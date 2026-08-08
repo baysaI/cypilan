@@ -114,6 +114,58 @@ class User {
       reviewCount: reviewsData.review_count || 0
     };
   }
+  static async findAll(page = 1, limit = 20, filters = {}) {
+    const db = await getDb();
+    let where = ' WHERE 1=1';
+    const params = [];
+
+    if (filters.role) {
+      where += ' AND u.role = ?';
+      params.push(filters.role);
+    }
+    if (filters.q) {
+      where += ' AND (u.full_name LIKE ? OR u.email LIKE ?)';
+      params.push(`%${filters.q}%`, `%${filters.q}%`);
+    }
+
+    const countStmt = db.prepare(`SELECT COUNT(*) as total FROM users u${where}`);
+    countStmt.bind(params);
+    let total = 0;
+    if (countStmt.step()) {
+      total = countStmt.getAsObject().total;
+    }
+    countStmt.free();
+
+    const offset = (page - 1) * limit;
+    const stmt = db.prepare(`
+      SELECT u.id, u.email, u.full_name, u.phone, u.role, u.is_active, u.is_verified,
+             u.company_name, u.created_at,
+             (SELECT COUNT(*) FROM listings WHERE user_id = u.id) as listing_count
+      FROM users u${where}
+      ORDER BY u.created_at DESC LIMIT ? OFFSET ?
+    `);
+    stmt.bind([...params, limit, offset]);
+    const data = [];
+    while (stmt.step()) {
+      data.push(stmt.getAsObject());
+    }
+    stmt.free();
+
+    return { data, total, pages: Math.ceil(total / limit) || 1 };
+  }
+
+  static async setActive(id, isActive) {
+    return this.update(id, { is_active: isActive ? 1 : 0 });
+  }
+
+  static async setRole(id, role) {
+    const allowed = ['user', 'business', 'agent', 'admin'];
+    if (!allowed.includes(role)) {
+      throw new Error(`Invalid role: ${role}`);
+    }
+    return this.update(id, { role });
+  }
+
   static async countAll() {
     const db = await getDb();
     const stmt = db.prepare('SELECT COUNT(*) as total FROM users WHERE is_active = 1');

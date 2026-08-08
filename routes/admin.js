@@ -11,6 +11,8 @@ router.get('/listings', adminController.listings);
 router.get('/reports', adminController.reports);
 
 router.put('/listings/:id/status', adminController.toggleListingStatus);
+router.delete('/listings/:id', adminController.deleteListing);
 router.put('/users/:id/status', adminController.toggleUserStatus);
+router.put('/reports/:id', adminController.resolveReport);
 
 module.exports = router;

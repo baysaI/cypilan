@@ -1,0 +1,12 @@
+<%
+const map = {
+  active: ['success', 'Aktif'],
+  pending: ['warning', 'Onay Bekliyor'],
+  rejected: ['danger', 'Reddedildi'],
+  sold: ['secondary', 'Satıldı'],
+  expired: ['secondary', 'Süresi Doldu'],
+  draft: ['light', 'Taslak']
+};
+const [color, label] = map[status] || ['secondary', status];
+%>
+<span class="badge bg-<%= color %> bg-opacity-10 text-<%= color === 'light' ? 'dark' : color %> rounded-pill px-2"><%= label %></span>

@@ -129,10 +129,23 @@ class Listing {
 
   static async delete(id) {
     const db = await getDb();
+
+    const related = [
+      'DELETE FROM listing_images WHERE listing_id = ?',
+      'DELETE FROM listing_attributes WHERE listing_id = ?',
+      'DELETE FROM favorites WHERE listing_id = ?',
+      'DELETE FROM reports WHERE listing_id = ?'
+    ];
+    related.forEach(sql => {
+      const s = db.prepare(sql);
+      s.run([id]);
+      s.free();
+    });
+
     const stmt = db.prepare('DELETE FROM listings WHERE id = ?');
     stmt.run([id]);
     stmt.free();
-    
+
     const changesRes = db.exec("SELECT changes() as changes");
     const changes = changesRes[0].values[0][0];
     if (changes > 0) saveDb();
@@ -315,6 +328,74 @@ class Listing {
 
   static async findAll(filters, page, limit) {
     return this.search(filters, page, limit);
+  }
+
+  static async adminFindAll(filters = {}, page = 1, limit = 20) {
+    const db = await getDb();
+    let where = ' WHERE 1=1';
+    const params = [];
+
+    if (filters.status) {
+      where += ' AND l.status = ?';
+      params.push(filters.status);
+    }
+    if (filters.q) {
+      where += ' AND (l.title LIKE ? OR u.email LIKE ?)';
+      params.push(`%${filters.q}%`, `%${filters.q}%`);
+    }
+
+    const countStmt = db.prepare(`
+      SELECT COUNT(*) as total FROM listings l
+      LEFT JOIN users u ON l.user_id = u.id${where}
+    `);
+    countStmt.bind(params);
+    let total = 0;
+    if (countStmt.step()) {
+      total = countStmt.getAsObject().total;
+    }
+    countStmt.free();
+
+    const offset = (page - 1) * limit;
+    const stmt = db.prepare(`
+      SELECT l.*, c.name_tr as category_name,
+             u.full_name as owner_name, u.email as owner_email,
+             (SELECT image_url FROM listing_images
+               WHERE listing_id = l.id
+               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
+      FROM listings l
+      LEFT JOIN categories c ON l.category_id = c.id
+      LEFT JOIN users u ON l.user_id = u.id
+      ${where} ORDER BY l.created_at DESC LIMIT ? OFFSET ?
+    `);
+    stmt.bind([...params, limit, offset]);
+    const data = [];
+    while (stmt.step()) {
+      data.push(stmt.getAsObject());
+    }
+    stmt.free();
+
+    return { data, total, pages: Math.ceil(total / limit) || 1 };
+  }
+
+  static async updateStatus(id, status) {
+    const allowed = ['pending', 'active', 'sold', 'expired', 'rejected', 'draft'];
+    if (!allowed.includes(status)) {
+      throw new Error(`Invalid status: ${status}`);
+    }
+    return this.update(id, { status });
+  }
+
+  static async countByStatus() {
+    const db = await getDb();
+    const stmt = db.prepare('SELECT status, COUNT(*) as count FROM listings GROUP BY status');
+    const counts = { total: 0 };
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      counts[row.status] = row.count;
+      counts.total += row.count;
+    }
+    stmt.free();
+    return counts;
   }
 
   static async toggleFavorite(listingId, userId) {
