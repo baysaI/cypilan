@@ -9,10 +9,6 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-9 col-xl-8">
             
-            <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
-                <div class="alert alert-danger rounded-3 mb-4"><%= error %></div>
-            <% } %>
-
             <form action="/listings" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate id="createListingForm">
 
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">

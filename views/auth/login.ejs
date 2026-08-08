@@ -19,10 +19,6 @@
                         <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 small text-muted"><%= t('common.or') %> <%= t('auth.email') %></span>
                     </div>
 
-                    <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
-                        <div class="alert alert-danger rounded-3 py-2 small"><%= error %></div>
-                    <% } %>
-
                     <form action="/auth/login" method="POST" class="needs-validation" novalidate>
                         <div class="mb-3">
                             <label for="email" class="form-label fw-medium small"><%= t('auth.email') %></label>

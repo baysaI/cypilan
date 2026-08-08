@@ -58,6 +58,29 @@
     
     <%- include('../partials/header') %>
 
+    <% if (typeof flash !== 'undefined' && flash && (flash.success || flash.error || flash.info)) { %>
+        <div class="container mt-3">
+            <% if (flash.error) { %>
+                <div class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i><%= flash.error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                </div>
+            <% } %>
+            <% if (flash.success) { %>
+                <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i><%= flash.success %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                </div>
+            <% } %>
+            <% if (flash.info) { %>
+                <div class="alert alert-info alert-dismissible fade show mb-0" role="alert">
+                    <i class="fa-solid fa-circle-info me-2"></i><%= flash.info %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
+
     <main id="content" role="main" class="flex-grow-1">
         <%- body %>
     </main>

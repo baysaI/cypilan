@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs');
 const { getDb, saveDb } = require('../config/database');
+
+const SALT_ROUNDS = 10;
 
 class User {
   static async findById(id) {
@@ -29,14 +32,20 @@ class User {
     const db = await getDb();
     const {
       email,
-      password_hash,
       full_name,
-      phone,
+      phone = null,
       role = 'user',
       company_name = null,
       language_pref = 'tr',
       currency_pref = 'TRY'
     } = userData;
+
+    const password_hash = userData.password_hash
+      || (userData.password ? await bcrypt.hash(userData.password, SALT_ROUNDS) : null);
+
+    if (!password_hash) {
+      throw new Error('User.create requires either password or password_hash');
+    }
 
     const stmt = db.prepare(`
       INSERT INTO users (email, password_hash, full_name, phone, role, company_name, language_pref, currency_pref)
@@ -71,7 +80,13 @@ class User {
   }
 
   static async verifyPassword(plainPassword, hashedPassword) {
-    throw new Error('verifyPassword should be handled via a library like bcryptjs in the controller layer.');
+    if (!plainPassword || !hashedPassword) return false;
+    return bcrypt.compare(plainPassword, hashedPassword);
+  }
+
+  static async setPassword(id, plainPassword) {
+    const password_hash = await bcrypt.hash(plainPassword, SALT_ROUNDS);
+    return this.update(id, { password_hash });
   }
 
   static async getStats(id) {
