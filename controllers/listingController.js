@@ -14,7 +14,9 @@ const index = async (req, res) => {
         };
 
         const result = await Listing.findAll(filters, page, limit);
+        const categories = await Category.getMainCategoriesWithCount();
 
+        res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = 'Tüm İlanlar | CYPILAN.COM';
         
         res.render('listings/index', {
@@ -24,6 +26,7 @@ const index = async (req, res) => {
                 totalPages: result.pages,
                 totalItems: result.total
             },
+            categories,
             filters,
             title: 'İlanlar'
         });

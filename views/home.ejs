@@ -34,70 +34,31 @@
             </div>
             
             <div class="row g-3 g-md-4">
-                <!-- Real Estate -->
-                <div class="col-6 col-md-4 col-lg">
-                    <a href="/listings?category=emlak" class="text-decoration-none">
-                        <div class="card category-card border-0 shadow-sm rounded-4 h-100 bg-light hover-bg-primary-light transition-all text-center p-3 p-md-4 group">
-                            <div class="icon-wrapper mb-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
-                                <i class="fa-solid fa-house fs-3 text-primary group-hover-scale"></i>
-                            </div>
-                            <h6 class="fw-bold text-dark mb-1">Emlak</h6>
-                            <span class="small text-muted">12.5K+ İlan</span>
-                        </div>
-                    </a>
-                </div>
+                <% 
+                const catIcons = {
+                    'emlak': 'fa-house',
+                    'vasita': 'fa-car',
+                    'is-ilanlari': 'fa-briefcase',
+                    'usta-hizmetler': 'fa-screwdriver-wrench',
+                    'ikinci-el': 'fa-couch'
+                };
+                %>
                 
-                <!-- Vehicles -->
-                <div class="col-6 col-md-4 col-lg">
-                    <a href="/listings?category=vasita" class="text-decoration-none">
-                        <div class="card category-card border-0 shadow-sm rounded-4 h-100 bg-light hover-bg-primary-light transition-all text-center p-3 p-md-4 group">
-                            <div class="icon-wrapper mb-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
-                                <i class="fa-solid fa-car fs-3 text-primary group-hover-scale"></i>
-                            </div>
-                            <h6 class="fw-bold text-dark mb-1">Vasıta</h6>
-                            <span class="small text-muted">8.2K+ İlan</span>
+                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                    <% categories.forEach(function(cat) { %>
+                        <div class="col-6 col-md-4 col-lg">
+                            <a href="/listings?category=<%= cat.slug %>" class="text-decoration-none">
+                                <div class="card category-card border-0 shadow-sm rounded-4 h-100 bg-light hover-bg-primary-light transition-all text-center p-3 p-md-4 group">
+                                    <div class="icon-wrapper mb-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
+                                        <i class="fa-solid <%= catIcons[cat.slug] || 'fa-tag' %> fs-3 text-primary group-hover-scale"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-1"><%= cat.name_tr %></h6>
+                                    <span class="small text-muted"><%= cat.listing_count || 0 %> İlan</span>
+                                </div>
+                            </a>
                         </div>
-                    </a>
-                </div>
-
-                <!-- Jobs -->
-                <div class="col-6 col-md-4 col-lg">
-                    <a href="/listings?category=is-ilanlari" class="text-decoration-none">
-                        <div class="card category-card border-0 shadow-sm rounded-4 h-100 bg-light hover-bg-primary-light transition-all text-center p-3 p-md-4 group">
-                            <div class="icon-wrapper mb-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
-                                <i class="fa-solid fa-briefcase fs-3 text-primary group-hover-scale"></i>
-                            </div>
-                            <h6 class="fw-bold text-dark mb-1">İş İlanları</h6>
-                            <span class="small text-muted">3.1K+ İlan</span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Services -->
-                <div class="col-6 col-md-4 col-lg">
-                    <a href="/listings?category=ustalar" class="text-decoration-none">
-                        <div class="card category-card border-0 shadow-sm rounded-4 h-100 bg-light hover-bg-primary-light transition-all text-center p-3 p-md-4 group">
-                            <div class="icon-wrapper mb-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
-                                <i class="fa-solid fa-tools fs-3 text-primary group-hover-scale"></i>
-                            </div>
-                            <h6 class="fw-bold text-dark mb-1">Ustalar</h6>
-                            <span class="small text-muted">1.5K+ İlan</span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Second Hand -->
-                <div class="col-12 col-md-4 col-lg">
-                    <a href="/listings?category=ikinci-el" class="text-decoration-none">
-                        <div class="card category-card border-0 shadow-sm rounded-4 h-100 bg-light hover-bg-primary-light transition-all text-center p-3 p-md-4 group">
-                            <div class="icon-wrapper mb-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
-                                <i class="fa-solid fa-couch fs-3 text-primary group-hover-scale"></i>
-                            </div>
-                            <h6 class="fw-bold text-dark mb-1">İkinci El</h6>
-                            <span class="small text-muted">5.4K+ İlan</span>
-                        </div>
-                    </a>
-                </div>
+                    <% }); %>
+                <% } %>
             </div>
         </div>
     </section>

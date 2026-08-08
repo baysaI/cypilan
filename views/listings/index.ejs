@@ -11,8 +11,8 @@
     <!-- Page Header & Mobile Search Toggle -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h1 class="fs-3 fw-bold mb-1">Tüm İlanlar</h1>
-            <p class="text-muted small mb-0">Toplam <span class="fw-bold text-primary">12.450</span> ilan bulundu</p>
+            <h1 class="fs-3 fw-bold mb-1"><%= typeof currentCategoryName !== 'undefined' ? currentCategoryName : 'Tüm İlanlar' %></h1>
+            <p class="text-muted small mb-0">Toplam <span class="fw-bold text-primary"><%= pagination.totalItems || (listings ? listings.length : 0) %></span> ilan bulundu</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-primary d-lg-none flex-fill" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
@@ -20,12 +20,12 @@
             </button>
             <div class="dropdown">
                 <button class="btn btn-light border dropdown-toggle bg-white shadow-sm" type="button" data-bs-toggle="dropdown">
-                    <i class="fa-solid fa-arrow-down-short-wide text-muted me-2"></i> Sırala: En Yeni
+                    <i class="fa-solid fa-arrow-down-short-wide text-muted me-2"></i> Sırala
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
-                    <li><a class="dropdown-item active bg-primary-light text-primary fw-medium" href="#">En Yeni İlanlar</a></li>
-                    <li><a class="dropdown-item" href="#">Fiyat (Düşükten Yükseğe)</a></li>
-                    <li><a class="dropdown-item" href="#">Fiyat (Yüksekten Düşüğe)</a></li>
+                    <li><a class="dropdown-item" href="?sort=newest">En Yeni İlanlar</a></li>
+                    <li><a class="dropdown-item" href="?sort=price_asc">Fiyat (Düşükten Yükseğe)</a></li>
+                    <li><a class="dropdown-item" href="?sort=price_desc">Fiyat (Yüksekten Düşüğe)</a></li>
                 </ul>
             </div>
         </div>
@@ -44,58 +44,33 @@
                         <!-- Category Filter -->
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Kategori</label>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" value="emlak" id="catEmlak" checked>
-                                <label class="form-check-label cursor-pointer" for="catEmlak">Emlak <span class="text-muted small">(4.2k)</span></label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" value="vasita" id="catVasita">
-                                <label class="form-check-label cursor-pointer" for="catVasita">Vasıta <span class="text-muted small">(2.8k)</span></label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" value="is-ilanlari" id="catIs">
-                                <label class="form-check-label cursor-pointer" for="catIs">İş İlanları <span class="text-muted small">(1.1k)</span></label>
-                            </div>
+                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                <% categories.forEach(function(cat) { %>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="cat_<%= cat.id %>" <%= (filters.category === cat.slug) ? 'checked' : '' %>>
+                                        <label class="form-check-label cursor-pointer" for="cat_<%= cat.id %>">
+                                            <%= cat.name_tr %> <span class="text-muted small">(<%= cat.listing_count || 0 %>)</span>
+                                        </label>
+                                    </div>
+                                <% }); %>
+                            <% } %>
                         </div>
 
                         <!-- Location Filter -->
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Şehir</label>
-                            <select class="form-select bg-light border-0 shadow-none cursor-pointer">
+                            <select name="city" class="form-select bg-light border-0 shadow-none cursor-pointer">
                                 <option value="">Tüm Şehirler</option>
-                                <option value="lefkosa">Lefkoşa</option>
-                                <option value="girne">Girne</option>
-                                <option value="gazimagusa">Gazimağusa</option>
-                                <option value="iskele">İskele</option>
+                                <option value="Lefkoşa" <%= filters.city === 'Lefkoşa' ? 'selected' : '' %>>Lefkoşa</option>
+                                <option value="Girne" <%= filters.city === 'Girne' ? 'selected' : '' %>>Girne</option>
+                                <option value="Gazimağusa" <%= filters.city === 'Gazimağusa' ? 'selected' : '' %>>Gazimağusa</option>
+                                <option value="İskele" <%= filters.city === 'İskele' ? 'selected' : '' %>>İskele</option>
+                                <option value="Güzelyurt" <%= filters.city === 'Güzelyurt' ? 'selected' : '' %>>Güzelyurt</option>
                             </select>
                         </div>
 
-                        <!-- Price Filter -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Fiyat Aralığı</label>
-                            <div class="input-group mb-2">
-                                <select class="form-select bg-light border-0 shadow-none w-25" style="flex: none;">
-                                    <option value="TRY">₺</option>
-                                    <option value="GBP">£</option>
-                                </select>
-                                <input type="number" class="form-control bg-light border-0 shadow-none border-start border-white border-2" placeholder="Min">
-                            </div>
-                            <input type="number" class="form-control bg-light border-0 shadow-none" placeholder="Max">
-                        </div>
-
-                        <!-- Switch Filter -->
-                        <div class="mb-4">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" role="switch" id="onlyPremium">
-                                <label class="form-check-label cursor-pointer" for="onlyPremium">Sadece Premium</label>
-                            </div>
-                            <div class="form-check form-switch mt-2">
-                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" role="switch" id="withPhoto" checked>
-                                <label class="form-check-label cursor-pointer" for="withPhoto">Fotoğraflı İlanlar</label>
-                            </div>
-                        </div>
-
                         <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift">Uygula</button>
+                        <a href="/listings" class="btn btn-link w-100 text-muted small text-decoration-none mt-2">Filtreleri Temizle</a>
                     </form>
                 </div>
             </div>
@@ -104,54 +79,46 @@
         <!-- Main Content -->
         <main class="col-12 col-lg-9">
             
-            <!-- Active Filters Tags -->
-            <div class="d-flex flex-wrap gap-2 mb-4">
-                <span class="badge bg-primary-light text-primary border border-primary-subtle rounded-pill py-2 px-3 fw-medium d-flex align-items-center gap-2">
-                    Emlak <button class="btn-close btn-close-white ms-1" style="font-size: 0.6rem; filter: invert(1);"></button>
-                </span>
-                <span class="badge bg-primary-light text-primary border border-primary-subtle rounded-pill py-2 px-3 fw-medium d-flex align-items-center gap-2">
-                    Lefkoşa <button class="btn-close btn-close-white ms-1" style="font-size: 0.6rem; filter: invert(1);"></button>
-                </span>
-                <a href="#" class="text-danger small fw-medium ms-2 align-self-center text-decoration-none">Temizle</a>
-            </div>
-
             <!-- Grid -->
             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4 mb-5">
-                <% 
-                // Dummy data
-                const listings = [
-                    { id: 1, title: 'Girne Merkezde Lüks 3+1 Daire', price: 125000, currency: 'GBP', city: 'Girne', district: 'Merkez', categoryName: 'Satılık Daire', isPremium: true, imageCount: 12, dateFormatted: '2 saat önce' },
-                    { id: 2, title: '2020 Model Mercedes C200d AMG', price: 42000, currency: 'GBP', city: 'Lefkoşa', district: 'Küçük Kaymaklı', categoryName: 'Otomobil', isPremium: false, imageCount: 8, dateFormatted: '5 saat önce' },
-                    { id: 3, title: 'Deniz Manzaralı Kiralık Villa', price: 1500, currency: 'GBP', city: 'İskele', district: 'Boğaz', categoryName: 'Kiralık Villa', isPremium: true, imageCount: 15, dateFormatted: 'Dün' },
-                    { id: 4, title: 'Temiz İkinci El iPhone 13 Pro', price: 25000, currency: 'TRY', city: 'Gazimağusa', district: 'Merkez', categoryName: 'Cep Telefonu', isPremium: false, imageCount: 3, dateFormatted: 'Bugün' },
-                    { id: 5, title: 'Sahibinden Satılık Arsa', price: 85000, currency: 'GBP', city: 'Girne', district: 'Alsancak', categoryName: 'Satılık Arsa', isPremium: false, imageCount: 5, dateFormatted: '2 gün önce' },
-                    { id: 6, title: 'Acil Satılık Honda Civic', price: 15000, currency: 'GBP', city: 'Lefkoşa', district: 'Gönyeli', categoryName: 'Otomobil', isPremium: false, imageCount: 6, dateFormatted: '3 gün önce' }
-                ];
-                %>
-                
-                <% listings.forEach(function(listing) { %>
-                    <div class="col">
-                        <%- include('../partials/listingCard', { listing: listing }) %>
+                <% if (listings && listings.length > 0) { %>
+                    <% listings.forEach(function(listing) { %>
+                        <div class="col">
+                            <%- include('../partials/listingCard', { listing: listing }) %>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm my-3">
+                        <i class="fa-solid fa-folder-open fs-1 text-muted mb-3 opacity-50 d-block"></i>
+                        <h5 class="fw-bold text-dark mb-2">Henüz İlan Bulunmuyor</h5>
+                        <p class="text-muted small mb-4">Seçtiğiniz kriterlere uygun ilan bulunamadı veya henüz veritabanına ilan eklenmedi.</p>
+                        <a href="/listings/create" class="btn btn-accent rounded-pill px-4 text-white fw-bold shadow-sm">
+                            <i class="fa-solid fa-plus me-2"></i>İlk İlanı Sen Ver
+                        </a>
                     </div>
-                <% }); %>
+                <% } %>
             </div>
 
-            <!-- Pagination -->
-            <nav aria-label="Page navigation" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center" href="#" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-left"></i></a>
-                    </li>
-                    <li class="page-item active"><a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center" href="#" style="width: 40px; height: 40px;">1</a></li>
-                    <li class="page-item"><a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="#" style="width: 40px; height: 40px;">2</a></li>
-                    <li class="page-item"><a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="#" style="width: 40px; height: 40px;">3</a></li>
-                    <li class="page-item"><span class="page-link border-0 bg-transparent text-muted px-1">...</span></li>
-                    <li class="page-item"><a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="#" style="width: 40px; height: 40px;">12</a></li>
-                    <li class="page-item">
-                        <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="#" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-right"></i></a>
-                    </li>
-                </ul>
-            </nav>
+            <!-- Working Functional Pagination -->
+            <% if (pagination.totalPages > 1) { %>
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
+                            <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center" href="?page=<%= pagination.page - 1 %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.city ? '&city=' + filters.city : '' %>" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-left"></i></a>
+                        </li>
+                        
+                        <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+                            <li class="page-item <%= pagination.page === p ? 'active' : '' %>">
+                                <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center <%= pagination.page === p ? 'bg-primary text-white' : 'bg-white text-dark hover-bg-primary hover-text-white' %>" href="?page=<%= p %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.city ? '&city=' + filters.city : '' %>" style="width: 40px; height: 40px;"><%= p %></a>
+                            </li>
+                        <% } %>
+                        
+                        <li class="page-item <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>">
+                            <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="?page=<%= pagination.page + 1 %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.city ? '&city=' + filters.city : '' %>" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            <% } %>
 
         </main>
     </div>
