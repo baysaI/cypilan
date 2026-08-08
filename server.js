@@ -75,6 +75,10 @@ app.use(session({
   name: 'cypilan.sid'
 }));
 
+const passport = require('./config/passport');
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use((req, res, next) => {
   res.locals.flash = {
     success: req.session.flashSuccess || null,
