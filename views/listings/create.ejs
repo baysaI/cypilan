@@ -11,8 +11,7 @@
         <div class="col-12 col-lg-9 col-xl-8">
             
             <form action="/listings" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                
-                <!-- Category Section -->
+
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
                         <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
@@ -32,7 +31,6 @@
                     </div>
                 </div>
 
-                <!-- Basic Details -->
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
                         <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
@@ -70,7 +68,6 @@
                     </div>
                 </div>
 
-                <!-- Location -->
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
                         <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
@@ -100,7 +97,6 @@
                     </div>
                 </div>
 
-                <!-- Photos -->
                 <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
                     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
                         <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
@@ -116,15 +112,11 @@
                             <button type="button" class="btn btn-primary rounded-pill px-4" onclick="document.getElementById('fileInput').click()">Dosya Seç</button>
                             <input type="file" name="images" id="fileInput" multiple accept="image/*" class="d-none">
                         </div>
-                        
-                        <!-- Preview Area -->
-                        <div class="row g-2 mt-3" id="imagePreviewContainer">
-                            <!-- JS will inject previews here -->
-                        </div>
+
+                        <div class="row g-2 mt-3" id="imagePreviewContainer"></div>
                     </div>
                 </div>
 
-                <!-- Submit -->
                 <div class="d-flex gap-3 justify-content-end mb-5">
                     <button type="button" class="btn btn-light btn-lg rounded-pill fw-medium px-4 hover-lift">Önizleme</button>
                     <button type="submit" class="btn btn-accent btn-lg rounded-pill fw-bold px-5 text-white shadow-lg hover-lift pulse-button">İlanı Yayınla</button>

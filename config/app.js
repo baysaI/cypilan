@@ -31,7 +31,7 @@ module.exports = {
   },
   
   uploads: {
-    maxFileSize: 5 * 1024 * 1024, // 5MB
+    maxFileSize: 5 * 1024 * 1024,
     allowedImageTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxImagesPerListing: 20
   }

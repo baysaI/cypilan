@@ -10,7 +10,7 @@
     "db:seed": "node -e \"require('./config/database').seed()\""
   },
   "keywords": ["cyprus", "marketplace", "classified-ads", "real-estate", "vehicles"],
-  "author": "CYPILAN",
+  "author": "Mehmet Baysal",
   "license": "ISC",
   "dependencies": {
     "express": "^4.21.0",

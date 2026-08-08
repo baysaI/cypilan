@@ -6,12 +6,10 @@
         </div>
     <% } %>
 
-    <!-- Favorite Button -->
     <button class="btn btn-light btn-sm favorite-btn position-absolute top-0 end-0 m-2 z-2 rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0 bg-white hover-bg-light" style="width: 32px; height: 32px;" data-id="<%= listing.id %>">
         <i class="fa-regular fa-heart text-muted fs-6"></i>
     </button>
 
-    <!-- Image -->
     <a href="/listings/<%= listing.slug || listing.id %>" class="text-decoration-none d-block position-relative overflow-hidden bg-light" style="padding-top: 66%;">
         <img src="<%= listing.primary_image || listing.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800' %>" 
              class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover transition-transform duration-500 hover-scale" 
@@ -24,7 +22,6 @@
         </div>
     </a>
 
-    <!-- Content -->
     <div class="card-body d-flex flex-column p-3">
         <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="card-title fs-6 fw-bold mb-0 text-truncate text-dark" style="max-width: 100%;" title="<%= listing.title %>">

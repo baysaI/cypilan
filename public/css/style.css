@@ -1,26 +1,23 @@
 :root {
-    /* Brand Colors — matched to CypIlan logo */
     --cyp-primary: #3A7CA5;
     --cyp-primary-dark: #2B5F80;
     --cyp-primary-light: #EAF2F8;
-    
+
     --cyp-secondary: #E8982D;
     --cyp-secondary-dark: #CC8220;
     --cyp-secondary-light: #FFF6E8;
-    
+
     --cyp-accent: #E8982D;
     --cyp-accent-dark: #CC8220;
-    
+
     --cyp-success: #2ECC71;
     --cyp-dark: #2C3E50;
     --cyp-light: #F5F3EE;
     --cyp-gray: #95A5A6;
     --cyp-cream: #F5F3EE;
-    
-    /* Typography */
+
     --cyp-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-    
-    /* Transitions */
+
     --cyp-transition-fast: 0.15s ease-in-out;
     --cyp-transition-normal: 0.3s ease-in-out;
     --cyp-transition-slow: 0.5s ease-in-out;
@@ -33,7 +30,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Utilities */
 .text-primary { color: var(--cyp-primary) !important; }
 .bg-primary { background-color: var(--cyp-primary) !important; }
 .text-secondary { color: var(--cyp-secondary) !important; }
@@ -70,7 +66,6 @@ body {
     color: white;
 }
 
-/* Hover & Animations */
 .hover-lift {
     transition: transform var(--cyp-transition-normal), box-shadow var(--cyp-transition-normal);
 }
@@ -99,7 +94,6 @@ body {
     100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
 }
 
-/* Glassmorphism */
 .glassmorphism {
     background: rgba(255, 255, 255, 0.9) !important;
     backdrop-filter: blur(10px);
@@ -115,7 +109,6 @@ body {
     -webkit-backdrop-filter: blur(10px);
 }
 
-/* Gradients */
 .bg-gradient-primary {
     background: linear-gradient(135deg, var(--cyp-primary) 0%, #2980b9 100%);
 }
@@ -126,7 +119,6 @@ body {
     background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Premium Badge Shimmer */
 .premium-card {
     border: 2px solid var(--cyp-secondary) !important;
 }
@@ -150,7 +142,6 @@ body {
     100% { transform: translateX(100%) rotate(30deg); }
 }
 
-/* Forms & Inputs */
 .focus-within-ring:focus-within {
     box-shadow: 0 0 0 0.25rem rgba(27, 77, 122, 0.25);
     border-color: var(--cyp-primary) !important;
@@ -161,7 +152,6 @@ body {
 }
 .cursor-pointer { cursor: pointer; }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -177,7 +167,6 @@ body {
     background: var(--cyp-primary);
 }
 
-/* Touch Targets for Mobile */
 @media (max-width: 767.98px) {
     .btn, .nav-link, .dropdown-item {
         min-height: 44px;
@@ -186,7 +175,6 @@ body {
     }
 }
 
-/* RTL Support */
 [dir="rtl"] .me-2 {
     margin-right: 0 !important;
     margin-left: 0.5rem !important;

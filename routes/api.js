@@ -3,7 +3,6 @@ const router = express.Router();
 const searchController = require('../controllers/searchController');
 const { isAuthenticated } = require('../middlewares/auth');
 
-// Mock Models
 const Listing = {
     findAll: async () => ({ data: [], total: 0 }),
     findById: async (id) => ({ id, title: 'Mock' }),
@@ -13,7 +12,6 @@ const Category = {
     findAll: async () => []
 };
 
-// Listings API
 router.get('/listings', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -34,7 +32,6 @@ router.get('/listings/:id', async (req, res) => {
     }
 });
 
-// Categories API
 router.get('/categories', async (req, res) => {
     try {
         const categories = await Category.findAll();
@@ -44,10 +41,8 @@ router.get('/categories', async (req, res) => {
     }
 });
 
-// Search API
 router.get('/search/suggestions', searchController.suggestions);
 
-// Favorite toggle API
 router.post('/listings/:id/favorite', isAuthenticated, async (req, res) => {
     try {
         const listingId = req.params.id;

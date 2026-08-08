@@ -3,7 +3,6 @@ const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
 
-// Ensure upload directory exists
 const uploadDir = path.join(__dirname, '../public/uploads/listings');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -33,8 +32,8 @@ const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
-        files: 10 // max 10 files
+        fileSize: 5 * 1024 * 1024,
+        files: 10
     }
 });
 

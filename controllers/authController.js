@@ -29,14 +29,13 @@ const login = async (req, res) => {
             return res.redirect('/auth/login');
         }
 
-        // Set session
         req.session.userId = user.id;
         req.session.userRole = user.role;
         req.session.userEmail = user.email;
         req.session.userName = user.full_name;
 
         if (remember) {
-            req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+            req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
         }
 
         const returnTo = req.session.returnTo || '/';
@@ -109,7 +108,7 @@ const logout = (req, res) => {
         if (err) {
             console.error('Logout Error:', err);
         }
-        res.clearCookie('connect.sid'); // Assuming default session cookie name
+        res.clearCookie('connect.sid');
         res.redirect('/');
     });
 };

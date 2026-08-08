@@ -47,7 +47,6 @@ const show = async (req, res) => {
             return res.redirect('/listings');
         }
 
-        // Increment view in background
         Listing.incrementViews(listing.id).catch(console.error);
 
         res.locals.meta.title = `${listing.title} | CYPILAN.COM`;
@@ -89,7 +88,7 @@ const create = async (req, res) => {
             city,
             condition,
             images: JSON.stringify(images),
-            status: 'active', // or 'pending' if moderation is required
+            status: 'active',
             slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString().slice(-4),
             createdAt: new Date().toISOString()
         });
@@ -109,10 +108,7 @@ const showEdit = async (req, res) => {
         if (!listing) {
             return res.redirect('/listings');
         }
-        
-        // Ownership check is assumed to be handled by isOwner middleware, 
-        // but we attach listing to req in a param middleware usually.
-        // Assuming we do check here if middleware didn't:
+
         if (listing.user_id !== req.session.userId && req.session.userRole !== 'admin') {
             req.flash('error', 'Yetkisiz erişim.');
             return res.redirect('/');
@@ -134,7 +130,6 @@ const update = async (req, res) => {
         const listing = await Listing.findBySlug(slug);
         if (!listing) return res.redirect('/listings');
 
-        // Check ownership
         if (listing.user_id !== req.session.userId && req.session.userRole !== 'admin') {
             req.flash('error', 'Yetkisiz erişim.');
             return res.redirect('/');

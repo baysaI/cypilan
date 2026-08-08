@@ -1,4 +1,3 @@
-// Mock models
 const Listing = {
     search: async (q, filters) => ({ data: [], total: 0 }),
     autocomplete: async (q) => []

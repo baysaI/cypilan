@@ -1,4 +1,3 @@
-// Mock models
 const User = {
     countAll: async () => 0,
     findAll: async (page, limit) => ({ data: [], total: 0 }),

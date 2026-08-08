@@ -1,7 +1,6 @@
 const seoMiddleware = (req, res, next) => {
     const siteName = 'CYPILAN.COM';
-    
-    // Default meta tags
+
     res.locals.meta = {
         title: `${siteName} - Kıbrıs İlan Platformu`,
         description: 'Kuzey Kıbrıs\'ın en kapsamlı ücretsiz ilan, emlak, oto, alışveriş platformu.',
@@ -13,7 +12,6 @@ const seoMiddleware = (req, res, next) => {
         url: `https://www.cypilan.com${req.originalUrl}`
     };
 
-    // Default Schema.org
     res.locals.schemaOrg = {
         "@context": "https://schema.org",
         "@type": "WebSite",

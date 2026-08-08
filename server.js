@@ -1,8 +1,3 @@
-/**
- * CYPILAN.COM — Kıbrıs Dijital Pazaryeri & İlan Ekosistemi
- * Main server entry point
- */
-
 require('dotenv').config();
 
 const express = require('express');
@@ -24,9 +19,6 @@ const routes = require('./routes/index');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// =============================================================================
-// Security Middleware
-// =============================================================================
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -41,31 +33,19 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// =============================================================================
-// Compression
-// =============================================================================
 app.use(compression());
 
-// =============================================================================
-// Rate Limiting
-// =============================================================================
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 200 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 200,
   message: 'Çok fazla istek gönderdiniz. Lütfen daha sonra tekrar deneyin.'
 });
 app.use('/api/', limiter);
 
-// =============================================================================
-// Body Parsing & Cookies
-// =============================================================================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// =============================================================================
-// Method Override (for PUT/DELETE from HTML forms)
-// =============================================================================
 app.use((req, res, next) => {
   if (req.body && req.body._method) {
     req.method = req.body._method.toUpperCase();
@@ -74,20 +54,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// =============================================================================
-// Static Files
-// =============================================================================
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
   etag: true
 }));
 
-// =============================================================================
-// Session
-// =============================================================================
 app.use(session({
   store: new MemoryStore({
-    checkPeriod: 86400000 // prune expired entries every 24h
+    checkPeriod: 86400000
   }),
   secret: process.env.SESSION_SECRET || 'cypilan-secret-key',
   resave: false,
@@ -95,15 +69,12 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'lax'
   },
   name: 'cypilan.sid'
 }));
 
-// =============================================================================
-// Flash Messages (simple implementation via session)
-// =============================================================================
 app.use((req, res, next) => {
   res.locals.flash = {
     success: req.session.flashSuccess || null,
@@ -114,7 +85,6 @@ app.use((req, res, next) => {
   delete req.session.flashError;
   delete req.session.flashInfo;
 
-  // Helper to set flash messages
   req.flash = (type, message) => {
     const key = `flash${type.charAt(0).toUpperCase() + type.slice(1)}`;
     req.session[key] = message;
@@ -123,9 +93,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// =============================================================================
-// View Engine (EJS with Layouts)
-// =============================================================================
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
@@ -133,14 +100,10 @@ app.set('layout', 'layouts/main');
 app.set('layout extractScripts', true);
 app.set('layout extractStyles', true);
 
-// =============================================================================
-// Global Middleware
-// =============================================================================
 app.use(i18nMiddleware);
 app.use(seoMiddleware);
 app.use(setUserLocal);
 
-// Make helpers available in all views
 const helpers = require('./utils/helpers');
 app.use((req, res, next) => {
   res.locals.helpers = helpers;
@@ -149,14 +112,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// =============================================================================
-// Routes
-// =============================================================================
 app.use('/', routes);
 
-// =============================================================================
-// 404 Handler
-// =============================================================================
 app.use((req, res) => {
   res.status(404).render('home', {
     meta: {
@@ -171,9 +128,6 @@ app.use((req, res) => {
   });
 });
 
-// =============================================================================
-// Error Handler
-// =============================================================================
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   const statusCode = err.status || 500;
@@ -190,9 +144,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// =============================================================================
-// Start Server
-// =============================================================================
 async function startServer() {
   try {
     console.log('🔧 Initializing database...');

@@ -1,6 +1,5 @@
 <div class="container py-4 py-md-5">
-    
-    <!-- Breadcrumb -->
+
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted hover-text-primary"><i class="fa-solid fa-house small"></i> Anasayfa</a></li>
@@ -8,7 +7,6 @@
         </ol>
     </nav>
 
-    <!-- Page Header & Mobile Search Toggle -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h1 class="fs-3 fw-bold mb-1"><%= typeof currentCategoryName !== 'undefined' ? currentCategoryName : 'Tüm İlanlar' %></h1>
@@ -32,7 +30,6 @@
     </div>
 
     <div class="row g-4">
-        <!-- Sidebar Filters (Desktop) -->
         <aside class="col-lg-3 d-none d-lg-block">
             <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px; z-index: 1;">
                 <div class="card-body p-4">
@@ -41,7 +38,6 @@
                     </h5>
                     
                     <form action="/listings" method="GET">
-                        <!-- Category Filter -->
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Kategori</label>
                             <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
@@ -56,7 +52,6 @@
                             <% } %>
                         </div>
 
-                        <!-- Location Filter -->
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Şehir</label>
                             <select name="city" class="form-select bg-light border-0 shadow-none cursor-pointer">
@@ -76,10 +71,8 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="col-12 col-lg-9">
-            
-            <!-- Grid -->
+
             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4 mb-5">
                 <% if (listings && listings.length > 0) { %>
                     <% listings.forEach(function(listing) { %>
@@ -99,7 +92,6 @@
                 <% } %>
             </div>
 
-            <!-- Working Functional Pagination -->
             <% if (pagination.totalPages > 1) { %>
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
@@ -124,14 +116,12 @@
     </div>
 </div>
 
-<!-- Mobile Filter Offcanvas -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="filterOffcanvas">
     <div class="offcanvas-header bg-light">
         <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-sliders text-primary me-2"></i> Filtreler</h5>
         <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-        <!-- Exact same form as desktop sidebar, omitted for brevity but should be rendered or shared via partial -->
         <p class="text-muted small">Mobil filtreleme alanı.</p>
     </div>
 </div>

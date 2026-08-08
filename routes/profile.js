@@ -3,10 +3,8 @@ const router = express.Router();
 const profileController = require('../controllers/profileController');
 const { isAuthenticated } = require('../middlewares/auth');
 
-// Public profile
 router.get('/:id', profileController.show);
 
-// Protected profile routes
 router.get('/edit', isAuthenticated, profileController.edit);
 router.put('/', isAuthenticated, profileController.update);
 router.get('/listings', isAuthenticated, profileController.myListings);

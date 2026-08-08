@@ -1,4 +1,3 @@
-// Mock models
 const User = {
     findById: async (id) => ({ id, name: 'User' }),
     update: async (id, data) => true
@@ -64,7 +63,6 @@ const update = async (req, res) => {
             updatedAt: new Date().toISOString()
         });
 
-        // Update session data
         req.session.userName = `${firstName} ${lastName}`;
 
         req.flash('success', 'Profiliniz güncellendi.');

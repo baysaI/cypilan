@@ -4,8 +4,7 @@ const isAuthenticated = (req, res, next) => {
     if (req.session && req.session.userId) {
         return next();
     }
-    
-    // Store requested URL to redirect after login
+
     if (req.method === 'GET' && !req.xhr) {
         req.session.returnTo = req.originalUrl;
     }
@@ -31,7 +30,6 @@ const isAdmin = (req, res, next) => {
     return res.redirect('/');
 };
 
-// Check if current user is owner of the listing
 const isOwner = (req, res, next) => {
     const listingUserId = req.listing ? req.listing.user_id : null;
     
@@ -50,7 +48,6 @@ const isOwner = (req, res, next) => {
 const setUserLocal = async (req, res, next) => {
     if (req.session && req.session.userId) {
         try {
-            // Simplified for performance, normally would fetch full user
             res.locals.currentUser = {
                 id: req.session.userId,
                 email: req.session.userEmail,

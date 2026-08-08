@@ -7,8 +7,7 @@ const index = async (req, res) => {
         const featuredListings = await Listing.getFeatured(8);
         const recentListings = await Listing.getRecent(12);
         const categories = await Category.getMainCategoriesWithCount();
-        
-        // Count real totals from SQL DB
+
         const totalListings = await Listing.countAll();
         const totalUsers = await User.countAll();
         const stats = { totalListings, totalUsers, totalCities: 5 };

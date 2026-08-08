@@ -1,29 +1,10 @@
-/**
- * Internationalization (i18n) Module for CYPILAN.COM
- * 
- * Supports multi-language localization (TR, EN, EL, RU, FA)
- * with dot-notation translation keys, parameter substitution,
- * and automatic Turkish fallback mechanism.
- */
-
 const fs = require('fs');
 const path = require('path');
 
-/**
- * Supported language codes.
- * @type {string[]}
- */
 const supportedLanguages = ['tr', 'en', 'el', 'ru', 'fa'];
 
-/**
- * Cache for loaded locale JSON objects.
- * @type {Object.<string, Object>}
- */
 const locales = {};
 
-/**
- * Load locale files into memory synchronously.
- */
 function loadLocales() {
   const localesDir = path.join(__dirname, '..', 'locales');
 
@@ -43,16 +24,8 @@ function loadLocales() {
   });
 }
 
-// Initial load of locales
 loadLocales();
 
-/**
- * Helper to traverse nested objects using dot notation (e.g., "nav.home").
- * 
- * @param {Object} obj - The object to search within.
- * @param {string} keyPath - Dot-separated path string.
- * @returns {string|number|undefined} The extracted value or undefined.
- */
 function getNestedValue(obj, keyPath) {
   if (!obj || typeof obj !== 'object' || !keyPath) {
     return undefined;
@@ -72,13 +45,6 @@ function getNestedValue(obj, keyPath) {
   return typeof current === 'string' || typeof current === 'number' ? String(current) : undefined;
 }
 
-/**
- * Helper utility to deep merge objects.
- * 
- * @param {Object} target 
- * @param {...Object} sources 
- * @returns {Object}
- */
 function mergeDeep(target, ...sources) {
   if (!sources.length) return target;
   const source = sources.shift();
@@ -97,31 +63,15 @@ function mergeDeep(target, ...sources) {
   return mergeDeep(target, ...sources);
 }
 
-/**
- * Checks if value is a plain object.
- * 
- * @param {*} item 
- * @returns {boolean}
- */
 function isObject(item) {
   return item && typeof item === 'object' && !Array.isArray(item);
 }
 
-/**
- * Translates a key into the target language with Turkish fallback.
- * 
- * @param {string} key - Dot-notation key (e.g. 'nav.home', 'auth.login_title')
- * @param {string} [lang='tr'] - Language code ('tr', 'en', 'el', 'ru', 'fa')
- * @param {Object} [params={}] - Key-value replacements for string interpolation (e.g. { name: 'John' })
- * @returns {string} The translated string or the original key if missing.
- */
 function translate(key, lang = 'tr', params = {}) {
   const targetLang = supportedLanguages.includes(lang) ? lang : 'tr';
 
-  // 1. Try direct key
   let translated = getNestedValue(locales[targetLang], key);
 
-  // 2. If not found and key doesn't have a dot, try common namespaces
   const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin'];
   if (translated === undefined && !key.includes('.')) {
     for (const ns of namespaces) {
@@ -130,7 +80,6 @@ function translate(key, lang = 'tr', params = {}) {
     }
   }
 
-  // 3. Fallback to Turkish if key not found in target language
   if (translated === undefined && targetLang !== 'tr') {
     translated = getNestedValue(locales['tr'], key);
     if (translated === undefined && !key.includes('.')) {
@@ -141,12 +90,10 @@ function translate(key, lang = 'tr', params = {}) {
     }
   }
 
-  // Fallback to original key if missing in both
   if (translated === undefined) {
     return key;
   }
 
-  // Perform parameter replacements if provided
   if (params && typeof params === 'object') {
     Object.keys(params).forEach((paramKey) => {
       const value = params[paramKey];
@@ -157,20 +104,12 @@ function translate(key, lang = 'tr', params = {}) {
   return translated;
 }
 
-/**
- * Retrieves the full locale dictionary for a specified language,
- * merged with Turkish fallbacks for missing keys.
- * 
- * @param {string} [lang='tr'] - Target language code.
- * @returns {Object} The complete localized dictionary.
- */
 function getLocale(lang = 'tr') {
   const targetLang = supportedLanguages.includes(lang) ? lang : 'tr';
   if (targetLang === 'tr') {
     return locales['tr'] || {};
   }
 
-  // Deep merge target locale over Turkish fallback
   return mergeDeep({}, locales['tr'] || {}, locales[targetLang] || {});
 }
 

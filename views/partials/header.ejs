@@ -1,17 +1,14 @@
 <header class="site-header sticky-top bg-white shadow-sm glassmorphism">
     <nav class="navbar navbar-expand-lg navbar-light py-3">
         <div class="container">
-            <!-- Brand Logo -->
             <a class="navbar-brand d-flex align-items-center py-0" href="/">
                 <img src="/img/logo.png" alt="CypIlan - Kıbrıs'ın İlan Sitesi" style="height: 65px; width: auto; object-fit: contain; mix-blend-mode: multiply;">
             </a>
 
-            <!-- Mobile Toggle -->
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <!-- Navbar Links -->
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium">
                     <li class="nav-item">
@@ -35,7 +32,6 @@
                 </ul>
 
                 <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0 flex-wrap">
-                    <!-- Language Selector -->
                     <div class="dropdown">
                         <button class="btn btn-light dropdown-toggle border-0 shadow-sm rounded-pill" type="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-globe text-primary"></i>
@@ -49,7 +45,6 @@
                         </ul>
                     </div>
 
-                    <!-- Currency Selector -->
                     <div class="dropdown">
                         <button class="btn btn-light dropdown-toggle border-0 shadow-sm rounded-pill fw-bold" type="button" data-bs-toggle="dropdown">
                             <%= (typeof req !== 'undefined' && req.cookies && req.cookies.currency === 'GBP') ? '£' : '₺' %>
@@ -60,7 +55,6 @@
                         </ul>
                     </div>
 
-                    <!-- User Actions -->
                     <% if (typeof user !== 'undefined' && user) { %>
                         <div class="dropdown">
                             <button class="btn btn-outline-primary rounded-pill px-4 dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown">
@@ -80,7 +74,6 @@
                         </div>
                     <% } %>
 
-                    <!-- Post Ad CTA -->
                     <a href="/listings/create" class="btn btn-accent rounded-pill px-4 fw-bold text-white shadow-sm pulse-button hover-lift">
                         <i class="fa-solid fa-plus me-2"></i><%= typeof t !== 'undefined' ? t('post_ad') : 'İlan Ver' %>
                     </a>

@@ -53,7 +53,6 @@ class Message {
 
   static async getInbox(userId) {
     const db = await getDb();
-    // Returns latest message per conversation
     const stmt = db.prepare(`
       SELECT m1.*,
              CASE WHEN m1.sender_id = ? THEN u2.full_name ELSE u1.full_name END as other_party_name,

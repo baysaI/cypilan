@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Language Switcher
     const langSwitches = document.querySelectorAll('.lang-switch');
     langSwitches.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Currency Switcher
     const currencySwitches = document.querySelectorAll('.currency-switch');
     currencySwitches.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -31,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Favorite Toggle (Mocked)
     const favoriteBtns = document.querySelectorAll('.favorite-btn');
     favoriteBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -50,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Form Validation (Bootstrap)
     const forms = document.querySelectorAll('.needs-validation');
     Array.from(forms).forEach(form => {
         form.addEventListener('submit', event => {
@@ -62,16 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, false);
     });
 
-    // Simple Toast Utility
     function showToast(message, type = 'success') {
         const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-        
+
         const toastEl = document.createElement('div');
         toastEl.className = `toast align-items-center text-bg-${type} border-0 mb-2`;
         toastEl.setAttribute('role', 'alert');
         toastEl.setAttribute('aria-live', 'assertive');
         toastEl.setAttribute('aria-atomic', 'true');
-        
+
         toastEl.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body fw-medium">
@@ -80,11 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" class="btn-close btn-close-white me-2 m-auto shadow-none" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         `;
-        
+
         toastContainer.appendChild(toastEl);
         const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
         toast.show();
-        
+
         toastEl.addEventListener('hidden.bs.toast', () => {
             toastEl.remove();
         });
