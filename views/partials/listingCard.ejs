@@ -12,12 +12,13 @@
     </button>
 
     <!-- Image -->
-    <a href="/listings/<%= listing.slug || listing.id %>" class="text-decoration-none d-block position-relative overflow-hidden" style="padding-top: 66%;">
+    <a href="/listings/<%= listing.slug || listing.id %>" class="text-decoration-none d-block position-relative overflow-hidden bg-light" style="padding-top: 66%;">
         <img src="<%= listing.primary_image || listing.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800' %>" 
              class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover transition-transform duration-500 hover-scale" 
-             alt="<%= listing.title %>" 
-             loading="lazy">
-        <div class="image-overlay position-absolute bottom-0 start-0 w-100 p-2 bg-gradient-to-t from-black-60 d-flex justify-content-between align-items-end">
+             alt="" 
+             loading="lazy"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800';">
+        <div class="image-overlay position-absolute bottom-0 start-0 w-100 p-2 bg-gradient-to-t from-black-60 d-flex justify-content-between align-items-end z-1">
             <span class="badge bg-primary text-white rounded-pill px-2 py-1 fw-medium shadow-sm"><%= listing.category_name || listing.categoryName || 'İlan' %></span>
             <span class="text-white small fw-medium text-shadow"><i class="fa-solid fa-camera me-1"></i> <%= listing.imageCount || 1 %></span>
         </div>

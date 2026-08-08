@@ -34,7 +34,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com", "fonts.googleapis.com"],
       fontSrc: ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com", "cdn.jsdelivr.net"],
-      imgSrc: ["'self'", "data:", "blob:", "*.tile.openstreetmap.org"],
+      imgSrc: ["'self'", "data:", "blob:", "http:", "https:"],
       connectSrc: ["'self'"]
     }
   },
