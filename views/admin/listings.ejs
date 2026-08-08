@@ -1,20 +1,27 @@
+<%
+const pag = (typeof pagination !== 'undefined' && pagination) ? pagination : { page: 1, totalItems: 0, totalPages: 1 };
+const f = (typeof filters !== 'undefined' && filters) ? filters : {};
+const c = (typeof counts !== 'undefined' && counts) ? counts : {};
+const list = (typeof listings !== 'undefined' && listings) ? listings : [];
+%>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="fs-4 fw-bold mb-0">İlanlar <span class="text-muted fw-normal fs-6">(<%= pagination.totalItems %>)</span></h1>
+    <h1 class="fs-4 fw-bold mb-0">İlanlar <span class="text-muted fw-normal fs-6">(<%= pag.totalItems %>)</span></h1>
 </div>
 
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
         <form method="GET" action="/admin/listings" class="row g-2 align-items-center">
             <div class="col-12 col-md-5">
-                <input type="text" name="q" class="form-control" placeholder="Başlık veya sahibinin e-postası" value="<%= filters.q || '' %>">
+                <input type="text" name="q" class="form-control" placeholder="Başlık veya sahibinin e-postası" value="<%= f.q || '' %>">
             </div>
             <div class="col-8 col-md-4">
                 <select name="status" class="form-select">
-                    <option value="">Tüm durumlar (<%= counts.total || 0 %>)</option>
-                    <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Aktif (<%= counts.active || 0 %>)</option>
-                    <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Onay Bekleyen (<%= counts.pending || 0 %>)</option>
-                    <option value="rejected" <%= filters.status === 'rejected' ? 'selected' : '' %>>Reddedilen (<%= counts.rejected || 0 %>)</option>
-                    <option value="sold" <%= filters.status === 'sold' ? 'selected' : '' %>>Satılan (<%= counts.sold || 0 %>)</option>
+                    <option value="">Tüm durumlar (<%= c.total || 0 %>)</option>
+                    <option value="active" <%= f.status === 'active' ? 'selected' : '' %>>Aktif (<%= c.active || 0 %>)</option>
+                    <option value="pending" <%= f.status === 'pending' ? 'selected' : '' %>>Onay Bekleyen (<%= c.pending || 0 %>)</option>
+                    <option value="rejected" <%= f.status === 'rejected' ? 'selected' : '' %>>Reddedilen (<%= c.rejected || 0 %>)</option>
+                    <option value="sold" <%= f.status === 'sold' ? 'selected' : '' %>>Satılan (<%= c.sold || 0 %>)</option>
                 </select>
             </div>
             <div class="col-4 col-md-3 d-grid">
@@ -26,7 +33,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <% if (listings.length === 0) { %>
+        <% if (list.length === 0) { %>
             <p class="text-muted text-center py-5 mb-0">Bu filtreye uyan ilan yok.</p>
         <% } else { %>
             <div class="table-responsive">
@@ -41,7 +48,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% listings.forEach(function(l) { %>
+                        <% list.forEach(function(l) { %>
                             <tr>
                                 <td class="ps-3">
                                     <div class="d-flex align-items-center">
@@ -92,7 +99,7 @@
     </div>
 </div>
 
-<%- include('_pagination', { pagination: pagination, baseUrl: '/admin/listings', query: filters }) %>
+<%- include('_pagination', { pagination: pag, baseUrl: '/admin/listings', query: f }) %>
 
 <script>
 document.querySelectorAll('.js-confirm-delete').forEach(function (form) {

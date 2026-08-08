@@ -1,3 +1,8 @@
+<%
+const statsObj = (typeof stats !== 'undefined' && stats) ? stats : { totalUsers: 0, activeListings: 0, pendingListings: 0, pendingReports: 0 };
+const recentListingsArr = (typeof recentListings !== 'undefined' && recentListings) ? recentListings : [];
+%>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="fs-4 fw-bold mb-0">Panel</h1>
 </div>
@@ -11,7 +16,7 @@
                 </div>
                 <div>
                     <div class="text-muted small fw-medium text-uppercase">Kullanıcı</div>
-                    <div class="fs-4 fw-bold"><%= stats.totalUsers %></div>
+                    <div class="fs-4 fw-bold"><%= statsObj.totalUsers || 0 %></div>
                 </div>
             </div>
         </div>
@@ -24,7 +29,7 @@
                 </div>
                 <div>
                     <div class="text-muted small fw-medium text-uppercase">Aktif İlan</div>
-                    <div class="fs-4 fw-bold"><%= stats.activeListings %></div>
+                    <div class="fs-4 fw-bold"><%= statsObj.activeListings || 0 %></div>
                 </div>
             </div>
         </div>
@@ -37,7 +42,7 @@
                 </div>
                 <div>
                     <div class="text-muted small fw-medium text-uppercase">Onay Bekleyen</div>
-                    <div class="fs-4 fw-bold"><%= stats.pendingListings %></div>
+                    <div class="fs-4 fw-bold"><%= statsObj.pendingListings || 0 %></div>
                 </div>
             </div>
         </div>
@@ -50,7 +55,7 @@
                 </div>
                 <div>
                     <div class="text-muted small fw-medium text-uppercase">Bekleyen Şikayet</div>
-                    <div class="fs-4 fw-bold"><%= stats.pendingReports %></div>
+                    <div class="fs-4 fw-bold"><%= statsObj.pendingReports || 0 %></div>
                 </div>
             </div>
         </div>
@@ -63,7 +68,7 @@
         <a href="/admin/listings" class="btn btn-sm btn-light">Tümünü Gör</a>
     </div>
     <div class="card-body p-0">
-        <% if (recentListings.length === 0) { %>
+        <% if (recentListingsArr.length === 0) { %>
             <p class="text-muted text-center py-5 mb-0">Henüz ilan yok.</p>
         <% } else { %>
             <div class="table-responsive">
@@ -78,7 +83,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% recentListings.forEach(function(l) { %>
+                        <% recentListingsArr.forEach(function(l) { %>
                             <tr>
                                 <td class="ps-3">
                                     <div class="d-flex align-items-center">

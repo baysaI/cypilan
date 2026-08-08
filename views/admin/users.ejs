@@ -1,20 +1,27 @@
+<%
+const pag = (typeof pagination !== 'undefined' && pagination) ? pagination : { page: 1, totalItems: 0, totalPages: 1 };
+const f = (typeof filters !== 'undefined' && filters) ? filters : {};
+const list = (typeof users !== 'undefined' && users) ? users : [];
+const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : ((typeof user !== 'undefined' && user) ? user : {});
+%>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="fs-4 fw-bold mb-0">Kullanıcılar <span class="text-muted fw-normal fs-6">(<%= pagination.totalItems %>)</span></h1>
+    <h1 class="fs-4 fw-bold mb-0">Kullanıcılar <span class="text-muted fw-normal fs-6">(<%= pag.totalItems %>)</span></h1>
 </div>
 
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
         <form method="GET" action="/admin/users" class="row g-2 align-items-center">
             <div class="col-12 col-md-5">
-                <input type="text" name="q" class="form-control" placeholder="Ad veya e-posta" value="<%= filters.q || '' %>">
+                <input type="text" name="q" class="form-control" placeholder="Ad veya e-posta" value="<%= f.q || '' %>">
             </div>
             <div class="col-8 col-md-4">
                 <select name="role" class="form-select">
                     <option value="">Tüm roller</option>
-                    <option value="user" <%= filters.role === 'user' ? 'selected' : '' %>>Bireysel</option>
-                    <option value="business" <%= filters.role === 'business' ? 'selected' : '' %>>Kurumsal</option>
-                    <option value="agent" <%= filters.role === 'agent' ? 'selected' : '' %>>Danışman</option>
-                    <option value="admin" <%= filters.role === 'admin' ? 'selected' : '' %>>Yönetici</option>
+                    <option value="user" <%= f.role === 'user' ? 'selected' : '' %>>Bireysel</option>
+                    <option value="business" <%= f.role === 'business' ? 'selected' : '' %>>Kurumsal</option>
+                    <option value="agent" <%= f.role === 'agent' ? 'selected' : '' %>>Danışman</option>
+                    <option value="admin" <%= f.role === 'admin' ? 'selected' : '' %>>Yönetici</option>
                 </select>
             </div>
             <div class="col-4 col-md-3 d-grid">
@@ -26,7 +33,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
-        <% if (users.length === 0) { %>
+        <% if (list.length === 0) { %>
             <p class="text-muted text-center py-5 mb-0">Bu filtreye uyan kullanıcı yok.</p>
         <% } else { %>
             <div class="table-responsive">
@@ -42,7 +49,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% users.forEach(function(u) { %>
+                        <% list.forEach(function(u) { %>
                             <tr>
                                 <td class="ps-3">
                                     <div class="fw-medium"><%= u.company_name || u.full_name %></div>
@@ -51,7 +58,7 @@
                                 <td class="d-none d-md-table-cell small"><%= u.phone || '-' %></td>
                                 <td><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2"><%= u.role %></span></td>
                                 <td class="d-none d-sm-table-cell">
-                                    <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="text-decoration-none"><%= u.listing_count %></a>
+                                    <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="text-decoration-none"><%= u.listing_count || 0 %></a>
                                 </td>
                                 <td>
                                     <% if (u.is_active) { %>
@@ -61,7 +68,7 @@
                                     <% } %>
                                 </td>
                                 <td class="pe-3 text-end text-nowrap">
-                                    <% if (u.id === currentUser.id) { %>
+                                    <% if (u.id === activeAdminUser.id) { %>
                                         <span class="text-muted small">siz</span>
                                     <% } else { %>
                                         <form action="/admin/users/<%= u.id %>/status" method="POST" class="d-inline">
@@ -82,4 +89,4 @@
     </div>
 </div>
 
-<%- include('_pagination', { pagination: pagination, baseUrl: '/admin/users', query: filters }) %>
+<%- include('_pagination', { pagination: pag, baseUrl: '/admin/users', query: f }) %>
