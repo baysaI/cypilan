@@ -109,10 +109,10 @@
                     </div>
                     <div class="card-body p-4">
                         <label for="fileInput" class="w-100 border-2 border-dashed border-primary rounded-4 p-5 text-center bg-light cursor-pointer hover-bg-primary-light transition-all d-block position-relative mb-0" id="dropArea">
-                            <i class="fa-solid fa-cloud-arrow-up display-4 text-primary mb-3"></i>
-                            <h5 class="fw-bold text-dark"><%= t('listing.drag_images') %></h5>
-                            <p class="text-muted small mb-4"><%= t('listing.max_images') %></p>
-                            <span class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm pe-none"><%= t('nav.post_ad') %></span>
+                            <i class="fa-solid fa-cloud-arrow-up display-4 text-primary mb-3 pointer-events-none"></i>
+                            <h5 class="fw-bold text-dark pointer-events-none"><%= t('listing.drag_images') %></h5>
+                            <p class="text-muted small mb-4 pointer-events-none"><%= t('listing.max_images') %></p>
+                            <span class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm pointer-events-none"><%= t('nav.post_ad') %></span>
                             <input type="file" name="images" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
                         </label>
 
@@ -132,7 +132,7 @@
 
 <style>
     .border-dashed { border-style: dashed !important; }
-    .pe-none { pointer-events: none !important; }
+    .pointer-events-none { pointer-events: none !important; }
 </style>
 
 <script>
@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewContainer = document.getElementById('imagePreviewContainer');
     const titleInput = document.getElementById('titleInput');
     const titleCount = document.getElementById('titleCount');
+    const form = document.getElementById('createListingForm');
 
     if (titleInput && titleCount) {
         titleInput.addEventListener('input', function() {
@@ -151,10 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!dropArea || !fileInput || !previewContainer) return;
 
-    const dt = new DataTransfer();
+    let selectedFiles = [];
 
+    // Global dragover & drop prevention to stop browser opening images in new tabs
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, function(e) {
+        window.addEventListener(eventName, function(e) {
             e.preventDefault();
             e.stopPropagation();
         }, false);
@@ -173,81 +175,82 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     dropArea.addEventListener('drop', function(e) {
-        const files = e.dataTransfer.files;
-        addFiles(files);
+        if (e.dataTransfer && e.dataTransfer.files) {
+            handleNewFiles(e.dataTransfer.files);
+        }
     }, false);
 
     fileInput.addEventListener('change', function() {
-        addFiles(this.files);
+        if (this.files) {
+            handleNewFiles(this.files);
+        }
     });
 
-    function addFiles(files) {
-        if (!files || files.length === 0) return;
-
-        for (let i = 0; i < files.length; i++) {
-            if (dt.items.length >= 10) {
+    function handleNewFiles(files) {
+        const fileList = Array.from(files);
+        for (let i = 0; i < fileList.length; i++) {
+            if (selectedFiles.length >= 10) {
                 alert('<%= t("listing.max_images") %>');
                 break;
             }
-            const file = files[i];
+            const file = fileList[i];
             if (file.type && file.type.startsWith('image/')) {
-                dt.items.add(file);
+                if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    selectedFiles.push(file);
+                }
             }
         }
-        
+        syncInputAndRender();
+    }
+
+    function syncInputAndRender() {
         try {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
             fileInput.files = dt.files;
         } catch (err) {
-            console.error('Error assigning DataTransfer to fileInput:', err);
+            console.error('DataTransfer sync error:', err);
         }
-        
+
         renderPreviews();
     }
 
     function renderPreviews() {
         previewContainer.innerHTML = '';
-        const filesArray = Array.from(dt.files);
-        
-        filesArray.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const col = document.createElement('div');
-                col.className = 'col-6 col-sm-4 col-md-3';
-                col.innerHTML = `
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative group" style="padding-top: 75%;">
-                        <img src="${e.target.result}" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="Preview">
-                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle d-flex align-items-center justify-content-center p-0 remove-img-btn shadow" style="width: 28px; height: 28px; z-index: 10;">
-                            <i class="fa-solid fa-xmark fs-6"></i>
-                        </button>
-                    </div>
-                `;
-                previewContainer.appendChild(col);
+        selectedFiles.forEach((file, index) => {
+            const objectUrl = URL.createObjectURL(file);
+            const col = document.createElement('div');
+            col.className = 'col-6 col-sm-4 col-md-3 position-relative';
+            col.innerHTML = `
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative" style="padding-top: 75%;">
+                    <img src="${objectUrl}" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="Preview">
+                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle d-flex align-items-center justify-content-center p-0 remove-btn shadow-sm" style="width: 28px; height: 28px; z-index: 10;" title="Sil">
+                        <i class="fa-solid fa-xmark fs-6"></i>
+                    </button>
+                </div>
+            `;
+            previewContainer.appendChild(col);
 
-                col.querySelector('.remove-img-btn').addEventListener('click', function(ev) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    removeFile(index);
-                });
-            };
-            reader.readAsDataURL(file);
+            col.querySelector('.remove-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                URL.revokeObjectURL(objectUrl);
+                selectedFiles.splice(index, 1);
+                syncInputAndRender();
+            });
         });
     }
 
-    function removeFile(index) {
-        const newDt = new DataTransfer();
-        Array.from(dt.files).forEach((file, i) => {
-            if (i !== index) newDt.items.add(file);
+    if (form) {
+        form.addEventListener('submit', function() {
+            try {
+                const dt = new DataTransfer();
+                selectedFiles.forEach(file => dt.items.add(file));
+                fileInput.files = dt.files;
+            } catch (err) {
+                console.error('Submit sync error:', err);
+            }
         });
-        dt.items.clear();
-        Array.from(newDt.files).forEach(file => dt.items.add(file));
-        
-        try {
-            fileInput.files = dt.files;
-        } catch (err) {
-            console.error('Error setting DataTransfer files:', err);
-        }
-
-        renderPreviews();
     }
 });
 </script>
