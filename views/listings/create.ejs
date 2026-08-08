@@ -93,6 +93,11 @@
                                 <label class="form-label fw-bold small text-muted"><%= t('listing.district') %></label>
                                 <input type="text" name="district" class="form-control bg-light border-0 shadow-none focus-ring-primary" placeholder="<%= t('listing.district') %>">
                             </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small text-muted">İletişim Telefonu <span class="text-danger">*</span></label>
+                                <input type="tel" name="phone" class="form-control bg-light border-0 shadow-none focus-ring-primary" placeholder="0533 123 4567" value="<%= typeof userPhone !== 'undefined' ? userPhone : '' %>" required>
+                                <div class="form-text small">Alıcılar size bu numaradan ulaşacak. Numara profilinize kaydedilir.</div>
+                            </div>
                         </div>
                     </div>
                 </div>

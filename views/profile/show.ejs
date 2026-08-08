@@ -1,0 +1,51 @@
+<div class="bg-white border-bottom py-4">
+    <div class="container">
+        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 gap-sm-4">
+            <img src="<%= profileUser.avatar_url || '/img/logo.png' %>" class="rounded-circle border bg-light object-fit-cover flex-shrink-0" width="96" height="96" alt="<%= profileUser.full_name %>">
+
+            <div class="text-center text-sm-start flex-grow-1">
+                <h1 class="fs-4 fw-bold mb-1"><%= profileUser.company_name || profileUser.full_name %></h1>
+                <div class="d-flex flex-wrap justify-content-center justify-content-sm-start gap-3 text-muted small">
+                    <span>
+                        <i class="fa-regular fa-user me-1"></i>
+                        <%= profileUser.role === 'business' ? 'Kurumsal Üye' : (profileUser.role === 'agent' ? 'Emlak Danışmanı' : 'Bireysel Üye') %>
+                    </span>
+                    <% if (profileUser.created_at) { %>
+                        <span><i class="fa-regular fa-calendar me-1"></i> <%= helpers.formatDate(profileUser.created_at, lang) %>'den beri üye</span>
+                    <% } %>
+                    <span><i class="fa-solid fa-list me-1"></i> <%= stats.listingsCount %> ilan</span>
+                </div>
+                <% if (profileUser.bio) { %>
+                    <p class="text-muted small mt-2 mb-0"><%= profileUser.bio %></p>
+                <% } %>
+            </div>
+
+            <% if (profileUser.phone) { %>
+                <a href="tel:<%= profileUser.phone %>" class="btn btn-primary fw-medium flex-shrink-0">
+                    <i class="fa-solid fa-phone me-2"></i><%= profileUser.phone %>
+                </a>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4 py-md-5">
+    <h2 class="fs-5 fw-bold mb-3">Yayındaki İlanları</h2>
+
+    <% const activeListings = listings.filter(function(l) { return l.status === 'active'; }); %>
+
+    <% if (activeListings.length > 0) { %>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+            <% activeListings.forEach(function(listing) { %>
+                <div class="col">
+                    <%- include('../partials/listingCard', { listing: listing }) %>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="text-center py-5 bg-white rounded-3 border">
+            <i class="fa-solid fa-folder-open fs-1 text-muted mb-3 opacity-50 d-block"></i>
+            <p class="text-muted mb-0">Bu kullanıcının yayında ilanı bulunmuyor.</p>
+        </div>
+    <% } %>
+</div>

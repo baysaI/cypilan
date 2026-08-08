@@ -153,7 +153,16 @@ class Listing {
 
   static async getByUser(userId, limit = 20, offset = 0) {
     const db = await getDb();
-    const stmt = db.prepare('SELECT * FROM listings WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?');
+    const stmt = db.prepare(`
+      SELECT l.*, c.name_tr as category_name,
+             (SELECT image_url FROM listing_images
+               WHERE listing_id = l.id
+               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
+      FROM listings l
+      LEFT JOIN categories c ON l.category_id = c.id
+      WHERE l.user_id = ?
+      ORDER BY l.created_at DESC LIMIT ? OFFSET ?
+    `);
     stmt.bind([userId, limit, offset]);
     const results = [];
     while (stmt.step()) {

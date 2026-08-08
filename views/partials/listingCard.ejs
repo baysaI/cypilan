@@ -39,7 +39,7 @@
                 <span class="text-truncate"><%= listing.location_city || listing.city || 'Kıbrıs' %><%= (listing.location_district || listing.district) ? ', ' + (listing.location_district || listing.district) : '' %></span>
             </div>
             <div class="date whitespace-nowrap">
-                <i class="fa-regular fa-clock me-1"></i> <%= listing.dateFormatted || t('common.today') %>
+                <i class="fa-regular fa-clock me-1"></i> <%= listing.created_at ? helpers.timeAgo(listing.created_at, lang) : t('common.today') %>
             </div>
         </div>
     </div>

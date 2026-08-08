@@ -1,6 +1,8 @@
 const Listing = require('../models/Listing');
 const Category = require('../models/Category');
+const User = require('../models/User');
 const { generateSlug } = require('../utils/helpers');
+const { isValidPhone } = require('../utils/validators');
 
 const ALLOWED_CURRENCIES = ['TRY', 'GBP'];
 
@@ -72,17 +74,29 @@ const showCreate = async (req, res) => {
     res.locals.meta = res.locals.meta || {};
     res.locals.meta.title = 'İlan Ver | CYPILAN.COM';
     const categories = await Category.getAll();
-    res.render('listings/create', { categories, title: 'Ücretsiz İlan Ver' });
+    const user = await User.findById(req.session.userId);
+    res.render('listings/create', {
+        categories,
+        userPhone: (user && user.phone) || '',
+        title: 'Ücretsiz İlan Ver'
+    });
 };
 
 const create = async (req, res) => {
     try {
-        const { title, description, category_id, price, currency, city, district } = req.body;
+        const { title, description, category_id, price, currency, city, district, phone } = req.body;
 
         if (!title || !category_id || !city) {
             req.flash('error', 'Lütfen zorunlu alanları doldurun.');
             return res.redirect('/listings/create');
         }
+
+        if (!phone || !isValidPhone(phone)) {
+            req.flash('error', 'İlan verebilmek için geçerli bir iletişim telefonu girmelisiniz.');
+            return res.redirect('/listings/create');
+        }
+
+        await User.update(req.session.userId, { phone: phone.trim() });
 
         const images = (req.processedImages || []).map(f => f.path);
         const parsedPrice = parseFloat(price);

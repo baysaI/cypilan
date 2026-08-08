@@ -1,41 +1,36 @@
-const User = {
-    findById: async (id) => ({ id, name: 'User' }),
-    update: async (id, data) => true
-};
-const Listing = {
-    findByUser: async (userId) => [],
-    findFavoritesByUser: async (userId) => []
-};
-const Message = {
-    findByUser: async (userId) => []
-};
-const Review = {
-    findByUser: async (userId) => []
-};
+const User = require('../models/User');
+const Listing = require('../models/Listing');
 
 const show = async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = parseInt(req.params.id, 10);
+
+        if (!Number.isInteger(userId)) {
+            req.flash('error', 'Kullanıcı bulunamadı.');
+            return res.redirect('/');
+        }
+
         const user = await User.findById(userId);
-        
+
         if (!user) {
             req.flash('error', 'Kullanıcı bulunamadı.');
             return res.redirect('/');
         }
 
-        const listings = await Listing.findByUser(userId);
-        const reviews = await Review.findByUser(userId);
+        const listings = await Listing.getByUser(userId);
+        const stats = await User.getStats(userId);
 
-        res.locals.meta.title = `${user.firstName} ${user.lastName} Profili | CYPILAN.COM`;
+        res.locals.meta.title = `${user.full_name} | CYPILAN.COM`;
 
         res.render('profile/show', {
             profileUser: user,
             listings,
-            reviews,
-            title: 'Kullanıcı Profili'
+            stats,
+            title: user.full_name
         });
     } catch (error) {
         console.error('Profile Show Error:', error);
+        req.flash('error', 'Profil yüklenirken bir hata oluştu.');
         res.redirect('/');
     }
 };
@@ -76,7 +71,7 @@ const update = async (req, res) => {
 
 const myListings = async (req, res) => {
     try {
-        const listings = await Listing.findByUser(req.session.userId);
+        const listings = await Listing.getByUser(req.session.userId);
         res.locals.meta.title = 'İlanlarım | CYPILAN.COM';
         res.render('profile/listings', { listings, title: 'İlanlarım' });
     } catch (error) {

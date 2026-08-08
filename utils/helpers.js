@@ -17,6 +17,18 @@ const INTL_LOCALES = {
   fa: 'fa-IR'
 };
 
+function parseDate(value) {
+  if (value instanceof Date) return value;
+  if (typeof value === 'number') return new Date(value);
+  if (typeof value !== 'string') return new Date(NaN);
+
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(value)) {
+    return new Date(value.replace(' ', 'T') + 'Z');
+  }
+
+  return new Date(value);
+}
+
 function getCurrencySymbol(code) {
   if (!code || typeof code !== 'string') return '₺';
   const upper = code.trim().toUpperCase();
@@ -38,7 +50,7 @@ function formatPrice(amount, currency = 'TRY') {
 
 function formatDate(date, lang = 'tr') {
   if (!date) return '';
-  const d = new Date(date);
+  const d = parseDate(date);
   if (isNaN(d.getTime())) return '';
 
   const locale = INTL_LOCALES[lang] || INTL_LOCALES['tr'];
@@ -55,15 +67,11 @@ function formatDate(date, lang = 'tr') {
 
 function timeAgo(date, lang = 'tr') {
   if (!date) return '';
-  const d = new Date(date);
+  const d = parseDate(date);
   if (isNaN(d.getTime())) return '';
 
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
-
-  if (diffInSeconds < 0) {
-    return formatDate(date, lang);
-  }
+  const diffInSeconds = Math.max(0, Math.floor((now.getTime() - d.getTime()) / 1000));
 
   const minutes = Math.floor(diffInSeconds / 60);
   const hours = Math.floor(minutes / 60);
