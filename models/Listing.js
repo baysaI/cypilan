@@ -295,6 +295,16 @@ class Listing {
       return { favorited: true };
     }
   }
+  static async countAll() {
+    const db = await getDb();
+    const stmt = db.prepare('SELECT COUNT(*) as total FROM listings WHERE status = "active"');
+    let total = 0;
+    if (stmt.step()) {
+      total = stmt.getAsObject().total;
+    }
+    stmt.free();
+    return total;
+  }
 }
 
 module.exports = Listing;

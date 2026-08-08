@@ -1,5 +1,6 @@
 const Listing = require('../models/Listing');
 const Category = require('../models/Category');
+const User = require('../models/User');
 
 const index = async (req, res) => {
     try {
@@ -7,9 +8,10 @@ const index = async (req, res) => {
         const recentListings = await Listing.getRecent(12);
         const categories = await Category.getMainCategoriesWithCount();
         
-        // Count total listings in SQL DB
-        const totalListings = (recentListings && recentListings.length) || 0;
-        const stats = { totalListings, totalUsers: 1, totalCities: 5 };
+        // Count real totals from SQL DB
+        const totalListings = await Listing.countAll();
+        const totalUsers = await User.countAll();
+        const stats = { totalListings, totalUsers, totalCities: 5 };
 
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = 'CYPILAN.COM - Kıbrıs\'ın İlan Sitesi';

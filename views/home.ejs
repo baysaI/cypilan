@@ -115,19 +115,19 @@
                     <div class="row g-3">
                         <div class="col-6 col-md-4">
                             <div class="bg-white bg-opacity-10 rounded-4 p-4 text-center backdrop-blur border border-white border-opacity-10">
-                                <h3 class="fw-bold mb-0">50K+</h3>
+                                <h3 class="fw-bold mb-0"><%= (typeof stats !== 'undefined' && stats.totalListings) ? stats.totalListings : 0 %></h3>
                                 <p class="small text-white-50 mb-0">Aktif İlan</p>
                             </div>
                         </div>
                         <div class="col-6 col-md-4">
                             <div class="bg-white bg-opacity-10 rounded-4 p-4 text-center backdrop-blur border border-white border-opacity-10">
-                                <h3 class="fw-bold mb-0">120K+</h3>
-                                <p class="small text-white-50 mb-0">Mutlu Üye</p>
+                                <h3 class="fw-bold mb-0"><%= (typeof stats !== 'undefined' && stats.totalUsers) ? stats.totalUsers : 1 %></h3>
+                                <p class="small text-white-50 mb-0">Kayıtlı Üye</p>
                             </div>
                         </div>
                         <div class="col-12 col-md-4">
                             <div class="bg-white bg-opacity-10 rounded-4 p-4 text-center backdrop-blur border border-white border-opacity-10">
-                                <h3 class="fw-bold mb-0">5</h3>
+                                <h3 class="fw-bold mb-0"><%= (typeof stats !== 'undefined' && stats.totalCities) ? stats.totalCities : 5 %></h3>
                                 <p class="small text-white-50 mb-0">Büyük Şehir</p>
                             </div>
                         </div>

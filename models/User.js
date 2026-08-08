@@ -99,6 +99,16 @@ class User {
       reviewCount: reviewsData.review_count || 0
     };
   }
+  static async countAll() {
+    const db = await getDb();
+    const stmt = db.prepare('SELECT COUNT(*) as total FROM users WHERE is_active = 1');
+    let total = 0;
+    if (stmt.step()) {
+      total = stmt.getAsObject().total;
+    }
+    stmt.free();
+    return total;
+  }
 }
 
 module.exports = User;
