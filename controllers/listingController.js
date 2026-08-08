@@ -1,5 +1,8 @@
 const Listing = require('../models/Listing');
 const Category = require('../models/Category');
+const { generateSlug } = require('../utils/helpers');
+
+const ALLOWED_CURRENCIES = ['TRY', 'GBP'];
 
 const index = async (req, res) => {
     try {
@@ -40,7 +43,7 @@ const index = async (req, res) => {
 const show = async (req, res) => {
     try {
         const { slug } = req.params;
-        const listing = await Listing.findBySlug(slug);
+        const listing = await Listing.findDetailBySlug(slug);
 
         if (!listing) {
             req.flash('error', 'İlan bulunamadı.');
@@ -52,7 +55,7 @@ const show = async (req, res) => {
         res.locals.meta.title = `${listing.title} | CYPILAN.COM`;
         res.locals.meta.description = listing.description ? listing.description.substring(0, 160) : '';
         if (listing.images && listing.images.length > 0) {
-            res.locals.meta.ogImage = `/uploads/listings/${listing.images[0]}`;
+            res.locals.meta.ogImage = listing.images[0];
         }
 
         res.render('listings/show', {
@@ -74,29 +77,32 @@ const showCreate = async (req, res) => {
 
 const create = async (req, res) => {
     try {
-        const { title, description, category_id, price, currency, city, condition } = req.body;
-        
-        const images = req.processedImages
-            ? req.processedImages.map(f => f.filename)
-            : (req.files ? req.files.map(f => f.filename) : []);
+        const { title, description, category_id, price, currency, city, district } = req.body;
 
-        const newListing = await Listing.create({
+        if (!title || !category_id || !city) {
+            req.flash('error', 'Lütfen zorunlu alanları doldurun.');
+            return res.redirect('/listings/create');
+        }
+
+        const images = (req.processedImages || []).map(f => f.path);
+        const parsedPrice = parseFloat(price);
+
+        const listing = await Listing.create({
             user_id: req.session.userId,
-            title,
-            description,
             category_id,
-            price: parseFloat(price),
-            currency: currency || 'TRY',
+            title,
+            slug: `${generateSlug(title)}-${Date.now().toString(36)}`,
+            description,
+            price: Number.isFinite(parsedPrice) ? parsedPrice : null,
+            currency: ALLOWED_CURRENCIES.includes(currency) ? currency : 'TRY',
             city,
-            condition,
-            images: JSON.stringify(images),
+            district,
             status: 'active',
-            slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString().slice(-4),
-            createdAt: new Date().toISOString()
+            images
         });
 
         req.flash('success', 'İlanınız başarıyla yayınlandı.');
-        res.redirect(`/listings/${newListing.slug || 'my-listings'}`);
+        res.redirect(`/listings/${listing.slug}`);
     } catch (error) {
         console.error('Listing Create Error:', error);
         req.flash('error', 'İlan eklenirken bir hata oluştu.');
