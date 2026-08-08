@@ -214,6 +214,71 @@ class Listing {
     saveDb();
     return true;
   }
+
+  static async search(filters = {}, page = 1, limit = 20) {
+    const db = await getDb();
+    let query = 'SELECT * FROM listings WHERE 1=1';
+    const params = [];
+
+    if (filters.category) {
+      query += ' AND category_id = ?';
+      params.push(filters.category);
+    }
+    if (filters.city) {
+      query += ' AND location_city = ?';
+      params.push(filters.city);
+    }
+
+    if (filters.sort === 'price_asc') {
+      query += ' ORDER BY price ASC';
+    } else if (filters.sort === 'price_desc') {
+      query += ' ORDER BY price DESC';
+    } else {
+      query += ' ORDER BY created_at DESC';
+    }
+
+    const offset = (page - 1) * limit;
+    query += ` LIMIT ${limit} OFFSET ${offset}`;
+
+    const stmt = db.prepare(query);
+    stmt.bind(params);
+    const results = [];
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+
+    return { data: results, total: results.length, pages: Math.ceil(results.length / limit) || 1 };
+  }
+
+  static async findAll(filters, page, limit) {
+    return this.search(filters, page, limit);
+  }
+
+  static async toggleFavorite(listingId, userId) {
+    const db = await getDb();
+    const checkStmt = db.prepare('SELECT id FROM favorites WHERE user_id = ? AND listing_id = ?');
+    checkStmt.bind([userId, listingId]);
+    let exists = false;
+    if (checkStmt.step()) {
+      exists = true;
+    }
+    checkStmt.free();
+
+    if (exists) {
+      const delStmt = db.prepare('DELETE FROM favorites WHERE user_id = ? AND listing_id = ?');
+      delStmt.run([userId, listingId]);
+      delStmt.free();
+      saveDb();
+      return { favorited: false };
+    } else {
+      const insStmt = db.prepare('INSERT INTO favorites (user_id, listing_id) VALUES (?, ?)');
+      insStmt.run([userId, listingId]);
+      insStmt.free();
+      saveDb();
+      return { favorited: true };
+    }
+  }
 }
 
 module.exports = Listing;

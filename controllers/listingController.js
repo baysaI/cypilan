@@ -1,14 +1,5 @@
-// const Listing = require('../models/Listing');
-// Mock Listing
-const Listing = {
-    findAll: async (filters, page, limit) => ({ data: [], total: 0, pages: 0 }),
-    findBySlug: async (slug) => null,
-    create: async (data) => ({ id: 1 }),
-    update: async (id, data) => true,
-    delete: async (id) => true,
-    incrementViews: async (id) => true,
-    toggleFavorite: async (listingId, userId) => ({ favorited: true })
-};
+const Listing = require('../models/Listing');
+const Category = require('../models/Category');
 
 const index = async (req, res) => {
     try {
@@ -73,8 +64,10 @@ const show = async (req, res) => {
 };
 
 const showCreate = async (req, res) => {
+    res.locals.meta = res.locals.meta || {};
     res.locals.meta.title = 'İlan Ver | CYPILAN.COM';
-    res.render('listings/create', { title: 'Ücretsiz İlan Ver' });
+    const categories = await Category.getAll();
+    res.render('listings/create', { categories, title: 'Ücretsiz İlan Ver' });
 };
 
 const create = async (req, res) => {

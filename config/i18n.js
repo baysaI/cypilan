@@ -118,11 +118,27 @@ function isObject(item) {
 function translate(key, lang = 'tr', params = {}) {
   const targetLang = supportedLanguages.includes(lang) ? lang : 'tr';
 
+  // 1. Try direct key
   let translated = getNestedValue(locales[targetLang], key);
 
-  // Fallback to Turkish if key not found in target language
+  // 2. If not found and key doesn't have a dot, try common namespaces
+  const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin'];
+  if (translated === undefined && !key.includes('.')) {
+    for (const ns of namespaces) {
+      translated = getNestedValue(locales[targetLang], `${ns}.${key}`);
+      if (translated !== undefined) break;
+    }
+  }
+
+  // 3. Fallback to Turkish if key not found in target language
   if (translated === undefined && targetLang !== 'tr') {
     translated = getNestedValue(locales['tr'], key);
+    if (translated === undefined && !key.includes('.')) {
+      for (const ns of namespaces) {
+        translated = getNestedValue(locales['tr'], `${ns}.${key}`);
+        if (translated !== undefined) break;
+      }
+    }
   }
 
   // Fallback to original key if missing in both
@@ -130,7 +146,7 @@ function translate(key, lang = 'tr', params = {}) {
     return key;
   }
 
-  // Perform parameter replacements if provided (e.g., "Hello {name}" -> "Hello John")
+  // Perform parameter replacements if provided
   if (params && typeof params === 'object') {
     Object.keys(params).forEach((paramKey) => {
       const value = params[paramKey];

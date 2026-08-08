@@ -4,10 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
     langSwitches.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const lang = e.target.getAttribute('data-lang');
-            if(lang) {
+            const target = e.currentTarget;
+            const lang = target.getAttribute('data-lang');
+            if (lang) {
                 document.cookie = `lang=${lang}; path=/; max-age=31536000`;
-                window.location.reload();
+                const url = new URL(window.location.href);
+                url.searchParams.set('lang', lang);
+                window.location.href = url.toString();
             }
         });
     });
@@ -17,10 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
     currencySwitches.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const currency = e.target.getAttribute('data-currency');
-            if(currency) {
+            const target = e.currentTarget;
+            const currency = target.getAttribute('data-currency');
+            if (currency) {
                 document.cookie = `currency=${currency}; path=/; max-age=31536000`;
-                window.location.reload();
+                const url = new URL(window.location.href);
+                url.searchParams.set('currency', currency);
+                window.location.href = url.toString();
             }
         });
     });
