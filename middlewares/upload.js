@@ -9,7 +9,6 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer memory storage so we can process with Sharp watermark before saving
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
@@ -44,14 +43,11 @@ const processImagesWithWatermark = async (req, res, next) => {
             const filename = `listing-${uniqueSuffix}.jpg`;
             const outputPath = path.join(uploadDir, filename);
 
-            // Temporary write buffer to disk
             const tempPath = path.join(uploadDir, `temp-${filename}`);
             await fs.promises.writeFile(tempPath, file.buffer);
 
-            // Apply watermark with Sharp
             await addWatermark(tempPath, outputPath);
 
-            // Clean up temp file
             if (fs.existsSync(tempPath)) {
                 await fs.promises.unlink(tempPath);
             }

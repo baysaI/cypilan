@@ -11,7 +11,6 @@ router.post('/register', authController.register);
 
 router.get('/logout', authController.logout);
 
-// Google OAuth Routes
 router.get('/google', (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     req.flash('error', 'Google ile giriş yapabilmek için .env dosyasına GOOGLE_CLIENT_ID ve GOOGLE_CLIENT_SECRET eklenmelidir.');

@@ -1,5 +1,4 @@
 <div class="bg-primary text-white py-4 py-md-5 position-relative overflow-hidden">
-    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('/images/pattern.svg') center/cover; opacity: 0.05;"></div>
     <div class="container position-relative z-1 text-center">
         <h1 class="fw-bold mb-2"><%= t('home.cta_button') %></h1>
         <p class="text-white-50 mb-0"><%= t('home.hero_subtitle') %></p>
@@ -154,7 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let selectedFiles = [];
 
-    // Global dragover & drop prevention to stop browser opening images in new tabs
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         window.addEventListener(eventName, function(e) {
             e.preventDefault();
