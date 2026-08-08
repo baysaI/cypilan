@@ -1,4 +1,4 @@
--- Demo Admin User
+-- Demo Admin User (Email: admin@cypilan.com | Password: ADMIN_SIFRESI)
 INSERT OR IGNORE INTO users (id, email, password_hash, full_name, phone, role, is_verified, is_active) VALUES
 (1, 'admin@cypilan.com', '$2a$10$REPLACED.ADMIN.HASH.SET.ADMIN_PASSWORD.IN.ENV.xxxxxxxx', 'System Admin', '+90 533 000 0000', 'admin', 1, 1);
 
