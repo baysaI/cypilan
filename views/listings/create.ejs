@@ -108,13 +108,13 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <div class="border-2 border-dashed border-primary rounded-4 p-5 text-center bg-light cursor-pointer hover-bg-primary-light transition-all position-relative" id="dropArea">
+                        <label for="fileInput" class="w-100 border-2 border-dashed border-primary rounded-4 p-5 text-center bg-light cursor-pointer hover-bg-primary-light transition-all d-block position-relative mb-0" id="dropArea">
                             <i class="fa-solid fa-cloud-arrow-up display-4 text-primary mb-3"></i>
                             <h5 class="fw-bold text-dark"><%= t('listing.drag_images') %></h5>
                             <p class="text-muted small mb-4"><%= t('listing.max_images') %></p>
-                            <button type="button" class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm"><%= t('common.search') %></button>
-                            <input type="file" name="images" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="d-none">
-                        </div>
+                            <span class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm pe-none"><%= t('nav.post_ad') %></span>
+                            <input type="file" name="images" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+                        </label>
 
                         <div class="row g-3 mt-3" id="imagePreviewContainer"></div>
                     </div>
@@ -132,6 +132,7 @@
 
 <style>
     .border-dashed { border-style: dashed !important; }
+    .pe-none { pointer-events: none !important; }
 </style>
 
 <script>
@@ -151,10 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!dropArea || !fileInput || !previewContainer) return;
 
     const dt = new DataTransfer();
-
-    dropArea.addEventListener('click', function(e) {
-        fileInput.click();
-    });
 
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, function(e) {
@@ -185,23 +182,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function addFiles(files) {
+        if (!files || files.length === 0) return;
+
         for (let i = 0; i < files.length; i++) {
             if (dt.items.length >= 10) {
                 alert('<%= t("listing.max_images") %>');
                 break;
             }
             const file = files[i];
-            if (file.type.startsWith('image/')) {
+            if (file.type && file.type.startsWith('image/')) {
                 dt.items.add(file);
             }
         }
-        fileInput.files = dt.files;
+        
+        try {
+            fileInput.files = dt.files;
+        } catch (err) {
+            console.error('Error assigning DataTransfer to fileInput:', err);
+        }
+        
         renderPreviews();
     }
 
     function renderPreviews() {
         previewContainer.innerHTML = '';
-        Array.from(dt.files).forEach((file, index) => {
+        const filesArray = Array.from(dt.files);
+        
+        filesArray.forEach((file, index) => {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const col = document.createElement('div');
@@ -233,7 +240,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         dt.items.clear();
         Array.from(newDt.files).forEach(file => dt.items.add(file));
-        fileInput.files = dt.files;
+        
+        try {
+            fileInput.files = dt.files;
+        } catch (err) {
+            console.error('Error setting DataTransfer files:', err);
+        }
+
         renderPreviews();
     }
 });
