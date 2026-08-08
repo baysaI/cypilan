@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="<%= (typeof req !== 'undefined' && req.locale) ? req.locale : 'tr' %>" <%= (typeof req !== 'undefined' && req.locale === 'fa') ? 'dir="rtl"' : '' %>>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title><%= typeof meta !== 'undefined' && meta.title ? meta.title + ' | CYPILAN.COM' : 'CYPILAN.COM | Kıbrıs\'ın En Büyük İlan Platformu' %></title>
+    <meta name="description" content="<%= typeof meta !== 'undefined' && meta.description ? meta.description : 'Kıbrıs emlak, vasıta, iş ilanları, ustalar ve ikinci el eşya alım satım platformu.' %>">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="<%= typeof meta !== 'undefined' && meta.title ? meta.title : 'CYPILAN.COM' %>">
+    <meta property="og:description" content="<%= typeof meta !== 'undefined' && meta.description ? meta.description : 'Kıbrıs\'ın En Büyük İlan Platformu' %>">
+    <meta property="og:image" content="<%= typeof meta !== 'undefined' && meta.image ? meta.image : '/images/og-image.jpg' %>">
+    <meta property="og:url" content="<%= typeof req !== 'undefined' ? req.protocol + '://' + req.get('host') + req.originalUrl : 'https://cypilan.com' %>">
+    <meta property="og:type" content="<%= typeof meta !== 'undefined' && meta.type ? meta.type : 'website' %>">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= typeof req !== 'undefined' ? req.protocol + '://' + req.get('host') + req.originalUrl : 'https://cypilan.com' %>">
+
+    <!-- Hreflang Tags -->
+    <link rel="alternate" hreflang="tr" href="https://cypilan.com/tr" />
+    <link rel="alternate" hreflang="en" href="https://cypilan.com/en" />
+    <link rel="alternate" hreflang="el" href="https://cypilan.com/el" />
+    <link rel="alternate" hreflang="ru" href="https://cypilan.com/ru" />
+    <link rel="alternate" hreflang="fa" href="https://cypilan.com/fa" />
+    <link rel="alternate" hreflang="x-default" href="https://cypilan.com/tr" />
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "CYPILAN.COM",
+      "url": "https://cypilan.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://cypilan.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Bootstrap CSS -->
+    <% if (typeof req !== 'undefined' && req.locale === 'fa') { %>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <% } else { %>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <% } %>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+    
+    <%- include('../partials/header') %>
+
+    <main id="content" role="main" class="flex-grow-1">
+        <%- body %>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+</body>
+</html>

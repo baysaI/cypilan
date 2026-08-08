@@ -1,0 +1,140 @@
+<div class="bg-primary text-white py-4 py-md-5 position-relative overflow-hidden">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('/images/pattern.svg') center/cover; opacity: 0.05;"></div>
+    <div class="container position-relative z-1 text-center">
+        <h1 class="fw-bold mb-2">İlan Ver</h1>
+        <p class="text-white-50 mb-0">Hızlı, kolay ve binlerce kişiye ulaşın</p>
+    </div>
+</div>
+
+<div class="container py-4 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9 col-xl-8">
+            
+            <form action="/listings" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                
+                <!-- Category Section -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
+                            <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; font-size: 0.9rem;">1</span>
+                            Kategori Seçimi
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <select name="category" class="form-select form-select-lg bg-light border-0 shadow-none focus-ring-primary fw-medium" required>
+                            <option value="">Lütfen kategori seçin...</option>
+                            <option value="emlak">Emlak</option>
+                            <option value="vasita">Vasıta</option>
+                            <option value="is-ilanlari">İş İlanları</option>
+                            <option value="ustalar">Ustalar</option>
+                            <option value="ikinci-el">İkinci El</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Basic Details -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
+                            <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; font-size: 0.9rem;">2</span>
+                            İlan Detayları
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted">İlan Başlığı <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control form-control-lg bg-light border-0 shadow-none focus-ring-primary" placeholder="Örn: Girne Merkezde Satılık 3+1 Daire" required maxlength="70">
+                            <div class="form-text small text-end" id="titleCount">0/70</div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Fiyat <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" name="price" class="form-control form-control-lg bg-light border-0 shadow-none focus-ring-primary" placeholder="0" required min="0">
+                                    <select name="currency" class="form-select bg-light border-0 shadow-none" style="max-width: 100px;">
+                                        <option value="TRY">₺ TRY</option>
+                                        <option value="GBP">£ GBP</option>
+                                        <option value="EUR">€ EUR</option>
+                                        <option value="USD">$ USD</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted">Açıklama <span class="text-danger">*</span></label>
+                            <textarea name="description" class="form-control bg-light border-0 shadow-none focus-ring-primary" rows="6" placeholder="İlanınızın tüm detaylarını buraya yazın..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
+                            <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; font-size: 0.9rem;">3</span>
+                            Konum Bilgisi
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Şehir <span class="text-danger">*</span></label>
+                                <select name="city" class="form-select bg-light border-0 shadow-none focus-ring-primary" required>
+                                    <option value="">Seçiniz</option>
+                                    <option value="lefkosa">Lefkoşa</option>
+                                    <option value="girne">Girne</option>
+                                    <option value="gazimagusa">Gazimağusa</option>
+                                    <option value="iskele">İskele</option>
+                                    <option value="guzelyurt">Güzelyurt</option>
+                                    <option value="lefke">Lefke</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Bölge/İlçe</label>
+                                <input type="text" name="district" class="form-control bg-light border-0 shadow-none focus-ring-primary" placeholder="Örn: Gönyeli">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photos -->
+                <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h5 class="fw-bold text-dark d-flex align-items-center mb-0">
+                            <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; font-size: 0.9rem;">4</span>
+                            Fotoğraflar
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="border-2 border-dashed border-primary rounded-4 p-5 text-center bg-primary-light cursor-pointer hover-bg-light transition-all" id="dropArea">
+                            <i class="fa-solid fa-cloud-arrow-up display-4 text-primary mb-3"></i>
+                            <h5 class="fw-bold text-dark">Fotoğrafları Sürükleyip Bırakın</h5>
+                            <p class="text-muted small mb-4">veya bilgisayarınızdan seçin (Maks. 10 fotoğraf)</p>
+                            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="document.getElementById('fileInput').click()">Dosya Seç</button>
+                            <input type="file" name="images" id="fileInput" multiple accept="image/*" class="d-none">
+                        </div>
+                        
+                        <!-- Preview Area -->
+                        <div class="row g-2 mt-3" id="imagePreviewContainer">
+                            <!-- JS will inject previews here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="d-flex gap-3 justify-content-end mb-5">
+                    <button type="button" class="btn btn-light btn-lg rounded-pill fw-medium px-4 hover-lift">Önizleme</button>
+                    <button type="submit" class="btn btn-accent btn-lg rounded-pill fw-bold px-5 text-white shadow-lg hover-lift pulse-button">İlanı Yayınla</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-dashed { border-style: dashed !important; }
+</style>

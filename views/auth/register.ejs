@@ -1,0 +1,86 @@
+<div class="container py-5 py-md-7">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
+                    <h3 class="fw-bold text-dark mb-1">Hesap Oluşturun</h3>
+                    <p class="text-muted small">CYPILAN'a katılarak ücretsiz ilan vermeye başlayın.</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5 pt-3">
+                    <% if (typeof error !== 'undefined' && error.length > 0) { %>
+                        <div class="alert alert-danger rounded-3 py-2 small"><%= error %></div>
+                    <% } %>
+
+                    <form action="/auth/register" method="POST" class="needs-validation" novalidate>
+                        <!-- Account Type -->
+                        <div class="mb-4 d-flex gap-3">
+                            <div class="form-check bg-light rounded-3 p-3 flex-fill text-center border cursor-pointer hover-bg-primary-light transition-all">
+                                <input class="form-check-input float-none mx-auto d-block mb-2 shadow-none cursor-pointer" type="radio" name="accountType" id="typeIndividual" value="individual" checked>
+                                <label class="form-check-label fw-bold d-block cursor-pointer" for="typeIndividual">
+                                    Bireysel
+                                </label>
+                            </div>
+                            <div class="form-check bg-light rounded-3 p-3 flex-fill text-center border cursor-pointer hover-bg-primary-light transition-all">
+                                <input class="form-check-input float-none mx-auto d-block mb-2 shadow-none cursor-pointer" type="radio" name="accountType" id="typeCorporate" value="corporate">
+                                <label class="form-check-label fw-bold d-block cursor-pointer" for="typeCorporate">
+                                    Kurumsal
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label for="firstName" class="form-label fw-medium small">Ad</label>
+                                <input type="text" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="lastName" class="form-label fw-medium small">Soyad</label>
+                                <input type="text" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-medium small">E-posta Adresi</label>
+                            <input type="email" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="email" name="email" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label fw-medium small">Telefon Numarası</label>
+                            <input type="tel" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="phone" name="phone" placeholder="0533 123 4567" required>
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <label for="password" class="form-label fw-medium small">Şifre</label>
+                                <input type="password" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="password" name="password" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="passwordConfirm" class="form-label fw-medium small">Şifre (Tekrar)</label>
+                                <input type="password" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="passwordConfirm" name="passwordConfirm" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input shadow-none cursor-pointer" id="terms" name="terms" required>
+                            <label class="form-check-label small text-muted cursor-pointer" for="terms">
+                                <a href="/kullanim-kosullari" class="text-primary text-decoration-none">Kullanım Koşullarını</a> ve <a href="/gizlilik-politikasi" class="text-primary text-decoration-none">Gizlilik Politikasını</a> okudum, kabul ediyorum.
+                            </label>
+                            <div class="invalid-feedback small">
+                                Devam etmek için şartları kabul etmelisiniz.
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm hover-lift">Kayıt Ol</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer bg-light border-0 py-3 text-center">
+                    <p class="mb-0 small text-muted">Zaten hesabınız var mı? <a href="/auth/login" class="text-primary fw-bold text-decoration-none">Giriş Yapın</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

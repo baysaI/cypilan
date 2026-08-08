@@ -1,0 +1,80 @@
+<div class="container py-5 py-md-7">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
+                    <h3 class="fw-bold text-dark mb-1">Tekrar Hoş Geldiniz</h3>
+                    <p class="text-muted small">Devam etmek için hesabınıza giriş yapın.</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5 pt-3">
+                    <!-- Social Login -->
+                    <div class="d-grid gap-2 mb-4">
+                        <button class="btn btn-outline-dark rounded-pill py-2 fw-medium d-flex align-items-center justify-content-center gap-2 hover-lift">
+                            <i class="fa-brands fa-google text-danger"></i> Google ile Giriş Yap
+                        </button>
+                    </div>
+
+                    <div class="position-relative mb-4 text-center">
+                        <hr class="text-muted">
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 small text-muted">veya E-posta ile</span>
+                    </div>
+
+                    <!-- Flash messages placeholder -->
+                    <% if (typeof error !== 'undefined' && error.length > 0) { %>
+                        <div class="alert alert-danger rounded-3 py-2 small"><%= error %></div>
+                    <% } %>
+
+                    <form action="/auth/login" method="POST" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-medium small">E-posta Adresi</label>
+                            <input type="email" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="email" name="email" required placeholder="ornek@email.com">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="password" class="form-label fw-medium small mb-0">Şifre</label>
+                                <a href="/auth/forgot-password" class="text-decoration-none small text-primary fw-medium">Şifremi Unuttum?</a>
+                            </div>
+                            <div class="input-group">
+                                <input type="password" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="password" name="password" required placeholder="••••••••">
+                                <button class="btn bg-light text-muted border-0 rounded-end-3" type="button" id="togglePassword">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input shadow-none cursor-pointer" id="remember" name="remember">
+                            <label class="form-check-label small text-muted cursor-pointer" for="remember">Beni hatırla</label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm hover-lift">Giriş Yap</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer bg-light border-0 py-3 text-center">
+                    <p class="mb-0 small text-muted">Hesabınız yok mu? <a href="/auth/register" class="text-primary fw-bold text-decoration-none">Hemen Kayıt Olun</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        if(togglePassword && password) {
+            togglePassword.addEventListener('click', function (e) {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+    });
+</script>

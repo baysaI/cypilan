@@ -1,0 +1,48 @@
+<div class="listing-card card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift transition-all <%= typeof listing.isPremium !== 'undefined' && listing.isPremium ? 'premium-card' : '' %>">
+    
+    <% if (typeof listing.isPremium !== 'undefined' && listing.isPremium) { %>
+        <div class="premium-badge position-absolute top-0 start-0 m-2 z-2 px-2 py-1 rounded-2 shadow-sm fw-bold small text-white bg-gradient-golden">
+            <i class="fa-solid fa-crown me-1"></i> Premium
+        </div>
+    <% } %>
+
+    <!-- Favorite Button -->
+    <button class="btn btn-light btn-sm favorite-btn position-absolute top-0 end-0 m-2 z-2 rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0 bg-white hover-bg-light" style="width: 32px; height: 32px;" data-id="<%= listing.id %>">
+        <i class="fa-regular fa-heart text-muted fs-6"></i>
+    </button>
+
+    <!-- Image -->
+    <a href="/listings/<%= listing.id %>" class="text-decoration-none d-block position-relative overflow-hidden" style="padding-top: 66%;">
+        <img src="<%= typeof listing.image !== 'undefined' ? listing.image : '/images/placeholder.jpg' %>" 
+             class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover transition-transform duration-500 hover-scale" 
+             alt="<%= listing.title %>" 
+             loading="lazy">
+        <div class="image-overlay position-absolute bottom-0 start-0 w-100 p-2 bg-gradient-to-t from-black-60 d-flex justify-content-between align-items-end">
+            <span class="badge bg-primary text-white rounded-pill px-2 py-1 fw-medium shadow-sm"><%= listing.categoryName %></span>
+            <span class="text-white small fw-medium text-shadow"><i class="fa-solid fa-camera me-1"></i> <%= listing.imageCount || 1 %></span>
+        </div>
+    </a>
+
+    <!-- Content -->
+    <div class="card-body d-flex flex-column p-3">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title fs-6 fw-bold mb-0 text-truncate text-dark" style="max-width: 80%;" title="<%= listing.title %>">
+                <a href="/listings/<%= listing.id %>" class="text-decoration-none text-dark hover-text-primary"><%= listing.title %></a>
+            </h5>
+        </div>
+        
+        <div class="price-tag mb-3">
+            <span class="fs-5 fw-bold text-primary"><%= listing.currency === 'GBP' ? '£' : '₺' %><%= new Intl.NumberFormat('tr-TR').format(listing.price) %></span>
+        </div>
+
+        <div class="mt-auto pt-2 border-top border-light d-flex justify-content-between align-items-center text-muted small fw-medium">
+            <div class="location d-flex align-items-center text-truncate pe-2">
+                <i class="fa-solid fa-location-dot text-accent me-1"></i>
+                <span class="text-truncate"><%= listing.city %>, <%= listing.district %></span>
+            </div>
+            <div class="date whitespace-nowrap">
+                <i class="fa-regular fa-clock me-1"></i> <%= listing.dateFormatted || 'Bugün' %>
+            </div>
+        </div>
+    </div>
+</div>

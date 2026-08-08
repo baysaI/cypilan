@@ -1,0 +1,170 @@
+<div class="container py-4 py-md-5">
+    
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted hover-text-primary"><i class="fa-solid fa-house small"></i> Anasayfa</a></li>
+            <li class="breadcrumb-item active fw-medium" aria-current="page">Tüm İlanlar</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header & Mobile Search Toggle -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h1 class="fs-3 fw-bold mb-1">Tüm İlanlar</h1>
+            <p class="text-muted small mb-0">Toplam <span class="fw-bold text-primary">12.450</span> ilan bulundu</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary d-lg-none flex-fill" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                <i class="fa-solid fa-filter me-2"></i> Filtrele
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-light border dropdown-toggle bg-white shadow-sm" type="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-arrow-down-short-wide text-muted me-2"></i> Sırala: En Yeni
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                    <li><a class="dropdown-item active bg-primary-light text-primary fw-medium" href="#">En Yeni İlanlar</a></li>
+                    <li><a class="dropdown-item" href="#">Fiyat (Düşükten Yükseğe)</a></li>
+                    <li><a class="dropdown-item" href="#">Fiyat (Yüksekten Düşüğe)</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Filters (Desktop) -->
+        <aside class="col-lg-3 d-none d-lg-block">
+            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px; z-index: 1;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 d-flex align-items-center">
+                        <i class="fa-solid fa-sliders text-primary me-2"></i> Filtreler
+                    </h5>
+                    
+                    <form action="/listings" method="GET">
+                        <!-- Category Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Kategori</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" value="emlak" id="catEmlak" checked>
+                                <label class="form-check-label cursor-pointer" for="catEmlak">Emlak <span class="text-muted small">(4.2k)</span></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" value="vasita" id="catVasita">
+                                <label class="form-check-label cursor-pointer" for="catVasita">Vasıta <span class="text-muted small">(2.8k)</span></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" value="is-ilanlari" id="catIs">
+                                <label class="form-check-label cursor-pointer" for="catIs">İş İlanları <span class="text-muted small">(1.1k)</span></label>
+                            </div>
+                        </div>
+
+                        <!-- Location Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Şehir</label>
+                            <select class="form-select bg-light border-0 shadow-none cursor-pointer">
+                                <option value="">Tüm Şehirler</option>
+                                <option value="lefkosa">Lefkoşa</option>
+                                <option value="girne">Girne</option>
+                                <option value="gazimagusa">Gazimağusa</option>
+                                <option value="iskele">İskele</option>
+                            </select>
+                        </div>
+
+                        <!-- Price Filter -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Fiyat Aralığı</label>
+                            <div class="input-group mb-2">
+                                <select class="form-select bg-light border-0 shadow-none w-25" style="flex: none;">
+                                    <option value="TRY">₺</option>
+                                    <option value="GBP">£</option>
+                                </select>
+                                <input type="number" class="form-control bg-light border-0 shadow-none border-start border-white border-2" placeholder="Min">
+                            </div>
+                            <input type="number" class="form-control bg-light border-0 shadow-none" placeholder="Max">
+                        </div>
+
+                        <!-- Switch Filter -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" role="switch" id="onlyPremium">
+                                <label class="form-check-label cursor-pointer" for="onlyPremium">Sadece Premium</label>
+                            </div>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" role="switch" id="withPhoto" checked>
+                                <label class="form-check-label cursor-pointer" for="withPhoto">Fotoğraflı İlanlar</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift">Uygula</button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="col-12 col-lg-9">
+            
+            <!-- Active Filters Tags -->
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <span class="badge bg-primary-light text-primary border border-primary-subtle rounded-pill py-2 px-3 fw-medium d-flex align-items-center gap-2">
+                    Emlak <button class="btn-close btn-close-white ms-1" style="font-size: 0.6rem; filter: invert(1);"></button>
+                </span>
+                <span class="badge bg-primary-light text-primary border border-primary-subtle rounded-pill py-2 px-3 fw-medium d-flex align-items-center gap-2">
+                    Lefkoşa <button class="btn-close btn-close-white ms-1" style="font-size: 0.6rem; filter: invert(1);"></button>
+                </span>
+                <a href="#" class="text-danger small fw-medium ms-2 align-self-center text-decoration-none">Temizle</a>
+            </div>
+
+            <!-- Grid -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4 mb-5">
+                <% 
+                // Dummy data
+                const listings = [
+                    { id: 1, title: 'Girne Merkezde Lüks 3+1 Daire', price: 125000, currency: 'GBP', city: 'Girne', district: 'Merkez', categoryName: 'Satılık Daire', isPremium: true, imageCount: 12, dateFormatted: '2 saat önce' },
+                    { id: 2, title: '2020 Model Mercedes C200d AMG', price: 42000, currency: 'GBP', city: 'Lefkoşa', district: 'Küçük Kaymaklı', categoryName: 'Otomobil', isPremium: false, imageCount: 8, dateFormatted: '5 saat önce' },
+                    { id: 3, title: 'Deniz Manzaralı Kiralık Villa', price: 1500, currency: 'GBP', city: 'İskele', district: 'Boğaz', categoryName: 'Kiralık Villa', isPremium: true, imageCount: 15, dateFormatted: 'Dün' },
+                    { id: 4, title: 'Temiz İkinci El iPhone 13 Pro', price: 25000, currency: 'TRY', city: 'Gazimağusa', district: 'Merkez', categoryName: 'Cep Telefonu', isPremium: false, imageCount: 3, dateFormatted: 'Bugün' },
+                    { id: 5, title: 'Sahibinden Satılık Arsa', price: 85000, currency: 'GBP', city: 'Girne', district: 'Alsancak', categoryName: 'Satılık Arsa', isPremium: false, imageCount: 5, dateFormatted: '2 gün önce' },
+                    { id: 6, title: 'Acil Satılık Honda Civic', price: 15000, currency: 'GBP', city: 'Lefkoşa', district: 'Gönyeli', categoryName: 'Otomobil', isPremium: false, imageCount: 6, dateFormatted: '3 gün önce' }
+                ];
+                %>
+                
+                <% listings.forEach(function(listing) { %>
+                    <div class="col">
+                        <%- include('../partials/listingCard', { listing: listing }) %>
+                    </div>
+                <% }); %>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center" href="#" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-left"></i></a>
+                    </li>
+                    <li class="page-item active"><a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center" href="#" style="width: 40px; height: 40px;">1</a></li>
+                    <li class="page-item"><a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="#" style="width: 40px; height: 40px;">2</a></li>
+                    <li class="page-item"><a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="#" style="width: 40px; height: 40px;">3</a></li>
+                    <li class="page-item"><span class="page-link border-0 bg-transparent text-muted px-1">...</span></li>
+                    <li class="page-item"><a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="#" style="width: 40px; height: 40px;">12</a></li>
+                    <li class="page-item">
+                        <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="#" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+
+        </main>
+    </div>
+</div>
+
+<!-- Mobile Filter Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filterOffcanvas">
+    <div class="offcanvas-header bg-light">
+        <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-sliders text-primary me-2"></i> Filtreler</h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <!-- Exact same form as desktop sidebar, omitted for brevity but should be rendered or shared via partial -->
+        <p class="text-muted small">Mobil filtreleme alanı.</p>
+    </div>
+</div>
