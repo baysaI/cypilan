@@ -1,7 +1,7 @@
 const User = require('../models/User');
 
 const isAuthenticated = (req, res, next) => {
-    if (req.session && req.session.userId) {
+    if ((req.session && req.session.userId) || req.isAuthenticated()) {
         return next();
     }
 
@@ -9,7 +9,7 @@ const isAuthenticated = (req, res, next) => {
         req.session.returnTo = req.originalUrl;
     }
     
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
         return res.status(401).json({ error: 'Authentication required' });
     }
     
@@ -18,11 +18,12 @@ const isAuthenticated = (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
-    if (req.session && req.session.userRole === 'admin') {
+    const role = (req.session && req.session.userRole) || (req.user && req.user.role);
+    if (role === 'admin') {
         return next();
     }
     
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
         return res.status(403).json({ error: 'Admin access required' });
     }
     
@@ -31,13 +32,15 @@ const isAdmin = (req, res, next) => {
 };
 
 const isOwner = (req, res, next) => {
+    const userId = (req.session && req.session.userId) || (req.user && req.user.id);
+    const role = (req.session && req.session.userRole) || (req.user && req.user.role);
     const listingUserId = req.listing ? req.listing.user_id : null;
     
-    if (req.session && req.session.userId && (req.session.userId === listingUserId || req.session.userRole === 'admin')) {
+    if (userId && (userId === listingUserId || role === 'admin')) {
         return next();
     }
     
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
         return res.status(403).json({ error: 'Ownership required' });
     }
     
@@ -46,19 +49,30 @@ const isOwner = (req, res, next) => {
 };
 
 const setUserLocal = async (req, res, next) => {
-    if (req.session && req.session.userId) {
-        try {
-            res.locals.currentUser = {
-                id: req.session.userId,
-                email: req.session.userEmail,
-                name: req.session.userName,
-                role: req.session.userRole
-            };
-        } catch (error) {
-            console.error('Error setting user local:', error);
-            res.locals.currentUser = null;
+    let userId = req.session && req.session.userId;
+    let user = req.user;
+
+    if (!userId && user) {
+        userId = user.id;
+        if (req.session) {
+            req.session.userId = user.id;
+            req.session.userRole = user.role;
+            req.session.userEmail = user.email;
+            req.session.userName = user.full_name;
         }
+    }
+
+    if (userId) {
+        const userData = {
+            id: userId,
+            email: (req.session && req.session.userEmail) || (user && user.email),
+            name: (req.session && req.session.userName) || (user && user.full_name),
+            role: (req.session && req.session.userRole) || (user && user.role)
+        };
+        res.locals.user = userData;
+        res.locals.currentUser = userData;
     } else {
+        res.locals.user = null;
         res.locals.currentUser = null;
     }
     next();

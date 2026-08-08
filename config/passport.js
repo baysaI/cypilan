@@ -1,5 +1,6 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
 const clientID = process.env.GOOGLE_CLIENT_ID;
@@ -19,9 +20,11 @@ if (clientID && clientSecret) {
 
         let user = await User.findByEmail(email);
         if (!user) {
+          const randomPassword = Math.random().toString(36).slice(-10);
+          const password_hash = await bcrypt.hash(randomPassword, 10);
           const userId = await User.create({
             email,
-            password: Math.random().toString(36).slice(-10),
+            password_hash,
             full_name: profile.displayName || 'Google User',
             phone: '',
             role: 'user'
@@ -30,6 +33,7 @@ if (clientID && clientSecret) {
         }
         return done(null, user);
       } catch (err) {
+        console.error('Google Auth Strategy Error:', err);
         return done(err, null);
       }
     }

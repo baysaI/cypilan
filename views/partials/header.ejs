@@ -39,10 +39,11 @@
                         </ul>
                     </div>
 
-                    <% if (typeof user !== 'undefined' && user) { %>
+                    <% const activeUser = (typeof user !== 'undefined' && user) ? user : ((typeof currentUser !== 'undefined' && currentUser) ? currentUser : null); %>
+                    <% if (activeUser) { %>
                         <div class="dropdown">
                             <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fa-regular fa-user me-2"></i><%= user.name %>
+                                <i class="fa-regular fa-user me-2"></i><%= activeUser.name %>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end mt-2">
                                 <li><a class="dropdown-item py-2" href="/profile"><i class="fa-solid fa-id-card me-3 text-primary"></i><%= t('nav.my_profile') %></a></li>
