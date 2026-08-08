@@ -116,25 +116,24 @@
             </div>
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
-                <% 
-                // Placeholder dummy data for view
-                const dummyListings = [
-                    { id: 1, title: 'Girne Merkezde Lüks 3+1 Daire', price: 125000, currency: 'GBP', city: 'Girne', district: 'Merkez', categoryName: 'Satılık Daire', isPremium: true, imageCount: 12, dateFormatted: '2 saat önce' },
-                    { id: 2, title: '2020 Model Mercedes C200d AMG', price: 42000, currency: 'GBP', city: 'Lefkoşa', district: 'Küçük Kaymaklı', categoryName: 'Otomobil', isPremium: true, imageCount: 8, dateFormatted: '5 saat önce' },
-                    { id: 3, title: 'Deniz Manzaralı Kiralık Villa', price: 1500, currency: 'GBP', city: 'İskele', district: 'Boğaz', categoryName: 'Kiralık Villa', isPremium: true, imageCount: 15, dateFormatted: 'Dün' },
-                    { id: 4, title: 'Temiz İkinci El iPhone 13 Pro', price: 25000, currency: 'TRY', city: 'Gazimağusa', district: 'Merkez', categoryName: 'Cep Telefonu', isPremium: true, imageCount: 3, dateFormatted: 'Bugün' }
-                ];
-                %>
+                <% const displayListings = (typeof featuredListings !== 'undefined' && featuredListings && featuredListings.length > 0) ? featuredListings : (typeof recentListings !== 'undefined' ? recentListings : []); %>
                 
-                <% dummyListings.forEach(function(listing) { %>
-                    <div class="col">
-                        <%- include('partials/listingCard', { listing: listing }) %>
+                <% if (displayListings.length > 0) { %>
+                    <% displayListings.forEach(function(listing) { %>
+                        <div class="col">
+                            <%- include('partials/listingCard', { listing: listing }) %>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="fa-solid fa-folder-open fs-1 mb-3 opacity-50 d-block"></i>
+                        <p class="mb-0">Henüz vitrin ilanı bulunmuyor.</p>
                     </div>
-                <% }); %>
+                <% } %>
             </div>
             
             <div class="text-center mt-4 d-md-none">
-                <a href="/listings?premium=true" class="btn btn-outline-primary rounded-pill px-4 fw-medium w-100">Tüm Vitrin İlanlarını Gör</a>
+                <a href="/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium">Tüm İlanları Gör</a>
             </div>
         </div>
     </section>

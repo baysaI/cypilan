@@ -153,7 +153,15 @@ class Listing {
 
   static async getFeatured(limit = 10) {
     const db = await getDb();
-    const stmt = db.prepare('SELECT * FROM listings WHERE is_featured = 1 AND status = "active" ORDER BY created_at DESC LIMIT ?');
+    const stmt = db.prepare(`
+      SELECT l.*, c.name_tr as category_name, i.image_url as primary_image
+      FROM listings l
+      LEFT JOIN categories c ON l.category_id = c.id
+      LEFT JOIN listing_images i ON l.id = i.listing_id AND (i.is_primary = 1 OR i.id = (SELECT id FROM listing_images WHERE listing_id = l.id LIMIT 1))
+      WHERE l.is_featured = 1 AND l.status = 'active'
+      GROUP BY l.id
+      ORDER BY l.created_at DESC LIMIT ?
+    `);
     stmt.bind([limit]);
     const results = [];
     while (stmt.step()) {
@@ -165,7 +173,15 @@ class Listing {
 
   static async getRecent(limit = 10) {
     const db = await getDb();
-    const stmt = db.prepare('SELECT * FROM listings WHERE status = "active" ORDER BY created_at DESC LIMIT ?');
+    const stmt = db.prepare(`
+      SELECT l.*, c.name_tr as category_name, i.image_url as primary_image
+      FROM listings l
+      LEFT JOIN categories c ON l.category_id = c.id
+      LEFT JOIN listing_images i ON l.id = i.listing_id AND (i.is_primary = 1 OR i.id = (SELECT id FROM listing_images WHERE listing_id = l.id LIMIT 1))
+      WHERE l.status = 'active'
+      GROUP BY l.id
+      ORDER BY l.created_at DESC LIMIT ?
+    `);
     stmt.bind([limit]);
     const results = [];
     while (stmt.step()) {
