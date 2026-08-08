@@ -1,0 +1,106 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="fs-4 fw-bold mb-0">İlanlar <span class="text-muted fw-normal fs-6">(<%= pagination.totalItems %>)</span></h1>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <form method="GET" action="/admin/listings" class="row g-2 align-items-center">
+            <div class="col-12 col-md-5">
+                <input type="text" name="q" class="form-control" placeholder="Başlık veya sahibinin e-postası" value="<%= filters.q || '' %>">
+            </div>
+            <div class="col-8 col-md-4">
+                <select name="status" class="form-select">
+                    <option value="">Tüm durumlar (<%= counts.total || 0 %>)</option>
+                    <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Aktif (<%= counts.active || 0 %>)</option>
+                    <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Onay Bekleyen (<%= counts.pending || 0 %>)</option>
+                    <option value="rejected" <%= filters.status === 'rejected' ? 'selected' : '' %>>Reddedilen (<%= counts.rejected || 0 %>)</option>
+                    <option value="sold" <%= filters.status === 'sold' ? 'selected' : '' %>>Satılan (<%= counts.sold || 0 %>)</option>
+                </select>
+            </div>
+            <div class="col-4 col-md-3 d-grid">
+                <button class="btn btn-primary">Filtrele</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <% if (listings.length === 0) { %>
+            <p class="text-muted text-center py-5 mb-0">Bu filtreye uyan ilan yok.</p>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th class="ps-3">İlan</th>
+                            <th class="d-none d-lg-table-cell">Sahibi</th>
+                            <th class="d-none d-md-table-cell">Fiyat</th>
+                            <th>Durum</th>
+                            <th class="pe-3 text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% listings.forEach(function(l) { %>
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="<%= l.primary_image || '/img/logo.png' %>" class="rounded bg-light me-2 object-fit-cover" width="44" height="44" alt="">
+                                        <div>
+                                            <div class="fw-medium text-truncate" style="max-width: 240px;"><%= l.title %></div>
+                                            <div class="text-muted small">
+                                                <%= l.category_name || '-' %> &middot; <%= l.location_city || '-' %> &middot; <%= helpers.timeAgo(l.created_at, 'tr') %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="d-none d-lg-table-cell small">
+                                    <div><%= l.owner_name || '-' %></div>
+                                    <div class="text-muted"><%= l.owner_email || '' %></div>
+                                </td>
+                                <td class="d-none d-md-table-cell fw-bold text-nowrap"><%= helpers.formatPrice(l.price, l.currency) %></td>
+                                <td><%- include('_statusBadge', { status: l.status }) %></td>
+                                <td class="pe-3 text-end text-nowrap">
+                                    <a href="/listings/<%= l.slug %>" target="_blank" rel="noopener" class="btn btn-sm btn-light" title="Görüntüle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <% if (l.status !== 'active') { %>
+                                        <form action="/admin/listings/<%= l.id %>/status" method="POST" class="d-inline">
+                                            <input type="hidden" name="_method" value="PUT">
+                                            <input type="hidden" name="status" value="active">
+                                            <button class="btn btn-sm btn-success" title="Yayına al"><i class="fa-solid fa-check"></i></button>
+                                        </form>
+                                    <% } %>
+                                    <% if (l.status !== 'rejected') { %>
+                                        <form action="/admin/listings/<%= l.id %>/status" method="POST" class="d-inline">
+                                            <input type="hidden" name="_method" value="PUT">
+                                            <input type="hidden" name="status" value="rejected">
+                                            <button class="btn btn-sm btn-warning" title="Reddet"><i class="fa-solid fa-ban"></i></button>
+                                        </form>
+                                    <% } %>
+                                    <form action="/admin/listings/<%= l.id %>" method="POST" class="d-inline js-confirm-delete" data-title="<%= l.title %>">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button class="btn btn-sm btn-danger" title="Kalıcı olarak sil"><i class="fa-solid fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('_pagination', { pagination: pagination, baseUrl: '/admin/listings', query: filters }) %>
+
+<script>
+document.querySelectorAll('.js-confirm-delete').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+        var title = form.getAttribute('data-title') || 'bu ilan';
+        if (!confirm('"' + title + '" kalıcı olarak silinecek. Bu işlem geri alınamaz. Emin misiniz?')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>

@@ -1,0 +1,85 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="fs-4 fw-bold mb-0">Kullanıcılar <span class="text-muted fw-normal fs-6">(<%= pagination.totalItems %>)</span></h1>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <form method="GET" action="/admin/users" class="row g-2 align-items-center">
+            <div class="col-12 col-md-5">
+                <input type="text" name="q" class="form-control" placeholder="Ad veya e-posta" value="<%= filters.q || '' %>">
+            </div>
+            <div class="col-8 col-md-4">
+                <select name="role" class="form-select">
+                    <option value="">Tüm roller</option>
+                    <option value="user" <%= filters.role === 'user' ? 'selected' : '' %>>Bireysel</option>
+                    <option value="business" <%= filters.role === 'business' ? 'selected' : '' %>>Kurumsal</option>
+                    <option value="agent" <%= filters.role === 'agent' ? 'selected' : '' %>>Danışman</option>
+                    <option value="admin" <%= filters.role === 'admin' ? 'selected' : '' %>>Yönetici</option>
+                </select>
+            </div>
+            <div class="col-4 col-md-3 d-grid">
+                <button class="btn btn-primary">Filtrele</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <% if (users.length === 0) { %>
+            <p class="text-muted text-center py-5 mb-0">Bu filtreye uyan kullanıcı yok.</p>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th class="ps-3">Kullanıcı</th>
+                            <th class="d-none d-md-table-cell">Telefon</th>
+                            <th>Rol</th>
+                            <th class="d-none d-sm-table-cell">İlan</th>
+                            <th>Durum</th>
+                            <th class="pe-3 text-end">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(function(u) { %>
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="fw-medium"><%= u.company_name || u.full_name %></div>
+                                    <div class="text-muted small"><%= u.email %></div>
+                                </td>
+                                <td class="d-none d-md-table-cell small"><%= u.phone || '-' %></td>
+                                <td><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2"><%= u.role %></span></td>
+                                <td class="d-none d-sm-table-cell">
+                                    <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="text-decoration-none"><%= u.listing_count %></a>
+                                </td>
+                                <td>
+                                    <% if (u.is_active) { %>
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Aktif</span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2">Askıda</span>
+                                    <% } %>
+                                </td>
+                                <td class="pe-3 text-end text-nowrap">
+                                    <% if (u.id === currentUser.id) { %>
+                                        <span class="text-muted small">siz</span>
+                                    <% } else { %>
+                                        <form action="/admin/users/<%= u.id %>/status" method="POST" class="d-inline">
+                                            <input type="hidden" name="_method" value="PUT">
+                                            <input type="hidden" name="status" value="<%= u.is_active ? 'suspended' : 'active' %>">
+                                            <button class="btn btn-sm <%= u.is_active ? 'btn-outline-danger' : 'btn-outline-success' %>">
+                                                <%= u.is_active ? 'Askıya Al' : 'Aktifleştir' %>
+                                            </button>
+                                        </form>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('_pagination', { pagination: pagination, baseUrl: '/admin/users', query: filters }) %>

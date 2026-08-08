@@ -1,0 +1,24 @@
+<% if (pagination.totalPages > 1) { %>
+    <%
+    const params = [];
+    Object.keys(query || {}).forEach(function (k) {
+      if (query[k]) params.push(encodeURIComponent(k) + '=' + encodeURIComponent(query[k]));
+    });
+    const suffix = params.length ? '&' + params.join('&') : '';
+    %>
+    <nav class="mt-3">
+        <ul class="pagination pagination-sm justify-content-center mb-0">
+            <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
+                <a class="page-link" href="<%= baseUrl %>?page=<%= pagination.page - 1 %><%= suffix %>">Önceki</a>
+            </li>
+            <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+                <li class="page-item <%= pagination.page === p ? 'active' : '' %>">
+                    <a class="page-link" href="<%= baseUrl %>?page=<%= p %><%= suffix %>"><%= p %></a>
+                </li>
+            <% } %>
+            <li class="page-item <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>">
+                <a class="page-link" href="<%= baseUrl %>?page=<%= pagination.page + 1 %><%= suffix %>">Sonraki</a>
+            </li>
+        </ul>
+    </nav>
+<% } %>

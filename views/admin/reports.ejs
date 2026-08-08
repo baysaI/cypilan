@@ -1,0 +1,102 @@
+<%
+const reasonLabels = {
+  wrong_category: 'Yanlış kategori',
+  misleading_price: 'Yanıltıcı fiyat',
+  missing_photos: 'Eksik fotoğraf',
+  spam: 'Spam',
+  fraud: 'Dolandırıcılık',
+  inappropriate: 'Uygunsuz içerik',
+  other: 'Diğer'
+};
+const statusLabels = {
+  pending: ['warning', 'Bekliyor'],
+  reviewed: ['info', 'İncelendi'],
+  resolved: ['success', 'Çözüldü'],
+  dismissed: ['secondary', 'Reddedildi']
+};
+%>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="fs-4 fw-bold mb-0">Şikayetler <span class="text-muted fw-normal fs-6">(<%= pagination.totalItems %>)</span></h1>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <form method="GET" action="/admin/reports" class="row g-2 align-items-center">
+            <div class="col-8 col-md-4">
+                <select name="status" class="form-select">
+                    <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Bekleyen</option>
+                    <option value="reviewed" <%= filters.status === 'reviewed' ? 'selected' : '' %>>İncelenen</option>
+                    <option value="resolved" <%= filters.status === 'resolved' ? 'selected' : '' %>>Çözülen</option>
+                    <option value="dismissed" <%= filters.status === 'dismissed' ? 'selected' : '' %>>Reddedilen</option>
+                </select>
+            </div>
+            <div class="col-4 col-md-3 d-grid">
+                <button class="btn btn-primary">Filtrele</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<% if (reports.length === 0) { %>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fa-solid fa-flag fs-1 text-muted opacity-25 d-block mb-3"></i>
+            <p class="text-muted mb-0">Bu durumda şikayet yok.</p>
+        </div>
+    </div>
+<% } else { %>
+    <div class="row g-3">
+        <% reports.forEach(function(r) { %>
+            <% const [color, label] = statusLabels[r.status] || ['secondary', r.status]; %>
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                            <div>
+                                <span class="badge bg-<%= color %> bg-opacity-10 text-<%= color %> rounded-pill px-2 me-2"><%= label %></span>
+                                <strong><%= reasonLabels[r.reason] || r.reason %></strong>
+                            </div>
+                            <small class="text-muted text-nowrap"><%= helpers.timeAgo(r.created_at, 'tr') %></small>
+                        </div>
+
+                        <p class="small text-muted mb-2">
+                            İlan:
+                            <% if (r.listing_slug) { %>
+                                <a href="/listings/<%= r.listing_slug %>" target="_blank" rel="noopener"><%= r.listing_title %></a>
+                            <% } else { %>
+                                <em>silinmiş</em>
+                            <% } %>
+                            &middot; Bildiren: <%= r.reporter_name || 'bilinmiyor' %>
+                        </p>
+
+                        <% if (r.description) { %>
+                            <p class="mb-3"><%= r.description %></p>
+                        <% } %>
+
+                        <% if (r.admin_note) { %>
+                            <p class="small text-muted mb-3">Yönetici notu: <%= r.admin_note %></p>
+                        <% } %>
+
+                        <% if (r.status === 'pending' || r.status === 'reviewed') { %>
+                            <form action="/admin/reports/<%= r.id %>" method="POST" class="row g-2 align-items-center">
+                                <input type="hidden" name="_method" value="PUT">
+                                <div class="col-12 col-md-6">
+                                    <input type="text" name="admin_note" class="form-control form-control-sm" placeholder="Not (opsiyonel)">
+                                </div>
+                                <div class="col-auto">
+                                    <button name="status" value="resolved" class="btn btn-sm btn-success">Çözüldü</button>
+                                </div>
+                                <div class="col-auto">
+                                    <button name="status" value="dismissed" class="btn btn-sm btn-outline-secondary">Reddet</button>
+                                </div>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+<% } %>
+
+<%- include('_pagination', { pagination: pagination, baseUrl: '/admin/reports', query: filters }) %>
