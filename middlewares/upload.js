@@ -2,22 +2,15 @@ const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
+const { addWatermark } = require('../utils/watermark');
 
 const uploadDir = path.join(__dirname, '../public/uploads/listings');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(4).toString('hex');
-        const ext = path.extname(file.originalname).toLowerCase();
-        cb(null, `listing-${uniqueSuffix}${ext}`);
-    }
-});
+// Multer memory storage so we can process with Sharp watermark before saving
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -32,13 +25,52 @@ const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024,
+        fileSize: 10 * 1024 * 1024,
         files: 10
     }
 });
 
 const uploadListingImages = upload.array('images', 10);
 
+const processImagesWithWatermark = async (req, res, next) => {
+    if (!req.files || req.files.length === 0) {
+        return next();
+    }
+
+    try {
+        const processedFiles = [];
+        for (const file of req.files) {
+            const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+            const filename = `listing-${uniqueSuffix}.jpg`;
+            const outputPath = path.join(uploadDir, filename);
+
+            // Temporary write buffer to disk
+            const tempPath = path.join(uploadDir, `temp-${filename}`);
+            await fs.promises.writeFile(tempPath, file.buffer);
+
+            // Apply watermark with Sharp
+            await addWatermark(tempPath, outputPath);
+
+            // Clean up temp file
+            if (fs.existsSync(tempPath)) {
+                await fs.promises.unlink(tempPath);
+            }
+
+            processedFiles.push({
+                filename: filename,
+                path: `/uploads/listings/${filename}`
+            });
+        }
+
+        req.processedImages = processedFiles;
+        next();
+    } catch (error) {
+        console.error('Error in processImagesWithWatermark:', error);
+        next(error);
+    }
+};
+
 module.exports = {
-    uploadListingImages
+    uploadListingImages,
+    processImagesWithWatermark
 };

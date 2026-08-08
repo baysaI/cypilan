@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const listingController = require('../controllers/listingController');
 const { isAuthenticated, isOwner } = require('../middlewares/auth');
-const { uploadListingImages } = require('../middlewares/upload');
+const { uploadListingImages, processImagesWithWatermark } = require('../middlewares/upload');
 
 const fetchListingForOwnership = async (req, res, next) => {
     next();
@@ -11,7 +11,7 @@ const fetchListingForOwnership = async (req, res, next) => {
 router.get('/', listingController.index);
 
 router.get('/create', isAuthenticated, listingController.showCreate);
-router.post('/', isAuthenticated, uploadListingImages, listingController.create);
+router.post('/', isAuthenticated, uploadListingImages, processImagesWithWatermark, listingController.create);
 
 router.get('/:slug', listingController.show);
 

@@ -76,7 +76,9 @@ const create = async (req, res) => {
     try {
         const { title, description, category_id, price, currency, city, condition } = req.body;
         
-        const images = req.files ? req.files.map(f => f.filename) : [];
+        const images = req.processedImages
+            ? req.processedImages.map(f => f.filename)
+            : (req.files ? req.files.map(f => f.filename) : []);
 
         const newListing = await Listing.create({
             user_id: req.session.userId,
