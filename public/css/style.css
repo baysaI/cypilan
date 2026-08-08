@@ -1,19 +1,21 @@
 :root {
-    /* Brand Colors */
-    --cyp-primary: #1B4D7A;
-    --cyp-primary-dark: #123352;
-    --cyp-primary-light: #E8F0F8;
+    /* Brand Colors — matched to CypIlan logo */
+    --cyp-primary: #3A7CA5;
+    --cyp-primary-dark: #2B5F80;
+    --cyp-primary-light: #EAF2F8;
     
-    --cyp-secondary: #F7A823;
+    --cyp-secondary: #E8982D;
+    --cyp-secondary-dark: #CC8220;
     --cyp-secondary-light: #FFF6E8;
     
-    --cyp-accent: #E74C3C;
-    --cyp-accent-dark: #C0392B;
+    --cyp-accent: #E8982D;
+    --cyp-accent-dark: #CC8220;
     
     --cyp-success: #2ECC71;
     --cyp-dark: #2C3E50;
-    --cyp-light: #F8F9FA;
+    --cyp-light: #F5F3EE;
     --cyp-gray: #95A5A6;
+    --cyp-cream: #F5F3EE;
     
     /* Typography */
     --cyp-font-sans: 'Inter', system-ui, -apple-system, sans-serif;

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 220" width="450" height="220">
+  <!-- Cyprus Island Outline -->
+  <path d="M 175,55 
+           C 185,55 195,50 205,53
+           C 215,55 220,40 230,42
+           C 240,44 260,35 275,32
+           C 290,29 300,25 305,25
+           C 305,27 295,33 285,38
+           C 275,43 255,50 248,55
+           C 240,60 238,68 230,75
+           C 225,80 222,88 225,95
+           C 228,102 235,108 242,112
+           C 245,114 240,118 232,118
+           C 220,118 215,115 205,112
+           C 195,109 188,112 180,115
+           C 170,118 160,115 152,110
+           C 145,105 138,102 130,98
+           C 125,95 120,80 125,75
+           C 130,70 140,68 148,65
+           C 155,62 165,65 175,55 Z" 
+        fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Inside Icons (Orange #E8982D) -->
+  <!-- 1. Phone Icon (Left) -->
+  <rect x="155" y="70" width="14" height="24" rx="3" fill="none" stroke="#E8982D" stroke-width="2.5"/>
+  <circle cx="162" cy="89" r="1" fill="#E8982D"/>
+  <line x1="160" y1="73" x2="164" y2="73" stroke="#E8982D" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- 2. Tag Icon (Center Left) -->
+  <path d="M 180,72 L 194,72 L 204,82 L 190,96 L 176,82 Z" fill="none" stroke="#E8982D" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="185" cy="77" r="1.5" fill="#E8982D"/>
+
+  <!-- 3. Car Icon (Bottom Center) -->
+  <path d="M 195,95 C 197,90 200,88 205,88 L 217,88 C 221,88 224,90 226,95 L 229,95 C 231,95 232,96 232,98 L 232,102 C 232,103 231,104 230,104 L 191,104 C 190,104 189,103 189,102 L 189,98 C 189,96 190,95 192,95 Z" fill="none" stroke="#E8982D" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="197" cy="104" r="2.5" fill="none" stroke="#E8982D" stroke-width="2"/>
+  <circle cx="224" cy="104" r="2.5" fill="none" stroke="#E8982D" stroke-width="2"/>
+
+  <!-- 4. House Icon (Right) -->
+  <path d="M 215,70 L 227,59 L 239,70 L 239,84 L 215,84 Z" fill="none" stroke="#E8982D" stroke-width="2.5" stroke-linejoin="round"/>
+  <rect x="223" y="74" width="8" height="10" fill="none" stroke="#E8982D" stroke-width="2"/>
+
+  <!-- Text: Cypilan -->
+  <text x="225" y="160" text-anchor="middle" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-weight="700" font-size="52">
+    <tspan fill="#FFFFFF">Cyp</tspan><tspan fill="#E8982D">ilan</tspan>
+  </text>
+
+  <!-- Subtitle: Kıbrıs'ın İlan Sitesi -->
+  <text x="295" y="185" text-anchor="middle" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-weight="500" font-size="18" fill="#CBD5E1" letter-spacing="0.5">
+    Kıbrıs'ın İlan Sitesi
+  </text>
+</svg>
