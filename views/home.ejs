@@ -1,12 +1,12 @@
 <div class="home-wrapper">
-    <h1 class="visually-hidden">Kıbrıs'ın İlan Platformu CYPILAN.COM</h1>
+    <h1 class="visually-hidden"><%= t('site.tagline') %> <%= t('site.name') %></h1>
 
     <section class="categories-section py-5 bg-white">
         <div class="container">
             <div class="d-flex justify-content-between align-items-end mb-4">
                 <div>
-                    <h2 class="fw-bold mb-1 text-dark">Kategoriler</h2>
-                    <p class="text-muted mb-0">İhtiyacınıza uygun kategoriyi seçin</p>
+                    <h2 class="fw-bold mb-1 text-dark"><%= t('home.categories_title') %></h2>
+                    <p class="text-muted mb-0"><%= t('home.categories_subtitle') %></p>
                 </div>
             </div>
             
@@ -19,6 +19,7 @@
                     'usta-hizmetler': 'fa-screwdriver-wrench',
                     'ikinci-el': 'fa-couch'
                 };
+                const currentLang = typeof lang !== 'undefined' ? lang : 'tr';
                 %>
                 
                 <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
@@ -29,8 +30,8 @@
                                     <div class="icon-wrapper mb-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
                                         <i class="fa-solid <%= catIcons[cat.slug] || 'fa-tag' %> fs-3 text-primary group-hover-scale"></i>
                                     </div>
-                                    <h6 class="fw-bold text-dark mb-1"><%= cat.name_tr %></h6>
-                                    <span class="small text-muted"><%= cat.listing_count || 0 %> İlan</span>
+                                    <h6 class="fw-bold text-dark mb-1"><%= cat['name_' + currentLang] || cat.name_tr %></h6>
+                                    <span class="small text-muted"><%= cat.listing_count || 0 %> <%= t('home.ad_unit') %></span>
                                 </div>
                             </a>
                         </div>
@@ -45,11 +46,11 @@
             <div class="d-flex justify-content-between align-items-end mb-4">
                 <div>
                     <h2 class="fw-bold mb-1 text-dark d-flex align-items-center">
-                        <i class="fa-solid fa-crown text-warning me-2 fs-4"></i> Vitrin İlanları
+                        <i class="fa-solid fa-crown text-warning me-2 fs-4"></i> <%= t('home.featured_listings') %>
                     </h2>
-                    <p class="text-muted mb-0">Öne çıkan fırsatları kaçırmayın</p>
+                    <p class="text-muted mb-0"><%= t('home.featured_subtitle') %></p>
                 </div>
-                <a href="/listings?premium=true" class="btn btn-outline-primary rounded-pill px-4 fw-medium d-none d-md-inline-block hover-lift">Tümünü Gör</a>
+                <a href="/listings?premium=true" class="btn btn-outline-primary rounded-pill px-4 fw-medium d-none d-md-inline-block hover-lift"><%= t('home.show_all') %></a>
             </div>
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
@@ -64,13 +65,13 @@
                 <% } else { %>
                     <div class="col-12 text-center py-5 text-muted">
                         <i class="fa-solid fa-folder-open fs-1 mb-3 opacity-50 d-block"></i>
-                        <p class="mb-0">Henüz vitrin ilanı bulunmuyor.</p>
+                        <p class="mb-0"><%= t('home.no_featured') %></p>
                     </div>
                 <% } %>
             </div>
             
             <div class="text-center mt-4 d-md-none">
-                <a href="/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium">Tüm İlanları Gör</a>
+                <a href="/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium"><%= t('home.show_all') %></a>
             </div>
         </div>
     </section>
@@ -81,9 +82,9 @@
         <div class="container position-relative z-1">
             <div class="row g-4 align-items-center">
                 <div class="col-lg-6 text-center text-lg-start">
-                    <h2 class="display-5 fw-bold mb-3">Hemen İlan Verin!</h2>
-                    <p class="lead text-white-50 mb-4">Binlerce alıcıya anında ulaşın, eşyalarınızı hızla satın veya kiralayın.</p>
-                    <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold shadow-lg pulse-button">Ücretsiz İlan Ver</a>
+                    <h2 class="display-5 fw-bold mb-3"><%= t('home.cta_title') %></h2>
+                    <p class="lead text-white-50 mb-4"><%= t('home.cta_subtitle') %></p>
+                    <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold shadow-lg pulse-button"><%= t('home.cta_button') %></a>
                 </div>
                 
                 <div class="col-lg-6">
@@ -91,19 +92,19 @@
                         <div class="col-6 col-md-4">
                             <div class="bg-white bg-opacity-10 rounded-4 p-4 text-center backdrop-blur border border-white border-opacity-10">
                                 <h3 class="fw-bold mb-0"><%= (typeof stats !== 'undefined' && stats.totalListings) ? stats.totalListings : 0 %></h3>
-                                <p class="small text-white-50 mb-0">Aktif İlan</p>
+                                <p class="small text-white-50 mb-0"><%= t('home.active_listings') %></p>
                             </div>
                         </div>
                         <div class="col-6 col-md-4">
                             <div class="bg-white bg-opacity-10 rounded-4 p-4 text-center backdrop-blur border border-white border-opacity-10">
                                 <h3 class="fw-bold mb-0"><%= (typeof stats !== 'undefined' && stats.totalUsers) ? stats.totalUsers : 1 %></h3>
-                                <p class="small text-white-50 mb-0">Kayıtlı Üye</p>
+                                <p class="small text-white-50 mb-0"><%= t('home.registered_users') %></p>
                             </div>
                         </div>
                         <div class="col-12 col-md-4">
                             <div class="bg-white bg-opacity-10 rounded-4 p-4 text-center backdrop-blur border border-white border-opacity-10">
                                 <h3 class="fw-bold mb-0"><%= (typeof stats !== 'undefined' && stats.totalCities) ? stats.totalCities : 5 %></h3>
-                                <p class="small text-white-50 mb-0">Büyük Şehir</p>
+                                <p class="small text-white-50 mb-0"><%= t('home.major_cities') %></p>
                             </div>
                         </div>
                     </div>

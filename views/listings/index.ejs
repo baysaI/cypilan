@@ -2,28 +2,28 @@
 
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted hover-text-primary"><i class="fa-solid fa-house small"></i> Anasayfa</a></li>
-            <li class="breadcrumb-item active fw-medium" aria-current="page">Tüm İlanlar</li>
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted hover-text-primary"><i class="fa-solid fa-house small"></i> <%= t('nav.home') %></a></li>
+            <li class="breadcrumb-item active fw-medium" aria-current="page"><%= t('listing.all_categories') %></li>
         </ol>
     </nav>
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h1 class="fs-3 fw-bold mb-1"><%= typeof currentCategoryName !== 'undefined' ? currentCategoryName : 'Tüm İlanlar' %></h1>
-            <p class="text-muted small mb-0">Toplam <span class="fw-bold text-primary"><%= pagination.totalItems || (listings ? listings.length : 0) %></span> ilan bulundu</p>
+            <h1 class="fs-3 fw-bold mb-1"><%= typeof currentCategoryName !== 'undefined' ? currentCategoryName : t('listing.all_categories') %></h1>
+            <p class="text-muted small mb-0"><%= t('common.all') %> <span class="fw-bold text-primary"><%= pagination.totalItems || (listings ? listings.length : 0) %></span> <%= t('listing.total_found') %></p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-primary d-lg-none flex-fill" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-                <i class="fa-solid fa-filter me-2"></i> Filtrele
+                <i class="fa-solid fa-filter me-2"></i> <%= t('listing.filters') %>
             </button>
             <div class="dropdown">
                 <button class="btn btn-light border dropdown-toggle bg-white shadow-sm" type="button" data-bs-toggle="dropdown">
-                    <i class="fa-solid fa-arrow-down-short-wide text-muted me-2"></i> Sırala
+                    <i class="fa-solid fa-arrow-down-short-wide text-muted me-2"></i> <%= t('listing.sort_by') %>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
-                    <li><a class="dropdown-item" href="?sort=newest">En Yeni İlanlar</a></li>
-                    <li><a class="dropdown-item" href="?sort=price_asc">Fiyat (Düşükten Yükseğe)</a></li>
-                    <li><a class="dropdown-item" href="?sort=price_desc">Fiyat (Yüksekten Düşüğe)</a></li>
+                    <li><a class="dropdown-item" href="?sort=newest"><%= t('listing.newest') %></a></li>
+                    <li><a class="dropdown-item" href="?sort=price_asc"><%= t('listing.price_asc') %></a></li>
+                    <li><a class="dropdown-item" href="?sort=price_desc"><%= t('listing.price_desc') %></a></li>
                 </ul>
             </div>
         </div>
@@ -34,18 +34,18 @@
             <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px; z-index: 1;">
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4 d-flex align-items-center">
-                        <i class="fa-solid fa-sliders text-primary me-2"></i> Filtreler
+                        <i class="fa-solid fa-sliders text-primary me-2"></i> <%= t('listing.filters') %>
                     </h5>
                     
                     <form action="/listings" method="GET">
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Kategori</label>
+                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.category') %></label>
                             <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
                                 <% categories.forEach(function(cat) { %>
                                     <div class="form-check mb-2">
                                         <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="cat_<%= cat.id %>" <%= (filters.category === cat.slug) ? 'checked' : '' %>>
                                         <label class="form-check-label cursor-pointer" for="cat_<%= cat.id %>">
-                                            <%= cat.name_tr %> <span class="text-muted small">(<%= cat.listing_count || 0 %>)</span>
+                                            <%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %> <span class="text-muted small">(<%= cat.listing_count || 0 %>)</span>
                                         </label>
                                     </div>
                                 <% }); %>
@@ -53,19 +53,19 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1">Şehir</label>
+                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.city') %></label>
                             <select name="city" class="form-select bg-light border-0 shadow-none cursor-pointer">
-                                <option value="">Tüm Şehirler</option>
-                                <option value="Lefkoşa" <%= filters.city === 'Lefkoşa' ? 'selected' : '' %>>Lefkoşa</option>
-                                <option value="Girne" <%= filters.city === 'Girne' ? 'selected' : '' %>>Girne</option>
-                                <option value="Gazimağusa" <%= filters.city === 'Gazimağusa' ? 'selected' : '' %>>Gazimağusa</option>
-                                <option value="İskele" <%= filters.city === 'İskele' ? 'selected' : '' %>>İskele</option>
-                                <option value="Güzelyurt" <%= filters.city === 'Güzelyurt' ? 'selected' : '' %>>Güzelyurt</option>
+                                <option value=""><%= t('listing.all_cities') %></option>
+                                <option value="Lefkoşa" <%= filters.city === 'Lefkoşa' ? 'selected' : '' %>><%= t('cities.nicosia') %></option>
+                                <option value="Girne" <%= filters.city === 'Girne' ? 'selected' : '' %>><%= t('cities.kyrenia') %></option>
+                                <option value="Gazimağusa" <%= filters.city === 'Gazimağusa' ? 'selected' : '' %>><%= t('cities.famagusta') %></option>
+                                <option value="İskele" <%= filters.city === 'İskele' ? 'selected' : '' %>><%= t('cities.iskele') %></option>
+                                <option value="Güzelyurt" <%= filters.city === 'Güzelyurt' ? 'selected' : '' %>><%= t('cities.guzelyurt') %></option>
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift">Uygula</button>
-                        <a href="/listings" class="btn btn-link w-100 text-muted small text-decoration-none mt-2">Filtreleri Temizle</a>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift"><%= t('listing.apply_filters') %></button>
+                        <a href="/listings" class="btn btn-link w-100 text-muted small text-decoration-none mt-2"><%= t('listing.clear_filters') %></a>
                     </form>
                 </div>
             </div>
@@ -83,10 +83,10 @@
                 <% } else { %>
                     <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm my-3">
                         <i class="fa-solid fa-folder-open fs-1 text-muted mb-3 opacity-50 d-block"></i>
-                        <h5 class="fw-bold text-dark mb-2">Henüz İlan Bulunmuyor</h5>
-                        <p class="text-muted small mb-4">Seçtiğiniz kriterlere uygun ilan bulunamadı veya henüz veritabanına ilan eklenmedi.</p>
+                        <h5 class="fw-bold text-dark mb-2"><%= t('listing.no_listings') %></h5>
+                        <p class="text-muted small mb-4"><%= t('listing.no_listings_desc') %></p>
                         <a href="/listings/create" class="btn btn-accent rounded-pill px-4 text-white fw-bold shadow-sm">
-                            <i class="fa-solid fa-plus me-2"></i>İlk İlanı Sen Ver
+                            <i class="fa-solid fa-plus me-2"></i><%= t('listing.first_ad_button') %>
                         </a>
                     </div>
                 <% } %>
@@ -118,10 +118,39 @@
 
 <div class="offcanvas offcanvas-start" tabindex="-1" id="filterOffcanvas">
     <div class="offcanvas-header bg-light">
-        <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-sliders text-primary me-2"></i> Filtreler</h5>
+        <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-sliders text-primary me-2"></i> <%= t('listing.filters') %></h5>
         <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-        <p class="text-muted small">Mobil filtreleme alanı.</p>
+        <form action="/listings" method="GET">
+            <div class="mb-4">
+                <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.category') %></label>
+                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                    <% categories.forEach(function(cat) { %>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="m_cat_<%= cat.id %>" <%= (filters.category === cat.slug) ? 'checked' : '' %>>
+                            <label class="form-check-label cursor-pointer" for="m_cat_<%= cat.id %>">
+                                <%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %> <span class="text-muted small">(<%= cat.listing_count || 0 %>)</span>
+                            </label>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.city') %></label>
+                <select name="city" class="form-select bg-light border-0 shadow-none cursor-pointer">
+                    <option value=""><%= t('listing.all_cities') %></option>
+                    <option value="Lefkoşa" <%= filters.city === 'Lefkoşa' ? 'selected' : '' %>><%= t('cities.nicosia') %></option>
+                    <option value="Girne" <%= filters.city === 'Girne' ? 'selected' : '' %>><%= t('cities.kyrenia') %></option>
+                    <option value="Gazimağusa" <%= filters.city === 'Gazimağusa' ? 'selected' : '' %>><%= t('cities.famagusta') %></option>
+                    <option value="İskele" <%= filters.city === 'İskele' ? 'selected' : '' %>><%= t('cities.iskele') %></option>
+                    <option value="Güzelyurt" <%= filters.city === 'Güzelyurt' ? 'selected' : '' %>><%= t('cities.guzelyurt') %></option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift"><%= t('listing.apply_filters') %></button>
+            <a href="/listings" class="btn btn-link w-100 text-muted small text-decoration-none mt-2"><%= t('listing.clear_filters') %></a>
+        </form>
     </div>
 </div>

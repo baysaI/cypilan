@@ -6,7 +6,7 @@
                     <img src="/img/logo.png" alt="CypIlan" style="height: 48px; width: auto; object-fit: contain;">
                 </a>
                 <p class="text-white-50 pe-lg-4 lh-lg">
-                    Kıbrıs'ın en kapsamlı ve güvenilir ilan platformu. Emlak, vasıta, iş ilanları ve daha fazlası tek bir adreste.
+                    <%= t('footer.about_text') %>
                 </p>
                 <div class="social-icons d-flex gap-3 mt-4">
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle shadow-sm hover-lift"><i class="fa-brands fa-facebook-f"></i></a>
@@ -17,33 +17,33 @@
             </div>
 
             <div class="col-12 col-md-4 col-lg-2 mb-4 mb-md-0">
-                <h5 class="fw-bold mb-4 text-white">Kategoriler</h5>
+                <h5 class="fw-bold mb-4 text-white"><%= t('footer.categories') %></h5>
                 <ul class="list-unstyled footer-links">
-                    <li class="mb-2"><a href="/listings?category=emlak" class="text-white-50 text-decoration-none hover-text-white transition-all">Emlak</a></li>
-                    <li class="mb-2"><a href="/listings?category=vasita" class="text-white-50 text-decoration-none hover-text-white transition-all">Vasıta</a></li>
-                    <li class="mb-2"><a href="/listings?category=is-ilanlari" class="text-white-50 text-decoration-none hover-text-white transition-all">İş İlanları</a></li>
-                    <li class="mb-2"><a href="/listings?category=ustalar" class="text-white-50 text-decoration-none hover-text-white transition-all">Ustalar</a></li>
-                    <li class="mb-2"><a href="/listings?category=ikinci-el" class="text-white-50 text-decoration-none hover-text-white transition-all">İkinci El</a></li>
+                    <li class="mb-2"><a href="/listings?category=emlak" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.real_estate') %></a></li>
+                    <li class="mb-2"><a href="/listings?category=vasita" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.vehicles') %></a></li>
+                    <li class="mb-2"><a href="/listings?category=is-ilanlari" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.jobs') %></a></li>
+                    <li class="mb-2"><a href="/listings?category=ustalar" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.services') %></a></li>
+                    <li class="mb-2"><a href="/listings?category=ikinci-el" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.second_hand') %></a></li>
                 </ul>
             </div>
 
             <div class="col-12 col-md-4 col-lg-3 mb-4 mb-md-0">
-                <h5 class="fw-bold mb-4 text-white">Destek</h5>
+                <h5 class="fw-bold mb-4 text-white"><%= t('footer.support') %></h5>
                 <ul class="list-unstyled footer-links">
-                    <li class="mb-2"><a href="/sss" class="text-white-50 text-decoration-none hover-text-white transition-all">Sıkça Sorulan Sorular</a></li>
-                    <li class="mb-2"><a href="/nasil-ilan-verilir" class="text-white-50 text-decoration-none hover-text-white transition-all">Nasıl İlan Verilir?</a></li>
-                    <li class="mb-2"><a href="/guvenlik" class="text-white-50 text-decoration-none hover-text-white transition-all">Güvenlik İpuçları</a></li>
-                    <li class="mb-2"><a href="/kurumsal" class="text-white-50 text-decoration-none hover-text-white transition-all">Kurumsal Üyelik</a></li>
-                    <li class="mb-2"><a href="/reklam" class="text-white-50 text-decoration-none hover-text-white transition-all">Reklam Verin</a></li>
+                    <li class="mb-2"><a href="/sss" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.faq') %></a></li>
+                    <li class="mb-2"><a href="/nasil-ilan-verilir" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.how_to_post') %></a></li>
+                    <li class="mb-2"><a href="/guvenlik" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.safety_tips') %></a></li>
+                    <li class="mb-2"><a href="/kurumsal" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.corporate_membership') %></a></li>
+                    <li class="mb-2"><a href="/reklam" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.advertise') %></a></li>
                 </ul>
             </div>
 
             <div class="col-12 col-md-4 col-lg-3">
-                <h5 class="fw-bold mb-4 text-white">İletişim</h5>
+                <h5 class="fw-bold mb-4 text-white"><%= t('footer.contact') %></h5>
                 <ul class="list-unstyled contact-info">
                     <li class="mb-3 d-flex align-items-start text-white-50">
                         <i class="fa-solid fa-location-dot mt-1 me-3 text-accent"></i>
-                        <span>Lefkoşa, Kuzey Kıbrıs</span>
+                        <span><%= t('footer.address_text') %></span>
                     </li>
                     <li class="mb-3 d-flex align-items-center text-white-50">
                         <i class="fa-solid fa-phone me-3 text-accent"></i>
@@ -62,15 +62,15 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <p class="mb-0 text-white-50 small">&copy; <span id="currentYear"></span> CYPILAN.COM. Tüm hakları saklıdır.</p>
+                    <p class="mb-0 text-white-50 small">&copy; <span id="currentYear"></span> CYPILAN.COM. <%= t('footer.copyright') %></p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <ul class="list-inline mb-0 small">
-                        <li class="list-inline-item"><a href="/gizlilik-politikasi" class="text-white-50 text-decoration-none hover-text-white">Gizlilik Politikası</a></li>
+                        <li class="list-inline-item"><a href="/gizlilik-politikasi" class="text-white-50 text-decoration-none hover-text-white"><%= t('footer.privacy') %></a></li>
                         <li class="list-inline-item text-white-50 mx-2">|</li>
-                        <li class="list-inline-item"><a href="/kullanim-kosullari" class="text-white-50 text-decoration-none hover-text-white">Kullanım Koşulları</a></li>
+                        <li class="list-inline-item"><a href="/kullanim-kosullari" class="text-white-50 text-decoration-none hover-text-white"><%= t('footer.terms') %></a></li>
                         <li class="list-inline-item text-white-50 mx-2">|</li>
-                        <li class="list-inline-item"><a href="/cerez-politikasi" class="text-white-50 text-decoration-none hover-text-white">Çerez Politikası</a></li>
+                        <li class="list-inline-item"><a href="/cerez-politikasi" class="text-white-50 text-decoration-none hover-text-white"><%= t('footer.cookie_policy') %></a></li>
                     </ul>
                 </div>
             </div>

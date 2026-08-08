@@ -17,7 +17,7 @@
              loading="lazy"
              onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800';">
         <div class="image-overlay position-absolute bottom-0 start-0 w-100 p-2 bg-gradient-to-t from-black-60 d-flex justify-content-between align-items-end z-1">
-            <span class="badge bg-primary text-white rounded-pill px-2 py-1 fw-medium shadow-sm"><%= listing.category_name || listing.categoryName || 'İlan' %></span>
+            <span class="badge bg-primary text-white rounded-pill px-2 py-1 fw-medium shadow-sm"><%= listing['category_name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || listing.category_name || listing.categoryName || t('home.ad_unit') %></span>
             <span class="text-white small fw-medium text-shadow"><i class="fa-solid fa-camera me-1"></i> <%= listing.imageCount || 1 %></span>
         </div>
     </a>
@@ -39,7 +39,7 @@
                 <span class="text-truncate"><%= listing.location_city || listing.city || 'Kıbrıs' %><%= (listing.location_district || listing.district) ? ', ' + (listing.location_district || listing.district) : '' %></span>
             </div>
             <div class="date whitespace-nowrap">
-                <i class="fa-regular fa-clock me-1"></i> <%= listing.dateFormatted || 'Bugün' %>
+                <i class="fa-regular fa-clock me-1"></i> <%= listing.dateFormatted || t('common.today') %>
             </div>
         </div>
     </div>

@@ -3,17 +3,17 @@
         <div class="container py-2">
             <div class="d-flex align-items-center gap-2 gap-md-3">
                 <a href="/" class="d-flex align-items-center flex-shrink-0">
-                    <img src="/img/logo.png" alt="CypIlan - Kıbrıs'ın İlan Sitesi" style="height: 44px; width: auto; object-fit: contain; mix-blend-mode: multiply;">
+                    <img src="/img/logo.png" alt="CypIlan" style="height: 44px; width: auto; object-fit: contain; mix-blend-mode: multiply;">
                 </a>
 
                 <form action="/listings" method="GET" class="flex-grow-1 d-none d-sm-block" style="max-width: 640px;">
                     <div class="input-group">
-                        <input type="text" name="q" class="form-control" placeholder="Kelime, ilan no veya mağaza adı ile ara">
+                        <input type="text" name="q" class="form-control" placeholder="<%= t('home.search_placeholder') %>">
                         <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                 </form>
 
-                <a href="/listings" class="text-decoration-none small fw-medium text-muted d-none d-lg-inline flex-shrink-0">Detaylı Arama</a>
+                <a href="/listings" class="text-decoration-none small fw-medium text-muted d-none d-lg-inline flex-shrink-0"><%= t('common.detailed_search') %></a>
 
                 <div class="ms-auto d-flex align-items-center gap-2 gap-md-3 flex-shrink-0">
                     <div class="dropdown">
@@ -45,26 +45,26 @@
                                 <i class="fa-regular fa-user me-2"></i><%= user.name %>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end mt-2">
-                                <li><a class="dropdown-item py-2" href="/profile"><i class="fa-solid fa-id-card me-3 text-primary"></i><%= typeof t !== 'undefined' ? t('my_profile') : 'Profilim' %></a></li>
-                                <li><a class="dropdown-item py-2" href="/listings/my-listings"><i class="fa-solid fa-list me-3 text-primary"></i><%= typeof t !== 'undefined' ? t('my_listings') : 'İlanlarım' %></a></li>
-                                <li><a class="dropdown-item py-2" href="/favorites"><i class="fa-solid fa-heart me-3 text-accent"></i><%= typeof t !== 'undefined' ? t('favorites') : 'Favorilerim' %></a></li>
+                                <li><a class="dropdown-item py-2" href="/profile"><i class="fa-solid fa-id-card me-3 text-primary"></i><%= t('nav.my_profile') %></a></li>
+                                <li><a class="dropdown-item py-2" href="/listings/my-listings"><i class="fa-solid fa-list me-3 text-primary"></i><%= t('nav.my_listings') %></a></li>
+                                <li><a class="dropdown-item py-2" href="/favorites"><i class="fa-solid fa-heart me-3 text-accent"></i><%= t('nav.my_favorites') %></a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 text-danger" href="/auth/logout"><i class="fa-solid fa-right-from-bracket me-3"></i><%= typeof t !== 'undefined' ? t('logout') : 'Çıkış Yap' %></a></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="/auth/logout"><i class="fa-solid fa-right-from-bracket me-3"></i><%= t('nav.logout') %></a></li>
                             </ul>
                         </div>
                     <% } else { %>
-                        <a href="/auth/login" class="btn btn-outline-primary d-none d-sm-inline-block"><%= typeof t !== 'undefined' ? t('login') : 'Giriş Yap' %></a>
+                        <a href="/auth/login" class="btn btn-outline-primary d-none d-sm-inline-block"><%= t('nav.login') %></a>
                     <% } %>
 
                     <a href="/listings/create" class="btn btn-accent fw-bold text-white">
-                        <i class="fa-solid fa-plus me-1"></i><span class="d-none d-md-inline"><%= typeof t !== 'undefined' ? t('post_ad') : 'İlan Ver' %></span>
+                        <i class="fa-solid fa-plus me-1"></i><span class="d-none d-md-inline"><%= t('nav.post_ad') %></span>
                     </a>
                 </div>
             </div>
 
             <form action="/listings" method="GET" class="d-sm-none mt-2">
                 <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="Kelime, ilan no veya mağaza adı ile ara">
+                    <input type="text" name="q" class="form-control" placeholder="<%= t('home.search_placeholder') %>">
                     <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
             </form>
@@ -78,12 +78,12 @@
             </button>
             <div class="collapse navbar-collapse" id="categoryNav">
                 <ul class="navbar-nav fw-medium small">
-                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/"><%= typeof t !== 'undefined' ? t('home') : 'Anasayfa' %></a></li>
-                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=emlak"><%= typeof t !== 'undefined' ? t('real_estate') : 'Emlak' %></a></li>
-                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=vasita"><%= typeof t !== 'undefined' ? t('vehicles') : 'Vasıta' %></a></li>
-                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=is-ilanlari"><%= typeof t !== 'undefined' ? t('jobs') : 'İş İlanları' %></a></li>
-                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=ustalar"><%= typeof t !== 'undefined' ? t('services') : 'Ustalar' %></a></li>
-                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=ikinci-el"><%= typeof t !== 'undefined' ? t('second_hand') : 'İkinci El' %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/"><%= t('nav.home') %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=emlak"><%= t('categories.real_estate') %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=vasita"><%= t('categories.vehicles') %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=is-ilanlari"><%= t('categories.jobs') %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=ustalar"><%= t('categories.services') %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=ikinci-el"><%= t('categories.second_hand') %></a></li>
                 </ul>
             </div>
         </div>
