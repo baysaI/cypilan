@@ -1,42 +1,26 @@
-<header class="site-header sticky-top bg-white shadow-sm glassmorphism">
-    <nav class="navbar navbar-expand-lg navbar-light py-3">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center py-0" href="/">
-                <img src="/img/logo.png" alt="CypIlan - Kıbrıs'ın İlan Sitesi" style="height: 65px; width: auto; object-fit: contain; mix-blend-mode: multiply;">
-            </a>
+<header class="site-header sticky-top bg-white shadow-sm">
+    <div class="border-bottom">
+        <div class="container py-2">
+            <div class="d-flex align-items-center gap-2 gap-md-3">
+                <a href="/" class="d-flex align-items-center flex-shrink-0">
+                    <img src="/img/logo.png" alt="CypIlan - Kıbrıs'ın İlan Sitesi" style="height: 44px; width: auto; object-fit: contain; mix-blend-mode: multiply;">
+                </a>
 
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <form action="/listings" method="GET" class="flex-grow-1 d-none d-sm-block" style="max-width: 640px;">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Kelime, ilan no veya mağaza adı ile ara">
+                        <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </form>
 
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium">
-                    <li class="nav-item">
-                        <a class="nav-link px-3 hover-lift" href="/"><%= typeof t !== 'undefined' ? t('home') : 'Anasayfa' %></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 hover-lift" href="/listings?category=emlak"><%= typeof t !== 'undefined' ? t('real_estate') : 'Emlak' %></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 hover-lift" href="/listings?category=vasita"><%= typeof t !== 'undefined' ? t('vehicles') : 'Vasıta' %></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 hover-lift" href="/listings?category=is-ilanlari"><%= typeof t !== 'undefined' ? t('jobs') : 'İş İlanları' %></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 hover-lift" href="/listings?category=ustalar"><%= typeof t !== 'undefined' ? t('services') : 'Ustalar' %></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 hover-lift" href="/listings?category=ikinci-el"><%= typeof t !== 'undefined' ? t('second_hand') : 'İkinci El' %></a>
-                    </li>
-                </ul>
+                <a href="/listings" class="text-decoration-none small fw-medium text-muted d-none d-lg-inline flex-shrink-0">Detaylı Arama</a>
 
-                <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0 flex-wrap">
+                <div class="ms-auto d-flex align-items-center gap-2 gap-md-3 flex-shrink-0">
                     <div class="dropdown">
-                        <button class="btn btn-light dropdown-toggle border-0 shadow-sm rounded-pill" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-light border-0" type="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-globe text-primary"></i>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item lang-switch" href="#" data-lang="tr">🇹🇷 Türkçe</a></li>
                             <li><a class="dropdown-item lang-switch" href="#" data-lang="en">🇬🇧 English</a></li>
                             <li><a class="dropdown-item lang-switch" href="#" data-lang="el">🇬🇷 Ελληνικά</a></li>
@@ -45,11 +29,11 @@
                         </ul>
                     </div>
 
-                    <div class="dropdown">
-                        <button class="btn btn-light dropdown-toggle border-0 shadow-sm rounded-pill fw-bold" type="button" data-bs-toggle="dropdown">
+                    <div class="dropdown d-none d-md-block">
+                        <button class="btn btn-light border-0 fw-bold" type="button" data-bs-toggle="dropdown">
                             <%= (typeof req !== 'undefined' && req.cookies && req.cookies.currency === 'GBP') ? '£' : '₺' %>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item currency-switch" href="#" data-currency="TRY">₺ TRY</a></li>
                             <li><a class="dropdown-item currency-switch" href="#" data-currency="GBP">£ GBP</a></li>
                         </ul>
@@ -57,10 +41,10 @@
 
                     <% if (typeof user !== 'undefined' && user) { %>
                         <div class="dropdown">
-                            <button class="btn btn-outline-primary rounded-pill px-4 dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="fa-regular fa-user me-2"></i><%= user.name %>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 mt-2">
+                            <ul class="dropdown-menu dropdown-menu-end mt-2">
                                 <li><a class="dropdown-item py-2" href="/profile"><i class="fa-solid fa-id-card me-3 text-primary"></i><%= typeof t !== 'undefined' ? t('my_profile') : 'Profilim' %></a></li>
                                 <li><a class="dropdown-item py-2" href="/listings/my-listings"><i class="fa-solid fa-list me-3 text-primary"></i><%= typeof t !== 'undefined' ? t('my_listings') : 'İlanlarım' %></a></li>
                                 <li><a class="dropdown-item py-2" href="/favorites"><i class="fa-solid fa-heart me-3 text-accent"></i><%= typeof t !== 'undefined' ? t('favorites') : 'Favorilerim' %></a></li>
@@ -69,15 +53,38 @@
                             </ul>
                         </div>
                     <% } else { %>
-                        <div class="d-flex gap-2">
-                            <a href="/auth/login" class="btn btn-outline-primary rounded-pill px-4 fw-bold shadow-sm hover-lift"><%= typeof t !== 'undefined' ? t('login') : 'Giriş Yap' %></a>
-                        </div>
+                        <a href="/auth/login" class="btn btn-outline-primary d-none d-sm-inline-block"><%= typeof t !== 'undefined' ? t('login') : 'Giriş Yap' %></a>
                     <% } %>
 
-                    <a href="/listings/create" class="btn btn-accent rounded-pill px-4 fw-bold text-white shadow-sm pulse-button hover-lift">
-                        <i class="fa-solid fa-plus me-2"></i><%= typeof t !== 'undefined' ? t('post_ad') : 'İlan Ver' %>
+                    <a href="/listings/create" class="btn btn-accent fw-bold text-white">
+                        <i class="fa-solid fa-plus me-1"></i><span class="d-none d-md-inline"><%= typeof t !== 'undefined' ? t('post_ad') : 'İlan Ver' %></span>
                     </a>
                 </div>
+            </div>
+
+            <form action="/listings" method="GET" class="d-sm-none mt-2">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Kelime, ilan no veya mağaza adı ile ara">
+                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light py-0">
+        <div class="container">
+            <button class="navbar-toggler border-0 shadow-none my-2" type="button" data-bs-toggle="collapse" data-bs-target="#categoryNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="categoryNav">
+                <ul class="navbar-nav fw-medium small">
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/"><%= typeof t !== 'undefined' ? t('home') : 'Anasayfa' %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=emlak"><%= typeof t !== 'undefined' ? t('real_estate') : 'Emlak' %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=vasita"><%= typeof t !== 'undefined' ? t('vehicles') : 'Vasıta' %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=is-ilanlari"><%= typeof t !== 'undefined' ? t('jobs') : 'İş İlanları' %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=ustalar"><%= typeof t !== 'undefined' ? t('services') : 'Ustalar' %></a></li>
+                    <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=ikinci-el"><%= typeof t !== 'undefined' ? t('second_hand') : 'İkinci El' %></a></li>
+                </ul>
             </div>
         </div>
     </nav>
