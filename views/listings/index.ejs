@@ -39,6 +39,16 @@
                     
                     <form action="/listings" method="GET">
                         <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('common.search') %></label>
+                            <div class="input-group">
+                                <input type="text" name="q" class="form-control bg-light border-0 shadow-none" placeholder="<%= t('home.search_placeholder') %>" value="<%= filters.q || '' %>">
+                                <% if (filters.q) { %>
+                                    <a href="/listings" class="btn btn-light border-0 text-muted" title="Temizle"><i class="fa-solid fa-xmark"></i></a>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.category') %></label>
                             <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
                                 <% categories.forEach(function(cat) { %>

@@ -11,6 +11,7 @@ const index = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 20;
         const filters = {
+            q: req.query.q ? req.query.q.trim() : undefined,
             category: req.query.category,
             city: req.query.city,
             minPrice: req.query.minPrice,
