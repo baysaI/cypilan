@@ -6,6 +6,7 @@ const reasonLabels = {
   spam: 'Spam',
   fraud: 'Dolandırıcılık',
   inappropriate: 'Uygunsuz içerik',
+  harassment: 'Taciz veya hakaret',
   other: 'Diğer'
 };
 const statusLabels = {
@@ -64,17 +65,44 @@ const list = (typeof reports !== 'undefined' && reports) ? reports : [];
                         </div>
 
                         <p class="small text-muted mb-2">
-                            İlan:
-                            <% if (r.listing_slug) { %>
-                                <a href="/listings/<%= r.listing_slug %>" target="_blank" rel="noopener"><%= r.listing_title %></a>
+                            <% if (r.listing_id) { %>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 me-1">İlan</span>
+                                <% if (r.listing_slug) { %>
+                                    <a href="/listings/<%= r.listing_slug %>" target="_blank" rel="noopener"><%= r.listing_title %></a>
+                                <% } else { %>
+                                    <em>silinmiş</em>
+                                <% } %>
                             <% } else { %>
-                                <em>silinmiş</em>
+                                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 me-1">Kullanıcı</span>
+                            <% } %>
+                            <% if (r.reported_user_id) { %>
+                                &middot; Şikayet edilen:
+                                <a href="/profile/<%= r.reported_user_id %>" target="_blank" rel="noopener"><%= r.reported_user_name || 'bilinmiyor' %></a>
+                                <% if (Number(r.reported_user_active) === 0) { %>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2">askıda</span>
+                                <% } %>
                             <% } %>
                             &middot; Bildiren: <%= r.reporter_name || 'bilinmiyor' %>
                         </p>
 
+                        <% if (r.message_content) { %>
+                            <div class="border-start border-3 ps-3 mb-3 small text-muted fst-italic">
+                                Son mesaj: <%= r.message_content %>
+                            </div>
+                        <% } %>
+
                         <% if (r.description) { %>
                             <p class="mb-3"><%= r.description %></p>
+                        <% } %>
+
+                        <% if (r.reported_user_id && Number(r.reported_user_active) !== 0) { %>
+                            <form action="/admin/users/<%= r.reported_user_id %>/status" method="POST" class="d-inline mb-3">
+                                <input type="hidden" name="_method" value="PUT">
+                                <input type="hidden" name="status" value="suspended">
+                                <button class="btn btn-sm btn-outline-danger mb-3">
+                                    <i class="fa-solid fa-ban me-1"></i>Kullanıcıyı askıya al
+                                </button>
+                            </form>
                         <% } %>
 
                         <% if (r.admin_note) { %>

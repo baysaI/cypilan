@@ -182,11 +182,36 @@
                         </a>
                     </div>
                 </div>
+
+                <% if (!currentUser || currentUser.id !== listing.user_id) { %>
+                    <div class="card-footer bg-white border-top text-center py-2">
+                        <% if (currentUser) { %>
+                            <button type="button" class="btn btn-link btn-sm text-muted text-decoration-none"
+                                    data-bs-toggle="modal" data-bs-target="#reportListingModal">
+                                <i class="fa-regular fa-flag me-1"></i> Bu ilanı şikayet et
+                            </button>
+                        <% } else { %>
+                            <a href="/auth/login" class="btn btn-link btn-sm text-muted text-decoration-none">
+                                <i class="fa-regular fa-flag me-1"></i> Bu ilanı şikayet et
+                            </a>
+                        <% } %>
+                    </div>
+                <% } %>
             </div>
         </div>
 
     </div>
 </div>
+
+<% if (currentUser && currentUser.id !== listing.user_id) { %>
+    <%- include('../partials/reportModal', {
+        modalId: 'reportListingModal',
+        action: `/report/listings/${listing.id}`,
+        modalTitle: 'İlanı Şikayet Et',
+        modalIntro: 'Bu ilanla ilgili sorunu bize bildirin. Şikayetiniz yöneticiler tarafından incelenecek.',
+        reasons: ['wrong_category', 'misleading_price', 'missing_photos', 'spam', 'fraud', 'inappropriate', 'other']
+    }) %>
+<% } %>
 
 <script type="application/ld+json">
 <%- JSON.stringify({

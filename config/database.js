@@ -56,12 +56,52 @@ const applyColumnMigrations = (db) => {
   });
 };
 
+const TABLE_REBUILDS = [
+  {
+    table: 'reports',
+    whenMissingColumn: 'reported_user_id',
+    create: `
+      CREATE TABLE reports_migrated (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        reporter_id INTEGER NOT NULL REFERENCES users(id),
+        listing_id INTEGER REFERENCES listings(id),
+        reported_user_id INTEGER REFERENCES users(id),
+        message_id INTEGER REFERENCES messages(id),
+        reason TEXT NOT NULL CHECK(reason IN ('wrong_category', 'misleading_price', 'missing_photos', 'spam', 'fraud', 'inappropriate', 'harassment', 'other')),
+        description TEXT,
+        status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'reviewed', 'resolved', 'dismissed')),
+        admin_note TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `,
+    copy: `
+      INSERT INTO reports_migrated (id, reporter_id, listing_id, reason, description, status, admin_note, created_at)
+      SELECT id, reporter_id, listing_id, reason, description, status, admin_note, created_at FROM reports
+    `
+  }
+];
+
+const applyTableRebuilds = (db) => {
+  TABLE_REBUILDS.forEach(({ table, whenMissingColumn, create, copy }) => {
+    const info = db.exec(`PRAGMA table_info(${table})`);
+    const existing = info[0] ? info[0].values.map(row => row[1]) : [];
+    if (existing.length === 0 || existing.includes(whenMissingColumn)) return;
+
+    db.run(create);
+    db.run(copy);
+    db.run(`DROP TABLE ${table}`);
+    db.run(`ALTER TABLE ${table}_migrated RENAME TO ${table}`);
+    console.log(`Migration applied: ${table} table rebuilt`);
+  });
+};
+
 const initialize = async () => {
   try {
     const db = await getDb();
     const schema = fs.readFileSync(schemaPath, 'utf8');
     db.run(schema);
     applyColumnMigrations(db);
+    applyTableRebuilds(db);
     saveDb();
     console.log('Database schema initialized successfully.');
   } catch (error) {
@@ -88,5 +128,6 @@ module.exports = {
   saveDb,
   initialize,
   applyColumnMigrations,
+  applyTableRebuilds,
   seed
 };

@@ -13,6 +13,10 @@
                         <%= otherUser.full_name %>
                     </a>
                 </div>
+                <button type="button" class="btn btn-light border btn-sm text-muted"
+                        data-bs-toggle="modal" data-bs-target="#reportUserModal" title="Kullanıcıyı şikayet et">
+                    <i class="fa-regular fa-flag"></i>
+                </button>
             </div>
 
             <% if (listing) { %>
@@ -70,6 +74,15 @@
         </div>
     </div>
 </div>
+
+<%- include('../partials/reportModal', {
+    modalId: 'reportUserModal',
+    action: `/report/users/${otherUser.id}`,
+    modalTitle: 'Kullanıcıyı Şikayet Et',
+    modalIntro: `${otherUser.full_name} ile ilgili sorunu bize bildirin. Mesajlaşmanız yöneticiler tarafından incelenebilir.`,
+    reasons: ['harassment', 'spam', 'fraud', 'inappropriate', 'other'],
+    messageId: messages.length > 0 ? messages[messages.length - 1].id : null
+}) %>
 
 <style>
     .min-width-0 { min-width: 0; }

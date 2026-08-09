@@ -125,8 +125,10 @@ CREATE TABLE IF NOT EXISTS payments (
 CREATE TABLE IF NOT EXISTS reports (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   reporter_id INTEGER NOT NULL REFERENCES users(id),
-  listing_id INTEGER NOT NULL REFERENCES listings(id),
-  reason TEXT NOT NULL CHECK(reason IN ('wrong_category', 'misleading_price', 'missing_photos', 'spam', 'fraud', 'inappropriate', 'other')),
+  listing_id INTEGER REFERENCES listings(id),
+  reported_user_id INTEGER REFERENCES users(id),
+  message_id INTEGER REFERENCES messages(id),
+  reason TEXT NOT NULL CHECK(reason IN ('wrong_category', 'misleading_price', 'missing_photos', 'spam', 'fraud', 'inappropriate', 'harassment', 'other')),
   description TEXT,
   status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'reviewed', 'resolved', 'dismissed')),
   admin_note TEXT,

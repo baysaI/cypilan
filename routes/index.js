@@ -10,6 +10,7 @@ const apiRoutes = require('./api');
 const adminRoutes = require('./admin');
 const profileRoutes = require('./profile');
 const messagesRoutes = require('./messages');
+const reportsRoutes = require('./reports');
 
 router.get('/', homeController.index);
 
@@ -20,6 +21,7 @@ router.use('/listings', listingsRoutes);
 router.use('/api', apiRoutes);
 router.use('/admin', adminRoutes);
 router.use('/messages', messagesRoutes);
+router.use('/report', reportsRoutes);
 
 const profileController = require('../controllers/profileController');
 router.get('/profile', isAuthenticated, profileController.index);
