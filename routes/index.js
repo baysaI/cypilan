@@ -41,6 +41,7 @@ const pageController = require('../controllers/pageController');
 
 router.get('/sss', pageController.faq);
 router.get('/nasil-ilan-verilir', pageController.howToPost);
+router.get('/ilan-paketleri', pageController.pricing);
 router.get('/guvenlik', pageController.safety);
 router.get('/kurumsal', pageController.corporate);
 router.get('/reklam', pageController.advertise);

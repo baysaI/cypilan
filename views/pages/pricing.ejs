@@ -1,0 +1,124 @@
+<div class="container py-4 py-md-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="fa-solid fa-house"></i> <%= t('nav.home') %></a></li>
+            <li class="breadcrumb-item active fw-medium" aria-current="page">İlan Paketleri</li>
+        </ol>
+    </nav>
+
+    <div class="text-center mx-auto mb-5" style="max-width: 720px;">
+        <span class="badge bg-accent text-white rounded-pill px-3 py-2 mb-3">İLAN PAKETLERİ</span>
+        <h1 class="display-6 fw-bold mb-3">Standart, Plus &amp; Premium Paylaşım</h1>
+        <p class="text-muted lead fs-6">Görünürlüğünüzü artırın, alım satımı hızlandırın.</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <% packages.forEach(function(p) { %>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center <%= p.highlighted ? 'bg-accent text-white' : '' %>">
+                    <h3 class="fw-bold mb-3 <%= p.highlighted ? 'text-white' : '' %>"><%= p.name %></h3>
+                    <div class="mb-3">
+                        <% for (let i = 0; i < p.stars; i++) { %>
+                            <i class="fa-solid fa-star <%= p.highlighted ? 'text-dark' : 'text-warning' %>"></i>
+                        <% } %>
+                    </div>
+                    <p class="<%= p.highlighted ? 'text-white' : 'text-muted' %> small mb-0"><%= p.summary %></p>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body d-flex align-items-center gap-3 p-4">
+                    <div class="rounded-circle bg-accent text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold mb-1">Usta &amp; Hizmet İlanları</h6>
+                        <p class="text-muted small mb-0">Her zaman ücretsiz, komisyonsuz. Emeği desteklemek için hizmet ilanı oluşturmak tamamen bedava.</p>
+                    </div>
+                    <span class="badge bg-success rounded-pill px-3 py-2 flex-shrink-0">ÜCRETSİZ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body d-flex align-items-center gap-3 p-4">
+                    <div class="rounded-circle bg-accent text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold mb-1">İş Arayan CV &amp; Profili</h6>
+                        <p class="text-muted small mb-0">Her zaman ücretsiz, sınırsız başvuru. İş arayanlardan hiçbir ücret alınmaz.</p>
+                    </div>
+                    <span class="badge bg-success rounded-pill px-3 py-2 flex-shrink-0">ÜCRETSİZ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="fs-5 fw-bold mb-4">Kimden ne zaman ücret alınır?</h2>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>Kategori</th>
+                            <th>Ücretlendirme</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        <tr>
+                            <td class="fw-medium">Bireysel</td>
+                            <td>Emlak, Vasıta, İkinci El</td>
+                            <td>İlk <strong><%= freeQuota %> ilan ücretsiz</strong>, sonrasında paket veya ilan başına ücret</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-medium">İş arayan</td>
+                            <td>Profil, CV, iş ilanı</td>
+                            <td><span class="text-success fw-medium">Tamamen ücretsiz</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-medium">Usta / Hizmet sağlayıcı</td>
+                            <td>Usta &amp; Hizmetler</td>
+                            <td><span class="text-success fw-medium">Ücretsiz.</span> Yalnızca üst sıralarda veya ana sayfada öne çıkmak isterseniz ücretlidir</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-medium">Emlakçı / Galeri</td>
+                            <td>Emlak, Vasıta</td>
+                            <td>Kurumsal panel, aylık/yıllık paket, premium üyelik veya ilan başına ücret</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-medium">Firma (işveren)</td>
+                            <td>İş İlanları</td>
+                            <td>Aylık/yıllık abonelik veya ilan başına ücret</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="text-muted small mb-0 mt-3">
+                İlan fiyatları Türk Lirası (₺) ve İngiliz Sterlini (£) olarak girilebilir.
+            </p>
+        </div>
+    </div>
+
+    <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
+        <h3 class="fw-bold mb-2">Ücretli paketler çok yakında</h3>
+        <p class="text-white-50 mb-4">
+            Paket satın alma sistemi henüz açılmadı. Şu an ücretsiz ilan hakkınızla ilan verebilir,
+            Usta &amp; Hizmet ile İş İlanları kategorilerini sınırsız kullanabilirsiniz.
+        </p>
+        <div>
+            <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold text-white shadow">
+                <i class="fa-solid fa-plus me-2"></i>Ücretsiz İlan Ver
+            </a>
+        </div>
+    </div>
+</div>

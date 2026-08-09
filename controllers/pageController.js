@@ -1,3 +1,5 @@
+const listingPolicy = require('../config/listingPolicy');
+
 const faq = (req, res) => {
     res.locals.meta = res.locals.meta || {};
     res.locals.meta.title = `${res.locals.t('footer.faq')} | CYPILAN.COM`;
@@ -46,9 +48,20 @@ const cookiePolicy = (req, res) => {
     res.render('pages/cookie-policy', { title: res.locals.t('footer.cookie_policy') });
 };
 
+const pricing = (req, res) => {
+    res.locals.meta = res.locals.meta || {};
+    res.locals.meta.title = 'İlan Paketleri | CYPILAN.COM';
+    res.render('pages/pricing', {
+        packages: listingPolicy.PACKAGES,
+        freeQuota: listingPolicy.FREE_LISTING_QUOTA,
+        title: 'İlan Paketleri'
+    });
+};
+
 module.exports = {
     faq,
     howToPost,
+    pricing,
     safety,
     corporate,
     advertise,

@@ -32,6 +32,27 @@ class Category {
     return row;
   }
 
+  static async getRootSlug(categoryId) {
+    const db = await getDb();
+    let currentId = categoryId;
+
+    for (let depth = 0; depth < 10; depth++) {
+      const stmt = db.prepare('SELECT id, slug, parent_id FROM categories WHERE id = ?');
+      stmt.bind([currentId]);
+      let row = null;
+      if (stmt.step()) {
+        row = stmt.getAsObject();
+      }
+      stmt.free();
+
+      if (!row) return null;
+      if (row.parent_id == null) return row.slug;
+      currentId = row.parent_id;
+    }
+
+    return null;
+  }
+
   static async getCategoryAndSubcategoryIds(categoryIdentifier) {
     if (!categoryIdentifier) return [];
     const cat = await this.getBySlug(categoryIdentifier);

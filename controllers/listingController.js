@@ -3,6 +3,7 @@ const Category = require('../models/Category');
 const User = require('../models/User');
 const { generateSlug, maskPhone } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
+const listingPolicy = require('../config/listingPolicy');
 
 const ALLOWED_CURRENCIES = ['TRY', 'GBP'];
 
@@ -104,10 +105,23 @@ const showCreate = async (req, res) => {
     res.locals.meta.title = 'İlan Ver | CYPILAN.COM';
     const categories = await Category.getAll();
     const user = await User.findById(req.session.userId);
+
+    const usedQuota = await Listing.countByUserInRootCategories(
+        req.session.userId,
+        listingPolicy.QUOTA_CATEGORIES
+    );
+
     res.render('listings/create', {
         categories,
         userPhone: (user && user.phone) || '',
         hidePhone: user ? Number(user.show_phone) === 0 : false,
+        quota: {
+            limit: listingPolicy.FREE_LISTING_QUOTA,
+            used: usedQuota,
+            remaining: Math.max(0, listingPolicy.FREE_LISTING_QUOTA - usedQuota),
+            categories: listingPolicy.QUOTA_CATEGORIES,
+            freeCategories: listingPolicy.ALWAYS_FREE_CATEGORIES
+        },
         title: 'Ücretsiz İlan Ver'
     });
 };
@@ -126,13 +140,51 @@ const create = async (req, res) => {
             return res.redirect('/listings/create');
         }
 
+        const rootSlug = await Category.getRootSlug(parseInt(category_id, 10));
+
+        if (!rootSlug) {
+            req.flash('error', 'Geçerli bir kategori seçin.');
+            return res.redirect('/listings/create');
+        }
+
+        const images = (req.processedImages || []).map(f => f.path);
+        const parsedPrice = parseFloat(price);
+
+        if (listingPolicy.requiresPhotos(rootSlug) && images.length === 0) {
+            req.flash('error', 'Bu kategoride ilan verebilmek için en az 1 fotoğraf yüklemelisiniz.');
+            return res.redirect('/listings/create');
+        }
+
+        if (!description || description.trim().length < 20) {
+            req.flash('error', 'İlan açıklaması en az 20 karakter olmalıdır.');
+            return res.redirect('/listings/create');
+        }
+
+        if (listingPolicy.requiresPrice(rootSlug) && (!Number.isFinite(parsedPrice) || parsedPrice <= 0)) {
+            req.flash('error', 'Bu kategoride geçerli bir fiyat girmelisiniz.');
+            return res.redirect('/listings/create');
+        }
+
+        const usedQuota = await Listing.countByUserInRootCategories(
+            req.session.userId,
+            listingPolicy.QUOTA_CATEGORIES
+        );
+
+        const decision = listingPolicy.evaluate({
+            role: req.session.userRole,
+            rootSlug,
+            usedCount: usedQuota
+        });
+
+        if (!decision.allowed) {
+            req.flash('error', `Emlak, Vasıta ve İkinci El kategorilerinde ilk ${listingPolicy.FREE_LISTING_QUOTA} ilan ücretsizdir. Ücretsiz hakkınızı doldurdunuz; yeni ilan için ilan paketleri gerekiyor.`);
+            return res.redirect('/ilan-paketleri');
+        }
+
         await User.update(req.session.userId, {
             phone: phone.trim(),
             show_phone: req.body.hide_phone ? 0 : 1
         });
-
-        const images = (req.processedImages || []).map(f => f.path);
-        const parsedPrice = parseFloat(price);
 
         const listing = await Listing.create({
             user_id: req.session.userId,

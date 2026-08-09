@@ -9,6 +9,34 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-9 col-xl-8">
             
+            <% if (typeof quota !== 'undefined') { %>
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="fa-solid fa-circle-info fs-4 text-primary mt-1"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1">İlan Hakkınız</h6>
+                                <p class="text-muted small mb-2">
+                                    <strong>Emlak, Vasıta ve İkinci El</strong> kategorilerinde ilk
+                                    <strong><%= quota.limit %> ilan ücretsizdir.</strong>
+                                    <% if (quota.remaining > 0) { %>
+                                        Kalan ücretsiz hakkınız:
+                                        <span class="badge bg-success rounded-pill"><%= quota.remaining %></span>
+                                    <% } else { %>
+                                        <span class="text-danger fw-medium">Ücretsiz hakkınızı doldurdunuz.</span>
+                                        <a href="/ilan-paketleri">İlan paketlerine göz atın.</a>
+                                    <% } %>
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    <i class="fa-solid fa-check text-success me-1"></i>
+                                    <strong>Usta &amp; Hizmet</strong> ve <strong>İş İlanları</strong> kategorileri her zaman ücretsiz, sınırsız.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
             <form action="/listings" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate id="createListingForm">
 
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">

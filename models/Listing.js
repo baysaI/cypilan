@@ -400,6 +400,29 @@ class Listing {
     return this.update(id, { status });
   }
 
+  static async countByUserInRootCategories(userId, rootSlugs) {
+    if (!Array.isArray(rootSlugs) || rootSlugs.length === 0) return 0;
+
+    const db = await getDb();
+    const placeholders = rootSlugs.map(() => '?').join(', ');
+    const stmt = db.prepare(`
+      SELECT COUNT(*) as count
+      FROM listings l
+      JOIN categories c ON l.category_id = c.id
+      LEFT JOIN categories p ON c.parent_id = p.id
+      WHERE l.user_id = ?
+        AND l.status != 'rejected'
+        AND COALESCE(p.slug, c.slug) IN (${placeholders})
+    `);
+    stmt.bind([userId, ...rootSlugs]);
+    let count = 0;
+    if (stmt.step()) {
+      count = stmt.getAsObject().count;
+    }
+    stmt.free();
+    return count;
+  }
+
   static async countByStatus() {
     const db = await getDb();
     const stmt = db.prepare('SELECT status, COUNT(*) as count FROM listings GROUP BY status');
