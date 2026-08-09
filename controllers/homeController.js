@@ -12,6 +12,11 @@ const index = async (req, res) => {
         const totalUsers = await User.countAll();
         const stats = { totalListings, totalUsers, totalCities: 5 };
 
+        let userFavoriteIds = [];
+        if (req.session && req.session.userId) {
+            userFavoriteIds = await Listing.getUserFavoriteIds(req.session.userId);
+        }
+
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = 'CYPILAN.COM - Kıbrıs\'ın İlan Sitesi';
 
@@ -20,6 +25,7 @@ const index = async (req, res) => {
             recentListings,
             categories,
             stats,
+            userFavoriteIds,
             title: 'Anasayfa'
         });
     } catch (error) {

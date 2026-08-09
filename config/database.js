@@ -40,11 +40,27 @@ const saveDb = () => {
   }
 };
 
+const COLUMN_MIGRATIONS = [
+  { table: 'users', column: 'show_phone', ddl: 'ALTER TABLE users ADD COLUMN show_phone INTEGER DEFAULT 1' }
+];
+
+const applyColumnMigrations = (db) => {
+  COLUMN_MIGRATIONS.forEach(({ table, column, ddl }) => {
+    const info = db.exec(`PRAGMA table_info(${table})`);
+    const existing = info[0] ? info[0].values.map(row => row[1]) : [];
+    if (existing.length > 0 && !existing.includes(column)) {
+      db.run(ddl);
+      console.log(`Migration applied: ${table}.${column}`);
+    }
+  });
+};
+
 const initialize = async () => {
   try {
     const db = await getDb();
     const schema = fs.readFileSync(schemaPath, 'utf8');
     db.run(schema);
+    applyColumnMigrations(db);
     saveDb();
     console.log('Database schema initialized successfully.');
   } catch (error) {

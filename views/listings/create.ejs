@@ -93,6 +93,17 @@
                                 <label class="form-label fw-bold small text-muted">İletişim Telefonu <span class="text-danger">*</span></label>
                                 <input type="tel" name="phone" class="form-control bg-light border-0 shadow-none focus-ring-primary" placeholder="0533 123 4567" value="<%= typeof userPhone !== 'undefined' ? userPhone : '' %>" required>
                                 <div class="form-text small">Alıcılar size bu numaradan ulaşacak. Numara profilinize kaydedilir.</div>
+
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input cursor-pointer" type="checkbox" name="hide_phone" value="1" id="hidePhone"
+                                           <%= (typeof hidePhone !== 'undefined' && hidePhone) ? 'checked' : '' %>>
+                                    <label class="form-check-label cursor-pointer" for="hidePhone">
+                                        Telefonumu ilanlarımda gösterme, sadece mesajla iletişim kurulsun
+                                    </label>
+                                    <div class="form-text small">
+                                        Numaranız kayıtlı kalır ama alıcılara gösterilmez. Bu ayar tüm ilanlarınız için geçerlidir.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

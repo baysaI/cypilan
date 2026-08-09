@@ -89,6 +89,7 @@ class Listing {
     const stmt = db.prepare(`
       SELECT l.*, c.name_tr as category_name, c.name_en as category_name_en, c.name_el as category_name_el, c.name_ru as category_name_ru, c.name_fa as category_name_fa, c.slug as category_slug,
              u.full_name as seller_name, u.phone as seller_phone,
+             COALESCE(u.show_phone, 1) as seller_show_phone,
              u.avatar_url as seller_avatar, u.role as seller_role,
              u.company_name as seller_company, u.created_at as seller_since
       FROM listings l
@@ -435,6 +436,43 @@ class Listing {
       saveDb();
       return { favorited: true };
     }
+  }
+
+  static async findFavoritesByUser(userId, limit = 50, offset = 0) {
+    if (!userId) return [];
+    const db = await getDb();
+    const stmt = db.prepare(`
+      SELECT l.*, c.name_tr as category_name, c.name_en as category_name_en, c.name_el as category_name_el, c.name_ru as category_name_ru, c.name_fa as category_name_fa,
+             (SELECT image_url FROM listing_images
+                WHERE listing_id = l.id
+                ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image,
+             f.created_at as favorited_at
+      FROM favorites f
+      JOIN listings l ON f.listing_id = l.id
+      LEFT JOIN categories c ON l.category_id = c.id
+      WHERE f.user_id = ? AND l.status = 'active'
+      ORDER BY f.created_at DESC LIMIT ? OFFSET ?
+    `);
+    stmt.bind([userId, limit, offset]);
+    const results = [];
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+    return results;
+  }
+
+  static async getUserFavoriteIds(userId) {
+    if (!userId) return [];
+    const db = await getDb();
+    const stmt = db.prepare('SELECT listing_id FROM favorites WHERE user_id = ?');
+    stmt.bind([userId]);
+    const ids = [];
+    while (stmt.step()) {
+      ids.push(stmt.getAsObject().listing_id);
+    }
+    stmt.free();
+    return ids;
   }
   static async countAll() {
     const db = await getDb();

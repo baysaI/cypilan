@@ -6,8 +6,9 @@
         </div>
     <% } %>
 
+    <% const favActive = (typeof isFavorited !== 'undefined' && isFavorited) || (typeof userFavoriteIds !== 'undefined' && Array.isArray(userFavoriteIds) && userFavoriteIds.includes(listing.id)); %>
     <button class="btn btn-light btn-sm favorite-btn position-absolute top-0 end-0 m-2 z-2 rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0 bg-white hover-bg-light" style="width: 32px; height: 32px;" data-id="<%= listing.id %>">
-        <i class="fa-regular fa-heart text-muted fs-6"></i>
+        <i class="<%= favActive ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart text-muted' %> fs-6"></i>
     </button>
 
     <a href="/listings/<%= listing.slug || listing.id %>" class="text-decoration-none d-block position-relative overflow-hidden bg-light" style="padding-top: 66%;">

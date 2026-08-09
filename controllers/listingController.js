@@ -33,16 +33,22 @@ const index = async (req, res) => {
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = currentCategoryName ? `${currentCategoryName} İlanları | CYPILAN.COM` : 'Tüm İlanlar | CYPILAN.COM';
         
+        let userFavoriteIds = [];
+        if (req.session && req.session.userId) {
+            userFavoriteIds = await Listing.getUserFavoriteIds(req.session.userId);
+        }
+
         res.render('listings/index', {
             listings: result.data,
             pagination: {
-                page,
+                currentPage: page,
                 totalPages: result.pages,
                 totalItems: result.total
             },
             categories,
             filters,
             currentCategoryName,
+            userFavoriteIds,
             title: currentCategoryName ? `${currentCategoryName} İlanları` : 'İlanlar'
         });
     } catch (error) {
@@ -62,8 +68,9 @@ const show = async (req, res) => {
             return res.redirect('/listings');
         }
 
-        listing.has_phone = Boolean(listing.seller_phone);
-        listing.seller_phone_masked = maskPhone(listing.seller_phone);
+        listing.phone_hidden = Number(listing.seller_show_phone) === 0;
+        listing.has_phone = Boolean(listing.seller_phone) && !listing.phone_hidden;
+        listing.seller_phone_masked = listing.has_phone ? maskPhone(listing.seller_phone) : '';
         delete listing.seller_phone;
 
         Listing.incrementViews(listing.id).catch(console.error);
@@ -74,8 +81,15 @@ const show = async (req, res) => {
             res.locals.meta.ogImage = listing.images[0];
         }
 
+        let isFavorited = false;
+        if (req.session && req.session.userId) {
+            const userFavs = await Listing.getUserFavoriteIds(req.session.userId);
+            isFavorited = userFavs.includes(listing.id);
+        }
+
         res.render('listings/show', {
             listing,
+            isFavorited,
             title: listing.title
         });
     } catch (error) {
@@ -92,6 +106,7 @@ const showCreate = async (req, res) => {
     res.render('listings/create', {
         categories,
         userPhone: (user && user.phone) || '',
+        hidePhone: user ? Number(user.show_phone) === 0 : false,
         title: 'Ücretsiz İlan Ver'
     });
 };
@@ -110,7 +125,10 @@ const create = async (req, res) => {
             return res.redirect('/listings/create');
         }
 
-        await User.update(req.session.userId, { phone: phone.trim() });
+        await User.update(req.session.userId, {
+            phone: phone.trim(),
+            show_phone: req.body.hide_phone ? 0 : 1
+        });
 
         const images = (req.processedImages || []).map(f => f.path);
         const parsedPrice = parseFloat(price);
@@ -222,6 +240,12 @@ const revealPhone = async (req, res) => {
 
         if (!owner || !owner.phone) {
             return res.status(404).json({ error: 'Bu ilan için telefon numarası yok.' });
+        }
+
+        if (Number(owner.show_phone) === 0) {
+            return res.status(403).json({
+                error: 'Satıcı telefonunu gizlemiş. Mesaj göndererek iletişime geçebilirsiniz.'
+            });
         }
 
         res.json({

@@ -31,18 +31,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const favoriteBtns = document.querySelectorAll('.favorite-btn');
     favoriteBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const icon = btn.querySelector('i');
-            if(icon.classList.contains('fa-regular')) {
-                icon.classList.remove('fa-regular', 'text-muted');
-                icon.classList.add('fa-solid', 'text-danger');
-                showToast('İlan favorilere eklendi!', 'success');
-            } else {
-                icon.classList.remove('fa-solid', 'text-danger');
-                icon.classList.add('fa-regular', 'text-muted');
-                showToast('İlan favorilerden çıkarıldı.', 'info');
+            const listingId = btn.getAttribute('data-id');
+            if (!listingId) return;
+
+            try {
+                const res = await fetch(`/listings/${listingId}/favorite`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (res.status === 401) {
+                    showToast('Favorilere eklemek için lütfen giriş yapın.', 'danger');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login';
+                    }, 1200);
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    const icon = btn.querySelector('i');
+                    if (data.favorited) {
+                        if (icon) {
+                            icon.className = 'fa-solid fa-heart text-danger' + (icon.classList.contains('fs-6') ? ' fs-6' : '');
+                        }
+                        if (btn.classList.contains('btn-outline-primary')) {
+                            btn.classList.remove('btn-outline-primary');
+                            btn.classList.add('btn-danger', 'text-white');
+                        }
+                        showToast('İlan favorilere eklendi!', 'success');
+                    } else {
+                        if (icon) {
+                            icon.className = 'fa-regular fa-heart text-muted' + (icon.classList.contains('fs-6') ? ' fs-6' : '');
+                        }
+                        if (btn.classList.contains('btn-danger')) {
+                            btn.classList.remove('btn-danger', 'text-white');
+                            btn.classList.add('btn-outline-primary');
+                        }
+                        showToast('İlan favorilerden çıkarıldı.', 'info');
+                    }
+                } else {
+                    showToast(data.error || 'Bir hata oluştu.', 'danger');
+                }
+            } catch (err) {
+                console.error('Favorite fetch error:', err);
+                showToast('İşlem gerçekleşmedi. Lütfen bağlantınızı kontrol edin.', 'danger');
             }
         });
     });

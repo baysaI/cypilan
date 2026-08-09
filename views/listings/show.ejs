@@ -111,8 +111,9 @@
 
         <div class="col-12 col-lg-4">
             <div class="d-none d-lg-flex gap-2 mb-4">
-                <button class="btn btn-outline-primary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2 favorite-btn" data-id="<%= listing.id %>">
-                    <i class="fa-regular fa-heart"></i> <%= t('listing.add_favorite') %>
+                <% const isFav = typeof isFavorited !== 'undefined' && isFavorited; %>
+                <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2 favorite-btn" data-id="<%= listing.id %>">
+                    <i class="<%= isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i> <%= t('listing.add_favorite') %>
                 </button>
                 <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2">
                     <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
@@ -150,15 +151,21 @@
                                     <% } %>
                                 </div>
                             </div>
+                        <% } else if (listing.phone_hidden) { %>
+                            <div class="alert alert-light border small mb-0">
+                                <i class="fa-solid fa-comment-dots me-1 text-primary"></i>
+                                Satıcı yalnızca mesajla iletişim kuruyor.
+                            </div>
                         <% } else { %>
                             <div class="alert alert-light border small mb-0"><%= t('listing.no_phone_provided') %></div>
                         <% } %>
+                        <% const messageBtnClass = listing.has_phone ? 'btn-outline-primary' : 'btn-primary btn-lg fw-bold shadow-sm'; %>
                         <% if (!currentUser) { %>
-                            <a href="/auth/login" class="btn btn-outline-primary rounded-pill fw-medium">
+                            <a href="/auth/login" class="btn <%= messageBtnClass %> rounded-pill fw-medium">
                                 <i class="fa-regular fa-comment-dots me-2"></i> Mesaj Gönder
                             </a>
                         <% } else if (currentUser.id !== listing.user_id) { %>
-                            <a href="/messages/<%= listing.user_id %>?listing=<%= listing.id %>" class="btn btn-outline-primary rounded-pill fw-medium">
+                            <a href="/messages/<%= listing.user_id %>?listing=<%= listing.id %>" class="btn <%= messageBtnClass %> rounded-pill fw-medium">
                                 <i class="fa-regular fa-comment-dots me-2"></i> Mesaj Gönder
                             </a>
                         <% } %>

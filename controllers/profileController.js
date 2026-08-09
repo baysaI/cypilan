@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const User = require('../models/User');
 const Listing = require('../models/Listing');
+const { isValidPhone } = require('../utils/validators');
 
 const index = async (req, res) => {
     if (req.session && req.session.userId) {
@@ -69,26 +70,40 @@ const edit = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        const { firstName, lastName, phone, city } = req.body;
-        
-        await User.update(req.session.userId, {
-            firstName,
-            lastName,
-            phone,
-            city,
-            updatedAt: new Date().toISOString()
-        });
+        const { full_name, phone, bio } = req.body;
+        const updates = {};
 
-        if (firstName || lastName) {
-            req.session.userName = `${firstName || ''} ${lastName || ''}`.trim();
+        if (full_name && full_name.trim()) {
+            updates.full_name = full_name.trim();
+        }
+
+        if (bio !== undefined) {
+            updates.bio = bio.trim() || null;
+        }
+
+        if (phone !== undefined) {
+            const trimmed = phone.trim();
+            if (trimmed && !isValidPhone(trimmed)) {
+                req.flash('error', 'Geçerli bir telefon numarası girin.');
+                return res.redirect('/profile/edit');
+            }
+            updates.phone = trimmed || null;
+        }
+
+        updates.show_phone = req.body.hide_phone ? 0 : 1;
+
+        await User.update(req.session.userId, updates);
+
+        if (updates.full_name) {
+            req.session.userName = updates.full_name;
         }
 
         req.flash('success', 'Profiliniz güncellendi.');
-        res.redirect(`/profile/${req.session.userId}`);
+        res.redirect('/profile/edit');
     } catch (error) {
         console.error('Profile Update Error:', error);
         req.flash('error', 'Profil güncellenirken hata oluştu.');
-        res.redirect(`/profile/${req.session.userId}`);
+        res.redirect('/profile/edit');
     }
 };
 
@@ -110,14 +125,10 @@ const myListings = async (req, res) => {
 
 const myFavorites = async (req, res) => {
     try {
-        const viewPath = path.join(__dirname, '..', 'views', 'profile', 'favorites.ejs');
-        if (fs.existsSync(viewPath)) {
-            const favorites = await Listing.findFavoritesByUser ? await Listing.findFavoritesByUser(req.session.userId) : [];
-            res.locals.meta = res.locals.meta || {};
-            res.locals.meta.title = 'Favorilerim | CYPILAN.COM';
-            return res.render('profile/favorites', { favorites, title: 'Favorilerim' });
-        }
-        res.redirect(`/profile/${req.session.userId}`);
+        const favorites = await Listing.findFavoritesByUser(req.session.userId);
+        res.locals.meta = res.locals.meta || {};
+        res.locals.meta.title = 'Favorilerim | CYPILAN.COM';
+        return res.render('profile/favorites', { favorites, title: 'Favorilerim' });
     } catch (error) {
         console.error('My Favorites Error:', error);
         res.redirect('/');
