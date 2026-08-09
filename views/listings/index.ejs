@@ -43,7 +43,7 @@
                             <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
                                 <% categories.forEach(function(cat) { %>
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="cat_<%= cat.id %>" <%= (filters.category === cat.slug) ? 'checked' : '' %>>
+                                        <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="cat_<%= cat.id %>" <%= (filters.category === cat.slug || (cat.slug === 'usta-hizmetler' && filters.category === 'ustalar')) ? 'checked' : '' %>>
                                         <label class="form-check-label cursor-pointer" for="cat_<%= cat.id %>">
                                             <%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %> <span class="text-muted small">(<%= cat.listing_count || 0 %>)</span>
                                         </label>
@@ -128,7 +128,7 @@
                 <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
                     <% categories.forEach(function(cat) { %>
                         <div class="form-check mb-2">
-                            <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="m_cat_<%= cat.id %>" <%= (filters.category === cat.slug) ? 'checked' : '' %>>
+                            <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="m_cat_<%= cat.id %>" <%= (filters.category === cat.slug || (cat.slug === 'usta-hizmetler' && filters.category === 'ustalar')) ? 'checked' : '' %>>
                             <label class="form-check-label cursor-pointer" for="m_cat_<%= cat.id %>">
                                 <%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %> <span class="text-muted small">(<%= cat.listing_count || 0 %>)</span>
                             </label>

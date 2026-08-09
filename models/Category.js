@@ -13,15 +13,39 @@ class Category {
   }
 
   static async getBySlug(slug) {
+    if (!slug) return null;
     const db = await getDb();
-    const stmt = db.prepare('SELECT * FROM categories WHERE slug = ?');
-    stmt.bind([slug]);
+    const isNum = typeof slug === 'number' || /^\d+$/.test(slug);
+    const numId = isNum ? parseInt(slug, 10) : -1;
+    const stmt = db.prepare(`
+      SELECT * FROM categories
+      WHERE slug = ?
+         OR (slug = 'usta-hizmetler' AND ? = 'ustalar')
+         OR (id = ? AND ? = 1)
+    `);
+    stmt.bind([String(slug), String(slug), numId, isNum ? 1 : 0]);
     let row = null;
     if (stmt.step()) {
       row = stmt.getAsObject();
     }
     stmt.free();
     return row;
+  }
+
+  static async getCategoryAndSubcategoryIds(categoryIdentifier) {
+    if (!categoryIdentifier) return [];
+    const cat = await this.getBySlug(categoryIdentifier);
+    if (!cat) return [];
+
+    const db = await getDb();
+    const stmt = db.prepare('SELECT id FROM categories WHERE id = ? OR parent_id = ?');
+    stmt.bind([cat.id, cat.id]);
+    const ids = [];
+    while (stmt.step()) {
+      ids.push(stmt.getAsObject().id);
+    }
+    stmt.free();
+    return ids;
   }
 
   static async getMainCategoriesWithCount() {

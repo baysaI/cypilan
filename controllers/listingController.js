@@ -18,11 +18,20 @@ const index = async (req, res) => {
             sort: req.query.sort || 'newest'
         };
 
+        let currentCategoryName = null;
+        if (filters.category) {
+            const cat = await Category.getBySlug(filters.category);
+            if (cat) {
+                const lang = (req.session && req.session.lang) || 'tr';
+                currentCategoryName = cat[`name_${lang}`] || cat.name_tr;
+            }
+        }
+
         const result = await Listing.findAll(filters, page, limit);
         const categories = await Category.getMainCategoriesWithCount();
 
         res.locals.meta = res.locals.meta || {};
-        res.locals.meta.title = 'Tüm İlanlar | CYPILAN.COM';
+        res.locals.meta.title = currentCategoryName ? `${currentCategoryName} İlanları | CYPILAN.COM` : 'Tüm İlanlar | CYPILAN.COM';
         
         res.render('listings/index', {
             listings: result.data,
@@ -33,7 +42,8 @@ const index = async (req, res) => {
             },
             categories,
             filters,
-            title: 'İlanlar'
+            currentCategoryName,
+            title: currentCategoryName ? `${currentCategoryName} İlanları` : 'İlanlar'
         });
     } catch (error) {
         console.error('Listings Index Error:', error);

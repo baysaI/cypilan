@@ -266,13 +266,27 @@ class Listing {
   }
 
   static async search(filters = {}, page = 1, limit = 20) {
+    const Category = require('./Category');
     const db = await getDb();
     let where = ' WHERE 1=1';
     const params = [];
 
+    if (filters.status) {
+      where += ' AND l.status = ?';
+      params.push(filters.status);
+    } else {
+      where += " AND l.status = 'active'";
+    }
+
     if (filters.category) {
-      where += ' AND l.category_id = ?';
-      params.push(filters.category);
+      const categoryIds = await Category.getCategoryAndSubcategoryIds(filters.category);
+      if (categoryIds.length > 0) {
+        const placeholders = categoryIds.map(() => '?').join(',');
+        where += ` AND l.category_id IN (${placeholders})`;
+        params.push(...categoryIds);
+      } else {
+        where += ' AND 1=0';
+      }
     }
     if (filters.city) {
       where += ' AND l.location_city = ?';
