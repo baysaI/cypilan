@@ -31,4 +31,15 @@ router.get('/profile/messages', isAuthenticated, profileController.myMessages);
 router.get('/profile/:id', profileController.show);
 
 
+const pageController = require('../controllers/pageController');
+
+router.get('/sss', pageController.faq);
+router.get('/nasil-ilan-verilir', pageController.howToPost);
+router.get('/guvenlik', pageController.safety);
+router.get('/kurumsal', pageController.corporate);
+router.get('/reklam', pageController.advertise);
+router.get('/gizlilik-politikasi', pageController.privacy);
+router.get('/kullanim-kosullari', pageController.terms);
+router.get('/cerez-politikasi', pageController.cookiePolicy);
+
 module.exports = router;

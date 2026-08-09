@@ -1,0 +1,63 @@
+<div class="container py-4 py-md-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="fa-solid fa-house"></i> <%= t('nav.home') %></a></li>
+            <li class="breadcrumb-item active fw-medium" aria-current="page"><%= t('footer.how_to_post') %></li>
+        </ol>
+    </nav>
+
+    <div class="text-center max-w-700 mx-auto mb-5">
+        <h1 class="display-6 fw-bold mb-3"><%= t('footer.how_to_post') %></h1>
+        <p class="text-muted lead fs-6">CYPILAN.COM'da sadece 4 kolay adımda ilanınızı yayınlayın ve binlerce alıcıya hızla ulaşın.</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-lift transition-all">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+                    <i class="fa-solid fa-user-plus fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-2">1. Üye Olun / Giriş Yapın</h5>
+                <p class="text-muted small mb-0">E-posta adresiniz veya Google hesabınızla saniyeler içinde ücretsiz hesabınızı oluşturun.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-lift transition-all">
+                <div class="rounded-circle bg-accent bg-opacity-10 text-accent mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+                    <i class="fa-solid fa-plus fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-2">2. "İlan Ver" Butonuna Basın</h5>
+                <p class="text-muted small mb-0">Üst menüdeki "İlan Ver" butonuna tıklayın ve ilanınıza en uygun kategoriyi seçin.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-lift transition-all">
+                <div class="rounded-circle bg-success bg-opacity-10 text-success mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+                    <i class="fa-solid fa-camera-retro fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-2">3. Detayları & Fotoğrafları Ekleyin</h5>
+                <p class="text-muted small mb-0">Ürününüzün net fotoğraflarını yükleyin, fiyatını ve açıklamasını eksiksiz doldurun.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-lift transition-all">
+                <div class="rounded-circle bg-warning bg-opacity-10 text-warning mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+                    <i class="fa-solid fa-rocket fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-2">4. Yayınlayın ve Satın</h5>
+                <p class="text-muted small mb-0">İlanınızı onaylayıp yayınlayın. Alıcıların mesaj ve aramalarını doğrudan yanıtlayın.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
+        <h3 class="fw-bold mb-2">Hemen Başlamaya Hazır mısınız?</h3>
+        <p class="text-white-50 mb-4">Ücretsiz ilanınızı oluşturup Kıbrıs genelinde binlerce kişiye anında ulaşın.</p>
+        <div>
+            <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold text-white shadow"><i class="fa-solid fa-plus me-2"></i><%= t('nav.post_ad') %></a>
+        </div>
+    </div>
+</div>

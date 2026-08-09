@@ -1,0 +1,72 @@
+<div class="container py-4 py-md-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="fa-solid fa-house"></i> <%= t('nav.home') %></a></li>
+            <li class="breadcrumb-item active fw-medium" aria-current="page"><%= t('footer.safety_tips') %></li>
+        </ol>
+    </nav>
+
+    <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 fw-semibold mb-2"><i class="fa-solid fa-shield-cat me-1"></i> Güvenli Alışveriş</span>
+        <h1 class="display-6 fw-bold mb-3"><%= t('footer.safety_tips') %></h1>
+        <p class="text-muted lead fs-6">Güvenli bir alım-satım deneyimi için dikkat etmeniz gereken altın kurallar.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 border-start border-4 border-primary">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 flex-shrink-0">
+                        <i class="fa-solid fa-handshake fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-2">1. Ürünü Görmeden Ödeme Yapmayın</h5>
+                        <p class="text-muted small mb-0">Tanımadığınız kişilere kesinlikle ön ödeme, kapora veya kargo ücreti adı altında para havalesi göndermeyiniz. Alışverişinizi ürünü canlı görüp inceledikten sonra tamamlayın.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 border-start border-4 border-accent">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-accent bg-opacity-10 text-accent p-3 flex-shrink-0">
+                        <i class="fa-solid fa-location-dot fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-2">2. Güvenli Yerlerde Buluşun</h5>
+                        <p class="text-muted small mb-0">Alıcı veya satıcı ile görüşmelerinizi gündüz saatlerinde, kalabalık ve güvenli kamusal alanlarda (AVM, kafe, meydan) gerçekleştirmeye özen gösterin.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 border-start border-4 border-warning">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3 flex-shrink-0">
+                        <i class="fa-solid fa-lock fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-2">3. Şüpheli Bağlantılara Tıklamayın</h5>
+                        <p class="text-muted small mb-0">SMS veya mesajlaşma uygulamalarından gelen ödeme veya kargo doğrulama bağlantılarına (linklere) şifrelerinizi ve kart bilgilerinizi girmeyiniz.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 border-start border-4 border-danger">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 flex-shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-2">4. Şüpheli İlanları Bildirin</h5>
+                        <p class="text-muted small mb-0">Gerçek dışı fiyat veren, aldatıcı bilgi içeren veya güveninizi sarsan ilanları ilan detay sayfasındaki "Bildir" seçeneğini kullanarak ekibimize raporlayın.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
