@@ -1,5 +1,14 @@
+const fs = require('fs');
+const path = require('path');
 const User = require('../models/User');
 const Listing = require('../models/Listing');
+
+const index = async (req, res) => {
+    if (req.session && req.session.userId) {
+        return res.redirect(`/profile/${req.session.userId}`);
+    }
+    return res.redirect('/auth/login');
+};
 
 const show = async (req, res) => {
     try {
@@ -20,6 +29,7 @@ const show = async (req, res) => {
         const listings = await Listing.getByUser(userId);
         const stats = await User.getStats(userId);
 
+        res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = `${user.full_name} | CYPILAN.COM`;
 
         res.render('profile/show', {
@@ -38,8 +48,14 @@ const show = async (req, res) => {
 const edit = async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
+        res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = 'Profilimi Düzenle | CYPILAN.COM';
-        res.render('profile/edit', { user, title: 'Profili Düzenle' });
+        
+        const viewPath = path.join(__dirname, '..', 'views', 'profile', 'edit.ejs');
+        if (fs.existsSync(viewPath)) {
+            return res.render('profile/edit', { user, title: 'Profili Düzenle' });
+        }
+        res.redirect(`/profile/${req.session.userId}`);
     } catch (error) {
         console.error('Profile Edit Error:', error);
         res.redirect('/');
@@ -58,51 +74,69 @@ const update = async (req, res) => {
             updatedAt: new Date().toISOString()
         });
 
-        req.session.userName = `${firstName} ${lastName}`;
+        if (firstName || lastName) {
+            req.session.userName = `${firstName || ''} ${lastName || ''}`.trim();
+        }
 
         req.flash('success', 'Profiliniz güncellendi.');
-        res.redirect('/profile/edit');
+        res.redirect(`/profile/${req.session.userId}`);
     } catch (error) {
         console.error('Profile Update Error:', error);
         req.flash('error', 'Profil güncellenirken hata oluştu.');
-        res.redirect('/profile/edit');
+        res.redirect(`/profile/${req.session.userId}`);
     }
 };
 
 const myListings = async (req, res) => {
     try {
-        const listings = await Listing.getByUser(req.session.userId);
-        res.locals.meta.title = 'İlanlarım | CYPILAN.COM';
-        res.render('profile/listings', { listings, title: 'İlanlarım' });
+        const viewPath = path.join(__dirname, '..', 'views', 'profile', 'listings.ejs');
+        if (fs.existsSync(viewPath)) {
+            const listings = await Listing.getByUser(req.session.userId);
+            res.locals.meta = res.locals.meta || {};
+            res.locals.meta.title = 'İlanlarım | CYPILAN.COM';
+            return res.render('profile/listings', { listings, title: 'İlanlarım' });
+        }
+        res.redirect(`/profile/${req.session.userId}`);
     } catch (error) {
         console.error('My Listings Error:', error);
-        res.redirect('/profile');
+        res.redirect('/');
     }
 };
 
 const myFavorites = async (req, res) => {
     try {
-        const favorites = await Listing.findFavoritesByUser(req.session.userId);
-        res.locals.meta.title = 'Favorilerim | CYPILAN.COM';
-        res.render('profile/favorites', { favorites, title: 'Favorilerim' });
+        const viewPath = path.join(__dirname, '..', 'views', 'profile', 'favorites.ejs');
+        if (fs.existsSync(viewPath)) {
+            const favorites = await Listing.findFavoritesByUser ? await Listing.findFavoritesByUser(req.session.userId) : [];
+            res.locals.meta = res.locals.meta || {};
+            res.locals.meta.title = 'Favorilerim | CYPILAN.COM';
+            return res.render('profile/favorites', { favorites, title: 'Favorilerim' });
+        }
+        res.redirect(`/profile/${req.session.userId}`);
     } catch (error) {
         console.error('My Favorites Error:', error);
-        res.redirect('/profile');
+        res.redirect('/');
     }
 };
 
 const myMessages = async (req, res) => {
     try {
-        const messages = await Message.findByUser(req.session.userId);
-        res.locals.meta.title = 'Mesajlarım | CYPILAN.COM';
-        res.render('profile/messages', { messages, title: 'Mesajlarım' });
+        const viewPath = path.join(__dirname, '..', 'views', 'profile', 'messages.ejs');
+        if (fs.existsSync(viewPath)) {
+            const messages = [];
+            res.locals.meta = res.locals.meta || {};
+            res.locals.meta.title = 'Mesajlarım | CYPILAN.COM';
+            return res.render('profile/messages', { messages, title: 'Mesajlarım' });
+        }
+        res.redirect(`/profile/${req.session.userId}`);
     } catch (error) {
         console.error('My Messages Error:', error);
-        res.redirect('/profile');
+        res.redirect('/');
     }
 };
 
 module.exports = {
+    index,
     show,
     edit,
     update,

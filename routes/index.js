@@ -20,6 +20,9 @@ router.use('/api', apiRoutes);
 router.use('/admin', adminRoutes);
 
 const profileController = require('../controllers/profileController');
+router.get('/profile', isAuthenticated, profileController.index);
+router.get('/favorites', isAuthenticated, (req, res) => res.redirect('/profile/favorites'));
+router.get('/listings/my-listings', isAuthenticated, (req, res) => res.redirect('/profile/listings'));
 router.get('/profile/edit', isAuthenticated, profileController.edit);
 router.put('/profile', isAuthenticated, profileController.update);
 router.get('/profile/listings', isAuthenticated, profileController.myListings);
