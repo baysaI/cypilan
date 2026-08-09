@@ -1,4 +1,4 @@
-<% const fmt = helpers.formatPrice; %>
+<% const fmt = (amt, curr) => helpers.formatPrice(amt, curr, typeof currency !== 'undefined' ? currency : 'TRY'); %>
 <% const imgs = (listing.images && listing.images.length > 0) ? listing.images : []; %>
 
 <div class="bg-light py-3 border-bottom">
@@ -133,13 +133,23 @@
                     <% } %>
 
                     <div class="d-grid gap-3">
-                        <% if (listing.seller_phone) { %>
-                            <a href="tel:<%= listing.seller_phone %>" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
-                                <i class="fa-solid fa-phone"></i> <%= listing.seller_phone %>
-                            </a>
-                            <a href="https://wa.me/<%= listing.seller_phone.replace(/[^0-9]/g, '') %>" target="_blank" rel="noopener" class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 border-0" style="background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);">
-                                <i class="fa-brands fa-whatsapp fs-5"></i> WhatsApp
-                            </a>
+                        <% if (listing.has_phone) { %>
+                            <div id="phoneReveal"
+                                 data-listing-id="<%= listing.id %>"
+                                 data-authenticated="<%= currentUser ? '1' : '0' %>"
+                                 data-login-url="/auth/login">
+                                <button type="button" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm w-100 d-flex align-items-center justify-content-center gap-2" id="revealPhoneBtn">
+                                    <i class="fa-solid fa-phone"></i>
+                                    <span id="phoneText"><%= listing.seller_phone_masked %></span>
+                                </button>
+                                <div class="form-text text-center mt-1" id="phoneHint">
+                                    <% if (currentUser) { %>
+                                        Numarayı görmek için tıklayın
+                                    <% } else { %>
+                                        Numarayı görmek için giriş yapın
+                                    <% } %>
+                                </div>
+                            </div>
                         <% } else { %>
                             <div class="alert alert-light border small mb-0">Satıcı telefon numarası paylaşmamış.</div>
                         <% } %>
@@ -170,4 +180,79 @@
     "seller": { "@type": "Person", "name": listing.seller_name || '' }
   }
 }) %>
+</script>
+
+<script>
+(function () {
+    var wrapper = document.getElementById('phoneReveal');
+    if (!wrapper) return;
+
+    var btn = document.getElementById('revealPhoneBtn');
+    var text = document.getElementById('phoneText');
+    var hint = document.getElementById('phoneHint');
+    var listingId = wrapper.getAttribute('data-listing-id');
+    var authenticated = wrapper.getAttribute('data-authenticated') === '1';
+
+    btn.addEventListener('click', function () {
+        if (!authenticated) {
+            window.location.href = wrapper.getAttribute('data-login-url');
+            return;
+        }
+
+        btn.disabled = true;
+        var previous = text.textContent;
+        text.textContent = 'Yükleniyor...';
+
+        fetch('/listings/' + listingId + '/phone', {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin'
+        })
+            .then(function (res) {
+                return res.json().then(function (data) {
+                    return { ok: res.ok, data: data };
+                });
+            })
+            .then(function (result) {
+                if (!result.ok) {
+                    text.textContent = previous;
+                    btn.disabled = false;
+                    if (hint) {
+                        hint.textContent = result.data.error || 'Numara alınamadı.';
+                        hint.className = 'form-text text-center mt-1 text-danger';
+                    }
+                    return;
+                }
+
+                text.textContent = result.data.phone;
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-success');
+                if (hint) hint.remove();
+
+                var call = document.createElement('a');
+                call.href = 'tel:' + result.data.phone;
+                call.className = 'btn btn-primary btn-lg rounded-pill fw-bold shadow-sm w-100 mt-2 d-flex align-items-center justify-content-center gap-2';
+                call.innerHTML = '<i class="fa-solid fa-phone"></i> Ara';
+                wrapper.appendChild(call);
+
+                var wa = document.createElement('a');
+                wa.href = 'https://wa.me/' + result.data.whatsapp;
+                wa.target = '_blank';
+                wa.rel = 'noopener';
+                wa.className = 'btn btn-lg rounded-pill fw-bold shadow-sm w-100 mt-2 text-white d-flex align-items-center justify-content-center gap-2 border-0';
+                wa.style.background = 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)';
+                wa.innerHTML = '<i class="fa-brands fa-whatsapp fs-5"></i> WhatsApp';
+                wrapper.appendChild(wa);
+
+                btn.disabled = true;
+            })
+            .catch(function () {
+                text.textContent = previous;
+                btn.disabled = false;
+                if (hint) {
+                    hint.textContent = 'Bağlantı hatası. Tekrar deneyin.';
+                    hint.className = 'form-text text-center mt-1 text-danger';
+                }
+            });
+    });
+})();
 </script>

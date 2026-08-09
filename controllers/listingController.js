@@ -1,7 +1,7 @@
 const Listing = require('../models/Listing');
 const Category = require('../models/Category');
 const User = require('../models/User');
-const { generateSlug } = require('../utils/helpers');
+const { generateSlug, maskPhone } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
 
 const ALLOWED_CURRENCIES = ['TRY', 'GBP'];
@@ -61,6 +61,10 @@ const show = async (req, res) => {
             req.flash('error', 'İlan bulunamadı.');
             return res.redirect('/listings');
         }
+
+        listing.has_phone = Boolean(listing.seller_phone);
+        listing.seller_phone_masked = maskPhone(listing.seller_phone);
+        delete listing.seller_phone;
 
         Listing.incrementViews(listing.id).catch(console.error);
 
@@ -206,6 +210,30 @@ const deleteListing = async (req, res) => {
     }
 };
 
+const revealPhone = async (req, res) => {
+    try {
+        const listing = await Listing.findById(req.params.id);
+
+        if (!listing || listing.status !== 'active') {
+            return res.status(404).json({ error: 'İlan bulunamadı.' });
+        }
+
+        const owner = await User.findById(listing.user_id);
+
+        if (!owner || !owner.phone) {
+            return res.status(404).json({ error: 'Bu ilan için telefon numarası yok.' });
+        }
+
+        res.json({
+            phone: owner.phone,
+            whatsapp: owner.phone.replace(/\D/g, '')
+        });
+    } catch (error) {
+        console.error('Reveal Phone Error:', error);
+        res.status(500).json({ error: 'Numara alınamadı.' });
+    }
+};
+
 const toggleFavorite = async (req, res) => {
     try {
         if (!req.session.userId) {
@@ -230,5 +258,6 @@ module.exports = {
     showEdit,
     update,
     delete: deleteListing,
+    revealPhone,
     toggleFavorite
 };

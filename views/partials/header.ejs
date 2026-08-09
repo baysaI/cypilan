@@ -31,7 +31,7 @@
 
                     <div class="dropdown d-none d-md-block">
                         <button class="btn btn-light border-0 fw-bold" type="button" data-bs-toggle="dropdown">
-                            <%= (typeof req !== 'undefined' && req.cookies && req.cookies.currency === 'GBP') ? '£' : '₺' %>
+                            <%= (typeof currency !== 'undefined' && currency === 'GBP') ? '£' : '₺' %>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item currency-switch" href="#" data-currency="TRY">₺ TRY</a></li>

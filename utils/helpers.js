@@ -29,20 +29,49 @@ function parseDate(value) {
   return new Date(value);
 }
 
+function maskPhone(phone) {
+  if (!phone || typeof phone !== 'string') return '';
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 7) return '••• ••• ••';
+  return `${digits.slice(0, 4)} ••• •• ••`;
+}
+
 function getCurrencySymbol(code) {
   if (!code || typeof code !== 'string') return '₺';
   const upper = code.trim().toUpperCase();
   return CURRENCY_SYMBOLS[upper] || upper;
 }
 
-function formatPrice(amount, currency = 'TRY') {
-  const num = Number(amount);
-  if (isNaN(num)) return `0 ${getCurrencySymbol(currency)}`;
+const EXCHANGE_RATES = {
+  GBP_TO_TRY: 45.0,
+  TRY_TO_GBP: 1 / 45.0
+};
 
-  const symbol = getCurrencySymbol(currency);
-  const formattedNumber = num.toLocaleString('tr-TR', {
+function formatPrice(amount, itemCurrency = 'TRY', targetCurrency = null) {
+  const num = Number(amount);
+  const source = (itemCurrency || 'TRY').trim().toUpperCase();
+  const target = targetCurrency ? targetCurrency.trim().toUpperCase() : source;
+
+  if (isNaN(num) || num === 0) return `${getCurrencySymbol(target || source)}0`;
+
+  let finalAmount = num;
+  let finalCurrency = source;
+
+  if (target && target !== source) {
+    if (source === 'TRY' && target === 'GBP') {
+      finalAmount = num * EXCHANGE_RATES.TRY_TO_GBP;
+      finalCurrency = 'GBP';
+    } else if (source === 'GBP' && target === 'TRY') {
+      finalAmount = num * EXCHANGE_RATES.GBP_TO_TRY;
+      finalCurrency = 'TRY';
+    }
+  }
+
+  const symbol = getCurrencySymbol(finalCurrency);
+  const locale = finalCurrency === 'GBP' ? 'en-GB' : 'tr-TR';
+  const formattedNumber = finalAmount.toLocaleString(locale, {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2
+    maximumFractionDigits: (finalAmount < 100 && finalCurrency === 'GBP') ? 2 : 0
   });
 
   return `${symbol}${formattedNumber}`;
@@ -239,5 +268,6 @@ module.exports = {
   generateSlug,
   sanitizeHtml,
   getCurrencySymbol,
+  maskPhone,
   paginationHelper
 };
