@@ -3,42 +3,45 @@ const { getDb, saveDb } = require('../config/database');
 class Message {
   static async create(messageData) {
     const db = await getDb();
-    const { sender_id, receiver_id, listing_id, content } = messageData;
-    
+    const { sender_id, receiver_id, content } = messageData;
+    const listing_id = messageData.listing_id != null ? messageData.listing_id : null;
+
     const stmt = db.prepare(`
       INSERT INTO messages (sender_id, receiver_id, listing_id, content)
       VALUES (?, ?, ?, ?)
     `);
-    
+
     stmt.run([sender_id, receiver_id, listing_id, content]);
     stmt.free();
-    
+
     const idRes = db.exec("SELECT last_insert_rowid() as id");
     const lastId = idRes[0].values[0][0];
     saveDb();
     return lastId;
   }
 
-  static async getConversation(userId1, userId2, listingId = null, limit = 50, offset = 0) {
+  static async getConversation(userId1, userId2, listingId = null, limit = 200, offset = 0) {
     const db = await getDb();
     let query = `
-      SELECT m.*, 
-             s.full_name as sender_name, 
-             r.full_name as receiver_name 
+      SELECT m.*,
+             s.full_name as sender_name,
+             r.full_name as receiver_name
       FROM messages m
       JOIN users s ON m.sender_id = s.id
       JOIN users r ON m.receiver_id = r.id
-      WHERE ((m.sender_id = ? AND m.receiver_id = ?) 
+      WHERE ((m.sender_id = ? AND m.receiver_id = ?)
          OR (m.sender_id = ? AND m.receiver_id = ?))
     `;
     const params = [userId1, userId2, userId2, userId1];
 
-    if (listingId) {
+    if (listingId != null) {
       query += ' AND m.listing_id = ?';
       params.push(listingId);
+    } else {
+      query += ' AND m.listing_id IS NULL';
     }
 
-    query += ' ORDER BY m.created_at ASC LIMIT ? OFFSET ?';
+    query += ' ORDER BY m.created_at ASC, m.id ASC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
     const stmt = db.prepare(query);
@@ -54,23 +57,34 @@ class Message {
   static async getInbox(userId) {
     const db = await getDb();
     const stmt = db.prepare(`
-      SELECT m1.*,
-             CASE WHEN m1.sender_id = ? THEN u2.full_name ELSE u1.full_name END as other_party_name,
-             l.title as listing_title
-      FROM messages m1
-      LEFT JOIN messages m2
-        ON (
-          (m1.sender_id = m2.sender_id AND m1.receiver_id = m2.receiver_id) OR
-          (m1.sender_id = m2.receiver_id AND m1.receiver_id = m2.sender_id)
-        ) AND m1.id < m2.id
-      JOIN users u1 ON m1.sender_id = u1.id
-      JOIN users u2 ON m1.receiver_id = u2.id
-      LEFT JOIN listings l ON m1.listing_id = l.id
-      WHERE m2.id IS NULL AND (m1.sender_id = ? OR m1.receiver_id = ?)
-      ORDER BY m1.created_at DESC
+      SELECT m.id, m.content, m.created_at, m.listing_id, m.sender_id,
+             CASE WHEN m.sender_id = ? THEN m.receiver_id ELSE m.sender_id END as other_party_id,
+             CASE WHEN m.sender_id = ? THEN r.full_name ELSE s.full_name END as other_party_name,
+             CASE WHEN m.sender_id = ? THEN r.avatar_url ELSE s.avatar_url END as other_party_avatar,
+             l.title as listing_title,
+             l.slug as listing_slug,
+             (SELECT COUNT(*) FROM messages um
+               WHERE um.receiver_id = ?
+                 AND um.is_read = 0
+                 AND um.sender_id = CASE WHEN m.sender_id = ? THEN m.receiver_id ELSE m.sender_id END
+                 AND ((um.listing_id IS NULL AND m.listing_id IS NULL) OR um.listing_id = m.listing_id)
+             ) as unread_count
+      FROM messages m
+      JOIN users s ON m.sender_id = s.id
+      JOIN users r ON m.receiver_id = r.id
+      LEFT JOIN listings l ON m.listing_id = l.id
+      WHERE m.id IN (
+        SELECT MAX(id) FROM messages
+        WHERE sender_id = ? OR receiver_id = ?
+        GROUP BY
+          CASE WHEN sender_id < receiver_id THEN sender_id ELSE receiver_id END,
+          CASE WHEN sender_id < receiver_id THEN receiver_id ELSE sender_id END,
+          COALESCE(listing_id, 0)
+      )
+      ORDER BY m.created_at DESC, m.id DESC
     `);
-    
-    stmt.bind([userId, userId, userId]);
+
+    stmt.bind([userId, userId, userId, userId, userId, userId, userId]);
     const results = [];
     while (stmt.step()) {
       results.push(stmt.getAsObject());
@@ -84,15 +98,17 @@ class Message {
     let query = 'UPDATE messages SET is_read = 1 WHERE receiver_id = ? AND sender_id = ? AND is_read = 0';
     const params = [receiverId, senderId];
 
-    if (listingId) {
+    if (listingId != null) {
       query += ' AND listing_id = ?';
       params.push(listingId);
+    } else {
+      query += ' AND listing_id IS NULL';
     }
 
     const stmt = db.prepare(query);
     stmt.run(params);
     stmt.free();
-    
+
     const changesRes = db.exec("SELECT changes() as changes");
     const changes = changesRes[0].values[0][0];
     if (changes > 0) saveDb();

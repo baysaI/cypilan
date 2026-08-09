@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Message = require('../models/Message');
 
 const isAuthenticated = (req, res, next) => {
     if ((req.session && req.session.userId) || req.isAuthenticated()) {
@@ -71,9 +72,17 @@ const setUserLocal = async (req, res, next) => {
         };
         res.locals.user = userData;
         res.locals.currentUser = userData;
+
+        try {
+            res.locals.unreadMessages = await Message.getUnreadCount(userId);
+        } catch (error) {
+            console.error('Unread count error:', error);
+            res.locals.unreadMessages = 0;
+        }
     } else {
         res.locals.user = null;
         res.locals.currentUser = null;
+        res.locals.unreadMessages = 0;
     }
     next();
 };

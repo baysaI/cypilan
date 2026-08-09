@@ -1,0 +1,25 @@
+const express = require('express');
+const rateLimit = require('express-rate-limit');
+const router = express.Router();
+const messageController = require('../controllers/messageController');
+const { isAuthenticated } = require('../middlewares/auth');
+
+const sendLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => String(req.session.userId),
+    handler: (req, res) => {
+        req.flash('error', 'Saatlik mesaj gönderme sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.');
+        res.redirect('/messages');
+    }
+});
+
+router.use(isAuthenticated);
+
+router.get('/', messageController.inbox);
+router.post('/', sendLimiter, messageController.send);
+router.get('/:userId', messageController.conversation);
+
+module.exports = router;

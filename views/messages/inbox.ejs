@@ -1,0 +1,56 @@
+<div class="container py-4 py-md-5">
+    <h1 class="fs-4 fw-bold mb-4">Mesajlarım</h1>
+
+    <% if (conversations.length === 0) { %>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fa-regular fa-comments fs-1 text-muted opacity-25 d-block mb-3"></i>
+                <p class="text-muted mb-3">Henüz mesajınız yok.</p>
+                <a href="/listings" class="btn btn-primary">İlanlara Göz At</a>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="card border-0 shadow-sm">
+            <div class="list-group list-group-flush">
+                <% conversations.forEach(function(c) { %>
+                    <a href="/messages/<%= c.other_party_id %><%= c.listing_id ? '?listing=' + c.listing_id : '' %>"
+                       class="list-group-item list-group-item-action py-3 px-3 px-md-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="<%= c.other_party_avatar || '/img/logo.png' %>"
+                                 class="rounded-circle bg-light object-fit-cover flex-shrink-0"
+                                 width="48" height="48" alt="">
+
+                            <div class="flex-grow-1 min-width-0">
+                                <div class="d-flex justify-content-between align-items-baseline gap-2">
+                                    <span class="fw-bold text-dark text-truncate"><%= c.other_party_name %></span>
+                                    <small class="text-muted text-nowrap flex-shrink-0"><%= helpers.timeAgo(c.created_at, lang) %></small>
+                                </div>
+
+                                <% if (c.listing_title) { %>
+                                    <div class="small text-primary text-truncate">
+                                        <i class="fa-solid fa-tag me-1"></i><%= c.listing_title %>
+                                    </div>
+                                <% } %>
+
+                                <div class="small text-muted text-truncate">
+                                    <% if (c.sender_id === currentUser.id) { %>
+                                        <i class="fa-solid fa-reply fa-flip-horizontal me-1"></i>
+                                    <% } %>
+                                    <%= c.content %>
+                                </div>
+                            </div>
+
+                            <% if (c.unread_count > 0) { %>
+                                <span class="badge bg-danger rounded-pill flex-shrink-0"><%= c.unread_count %></span>
+                            <% } %>
+                        </div>
+                    </a>
+                <% }); %>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<style>
+    .min-width-0 { min-width: 0; }
+</style>

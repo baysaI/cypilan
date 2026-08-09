@@ -153,6 +153,15 @@
                         <% } else { %>
                             <div class="alert alert-light border small mb-0"><%= t('listing.no_phone_provided') %></div>
                         <% } %>
+                        <% if (!currentUser) { %>
+                            <a href="/auth/login" class="btn btn-outline-primary rounded-pill fw-medium">
+                                <i class="fa-regular fa-comment-dots me-2"></i> Mesaj Gönder
+                            </a>
+                        <% } else if (currentUser.id !== listing.user_id) { %>
+                            <a href="/messages/<%= listing.user_id %>?listing=<%= listing.id %>" class="btn btn-outline-primary rounded-pill fw-medium">
+                                <i class="fa-regular fa-comment-dots me-2"></i> Mesaj Gönder
+                            </a>
+                        <% } %>
                         <a href="/profile/<%= listing.user_id %>" class="btn btn-outline-dark rounded-pill fw-medium">
                             <i class="fa-regular fa-user me-2"></i> <%= t('user.seller_profile') %>
                         </a>

@@ -42,8 +42,11 @@
                     <% const activeUser = (typeof user !== 'undefined' && user) ? user : ((typeof currentUser !== 'undefined' && currentUser) ? currentUser : null); %>
                     <% if (activeUser) { %>
                         <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle position-relative" type="button" data-bs-toggle="dropdown">
                                 <i class="fa-regular fa-user me-2"></i><%= activeUser.name %>
+                                <% if (typeof unreadMessages !== 'undefined' && unreadMessages > 0) { %>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><%= unreadMessages %></span>
+                                <% } %>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end mt-2">
                                 <% if (activeUser.role === 'admin') { %>
@@ -52,6 +55,15 @@
                                 <% } %>
                                 <li><a class="dropdown-item py-2" href="/profile"><i class="fa-solid fa-id-card me-3 text-primary"></i><%= t('nav.my_profile') %></a></li>
                                 <li><a class="dropdown-item py-2" href="/listings/my-listings"><i class="fa-solid fa-list me-3 text-primary"></i><%= t('nav.my_listings') %></a></li>
+                                <li>
+                                    <a class="dropdown-item py-2 d-flex align-items-center" href="/messages">
+                                        <i class="fa-regular fa-comments me-3 text-primary"></i>
+                                        <span class="flex-grow-1">Mesajlarım</span>
+                                        <% if (typeof unreadMessages !== 'undefined' && unreadMessages > 0) { %>
+                                            <span class="badge bg-danger rounded-pill ms-2"><%= unreadMessages %></span>
+                                        <% } %>
+                                    </a>
+                                </li>
                                 <li><a class="dropdown-item py-2" href="/favorites"><i class="fa-solid fa-heart me-3 text-accent"></i><%= t('nav.my_favorites') %></a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item py-2 text-danger" href="/auth/logout"><i class="fa-solid fa-right-from-bracket me-3"></i><%= t('nav.logout') %></a></li>
