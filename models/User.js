@@ -37,7 +37,8 @@ class User {
       role = 'user',
       company_name = null,
       language_pref = 'tr',
-      currency_pref = 'TRY'
+      currency_pref = 'TRY',
+      has_password = 1
     } = userData;
 
     const password_hash = userData.password_hash
@@ -48,11 +49,11 @@ class User {
     }
 
     const stmt = db.prepare(`
-      INSERT INTO users (email, password_hash, full_name, phone, role, company_name, language_pref, currency_pref)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (email, password_hash, full_name, phone, role, company_name, language_pref, currency_pref, has_password)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    
-    stmt.run([email, password_hash, full_name, phone, role, company_name, language_pref, currency_pref]);
+
+    stmt.run([email, password_hash, full_name, phone, role, company_name, language_pref, currency_pref, has_password]);
     stmt.free();
     
     const idRes = db.exec("SELECT last_insert_rowid() as id");
@@ -86,7 +87,13 @@ class User {
 
   static async setPassword(id, plainPassword) {
     const password_hash = await bcrypt.hash(plainPassword, SALT_ROUNDS);
-    return this.update(id, { password_hash });
+    return this.update(id, { password_hash, has_password: 1 });
+  }
+
+  static async isEmailTaken(email, exceptUserId = null) {
+    const existing = await this.findByEmail(email);
+    if (!existing) return false;
+    return exceptUserId == null || existing.id !== Number(exceptUserId);
   }
 
   static async getStats(id) {

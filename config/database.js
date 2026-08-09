@@ -41,7 +41,8 @@ const saveDb = () => {
 };
 
 const COLUMN_MIGRATIONS = [
-  { table: 'users', column: 'show_phone', ddl: 'ALTER TABLE users ADD COLUMN show_phone INTEGER DEFAULT 1' }
+  { table: 'users', column: 'show_phone', ddl: 'ALTER TABLE users ADD COLUMN show_phone INTEGER DEFAULT 1' },
+  { table: 'users', column: 'has_password', ddl: 'ALTER TABLE users ADD COLUMN has_password INTEGER DEFAULT 1' }
 ];
 
 const applyColumnMigrations = (db) => {

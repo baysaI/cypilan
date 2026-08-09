@@ -27,7 +27,8 @@ if (clientID && clientSecret) {
             password_hash,
             full_name: profile.displayName || 'Google User',
             phone: '',
-            role: 'user'
+            role: 'user',
+            has_password: 0
           });
           user = await User.findById(userId);
         }

@@ -27,6 +27,8 @@ router.get('/favorites', isAuthenticated, (req, res) => res.redirect('/profile/f
 router.get('/listings/my-listings', isAuthenticated, (req, res) => res.redirect('/profile/listings'));
 router.get('/profile/edit', isAuthenticated, profileController.edit);
 router.put('/profile', isAuthenticated, profileController.update);
+router.post('/profile/password', isAuthenticated, profileController.changePassword);
+router.post('/profile/email', isAuthenticated, profileController.changeEmail);
 router.get('/profile/listings', isAuthenticated, profileController.myListings);
 router.get('/profile/favorites', isAuthenticated, profileController.myFavorites);
 router.get('/profile/messages', isAuthenticated, (req, res) => res.redirect('/messages'));

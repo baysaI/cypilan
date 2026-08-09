@@ -21,12 +21,6 @@
                                    value="<%= user.full_name || '' %>" required maxlength="120">
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-medium small">E-posta</label>
-                            <input type="email" class="form-control bg-light" value="<%= user.email || '' %>" disabled>
-                            <div class="form-text small">E-posta adresi değiştirilemez.</div>
-                        </div>
-
                         <div class="mb-0">
                             <label for="bio" class="form-label fw-medium small">Hakkımda</label>
                             <textarea class="form-control" id="bio" name="bio" rows="3" maxlength="500"
@@ -66,6 +60,86 @@
                     <button type="submit" class="btn btn-primary px-4 fw-medium">Kaydet</button>
                 </div>
             </form>
+
+            <% const hasPassword = Number(user.has_password) !== 0; %>
+
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white py-3">
+                    <h2 class="fs-6 fw-bold mb-0"><%= hasPassword ? 'Şifre Değiştir' : 'Şifre Belirle' %></h2>
+                </div>
+                <div class="card-body p-4">
+                    <% if (!hasPassword) { %>
+                        <div class="alert alert-info small">
+                            Hesabınız Google ile oluşturulduğu için bir şifreniz yok.
+                            Buradan şifre belirlerseniz e-posta ve şifreyle de giriş yapabilirsiniz.
+                        </div>
+                    <% } %>
+
+                    <form action="/profile/password" method="POST">
+                        <% if (hasPassword) { %>
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label fw-medium small">Mevcut Şifre</label>
+                                <input type="password" class="form-control" id="currentPassword"
+                                       name="current_password" required autocomplete="current-password">
+                            </div>
+                        <% } %>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="newPassword" class="form-label fw-medium small">Yeni Şifre</label>
+                                <input type="password" class="form-control" id="newPassword"
+                                       name="new_password" required autocomplete="new-password">
+                                <div class="form-text small">En az 8 karakter, 1 büyük harf ve 1 rakam.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="confirmPassword" class="form-label fw-medium small">Yeni Şifre (Tekrar)</label>
+                                <input type="password" class="form-control" id="confirmPassword"
+                                       name="confirm_password" required autocomplete="new-password">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary px-4 fw-medium">
+                                <%= hasPassword ? 'Şifreyi Güncelle' : 'Şifreyi Belirle' %>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-4 mb-5">
+                <div class="card-header bg-white py-3">
+                    <h2 class="fs-6 fw-bold mb-0">E-posta Adresi</h2>
+                </div>
+                <div class="card-body p-4">
+                    <% if (!hasPassword) { %>
+                        <p class="text-muted small mb-2">Mevcut adres: <strong><%= user.email %></strong></p>
+                        <div class="alert alert-warning small mb-0">
+                            E-posta adresinizi değiştirebilmek için önce yukarıdan bir şifre belirlemelisiniz.
+                        </div>
+                    <% } else { %>
+                        <form action="/profile/email" method="POST">
+                            <div class="mb-3">
+                                <label for="newEmail" class="form-label fw-medium small">E-posta Adresi</label>
+                                <input type="email" class="form-control" id="newEmail" name="new_email"
+                                       value="<%= user.email || '' %>" required>
+                                <div class="form-text small">Giriş yaparken bu adresi kullanacaksınız.</div>
+                            </div>
+
+                            <div class="mb-0">
+                                <label for="emailPassword" class="form-label fw-medium small">Şifreniz</label>
+                                <input type="password" class="form-control" id="emailPassword"
+                                       name="current_password" required autocomplete="current-password">
+                                <div class="form-text small">Güvenlik için şifrenizi doğrulamanız gerekir.</div>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary px-4 fw-medium">E-postayı Güncelle</button>
+                            </div>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
 
         </div>
     </div>
