@@ -35,8 +35,17 @@
                 </div>
             </div>
 
-            <div class="d-md-none mb-3">
+            <% const isFav = typeof isFavorited !== 'undefined' && isFavorited; %>
+            <div class="d-md-none mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h2 class="text-primary fw-bolder mb-0 fs-1"><%= fmt(listing.price, listing.currency) %></h2>
+                <div class="d-flex gap-2">
+                    <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 favorite-btn" data-id="<%= listing.id %>">
+                        <i class="<%= isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i> <%= t('listing.add_favorite') %>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 share-btn" data-title="<%= listing.title %>">
+                        <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
+                    </button>
+                </div>
             </div>
 
             <div class="card border-0 rounded-4 overflow-hidden mb-4 shadow-sm">
@@ -111,11 +120,10 @@
 
         <div class="col-12 col-lg-4">
             <div class="d-none d-lg-flex gap-2 mb-4">
-                <% const isFav = typeof isFavorited !== 'undefined' && isFavorited; %>
                 <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2 favorite-btn" data-id="<%= listing.id %>">
                     <i class="<%= isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i> <%= t('listing.add_favorite') %>
                 </button>
-                <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2">
+                <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2 share-btn" data-title="<%= listing.title %>">
                     <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                 </button>
             </div>
@@ -272,3 +280,38 @@
     });
 })();
 </script>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="shareModalLabel"><i class="fa-solid fa-share-nodes text-primary me-2"></i><%= t('common.share') %></h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <p class="text-muted small mb-4 fw-medium"><%= listing.title %></p>
+        <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
+            <a href="https://api.whatsapp.com/send?text=<%= encodeURIComponent(listing.title + ' ') %>" id="shareWhatsapp" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 54px; height: 54px; background: #25D366;" title="WhatsApp">
+                <i class="fa-brands fa-whatsapp fs-4"></i>
+            </a>
+            <a href="https://www.facebook.com/sharer/sharer.php" id="shareFacebook" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 54px; height: 54px; background: #1877F2;" title="Facebook">
+                <i class="fa-brands fa-facebook-f fs-4"></i>
+            </a>
+            <a href="https://t.me/share/url" id="shareTelegram" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 54px; height: 54px; background: #0088cc;" title="Telegram">
+                <i class="fa-brands fa-telegram fs-4"></i>
+            </a>
+            <a href="https://twitter.com/intent/tweet" id="shareTwitter" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 54px; height: 54px; background: #000000;" title="X / Twitter">
+                <i class="fa-brands fa-x-twitter fs-4"></i>
+            </a>
+        </div>
+        <div class="input-group">
+            <input type="text" class="form-control bg-light border-end-0 shadow-none small" id="shareUrlInput" readonly>
+            <button class="btn btn-primary px-3 fw-bold" type="button" id="copyShareLinkBtn">
+                <i class="fa-regular fa-copy me-1"></i> Kopyala
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

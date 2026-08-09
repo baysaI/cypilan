@@ -86,6 +86,73 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const shareBtns = document.querySelectorAll('.share-btn');
+    shareBtns.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const title = btn.getAttribute('data-title') || document.title;
+            const url = window.location.href;
+
+            const shareUrlInput = document.getElementById('shareUrlInput');
+            if (shareUrlInput) shareUrlInput.value = url;
+
+            const shareWa = document.getElementById('shareWhatsapp');
+            if (shareWa) shareWa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + url)}`;
+
+            const shareFb = document.getElementById('shareFacebook');
+            if (shareFb) shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+
+            const shareTg = document.getElementById('shareTelegram');
+            if (shareTg) shareTg.href = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+
+            const shareTw = document.getElementById('shareTwitter');
+            if (shareTw) shareTw.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title, url });
+                    return;
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.log('Native share error, falling back to modal:', err);
+                    } else {
+                        return;
+                    }
+                }
+            }
+
+            const shareModalEl = document.getElementById('shareModal');
+            if (shareModalEl && typeof bootstrap !== 'undefined') {
+                const modal = new bootstrap.Modal(shareModalEl);
+                modal.show();
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('İlan bağlantısı panoya kopyalandı!', 'success');
+                }).catch(() => {
+                    showToast(url, 'info');
+                });
+            }
+        });
+    });
+
+    const copyShareBtn = document.getElementById('copyShareLinkBtn');
+    if (copyShareBtn) {
+        copyShareBtn.addEventListener('click', () => {
+            const input = document.getElementById('shareUrlInput');
+            const url = input ? input.value : window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('İlan bağlantısı panoya kopyalandı!', 'success');
+                const modalEl = document.getElementById('shareModal');
+                if (modalEl && typeof bootstrap !== 'undefined') {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                }
+            });
+        });
+    }
+
     const forms = document.querySelectorAll('.needs-validation');
     Array.from(forms).forEach(form => {
         form.addEventListener('submit', event => {

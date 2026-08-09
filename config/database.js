@@ -86,5 +86,6 @@ module.exports = {
   getDb,
   saveDb,
   initialize,
+  applyColumnMigrations,
   seed
 };
