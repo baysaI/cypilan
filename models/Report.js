@@ -18,9 +18,13 @@ class Report {
     return USER_REASONS;
   }
 
-  static async create({ reporter_id, listing_id = null, reported_user_id = null, message_id = null, reason, description = null }) {
+  static async create({ reporter_id, type = 'listing', listing_id = null, reported_user_id = null, message_id = null, reason, description = null }) {
     if (!REASONS.includes(reason)) {
       throw new Error(`Invalid reason: ${reason}`);
+    }
+
+    if (!['listing', 'user'].includes(type)) {
+      throw new Error(`Invalid report type: ${type}`);
     }
 
     if (listing_id == null && reported_user_id == null) {
@@ -29,9 +33,9 @@ class Report {
 
     const db = await getDb();
     const stmt = db.prepare(
-      'INSERT INTO reports (reporter_id, listing_id, reported_user_id, message_id, reason, description) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO reports (reporter_id, type, listing_id, reported_user_id, message_id, reason, description) VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
-    stmt.run([reporter_id, listing_id, reported_user_id, message_id, reason, description]);
+    stmt.run([reporter_id, type, listing_id, reported_user_id, message_id, reason, description]);
     stmt.free();
 
     const idRes = db.exec('SELECT last_insert_rowid() as id');
@@ -39,16 +43,16 @@ class Report {
     return idRes[0].values[0][0];
   }
 
-  static async hasPending({ reporter_id, listing_id = null, reported_user_id = null }) {
+  static async hasPending({ reporter_id, type = 'listing', listing_id = null, reported_user_id = null }) {
     const db = await getDb();
-    let query = "SELECT COUNT(*) as count FROM reports WHERE reporter_id = ? AND status IN ('pending','reviewed')";
-    const params = [reporter_id];
+    let query = "SELECT COUNT(*) as count FROM reports WHERE reporter_id = ? AND status IN ('pending','reviewed') AND COALESCE(type,'listing') = ?";
+    const params = [reporter_id, type];
 
-    if (listing_id != null) {
+    if (type === 'listing') {
       query += ' AND listing_id = ?';
       params.push(listing_id);
     } else {
-      query += ' AND listing_id IS NULL AND reported_user_id = ?';
+      query += ' AND reported_user_id = ?';
       params.push(reported_user_id);
     }
 
@@ -102,6 +106,27 @@ class Report {
     stmt.free();
 
     return { data, total, pages: Math.ceil(total / limit) || 1 };
+  }
+
+  static async findById(id) {
+    const db = await getDb();
+    const stmt = db.prepare(`
+      SELECT r.*, l.title as listing_title, l.slug as listing_slug,
+             u.full_name as reporter_name,
+             ru.full_name as reported_user_name
+      FROM reports r
+      LEFT JOIN listings l ON r.listing_id = l.id
+      LEFT JOIN users u ON r.reporter_id = u.id
+      LEFT JOIN users ru ON r.reported_user_id = ru.id
+      WHERE r.id = ?
+    `);
+    stmt.bind([id]);
+    let row = null;
+    if (stmt.step()) {
+      row = stmt.getAsObject();
+    }
+    stmt.free();
+    return row;
   }
 
   static async updateStatus(id, status, adminNote = null) {

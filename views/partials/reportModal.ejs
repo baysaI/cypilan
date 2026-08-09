@@ -16,6 +16,9 @@ const reasonLabels = {
             <% if (typeof messageId !== 'undefined' && messageId) { %>
                 <input type="hidden" name="message_id" value="<%= messageId %>">
             <% } %>
+            <% if (typeof threadListingId !== 'undefined' && threadListingId) { %>
+                <input type="hidden" name="thread_listing_id" value="<%= threadListingId %>">
+            <% } %>
 
             <div class="modal-header">
                 <h5 class="modal-title"><%= modalTitle %></h5>

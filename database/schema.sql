@@ -125,6 +125,7 @@ CREATE TABLE IF NOT EXISTS payments (
 CREATE TABLE IF NOT EXISTS reports (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   reporter_id INTEGER NOT NULL REFERENCES users(id),
+  type TEXT DEFAULT 'listing' CHECK(type IN ('listing', 'user')),
   listing_id INTEGER REFERENCES listings(id),
   reported_user_id INTEGER REFERENCES users(id),
   message_id INTEGER REFERENCES messages(id),

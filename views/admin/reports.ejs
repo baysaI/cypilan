@@ -65,15 +65,19 @@ const list = (typeof reports !== 'undefined' && reports) ? reports : [];
                         </div>
 
                         <p class="small text-muted mb-2">
-                            <% if (r.listing_id) { %>
+                            <% if (r.type === 'user') { %>
+                                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 me-1">Kullanıcı</span>
+                                <% if (r.listing_slug) { %>
+                                    &middot; sohbet konusu:
+                                    <a href="/listings/<%= r.listing_slug %>" target="_blank" rel="noopener"><%= r.listing_title %></a>
+                                <% } %>
+                            <% } else { %>
                                 <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 me-1">İlan</span>
                                 <% if (r.listing_slug) { %>
                                     <a href="/listings/<%= r.listing_slug %>" target="_blank" rel="noopener"><%= r.listing_title %></a>
                                 <% } else { %>
                                     <em>silinmiş</em>
                                 <% } %>
-                            <% } else { %>
-                                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 me-1">Kullanıcı</span>
                             <% } %>
                             <% if (r.reported_user_id) { %>
                                 &middot; Şikayet edilen:
@@ -84,6 +88,14 @@ const list = (typeof reports !== 'undefined' && reports) ? reports : [];
                             <% } %>
                             &middot; Bildiren: <%= r.reporter_name || 'bilinmiyor' %>
                         </p>
+
+                        <% if (r.reported_user_id && r.type === 'user') { %>
+                            <div class="mb-3">
+                                <a href="/admin/reports/<%= r.id %>/conversation" class="btn btn-sm btn-primary">
+                                    <i class="fa-regular fa-comments me-1"></i>Sohbetin tamamını incele
+                                </a>
+                            </div>
+                        <% } %>
 
                         <% if (r.message_content) { %>
                             <div class="border-start border-3 ps-3 mb-3 small text-muted fst-italic">

@@ -3,6 +3,7 @@ const path = require('path');
 const User = require('../models/User');
 const Listing = require('../models/Listing');
 const Report = require('../models/Report');
+const Message = require('../models/Message');
 
 const PAGE_SIZE = 20;
 
@@ -111,6 +112,44 @@ const reports = async (req, res) => {
         console.error('Admin Reports Error:', error);
         req.flash('error', 'Şikayetler yüklenemedi.');
         res.redirect('/admin');
+    }
+};
+
+const reportConversation = async (req, res) => {
+    try {
+        const report = await Report.findById(parseInt(req.params.id, 10));
+
+        if (!report) {
+            req.flash('error', 'Şikayet bulunamadı.');
+            return res.redirect('/admin/reports');
+        }
+
+        if (!report.reported_user_id) {
+            req.flash('error', 'Bu şikayet bir kullanıcı sohbetine ait değil.');
+            return res.redirect('/admin/reports');
+        }
+
+        const messages = await Message.getConversation(
+            report.reporter_id,
+            report.reported_user_id,
+            report.listing_id != null ? report.listing_id : null
+        );
+
+        const pendingReports = await Report.countPending();
+
+        res.locals.meta.title = 'Şikayet Edilen Sohbet | Admin Paneli';
+        res.render('admin/conversation', {
+            layout: 'admin/layout',
+            report,
+            messages,
+            pendingReports,
+            activePage: 'reports',
+            title: 'Şikayet Edilen Sohbet'
+        });
+    } catch (error) {
+        console.error('Admin Report Conversation Error:', error);
+        req.flash('error', 'Sohbet yüklenemedi.');
+        res.redirect('/admin/reports');
     }
 };
 
@@ -239,6 +278,7 @@ module.exports = {
     users,
     listings,
     reports,
+    reportConversation,
     toggleListingStatus,
     deleteListing,
     toggleUserStatus,

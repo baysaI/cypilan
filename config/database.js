@@ -42,7 +42,8 @@ const saveDb = () => {
 
 const COLUMN_MIGRATIONS = [
   { table: 'users', column: 'show_phone', ddl: 'ALTER TABLE users ADD COLUMN show_phone INTEGER DEFAULT 1' },
-  { table: 'users', column: 'has_password', ddl: 'ALTER TABLE users ADD COLUMN has_password INTEGER DEFAULT 1' }
+  { table: 'users', column: 'has_password', ddl: 'ALTER TABLE users ADD COLUMN has_password INTEGER DEFAULT 1' },
+  { table: 'reports', column: 'type', ddl: "ALTER TABLE reports ADD COLUMN type TEXT DEFAULT 'listing'" }
 ];
 
 const applyColumnMigrations = (db) => {
@@ -64,6 +65,7 @@ const TABLE_REBUILDS = [
       CREATE TABLE reports_migrated (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         reporter_id INTEGER NOT NULL REFERENCES users(id),
+        type TEXT DEFAULT 'listing' CHECK(type IN ('listing', 'user')),
         listing_id INTEGER REFERENCES listings(id),
         reported_user_id INTEGER REFERENCES users(id),
         message_id INTEGER REFERENCES messages(id),
@@ -75,8 +77,8 @@ const TABLE_REBUILDS = [
       )
     `,
     copy: `
-      INSERT INTO reports_migrated (id, reporter_id, listing_id, reason, description, status, admin_note, created_at)
-      SELECT id, reporter_id, listing_id, reason, description, status, admin_note, created_at FROM reports
+      INSERT INTO reports_migrated (id, reporter_id, type, listing_id, reason, description, status, admin_note, created_at)
+      SELECT id, reporter_id, COALESCE(type, 'listing'), listing_id, reason, description, status, admin_note, created_at FROM reports
     `
   }
 ];

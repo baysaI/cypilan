@@ -29,6 +29,7 @@ const reportListing = async (req, res) => {
 
         const already = await Report.hasPending({
             reporter_id: req.session.userId,
+            type: 'listing',
             listing_id: listing.id
         });
 
@@ -39,6 +40,7 @@ const reportListing = async (req, res) => {
 
         await Report.create({
             reporter_id: req.session.userId,
+            type: 'listing',
             listing_id: listing.id,
             reported_user_id: listing.user_id,
             reason,
@@ -57,7 +59,7 @@ const reportListing = async (req, res) => {
 const reportUser = async (req, res) => {
     try {
         const userId = parseInt(req.params.userId, 10);
-        const { reason, description, message_id } = req.body;
+        const { reason, description, message_id, thread_listing_id } = req.body;
 
         if (userId === req.session.userId) {
             req.flash('error', 'Kendinizi şikayet edemezsiniz.');
@@ -77,6 +79,7 @@ const reportUser = async (req, res) => {
 
         const already = await Report.hasPending({
             reporter_id: req.session.userId,
+            type: 'user',
             reported_user_id: userId
         });
 
@@ -85,8 +88,12 @@ const reportUser = async (req, res) => {
             return res.redirect(backTo(req, `/messages/${userId}`));
         }
 
+        const threadListingId = thread_listing_id ? parseInt(thread_listing_id, 10) : null;
+
         await Report.create({
             reporter_id: req.session.userId,
+            type: 'user',
+            listing_id: Number.isInteger(threadListingId) ? threadListingId : null,
             reported_user_id: userId,
             message_id: message_id ? parseInt(message_id, 10) : null,
             reason,

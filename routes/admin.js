@@ -9,6 +9,7 @@ router.get('/', adminController.dashboard);
 router.get('/users', adminController.users);
 router.get('/listings', adminController.listings);
 router.get('/reports', adminController.reports);
+router.get('/reports/:id/conversation', adminController.reportConversation);
 
 router.put('/listings/:id/status', adminController.toggleListingStatus);
 router.delete('/listings/:id', adminController.deleteListing);

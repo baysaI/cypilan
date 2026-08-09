@@ -81,7 +81,8 @@
     modalTitle: 'Kullanıcıyı Şikayet Et',
     modalIntro: `${otherUser.full_name} ile ilgili sorunu bize bildirin. Mesajlaşmanız yöneticiler tarafından incelenebilir.`,
     reasons: ['harassment', 'spam', 'fraud', 'inappropriate', 'other'],
-    messageId: messages.length > 0 ? messages[messages.length - 1].id : null
+    messageId: messages.length > 0 ? messages[messages.length - 1].id : null,
+    threadListingId: listing ? listing.id : null
 }) %>
 
 <style>
