@@ -104,7 +104,21 @@
     "sale": "For Sale",
     "rent": "For Rent",
     "drag_images": "Drag and drop photos or select files",
-    "max_images": "You can upload up to 10 photos"
+    "max_images": "You can upload up to 10 photos",
+    "ad_no": "Ad ID:",
+    "attributes": "Features",
+    "no_images": "No photos for this ad",
+    "click_to_see_phone": "Click to reveal phone number",
+    "login_to_see_phone": "Log in to see phone number",
+    "no_phone_provided": "Seller has not provided a phone number."
+  },
+  "user": {
+    "member": "Member",
+    "business_member": "Business Account",
+    "individual_member": "Individual Account",
+    "agent_member": "Real Estate Agent",
+    "member_since": "Member since",
+    "seller_profile": "Seller's Profile"
   },
   "categories": {
     "real_estate": "Real Estate",
@@ -117,8 +131,8 @@
     "nicosia": "Nicosia",
     "kyrenia": "Kyrenia",
     "famagusta": "Famagusta",
-    "iskele": "Trikomo / Iskele",
-    "guzelyurt": "Morphou / Guzelyurt"
+    "iskele": "Iskele",
+    "guzelyurt": "Guzelyurt"
   },
   "footer": {
     "about": "About Us",
@@ -130,7 +144,7 @@
     "how_to_post": "How to Post an Ad?",
     "safety_tips": "Safety Tips",
     "corporate_membership": "Corporate Membership",
-    "advertise": "Advertise with Us",
+    "advertise": "Advertise",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "cookie_policy": "Cookie Policy",
@@ -154,7 +168,7 @@
   },
   "common": {
     "search": "Search",
-    "detailed_search": "Advanced Search",
+    "detailed_search": "Detailed Search",
     "submit": "Submit",
     "save": "Save",
     "cancel": "Cancel",
@@ -166,7 +180,7 @@
     "loading": "Loading...",
     "no_results": "No results found",
     "error": "An error occurred",
-    "success": "Operation successful",
+    "success": "Success",
     "confirm_delete": "Are you sure you want to delete?",
     "yes": "Yes",
     "no": "No",
@@ -174,6 +188,7 @@
     "all": "All",
     "show_more": "Show More",
     "show_less": "Show Less",
-    "today": "Today"
+    "today": "Today",
+    "share": "Share"
   }
 }

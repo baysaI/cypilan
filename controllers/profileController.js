@@ -29,6 +29,11 @@ const show = async (req, res) => {
         const listings = await Listing.getByUser(userId);
         const stats = await User.getStats(userId);
 
+        user.has_phone = Boolean(user.phone);
+        delete user.phone;
+        delete user.password_hash;
+        delete user.email;
+
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = `${user.full_name} | CYPILAN.COM`;
 

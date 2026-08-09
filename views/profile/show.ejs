@@ -8,29 +8,29 @@
                 <div class="d-flex flex-wrap justify-content-center justify-content-sm-start gap-3 text-muted small">
                     <span>
                         <i class="fa-regular fa-user me-1"></i>
-                        <%= profileUser.role === 'business' ? 'Kurumsal Üye' : (profileUser.role === 'agent' ? 'Emlak Danışmanı' : 'Bireysel Üye') %>
+                        <%= profileUser.role === 'business' ? t('user.business_member') : (profileUser.role === 'agent' ? t('user.agent_member') : t('user.individual_member')) %>
                     </span>
                     <% if (profileUser.created_at) { %>
-                        <span><i class="fa-regular fa-calendar me-1"></i> <%= helpers.formatDate(profileUser.created_at, lang) %>'den beri üye</span>
+                        <span><i class="fa-regular fa-calendar me-1"></i> <%= helpers.formatDate(profileUser.created_at, lang) %> (<%= t('user.member_since') %>)</span>
                     <% } %>
-                    <span><i class="fa-solid fa-list me-1"></i> <%= stats.listingsCount %> ilan</span>
+                    <span><i class="fa-solid fa-list me-1"></i> <%= stats.listingsCount %> <%= t('home.ad_unit') %></span>
                 </div>
                 <% if (profileUser.bio) { %>
                     <p class="text-muted small mt-2 mb-0"><%= profileUser.bio %></p>
                 <% } %>
             </div>
 
-            <% if (profileUser.phone) { %>
-                <a href="tel:<%= profileUser.phone %>" class="btn btn-primary fw-medium flex-shrink-0">
-                    <i class="fa-solid fa-phone me-2"></i><%= profileUser.phone %>
-                </a>
+            <% if (profileUser.has_phone) { %>
+                <span class="text-muted small flex-shrink-0">
+                    <i class="fa-solid fa-lock me-1"></i><%= t('listing.click_to_see_phone') %>
+                </span>
             <% } %>
         </div>
     </div>
 </div>
 
 <div class="container py-4 py-md-5">
-    <h2 class="fs-5 fw-bold mb-3">Yayındaki İlanları</h2>
+    <h2 class="fs-5 fw-bold mb-3"><%= t('home.recent_listings') %></h2>
 
     <% const activeListings = listings.filter(function(l) { return l.status === 'active'; }); %>
 
@@ -45,7 +45,7 @@
     <% } else { %>
         <div class="text-center py-5 bg-white rounded-3 border">
             <i class="fa-solid fa-folder-open fs-1 text-muted mb-3 opacity-50 d-block"></i>
-            <p class="text-muted mb-0">Bu kullanıcının yayında ilanı bulunmuyor.</p>
+            <p class="text-muted mb-0"><%= t('listing.no_listings_desc') %></p>
         </div>
     <% } %>
 </div>

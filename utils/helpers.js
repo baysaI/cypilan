@@ -31,8 +31,17 @@ function parseDate(value) {
 
 function maskPhone(phone) {
   if (!phone || typeof phone !== 'string') return '';
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length < 7) return '••• ••• ••';
+
+  let digits = phone.replace(/\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.startsWith('90') && digits.length > 10) digits = digits.slice(2);
+  else if (digits.startsWith('357') && digits.length > 8) digits = digits.slice(3);
+  if (digits.startsWith('0')) digits = digits.slice(1);
+
+  if (digits.length < 6) return '••• ••• ••';
+  if (digits.length === 10 && digits.startsWith('5')) {
+    return `0${digits.slice(0, 3)} ••• •• ••`;
+  }
   return `${digits.slice(0, 4)} ••• •• ••`;
 }
 
@@ -260,6 +269,23 @@ function paginationHelper(currentPage, totalPages, maxVisiblePages = 5) {
   };
 }
 
+const CITY_TRANSLATIONS = {
+  'Lefkoşa': { tr: 'Lefkoşa', en: 'Nicosia', el: 'Λευκωσία', ru: 'Лефкоша (Никосия)', fa: 'نیکوزیا' },
+  'Girne': { tr: 'Girne', en: 'Kyrenia', el: 'Κερύνεια', ru: 'Гирне (Кирения)', fa: 'گیرنه' },
+  'Gazimağusa': { tr: 'Gazimağusa', en: 'Famagusta', el: 'Αμμόχωστος', ru: 'Газимагуса (Фамагуста)', fa: 'فاماگوستا' },
+  'İskele': { tr: 'İskele', en: 'Iskele', el: 'Τρίκωμο', ru: 'Искеле', fa: 'اسکله' },
+  'Güzelyurt': { tr: 'Güzelyurt', en: 'Guzelyurt', el: 'Μόρφου', ru: 'Гюзельюрт', fa: 'گوزل‌یورت' }
+};
+
+function getCityName(cityName, lang = 'tr') {
+  if (!cityName) return '';
+  const cityObj = CITY_TRANSLATIONS[cityName];
+  if (cityObj) {
+    return cityObj[lang] || cityObj.tr || cityName;
+  }
+  return cityName;
+}
+
 module.exports = {
   formatPrice,
   formatDate,
@@ -269,5 +295,6 @@ module.exports = {
   sanitizeHtml,
   getCurrencySymbol,
   maskPhone,
-  paginationHelper
+  paginationHelper,
+  getCityName
 };

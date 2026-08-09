@@ -24,10 +24,10 @@
                 <div>
                     <h1 class="fs-3 fw-bold mb-2"><%= listing.title %></h1>
                     <div class="d-flex align-items-center text-muted small fw-medium gap-3 flex-wrap">
-                        <span><i class="fa-solid fa-location-dot text-primary me-1"></i> <%= listing.location_city || '-' %><%= listing.location_district ? ', ' + listing.location_district : '' %></span>
+                        <span><i class="fa-solid fa-location-dot text-primary me-1"></i> <%= helpers.getCityName(listing.location_city, lang) || '-' %><%= listing.location_district ? ', ' + listing.location_district : '' %></span>
                         <span><i class="fa-regular fa-clock me-1"></i> <%= helpers.timeAgo(listing.created_at, lang) %></span>
                         <span><i class="fa-regular fa-eye me-1"></i> <%= listing.views_count || 0 %></span>
-                        <span>İlan No: <strong class="text-dark">#<%= listing.id %></strong></span>
+                        <span><%= t('listing.ad_no') %> <strong class="text-dark">#<%= listing.id %></strong></span>
                     </div>
                 </div>
                 <div class="text-end d-none d-md-block">
@@ -52,48 +52,48 @@
                         <% if (imgs.length > 1) { %>
                             <button class="carousel-control-prev" type="button" data-bs-target="#listingCarousel" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon bg-dark bg-opacity-50 rounded-circle p-3" aria-hidden="true"></span>
-                                <span class="visually-hidden">Önceki</span>
+                                <span class="visually-hidden"><%= t('common.previous') %></span>
                             </button>
                             <button class="carousel-control-next" type="button" data-bs-target="#listingCarousel" data-bs-slide="next">
                                 <span class="carousel-control-next-icon bg-dark bg-opacity-50 rounded-circle p-3" aria-hidden="true"></span>
-                                <span class="visually-hidden">Sonraki</span>
+                                <span class="visually-hidden"><%= t('common.next') %></span>
                             </button>
                         <% } %>
                     </div>
                 <% } else { %>
                     <div class="bg-light d-flex flex-column align-items-center justify-content-center text-muted" style="aspect-ratio: 16/10;">
                         <i class="fa-regular fa-image fs-1 mb-2 opacity-50"></i>
-                        <span class="small">Bu ilanda fotoğraf yok</span>
+                        <span class="small"><%= t('listing.no_images') %></span>
                     </div>
                 <% } %>
             </div>
 
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 border-bottom pb-2">Özellikler</h5>
+                    <h5 class="fw-bold mb-4 border-bottom pb-2"><%= t('listing.attributes') %></h5>
                     <div class="row row-cols-2 row-cols-md-3 g-4">
                         <div class="col">
-                            <div class="text-muted small mb-1">Kategori</div>
-                            <div class="fw-bold text-dark"><%= listing.category_name || '-' %></div>
+                            <div class="text-muted small mb-1"><%= t('listing.category') %></div>
+                            <div class="fw-bold text-dark"><%= listing['category_name_' + lang] || listing.category_name || '-' %></div>
                         </div>
                         <div class="col">
-                            <div class="text-muted small mb-1">Şehir</div>
-                            <div class="fw-bold text-dark"><%= listing.location_city || '-' %></div>
+                            <div class="text-muted small mb-1"><%= t('listing.city') %></div>
+                            <div class="fw-bold text-dark"><%= helpers.getCityName(listing.location_city, lang) || '-' %></div>
                         </div>
                         <div class="col">
-                            <div class="text-muted small mb-1">Bölge</div>
+                            <div class="text-muted small mb-1"><%= t('listing.district') %></div>
                             <div class="fw-bold text-dark"><%= listing.location_district || '-' %></div>
                         </div>
                         <div class="col">
-                            <div class="text-muted small mb-1">İlan Tarihi</div>
+                            <div class="text-muted small mb-1"><%= t('listing.date') %></div>
                             <div class="fw-bold text-dark"><%= helpers.formatDate(listing.created_at, lang) %></div>
                         </div>
                         <div class="col">
-                            <div class="text-muted small mb-1">Fiyat</div>
+                            <div class="text-muted small mb-1"><%= t('listing.price') %></div>
                             <div class="fw-bold text-dark"><%= fmt(listing.price, listing.currency) %></div>
                         </div>
                         <div class="col">
-                            <div class="text-muted small mb-1">Görüntülenme</div>
+                            <div class="text-muted small mb-1"><%= t('listing.views') %></div>
                             <div class="fw-bold text-dark"><%= listing.views_count || 0 %></div>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
 
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 border-bottom pb-2">Açıklama</h5>
+                    <h5 class="fw-bold mb-4 border-bottom pb-2"><%= t('listing.description') %></h5>
                     <div class="lh-lg text-dark" style="white-space: pre-line;"><%= listing.description || '' %></div>
                 </div>
             </div>
@@ -112,10 +112,10 @@
         <div class="col-12 col-lg-4">
             <div class="d-none d-lg-flex gap-2 mb-4">
                 <button class="btn btn-outline-primary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2 favorite-btn" data-id="<%= listing.id %>">
-                    <i class="fa-regular fa-heart"></i> Favoriye Al
+                    <i class="fa-regular fa-heart"></i> <%= t('listing.add_favorite') %>
                 </button>
                 <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2">
-                    <i class="fa-solid fa-share-nodes"></i> Paylaş
+                    <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                 </button>
             </div>
 
@@ -125,11 +125,11 @@
                         <img src="<%= listing.seller_avatar || '/img/logo.png' %>" class="rounded-circle border border-3 border-white shadow-sm object-fit-cover bg-light" width="90" height="90" alt="<%= listing.seller_name %>">
                     </div>
 
-                    <h5 class="fw-bold mb-1"><%= listing.seller_company || listing.seller_name || 'Üye' %></h5>
-                    <p class="text-muted small mb-3"><%= listing.seller_role === 'business' ? 'Kurumsal Üye' : 'Bireysel Üye' %></p>
+                    <h5 class="fw-bold mb-1"><%= listing.seller_company || listing.seller_name || t('user.member') %></h5>
+                    <p class="text-muted small mb-3"><%= listing.seller_role === 'business' ? t('user.business_member') : (listing.seller_role === 'agent' ? t('user.agent_member') : t('user.individual_member')) %></p>
 
                     <% if (listing.seller_since) { %>
-                        <p class="small text-muted mb-4"><i class="fa-regular fa-calendar me-1"></i> <%= helpers.formatDate(listing.seller_since, lang) %>'den beri üye</p>
+                        <p class="small text-muted mb-4"><i class="fa-regular fa-calendar me-1"></i> <%= helpers.formatDate(listing.seller_since, lang) %> (<%= t('user.member_since') %>)</p>
                     <% } %>
 
                     <div class="d-grid gap-3">
@@ -144,17 +144,17 @@
                                 </button>
                                 <div class="form-text text-center mt-1" id="phoneHint">
                                     <% if (currentUser) { %>
-                                        Numarayı görmek için tıklayın
+                                        <%= t('listing.click_to_see_phone') %>
                                     <% } else { %>
-                                        Numarayı görmek için giriş yapın
+                                        <%= t('listing.login_to_see_phone') %>
                                     <% } %>
                                 </div>
                             </div>
                         <% } else { %>
-                            <div class="alert alert-light border small mb-0">Satıcı telefon numarası paylaşmamış.</div>
+                            <div class="alert alert-light border small mb-0"><%= t('listing.no_phone_provided') %></div>
                         <% } %>
                         <a href="/profile/<%= listing.user_id %>" class="btn btn-outline-dark rounded-pill fw-medium">
-                            <i class="fa-regular fa-user me-2"></i> Satıcının Profili
+                            <i class="fa-regular fa-user me-2"></i> <%= t('user.seller_profile') %>
                         </a>
                     </div>
                 </div>

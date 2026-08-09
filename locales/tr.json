@@ -104,7 +104,21 @@
     "sale": "Satılık",
     "rent": "Kiralık",
     "drag_images": "Fotoğrafları sürükleyip bırakın veya seçin",
-    "max_images": "En fazla 10 fotoğraf yükleyebilirsiniz"
+    "max_images": "En fazla 10 fotoğraf yükleyebilirsiniz",
+    "ad_no": "İlan No:",
+    "attributes": "Özellikler",
+    "no_images": "Bu ilanda fotoğraf yok",
+    "click_to_see_phone": "Numarayı görmek için tıklayın",
+    "login_to_see_phone": "Numarayı görmek için giriş yapın",
+    "no_phone_provided": "Satıcı telefon numarası paylaşmamış."
+  },
+  "user": {
+    "member": "Üye",
+    "business_member": "Kurumsal Üye",
+    "individual_member": "Bireysel Üye",
+    "agent_member": "Emlak Danışmanı",
+    "member_since": "tarihinden beri üye",
+    "seller_profile": "Satıcının Profili"
   },
   "categories": {
     "real_estate": "Emlak",
@@ -174,6 +188,7 @@
     "all": "Tümü",
     "show_more": "Daha Fazla Göster",
     "show_less": "Daha Az Göster",
-    "today": "Bugün"
+    "today": "Bugün",
+    "share": "Paylaş"
   }
 }
