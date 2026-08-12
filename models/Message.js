@@ -1,27 +1,21 @@
-const { getDb, saveDb } = require('../config/database');
+const { getDb } = require('../config/database');
 
 class Message {
   static async create(messageData) {
-    const db = await getDb();
+    const db = getDb();
     const { sender_id, receiver_id, content } = messageData;
     const listing_id = messageData.listing_id != null ? messageData.listing_id : null;
 
-    const stmt = db.prepare(`
+    const result = db.prepare(`
       INSERT INTO messages (sender_id, receiver_id, listing_id, content)
       VALUES (?, ?, ?, ?)
-    `);
+    `).run([sender_id, receiver_id, listing_id, content]);
 
-    stmt.run([sender_id, receiver_id, listing_id, content]);
-    stmt.free();
-
-    const idRes = db.exec("SELECT last_insert_rowid() as id");
-    const lastId = idRes[0].values[0][0];
-    saveDb();
-    return lastId;
+    return Number(result.lastInsertRowid);
   }
 
   static async getConversation(userId1, userId2, listingId = null, limit = 200, offset = 0) {
-    const db = await getDb();
+    const db = getDb();
     let query = `
       SELECT m.*,
              s.full_name as sender_name,
@@ -44,19 +38,12 @@ class Message {
     query += ' ORDER BY m.created_at ASC, m.id ASC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
-    const stmt = db.prepare(query);
-    stmt.bind(params);
-    const results = [];
-    while (stmt.step()) {
-      results.push(stmt.getAsObject());
-    }
-    stmt.free();
-    return results;
+    return db.prepare(query).all(params);
   }
 
   static async getInbox(userId) {
-    const db = await getDb();
-    const stmt = db.prepare(`
+    const db = getDb();
+    return db.prepare(`
       SELECT m.id, m.content, m.created_at, m.listing_id, m.sender_id,
              CASE WHEN m.sender_id = ? THEN m.receiver_id ELSE m.sender_id END as other_party_id,
              CASE WHEN m.sender_id = ? THEN r.full_name ELSE s.full_name END as other_party_name,
@@ -82,19 +69,11 @@ class Message {
           COALESCE(listing_id, 0)
       )
       ORDER BY m.created_at DESC, m.id DESC
-    `);
-
-    stmt.bind([userId, userId, userId, userId, userId, userId, userId]);
-    const results = [];
-    while (stmt.step()) {
-      results.push(stmt.getAsObject());
-    }
-    stmt.free();
-    return results;
+    `).all([userId, userId, userId, userId, userId, userId, userId]);
   }
 
   static async markAsRead(receiverId, senderId, listingId = null) {
-    const db = await getDb();
+    const db = getDb();
     let query = 'UPDATE messages SET is_read = 1 WHERE receiver_id = ? AND sender_id = ? AND is_read = 0';
     const params = [receiverId, senderId];
 
@@ -105,25 +84,12 @@ class Message {
       query += ' AND listing_id IS NULL';
     }
 
-    const stmt = db.prepare(query);
-    stmt.run(params);
-    stmt.free();
-
-    const changesRes = db.exec("SELECT changes() as changes");
-    const changes = changesRes[0].values[0][0];
-    if (changes > 0) saveDb();
-    return changes;
+    return db.prepare(query).run(params).changes;
   }
 
   static async getUnreadCount(userId) {
-    const db = await getDb();
-    const stmt = db.prepare('SELECT COUNT(*) as count FROM messages WHERE receiver_id = ? AND is_read = 0');
-    stmt.bind([userId]);
-    let count = 0;
-    if (stmt.step()) {
-      count = stmt.getAsObject().count;
-    }
-    stmt.free();
+    const db = getDb();
+    const { count } = db.prepare('SELECT COUNT(*) as count FROM messages WHERE receiver_id = ? AND is_read = 0').get([userId]);
     return count;
   }
 }

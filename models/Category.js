@@ -2,48 +2,31 @@ const { getDb } = require('../config/database');
 
 class Category {
   static async getAll() {
-    const db = await getDb();
-    const stmt = db.prepare('SELECT * FROM categories ORDER BY sort_order ASC');
-    const results = [];
-    while (stmt.step()) {
-      results.push(stmt.getAsObject());
-    }
-    stmt.free();
-    return results;
+    const db = getDb();
+    return db.prepare('SELECT * FROM categories ORDER BY sort_order ASC').all();
   }
 
   static async getBySlug(slug) {
     if (!slug) return null;
-    const db = await getDb();
+    const db = getDb();
     const isNum = typeof slug === 'number' || /^\d+$/.test(slug);
     const numId = isNum ? parseInt(slug, 10) : -1;
-    const stmt = db.prepare(`
+
+    return db.prepare(`
       SELECT * FROM categories
       WHERE slug = ?
          OR (slug = 'usta-hizmetler' AND ? = 'ustalar')
          OR (id = ? AND ? = 1)
-    `);
-    stmt.bind([String(slug), String(slug), numId, isNum ? 1 : 0]);
-    let row = null;
-    if (stmt.step()) {
-      row = stmt.getAsObject();
-    }
-    stmt.free();
-    return row;
+    `).get([String(slug), String(slug), numId, isNum ? 1 : 0]) || null;
   }
 
   static async getRootSlug(categoryId) {
-    const db = await getDb();
+    const db = getDb();
+    const stmt = db.prepare('SELECT id, slug, parent_id FROM categories WHERE id = ?');
     let currentId = categoryId;
 
     for (let depth = 0; depth < 10; depth++) {
-      const stmt = db.prepare('SELECT id, slug, parent_id FROM categories WHERE id = ?');
-      stmt.bind([currentId]);
-      let row = null;
-      if (stmt.step()) {
-        row = stmt.getAsObject();
-      }
-      stmt.free();
+      const row = stmt.get([currentId]);
 
       if (!row) return null;
       if (row.parent_id == null) return row.slug;
@@ -58,56 +41,32 @@ class Category {
     const cat = await this.getBySlug(categoryIdentifier);
     if (!cat) return [];
 
-    const db = await getDb();
-    const stmt = db.prepare('SELECT id FROM categories WHERE id = ? OR parent_id = ?');
-    stmt.bind([cat.id, cat.id]);
-    const ids = [];
-    while (stmt.step()) {
-      ids.push(stmt.getAsObject().id);
-    }
-    stmt.free();
-    return ids;
+    const db = getDb();
+    return db.prepare('SELECT id FROM categories WHERE id = ? OR parent_id = ?')
+      .all([cat.id, cat.id])
+      .map(row => row.id);
   }
 
   static async getMainCategoriesWithCount() {
-    const db = await getDb();
-    const stmt = db.prepare(`
+    const db = getDb();
+    return db.prepare(`
       SELECT c.*, COUNT(l.id) as listing_count
       FROM categories c
       LEFT JOIN listings l ON (l.category_id = c.id OR l.category_id IN (SELECT id FROM categories WHERE parent_id = c.id)) AND l.status = 'active'
       WHERE c.parent_id IS NULL AND c.is_active = 1
       GROUP BY c.id
       ORDER BY c.sort_order ASC
-    `);
-    const results = [];
-    while (stmt.step()) {
-      results.push(stmt.getAsObject());
-    }
-    stmt.free();
-    return results;
+    `).all();
   }
 
   static async getMainCategories() {
-    const db = await getDb();
-    const stmt = db.prepare('SELECT * FROM categories WHERE parent_id IS NULL AND is_active = 1 ORDER BY sort_order ASC');
-    const results = [];
-    while (stmt.step()) {
-      results.push(stmt.getAsObject());
-    }
-    stmt.free();
-    return results;
+    const db = getDb();
+    return db.prepare('SELECT * FROM categories WHERE parent_id IS NULL AND is_active = 1 ORDER BY sort_order ASC').all();
   }
 
   static async getSubcategories(parentId) {
-    const db = await getDb();
-    const stmt = db.prepare('SELECT * FROM categories WHERE parent_id = ? AND is_active = 1 ORDER BY sort_order ASC');
-    stmt.bind([parentId]);
-    const results = [];
-    while (stmt.step()) {
-      results.push(stmt.getAsObject());
-    }
-    stmt.free();
-    return results;
+    const db = getDb();
+    return db.prepare('SELECT * FROM categories WHERE parent_id = ? AND is_active = 1 ORDER BY sort_order ASC').all([parentId]);
   }
 
   static async getTree() {

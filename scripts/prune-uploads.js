@@ -2,7 +2,7 @@
 // references any more. Dry run by default.
 const fs = require('fs');
 const path = require('path');
-const initSqlJs = require('sql.js');
+const Database = require('better-sqlite3');
 
 const rootDir = path.resolve(__dirname, '..');
 const uploadDir = path.join(rootDir, 'public', 'uploads', 'listings');
@@ -25,12 +25,10 @@ const formatSize = (bytes) => (bytes < 1024 * 1024
     process.exit(1);
   }
 
-  const SQL = await initSqlJs();
-  const db = new SQL.Database(fs.readFileSync(dbPath));
-
-  const result = db.exec('SELECT image_url FROM listing_images');
+  const db = new Database(dbPath, { readonly: true });
   const referenced = new Set(
-    (result[0] ? result[0].values : []).map((row) => path.basename(String(row[0])))
+    db.prepare('SELECT image_url FROM listing_images').all()
+      .map((row) => path.basename(String(row.image_url)))
   );
   db.close();
 

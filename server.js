@@ -4,13 +4,13 @@ const express = require('express');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 const session = require('express-session');
-const MemoryStore = require('memorystore')(session);
+const SqliteStore = require('better-sqlite3-session-store')(session);
 const helmet = require('helmet');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
-const { initialize, seed, getDb } = require('./config/database');
+const { initialize, seed, getDb, closeDb } = require('./config/database');
 const seoMiddleware = require('./middlewares/seo');
 const i18nMiddleware = require('./middlewares/i18n');
 const { setUserLocal } = require('./middlewares/auth');
@@ -67,9 +67,12 @@ app.use(express.static(path.join(__dirname, 'public'), {
   etag: true
 }));
 
+// Sessions live in the database rather than in memory, so a restart no longer
+// signs everybody out and a second worker sees the same sessions.
 app.use(session({
-  store: new MemoryStore({
-    checkPeriod: 86400000
+  store: new SqliteStore({
+    client: getDb(),
+    expired: { clear: true, intervalMs: 15 * 60 * 1000 }
   }),
   secret: SESSION_SECRET || 'cypilan-development-only-secret',
   resave: false,
@@ -197,7 +200,7 @@ async function startServer() {
     await sweepExpiredListings();
     setInterval(sweepExpiredListings, 24 * 60 * 60 * 1000).unref();
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log('');
       console.log('╔══════════════════════════════════════════════╗');
       console.log('║                                              ║');
@@ -209,6 +212,18 @@ async function startServer() {
       console.log('╚══════════════════════════════════════════════╝');
       console.log('');
     });
+
+    // Closing the database checkpoints the write-ahead log, so a restart never
+    // leaves recent writes stranded in the -wal file.
+    const shutdown = (signal) => {
+      console.log(`\n${signal} alındı, kapatılıyor...`);
+      server.close(() => {
+        closeDb();
+        process.exit(0);
+      });
+    };
+
+    ['SIGINT', 'SIGTERM'].forEach((signal) => process.on(signal, () => shutdown(signal)));
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);

@@ -1,4 +1,4 @@
-const { getDb, saveDb } = require('../config/database');
+const { getDb } = require('../config/database');
 
 const LISTING_REASONS = ['wrong_category', 'misleading_price', 'missing_photos', 'spam', 'fraud', 'inappropriate', 'other'];
 const USER_REASONS = ['harassment', 'spam', 'fraud', 'inappropriate', 'other'];
@@ -31,20 +31,16 @@ class Report {
       throw new Error('A report needs either a listing or a user target');
     }
 
-    const db = await getDb();
-    const stmt = db.prepare(
+    const db = getDb();
+    const result = db.prepare(
       'INSERT INTO reports (reporter_id, type, listing_id, reported_user_id, message_id, reason, description) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    );
-    stmt.run([reporter_id, type, listing_id, reported_user_id, message_id, reason, description]);
-    stmt.free();
+    ).run([reporter_id, type, listing_id, reported_user_id, message_id, reason, description]);
 
-    const idRes = db.exec('SELECT last_insert_rowid() as id');
-    saveDb();
-    return idRes[0].values[0][0];
+    return Number(result.lastInsertRowid);
   }
 
   static async hasPending({ reporter_id, type = 'listing', listing_id = null, reported_user_id = null }) {
-    const db = await getDb();
+    const db = getDb();
     let query = "SELECT COUNT(*) as count FROM reports WHERE reporter_id = ? AND status IN ('pending','reviewed') AND COALESCE(type,'listing') = ?";
     const params = [reporter_id, type];
 
@@ -56,18 +52,12 @@ class Report {
       params.push(reported_user_id);
     }
 
-    const stmt = db.prepare(query);
-    stmt.bind(params);
-    let count = 0;
-    if (stmt.step()) {
-      count = stmt.getAsObject().count;
-    }
-    stmt.free();
+    const { count } = db.prepare(query).get(params);
     return count > 0;
   }
 
   static async findAll(filters = {}, page = 1, limit = 20) {
-    const db = await getDb();
+    const db = getDb();
     let where = ' WHERE 1=1';
     const params = [];
 
@@ -76,16 +66,10 @@ class Report {
       params.push(filters.status);
     }
 
-    const countStmt = db.prepare(`SELECT COUNT(*) as total FROM reports r${where}`);
-    countStmt.bind(params);
-    let total = 0;
-    if (countStmt.step()) {
-      total = countStmt.getAsObject().total;
-    }
-    countStmt.free();
+    const { total } = db.prepare(`SELECT COUNT(*) as total FROM reports r${where}`).get(params);
 
     const offset = (page - 1) * limit;
-    const stmt = db.prepare(`
+    const data = db.prepare(`
       SELECT r.*, l.title as listing_title, l.slug as listing_slug, l.status as listing_status,
              u.full_name as reporter_name, u.email as reporter_email,
              ru.full_name as reported_user_name, ru.email as reported_user_email,
@@ -97,20 +81,14 @@ class Report {
       LEFT JOIN users ru ON r.reported_user_id = ru.id
       LEFT JOIN messages m ON r.message_id = m.id
       ${where} ORDER BY r.created_at DESC LIMIT ? OFFSET ?
-    `);
-    stmt.bind([...params, limit, offset]);
-    const data = [];
-    while (stmt.step()) {
-      data.push(stmt.getAsObject());
-    }
-    stmt.free();
+    `).all([...params, limit, offset]);
 
     return { data, total, pages: Math.ceil(total / limit) || 1 };
   }
 
   static async findById(id) {
-    const db = await getDb();
-    const stmt = db.prepare(`
+    const db = getDb();
+    return db.prepare(`
       SELECT r.*, l.title as listing_title, l.slug as listing_slug,
              u.full_name as reporter_name,
              ru.full_name as reported_user_name
@@ -119,14 +97,7 @@ class Report {
       LEFT JOIN users u ON r.reporter_id = u.id
       LEFT JOIN users ru ON r.reported_user_id = ru.id
       WHERE r.id = ?
-    `);
-    stmt.bind([id]);
-    let row = null;
-    if (stmt.step()) {
-      row = stmt.getAsObject();
-    }
-    stmt.free();
-    return row;
+    `).get([id]) || null;
   }
 
   static async updateStatus(id, status, adminNote = null) {
@@ -134,25 +105,14 @@ class Report {
       throw new Error(`Invalid status: ${status}`);
     }
 
-    const db = await getDb();
-    const stmt = db.prepare('UPDATE reports SET status = ?, admin_note = ? WHERE id = ?');
-    stmt.run([status, adminNote, id]);
-    stmt.free();
-
-    const changesRes = db.exec('SELECT changes() as changes');
-    const changes = changesRes[0].values[0][0];
-    if (changes > 0) saveDb();
-    return changes > 0;
+    const db = getDb();
+    return db.prepare('UPDATE reports SET status = ?, admin_note = ? WHERE id = ?')
+      .run([status, adminNote, id]).changes > 0;
   }
 
   static async countPending() {
-    const db = await getDb();
-    const stmt = db.prepare("SELECT COUNT(*) as count FROM reports WHERE status = 'pending'");
-    let count = 0;
-    if (stmt.step()) {
-      count = stmt.getAsObject().count;
-    }
-    stmt.free();
+    const db = getDb();
+    const { count } = db.prepare("SELECT COUNT(*) as count FROM reports WHERE status = 'pending'").get();
     return count;
   }
 }
