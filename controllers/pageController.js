@@ -53,7 +53,7 @@ const cookiePolicy = (req, res) => {
 const pricing = async (req, res, next) => {
     try {
         res.locals.meta = res.locals.meta || {};
-        res.locals.meta.title = 'İlan Paketleri';
+        res.locals.meta.title = res.locals.t('footer.pricing');
 
         // Users are sent here when they run out of free listings, so the page has
         // to know whether that is why they arrived — otherwise its call to action
@@ -77,7 +77,7 @@ const pricing = async (req, res, next) => {
             paidTiersLive: listingPolicy.PAID_TIERS_LIVE,
             supportEmail: appConfig.app.supportEmail,
             quota,
-            title: 'İlan Paketleri'
+            title: res.locals.t('footer.pricing')
         });
     } catch (error) {
         console.error('Pricing Page Error:', error);

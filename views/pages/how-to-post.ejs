@@ -55,8 +55,8 @@
 
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4 p-md-5">
-            <h2 class="fs-4 fw-bold mb-2">İlan vermek ücretli mi?</h2>
-            <p class="text-muted mb-4">Kategoriye ve kullanıcı tipine göre değişir. Özet:</p>
+            <h2 class="fs-4 fw-bold mb-2"><%= t('pages.how_to_post.pricing_title') %></h2>
+            <p class="text-muted mb-4"><%= t('pages.how_to_post.pricing_intro') %></p>
 
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
@@ -66,49 +66,39 @@
                             <i class="fa-solid fa-car"></i>
                             <i class="fa-solid fa-couch"></i>
                         </div>
-                        <h6 class="fw-bold mb-1">Emlak, Vasıta, İkinci El</h6>
-                        <p class="text-muted small mb-0">
-                            Bireysel kullanıcılar için <strong>ilk 3 ilan ücretsiz.</strong>
-                            Sonrasında ilan paketi veya ilan başına ücret uygulanır.
-                        </p>
+                        <h6 class="fw-bold mb-1"><%= t('pages.how_to_post.goods_title') %></h6>
+                        <p class="text-muted small mb-0"><%- t('pages.how_to_post.goods_body') %></p>
                     </div>
                 </div>
 
                 <div class="col-md-4">
                     <div class="border border-success rounded-4 p-3 h-100">
                         <div class="mb-2"><i class="fa-solid fa-screwdriver-wrench text-success"></i></div>
-                        <h6 class="fw-bold mb-1">Usta &amp; Hizmetler</h6>
-                        <p class="text-muted small mb-0">
-                            <strong class="text-success">Tamamen ücretsiz, komisyonsuz.</strong>
-                            Yalnızca üst sırada veya ana sayfada öne çıkmak isterseniz ücretlidir.
-                        </p>
+                        <h6 class="fw-bold mb-1"><%= t('nav.services') %></h6>
+                        <p class="text-muted small mb-0"><%- t('pages.how_to_post.trades_body') %></p>
                     </div>
                 </div>
 
                 <div class="col-md-4">
                     <div class="border border-success rounded-4 p-3 h-100">
                         <div class="mb-2"><i class="fa-solid fa-briefcase text-success"></i></div>
-                        <h6 class="fw-bold mb-1">İş Arayanlar</h6>
-                        <p class="text-muted small mb-0">
-                            Profil, CV ve ilan oluşturmak <strong class="text-success">tamamen ücretsiz.</strong>
-                            İşverenler için abonelik veya ilan başına ücret uygulanır.
-                        </p>
+                        <h6 class="fw-bold mb-1"><%= t('pages.how_to_post.jobseekers_title') %></h6>
+                        <p class="text-muted small mb-0"><%- t('pages.how_to_post.jobseekers_body') %></p>
                     </div>
                 </div>
             </div>
 
             <a href="/ilan-paketleri" class="btn btn-outline-primary rounded-pill px-4 fw-medium">
-                Tüm paketleri ve ücretlendirmeyi gör
+                <%= t('pages.how_to_post.see_all_packages') %>
             </a>
         </div>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4 p-md-5">
-            <h2 class="fs-4 fw-bold mb-2">İlan kuralları</h2>
+            <h2 class="fs-4 fw-bold mb-2"><%= t('pages.how_to_post.rules_title') %></h2>
             <p class="text-muted mb-4">
-                Platformdaki kaliteyi korumak için ilanlar moderasyondan geçer.
-                Aşağıdaki kurallara uymayan ilanlar yayına alınmaz veya kaldırılır.
+                <%= t('pages.how_to_post.rules_intro') %>
             </p>
 
             <div class="row g-3">
@@ -116,8 +106,8 @@
                     <div class="d-flex gap-3">
                         <i class="fa-solid fa-camera text-danger mt-1"></i>
                         <div>
-                            <h6 class="fw-bold mb-1">Fotoğrafsız ilan kabul edilmez</h6>
-                            <p class="text-muted small mb-0">Emlak, Vasıta ve İkinci El ilanlarında en az 1 gerçek fotoğraf zorunludur.</p>
+                            <h6 class="fw-bold mb-1"><%= t('pages.how_to_post.rule_photo_title') %></h6>
+                            <p class="text-muted small mb-0"><%= t('pages.how_to_post.rule_photo_body') %></p>
                         </div>
                     </div>
                 </div>
@@ -126,8 +116,8 @@
                     <div class="d-flex gap-3">
                         <i class="fa-solid fa-folder-tree text-danger mt-1"></i>
                         <div>
-                            <h6 class="fw-bold mb-1">Doğru kategori seçin</h6>
-                            <p class="text-muted small mb-0">Yanlış kategoriye açılan ilanlar kaldırılır.</p>
+                            <h6 class="fw-bold mb-1"><%= t('pages.how_to_post.rule_category_title') %></h6>
+                            <p class="text-muted small mb-0"><%= t('pages.how_to_post.rule_category_body') %></p>
                         </div>
                     </div>
                 </div>
@@ -136,8 +126,8 @@
                     <div class="d-flex gap-3">
                         <i class="fa-solid fa-tag text-danger mt-1"></i>
                         <div>
-                            <h6 class="fw-bold mb-1">Yanıltıcı fiyat yasak</h6>
-                            <p class="text-muted small mb-0">Gerçek satış fiyatını yazın. Dikkat çekmek için düşük fiyat girmek yasaktır.</p>
+                            <h6 class="fw-bold mb-1"><%= t('pages.how_to_post.rule_price_title') %></h6>
+                            <p class="text-muted small mb-0"><%= t('pages.how_to_post.rule_price_body') %></p>
                         </div>
                     </div>
                 </div>
@@ -146,8 +136,8 @@
                     <div class="d-flex gap-3">
                         <i class="fa-solid fa-align-left text-danger mt-1"></i>
                         <div>
-                            <h6 class="fw-bold mb-1">Eksik bilgi kabul edilmez</h6>
-                            <p class="text-muted small mb-0">Açıklama en az 20 karakter olmalı, konum ve iletişim bilgisi eksiksiz girilmelidir.</p>
+                            <h6 class="fw-bold mb-1"><%= t('pages.how_to_post.rule_missing_title') %></h6>
+                            <p class="text-muted small mb-0"><%= t('pages.how_to_post.rule_missing_body') %></p>
                         </div>
                     </div>
                 </div>
@@ -156,8 +146,8 @@
                     <div class="d-flex gap-3">
                         <i class="fa-solid fa-money-bill-wave text-primary mt-1"></i>
                         <div>
-                            <h6 class="fw-bold mb-1">Para birimi</h6>
-                            <p class="text-muted small mb-0">Fiyatlar Türk Lirası (₺) veya İngiliz Sterlini (£) olarak girilebilir.</p>
+                            <h6 class="fw-bold mb-1"><%= t('pages.how_to_post.rule_currency_title') %></h6>
+                            <p class="text-muted small mb-0"><%= t('pages.how_to_post.rule_currency_body') %></p>
                         </div>
                     </div>
                 </div>
@@ -166,8 +156,8 @@
                     <div class="d-flex gap-3">
                         <i class="fa-solid fa-flag text-primary mt-1"></i>
                         <div>
-                            <h6 class="fw-bold mb-1">Kural dışı ilanı bildirin</h6>
-                            <p class="text-muted small mb-0">Her ilan sayfasındaki "Şikayet et" bağlantısıyla bize ulaştırabilirsiniz.</p>
+                            <h6 class="fw-bold mb-1"><%= t('pages.how_to_post.rule_report_title') %></h6>
+                            <p class="text-muted small mb-0"><%= t('pages.how_to_post.rule_report_body') %></p>
                         </div>
                     </div>
                 </div>

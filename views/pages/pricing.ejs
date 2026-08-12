@@ -2,27 +2,27 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0 small">
             <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="fa-solid fa-house"></i> <%= t('nav.home') %></a></li>
-            <li class="breadcrumb-item active fw-medium" aria-current="page">İlan Paketleri</li>
+            <li class="breadcrumb-item active fw-medium" aria-current="page"><%= t('footer.pricing') %></li>
         </ol>
     </nav>
 
     <div class="text-center mx-auto mb-5" style="max-width: 720px;">
-        <span class="badge bg-accent text-white rounded-pill px-3 py-2 mb-3">İLAN PAKETLERİ</span>
-        <h1 class="display-6 fw-bold mb-3">Standart, Plus &amp; Premium Paylaşım</h1>
-        <p class="text-muted lead fs-6">Görünürlüğünüzü artırın, alım satımı hızlandırın.</p>
+        <span class="badge bg-accent rounded-pill px-3 py-2 mb-3"><%= t('pages.pricing.badge') %></span>
+        <h1 class="display-6 fw-bold mb-3"><%= t('pages.pricing.title') %></h1>
+        <p class="text-muted lead fs-6"><%= t('pages.pricing.subtitle') %></p>
     </div>
 
     <div class="row g-4 mb-5">
         <% packages.forEach(function(p) { %>
             <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center <%= p.highlighted ? 'bg-accent text-white' : '' %>">
-                    <h3 class="fw-bold mb-3 <%= p.highlighted ? 'text-white' : '' %>"><%= p.name %></h3>
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center <%= p.highlighted ? 'bg-accent' : '' %>">
+                    <h3 class="fw-bold mb-3"><%= p.name %></h3>
                     <div class="mb-3">
                         <% for (let i = 0; i < p.stars; i++) { %>
                             <i class="fa-solid fa-star <%= p.highlighted ? 'text-dark' : 'text-warning' %>"></i>
                         <% } %>
                     </div>
-                    <p class="<%= p.highlighted ? 'text-white' : 'text-muted' %> small mb-0"><%= p.summary %></p>
+                    <p class="<%= p.highlighted ? '' : 'text-muted' %> small mb-0"><%= t('pages.pricing.pkg_' + p.key) %></p>
                 </div>
             </div>
         <% }); %>
@@ -32,14 +32,14 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body d-flex align-items-center gap-3 p-4">
-                    <div class="rounded-circle bg-accent text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                    <div class="rounded-circle bg-accent d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
                         <i class="fa-solid fa-screwdriver-wrench"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <h6 class="fw-bold mb-1">Usta &amp; Hizmet İlanları</h6>
-                        <p class="text-muted small mb-0">Her zaman ücretsiz, komisyonsuz. Emeği desteklemek için hizmet ilanı oluşturmak tamamen bedava.</p>
+                        <h6 class="fw-bold mb-1"><%= t('pages.pricing.trades_title') %></h6>
+                        <p class="text-muted small mb-0"><%= t('pages.pricing.trades_body') %></p>
                     </div>
-                    <span class="badge bg-success rounded-pill px-3 py-2 flex-shrink-0">ÜCRETSİZ</span>
+                    <span class="badge bg-success rounded-pill px-3 py-2 flex-shrink-0"><%= t('pages.pricing.free_badge') %></span>
                 </div>
             </div>
         </div>
@@ -47,14 +47,14 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body d-flex align-items-center gap-3 p-4">
-                    <div class="rounded-circle bg-accent text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                    <div class="rounded-circle bg-accent d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
                         <i class="fa-solid fa-briefcase"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <h6 class="fw-bold mb-1">İş Arayan CV &amp; Profili</h6>
-                        <p class="text-muted small mb-0">Her zaman ücretsiz, sınırsız başvuru. İş arayanlardan hiçbir ücret alınmaz.</p>
+                        <h6 class="fw-bold mb-1"><%= t('pages.pricing.jobseeker_title') %></h6>
+                        <p class="text-muted small mb-0"><%= t('pages.pricing.jobseeker_body') %></p>
                     </div>
-                    <span class="badge bg-success rounded-pill px-3 py-2 flex-shrink-0">ÜCRETSİZ</span>
+                    <span class="badge bg-success rounded-pill px-3 py-2 flex-shrink-0"><%= t('pages.pricing.free_badge') %></span>
                 </div>
             </div>
         </div>
@@ -62,50 +62,48 @@
 
     <div class="card border-0 shadow-sm rounded-4 mb-5">
         <div class="card-body p-4 p-md-5">
-            <h2 class="fs-5 fw-bold mb-4">Kimden ne zaman ücret alınır?</h2>
+            <h2 class="fs-5 fw-bold mb-4"><%= t('pages.pricing.table_title') %></h2>
 
             <div class="table-responsive">
                 <table class="table align-middle">
                     <thead class="table-light small text-muted">
                         <tr>
-                            <th>Kullanıcı</th>
-                            <th>Kategori</th>
-                            <th>Ücretlendirme</th>
+                            <th><%= t('pages.pricing.col_user') %></th>
+                            <th><%= t('listing.category') %></th>
+                            <th><%= t('pages.pricing.col_pricing') %></th>
                         </tr>
                     </thead>
                     <tbody class="small">
                         <tr>
-                            <td class="fw-medium">Bireysel</td>
-                            <td>Emlak, Vasıta, İkinci El</td>
-                            <td>İlk <strong><%= freeQuota %> ilan ücretsiz</strong>, sonrasında paket veya ilan başına ücret</td>
+                            <td class="fw-medium"><%= t('pages.pricing.row_individual') %></td>
+                            <td><%= t('pages.pricing.row_individual_cats') %></td>
+                            <td><%- t('pages.pricing.row_individual_price', { quota: freeQuota }) %></td>
                         </tr>
                         <tr>
-                            <td class="fw-medium">İş arayan</td>
-                            <td>Profil, CV, iş ilanı</td>
-                            <td><span class="text-success fw-medium">Tamamen ücretsiz</span></td>
+                            <td class="fw-medium"><%= t('pages.pricing.row_jobseeker') %></td>
+                            <td><%= t('pages.pricing.row_jobseeker_cats') %></td>
+                            <td><span class="text-success fw-medium"><%= t('pages.pricing.row_jobseeker_price') %></span></td>
                         </tr>
                         <tr>
-                            <td class="fw-medium">Usta / Hizmet sağlayıcı</td>
-                            <td>Usta &amp; Hizmetler</td>
-                            <td><span class="text-success fw-medium">Ücretsiz.</span> Yalnızca üst sıralarda veya ana sayfada öne çıkmak isterseniz ücretlidir</td>
+                            <td class="fw-medium"><%= t('pages.pricing.row_trades') %></td>
+                            <td><%= t('nav.services') %></td>
+                            <td><%- t('pages.pricing.row_trades_price') %></td>
                         </tr>
                         <tr>
-                            <td class="fw-medium">Emlakçı / Galeri</td>
-                            <td>Emlak, Vasıta</td>
-                            <td>Kurumsal panel, aylık/yıllık paket, premium üyelik veya ilan başına ücret</td>
+                            <td class="fw-medium"><%= t('pages.pricing.row_agency') %></td>
+                            <td><%= t('pages.pricing.row_agency_cats') %></td>
+                            <td><%= t('pages.pricing.row_agency_price') %></td>
                         </tr>
                         <tr>
-                            <td class="fw-medium">Firma (işveren)</td>
-                            <td>İş İlanları</td>
-                            <td>Aylık/yıllık abonelik veya ilan başına ücret</td>
+                            <td class="fw-medium"><%= t('pages.pricing.row_company') %></td>
+                            <td><%= t('nav.jobs') %></td>
+                            <td><%= t('pages.pricing.row_company_price') %></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <p class="text-muted small mb-0 mt-3">
-                İlan fiyatları Türk Lirası (₺) ve İngiliz Sterlini (£) olarak girilebilir.
-            </p>
+            <p class="text-muted small mb-0 mt-3"><%= t('pages.pricing.currency_note') %></p>
         </div>
     </div>
 
@@ -113,52 +111,48 @@
 
     <% if (quotaExhausted && !paidTiersLive) { %>
         <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 shadow-lg">
-            <h3 class="fw-bold mb-2 text-center">Ücretsiz hakkınız doldu</h3>
-            <p class="text-white-50 mb-4 text-center">
-                Emlak, Vasıta ve İkinci El kategorilerindeki <%= quota.limit %> ücretsiz ilan hakkınızı kullandınız.
-                Paket satın alma sistemi henüz açılmadı, ama hâlâ yapabilecekleriniz var:
-            </p>
+            <h3 class="fw-bold mb-2 text-center"><%= t('pages.pricing.quota_done_title') %></h3>
+            <p class="text-white-50 mb-4 text-center"><%= t('pages.pricing.quota_done_body', { limit: quota.limit }) %></p>
 
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
                     <div class="bg-white bg-opacity-10 rounded-4 p-3 h-100">
                         <i class="fa-solid fa-screwdriver-wrench mb-2 fs-5"></i>
-                        <h6 class="fw-bold mb-1">Ücretsiz kategoriler</h6>
-                        <p class="small text-white-50 mb-2">Usta &amp; Hizmetler ve İş İlanları sınırsız ve ücretsiz.</p>
-                        <a href="/listings/create" class="small text-white fw-medium">İlan ver →</a>
+                        <h6 class="fw-bold mb-1"><%= t('pages.pricing.opt_free_title') %></h6>
+                        <p class="small text-white-50 mb-2"><%= t('pages.pricing.opt_free_body') %></p>
+                        <a href="/listings/create" class="small text-white fw-medium"><%= t('pages.pricing.opt_free_link') %> &rarr;</a>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="bg-white bg-opacity-10 rounded-4 p-3 h-100">
                         <i class="fa-regular fa-rectangle-list mb-2 fs-5"></i>
-                        <h6 class="fw-bold mb-1">Yer açın</h6>
-                        <p class="small text-white-50 mb-2">Satılan veya artık geçerli olmayan bir ilanı silin, hakkınız geri gelsin.</p>
-                        <a href="/profile/listings" class="small text-white fw-medium">İlanlarım →</a>
+                        <h6 class="fw-bold mb-1"><%= t('pages.pricing.opt_space_title') %></h6>
+                        <p class="small text-white-50 mb-2"><%= t('pages.pricing.opt_space_body') %></p>
+                        <a href="/profile/listings" class="small text-white fw-medium"><%= t('nav.my_listings') %> &rarr;</a>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="bg-white bg-opacity-10 rounded-4 p-3 h-100">
                         <i class="fa-regular fa-envelope mb-2 fs-5"></i>
-                        <h6 class="fw-bold mb-1">Paket haberi alın</h6>
-                        <p class="small text-white-50 mb-2">Paketler açıldığında haberdar olmak veya kurumsal hesap için yazın.</p>
-                        <a href="mailto:<%= supportEmail %>?subject=İlan%20paketi%20talebi" class="small text-white fw-medium"><%= supportEmail %> →</a>
+                        <h6 class="fw-bold mb-1"><%= t('pages.pricing.opt_news_title') %></h6>
+                        <p class="small text-white-50 mb-2"><%= t('pages.pricing.opt_news_body') %></p>
+                        <a href="mailto:<%= supportEmail %>" class="small text-white fw-medium"><%= supportEmail %> &rarr;</a>
                     </div>
                 </div>
             </div>
         </div>
     <% } else { %>
         <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
-            <h3 class="fw-bold mb-2">Ücretli paketler çok yakında</h3>
+            <h3 class="fw-bold mb-2"><%= t('pages.pricing.soon_title') %></h3>
             <p class="text-white-50 mb-4">
-                Paket satın alma sistemi henüz açılmadı. Şu an ücretsiz ilan hakkınızla ilan verebilir,
-                Usta &amp; Hizmet ile İş İlanları kategorilerini sınırsız kullanabilirsiniz.
+                <%= t('pages.pricing.soon_body') %>
                 <% if (quota) { %>
-                    <br><span class="text-white fw-medium">Kalan ücretsiz hakkınız: <%= quota.remaining %>/<%= quota.limit %></span>
+                    <br><span class="text-white fw-medium"><%= t('pages.pricing.remaining', { remaining: quota.remaining, limit: quota.limit }) %></span>
                 <% } %>
             </p>
             <div>
-                <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold text-white shadow">
-                    <i class="fa-solid fa-plus me-2"></i>Ücretsiz İlan Ver
+                <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold shadow">
+                    <i class="fa-solid fa-plus me-2"></i><%= t('listing.post_ad') %>
                 </a>
             </div>
         </div>
