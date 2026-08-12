@@ -10,7 +10,7 @@ const startAuthenticatedSession = (req, user, redirectTo, successMessage, res) =
     req.session.regenerate((regenerateErr) => {
         if (regenerateErr) {
             console.error('Session Regenerate Error:', regenerateErr);
-            req.flash('error', 'Oturum başlatılamadı. Lütfen tekrar deneyin.');
+            req.flash('error', 'flash.session_start_failed');
             return res.redirect('/auth/login');
         }
 
@@ -41,25 +41,25 @@ const login = async (req, res) => {
         const email = String(req.body.email || '').trim().toLowerCase();
 
         if (!email || !password) {
-            req.flash('error', 'Lütfen tüm alanları doldurun.');
+            req.flash('error', 'flash.fill_all_fields');
             return res.redirect('/auth/login');
         }
 
         const user = await User.findByEmail(email);
 
         if (!user || !user.password_hash) {
-            req.flash('error', 'Geçersiz e-posta veya şifre.');
+            req.flash('error', 'flash.invalid_credentials');
             return res.redirect('/auth/login');
         }
 
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
-            req.flash('error', 'Geçersiz e-posta veya şifre.');
+            req.flash('error', 'flash.invalid_credentials');
             return res.redirect('/auth/login');
         }
 
         if (Number(user.is_active) === 0) {
-            req.flash('error', 'Hesabınız askıya alınmış veya henüz onaylanmamış.');
+            req.flash('error', 'flash.account_suspended');
             return res.redirect('/auth/login');
         }
 
@@ -70,7 +70,7 @@ const login = async (req, res) => {
         req.session.regenerate((regenerateErr) => {
             if (regenerateErr) {
                 console.error('Session Regenerate Error:', regenerateErr);
-                req.flash('error', 'Oturum başlatılamadı. Lütfen tekrar deneyin.');
+                req.flash('error', 'flash.session_start_failed');
                 return res.redirect('/auth/login');
             }
 
@@ -85,13 +85,13 @@ const login = async (req, res) => {
 
             req.session.save((saveErr) => {
                 if (saveErr) console.error('Session Save Error:', saveErr);
-                req.flash('success', 'Başarıyla giriş yaptınız.');
+                req.flash('success', 'flash.login_success');
                 res.redirect(returnTo);
             });
         });
     } catch (error) {
         console.error('Login Error:', error);
-        req.flash('error', 'Giriş işlemi sırasında bir hata oluştu.');
+        req.flash('error', 'flash.login_failed');
         res.redirect('/auth/login');
     }
 };
@@ -112,38 +112,38 @@ const register = async (req, res) => {
         const phone = String(req.body.phone || '').trim();
 
         if (!email || !password || !fullName) {
-            req.flash('error', 'Lütfen gerekli alanları doldurun.');
+            req.flash('error', 'flash.fill_required_fields');
             return res.redirect('/auth/register');
         }
 
         if (!isValidEmail(email)) {
-            req.flash('error', 'Geçerli bir e-posta adresi girin.');
+            req.flash('error', 'flash.invalid_email');
             return res.redirect('/auth/register');
         }
 
         if (fullName.length < 2) {
-            req.flash('error', 'Ad Soyad en az 2 karakter olmalıdır.');
+            req.flash('error', 'flash.name_too_short');
             return res.redirect('/auth/register');
         }
 
         if (!isValidPassword(password)) {
-            req.flash('error', 'Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.');
+            req.flash('error', 'flash.weak_password');
             return res.redirect('/auth/register');
         }
 
         if (password !== passwordConfirm) {
-            req.flash('error', 'Şifreler birbiriyle uyuşmuyor.');
+            req.flash('error', 'flash.passwords_do_not_match');
             return res.redirect('/auth/register');
         }
 
         if (phone && !isValidPhone(phone)) {
-            req.flash('error', 'Geçerli bir telefon numarası girin.');
+            req.flash('error', 'flash.invalid_phone');
             return res.redirect('/auth/register');
         }
 
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
-            req.flash('error', 'Bu e-posta adresi zaten kullanımda.');
+            req.flash('error', 'flash.email_taken');
             return res.redirect('/auth/register');
         }
 
@@ -163,12 +163,12 @@ const register = async (req, res) => {
             req,
             user,
             '/',
-            'Hesabınız başarıyla oluşturuldu ve giriş yapıldı.',
+            'flash.register_success',
             res
         );
     } catch (error) {
         console.error('Register Error:', error);
-        req.flash('error', 'Kayıt sırasında bir hata oluştu.');
+        req.flash('error', 'flash.register_failed');
         res.redirect('/auth/register');
     }
 };

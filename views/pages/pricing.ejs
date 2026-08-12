@@ -109,16 +109,58 @@
         </div>
     </div>
 
-    <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
-        <h3 class="fw-bold mb-2">Ücretli paketler çok yakında</h3>
-        <p class="text-white-50 mb-4">
-            Paket satın alma sistemi henüz açılmadı. Şu an ücretsiz ilan hakkınızla ilan verebilir,
-            Usta &amp; Hizmet ile İş İlanları kategorilerini sınırsız kullanabilirsiniz.
-        </p>
-        <div>
-            <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold text-white shadow">
-                <i class="fa-solid fa-plus me-2"></i>Ücretsiz İlan Ver
-            </a>
+    <% const quotaExhausted = quota && quota.remaining === 0; %>
+
+    <% if (quotaExhausted && !paidTiersLive) { %>
+        <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 shadow-lg">
+            <h3 class="fw-bold mb-2 text-center">Ücretsiz hakkınız doldu</h3>
+            <p class="text-white-50 mb-4 text-center">
+                Emlak, Vasıta ve İkinci El kategorilerindeki <%= quota.limit %> ücretsiz ilan hakkınızı kullandınız.
+                Paket satın alma sistemi henüz açılmadı, ama hâlâ yapabilecekleriniz var:
+            </p>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="bg-white bg-opacity-10 rounded-4 p-3 h-100">
+                        <i class="fa-solid fa-screwdriver-wrench mb-2 fs-5"></i>
+                        <h6 class="fw-bold mb-1">Ücretsiz kategoriler</h6>
+                        <p class="small text-white-50 mb-2">Usta &amp; Hizmetler ve İş İlanları sınırsız ve ücretsiz.</p>
+                        <a href="/listings/create" class="small text-white fw-medium">İlan ver →</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-white bg-opacity-10 rounded-4 p-3 h-100">
+                        <i class="fa-regular fa-rectangle-list mb-2 fs-5"></i>
+                        <h6 class="fw-bold mb-1">Yer açın</h6>
+                        <p class="small text-white-50 mb-2">Satılan veya artık geçerli olmayan bir ilanı silin, hakkınız geri gelsin.</p>
+                        <a href="/profile/listings" class="small text-white fw-medium">İlanlarım →</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-white bg-opacity-10 rounded-4 p-3 h-100">
+                        <i class="fa-regular fa-envelope mb-2 fs-5"></i>
+                        <h6 class="fw-bold mb-1">Paket haberi alın</h6>
+                        <p class="small text-white-50 mb-2">Paketler açıldığında haberdar olmak veya kurumsal hesap için yazın.</p>
+                        <a href="mailto:<%= supportEmail %>?subject=İlan%20paketi%20talebi" class="small text-white fw-medium"><%= supportEmail %> →</a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    <% } else { %>
+        <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
+            <h3 class="fw-bold mb-2">Ücretli paketler çok yakında</h3>
+            <p class="text-white-50 mb-4">
+                Paket satın alma sistemi henüz açılmadı. Şu an ücretsiz ilan hakkınızla ilan verebilir,
+                Usta &amp; Hizmet ile İş İlanları kategorilerini sınırsız kullanabilirsiniz.
+                <% if (quota) { %>
+                    <br><span class="text-white fw-medium">Kalan ücretsiz hakkınız: <%= quota.remaining %>/<%= quota.limit %></span>
+                <% } %>
+            </p>
+            <div>
+                <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold text-white shadow">
+                    <i class="fa-solid fa-plus me-2"></i>Ücretsiz İlan Ver
+                </a>
+            </div>
+        </div>
+    <% } %>
 </div>

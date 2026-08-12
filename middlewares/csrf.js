@@ -20,11 +20,11 @@ const readToken = (req) =>
 const reject = (req, res) => {
     if (wantsJson(req)) {
         return res.status(403).json({
-            error: 'Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.'
+            error: res.locals.t('flash.csrf_failed_json')
         });
     }
 
-    req.flash('error', 'Güvenlik doğrulaması başarısız oldu. Lütfen formu tekrar gönderin.');
+    req.flash('error', 'flash.csrf_failed');
     return res.redirect(req.get('referer') || '/');
 };
 

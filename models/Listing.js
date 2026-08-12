@@ -463,6 +463,23 @@ class Listing {
     return count;
   }
 
+  // Listings created before expires_at was populated have it NULL and are left
+  // alone: only listings that were given a deadline can miss one.
+  static async expireOverdue() {
+    const db = await getDb();
+    db.run(`
+      UPDATE listings SET status = 'expired', updated_at = CURRENT_TIMESTAMP
+      WHERE status = 'active'
+        AND expires_at IS NOT NULL
+        AND expires_at < datetime('now')
+    `);
+
+    const changesRes = db.exec('SELECT changes() as changes');
+    const changes = changesRes[0].values[0][0];
+    if (changes > 0) saveDb();
+    return changes;
+  }
+
   static async countByStatus() {
     const db = await getDb();
     const stmt = db.prepare('SELECT status, COUNT(*) as count FROM listings GROUP BY status');

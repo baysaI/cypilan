@@ -10,7 +10,8 @@
     "db:seed": "node -e \"require('./config/database').seed()\"",
     "i18n:check": "node scripts/i18n-tool.js check",
     "i18n:sync": "node scripts/i18n-tool.js sync",
-    "i18n:scan": "node scripts/i18n-tool.js scan"
+    "i18n:scan": "node scripts/i18n-tool.js scan",
+    "uploads:prune": "node scripts/prune-uploads.js"
   },
   "keywords": [
     "cyprus",

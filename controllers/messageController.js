@@ -15,7 +15,7 @@ const inbox = async (req, res) => {
         });
     } catch (error) {
         console.error('Inbox Error:', error);
-        req.flash('error', 'Mesajlar yüklenemedi.');
+        req.flash('error', 'flash.messages_load_failed');
         res.redirect('/');
     }
 };
@@ -27,13 +27,13 @@ const conversation = async (req, res) => {
         const listingId = req.query.listing ? parseInt(req.query.listing, 10) : null;
 
         if (!Number.isInteger(otherUserId) || otherUserId === currentUserId) {
-            req.flash('error', 'Geçersiz sohbet.');
+            req.flash('error', 'flash.invalid_conversation');
             return res.redirect('/messages');
         }
 
         const otherUser = await User.findById(otherUserId);
         if (!otherUser) {
-            req.flash('error', 'Kullanıcı bulunamadı.');
+            req.flash('error', 'flash.user_not_found');
             return res.redirect('/messages');
         }
 
@@ -59,7 +59,7 @@ const conversation = async (req, res) => {
         });
     } catch (error) {
         console.error('Conversation Error:', error);
-        req.flash('error', 'Sohbet yüklenemedi.');
+        req.flash('error', 'flash.conversation_load_failed');
         res.redirect('/messages');
     }
 };
@@ -75,28 +75,28 @@ const send = async (req, res) => {
         const content = (req.body.content || '').trim();
 
         if (!Number.isInteger(receiverId)) {
-            req.flash('error', 'Alıcı bulunamadı.');
+            req.flash('error', 'flash.recipient_not_found');
             return res.redirect('/messages');
         }
 
         if (receiverId === senderId) {
-            req.flash('error', 'Kendinize mesaj gönderemezsiniz.');
+            req.flash('error', 'flash.cannot_message_self');
             return res.redirect('/messages');
         }
 
         if (!content) {
-            req.flash('error', 'Mesaj boş olamaz.');
+            req.flash('error', 'flash.message_empty');
             return res.redirect(backTo(receiverId, listingId));
         }
 
         if (content.length > MAX_LENGTH) {
-            req.flash('error', `Mesaj en fazla ${MAX_LENGTH} karakter olabilir.`);
+            req.flash('error', 'flash.message_too_long', { max: MAX_LENGTH });
             return res.redirect(backTo(receiverId, listingId));
         }
 
         const receiver = await User.findById(receiverId);
         if (!receiver) {
-            req.flash('error', 'Alıcı bulunamadı.');
+            req.flash('error', 'flash.recipient_not_found');
             return res.redirect('/messages');
         }
 
@@ -116,7 +116,7 @@ const send = async (req, res) => {
         res.redirect(backTo(receiverId, validListingId));
     } catch (error) {
         console.error('Send Message Error:', error);
-        req.flash('error', 'Mesaj gönderilemedi.');
+        req.flash('error', 'flash.message_send_failed');
         res.redirect('/messages');
     }
 };

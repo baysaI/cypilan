@@ -12,7 +12,7 @@ const fetchListingForOwnership = async (req, res, next) => {
         const listing = await Listing.findBySlug(req.params.slug);
 
         if (!listing) {
-            req.flash('error', 'İlan bulunamadı.');
+            req.flash('error', 'flash.listing_not_found');
             return res.redirect('/profile/listings');
         }
 
@@ -30,7 +30,7 @@ const phoneRevealLimiter = rateLimit({
     legacyHeaders: false,
     keyGenerator: (req) => String(req.session.userId),
     handler: (req, res) => res.status(429).json({
-        error: 'Saatlik numara görüntüleme sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.'
+        error: res.locals.t('flash.rate_limit_phone')
     })
 });
 

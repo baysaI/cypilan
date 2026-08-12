@@ -61,7 +61,10 @@
     <hr class="border-secondary">
     <div class="px-2">
         <a href="/" class="btn btn-outline-light btn-sm w-100 mb-2"><i class="fa-solid fa-arrow-left me-2"></i>Siteye Dön</a>
-        <a href="/auth/logout" class="btn btn-outline-danger btn-sm w-100">Çıkış Yap</a>
+        <form action="/auth/logout" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100"><%= t('nav.logout') %></button>
+        </form>
     </div>
 </aside>
 

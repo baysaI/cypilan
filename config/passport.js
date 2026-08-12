@@ -17,13 +17,13 @@ if (clientID && clientSecret) {
       try {
         const primaryEmail = profile.emails && profile.emails[0] ? profile.emails[0] : null;
         if (!primaryEmail || !primaryEmail.value) {
-          return done(null, false, { message: 'Google hesabı e-postası alınamadı.' });
+          return done(null, false, { message: 'flash.google_email_missing' });
         }
 
         // Without this an unverified Google address could be used to take over an
         // existing password account that happens to share the same e-mail.
         if (primaryEmail.verified === false) {
-          return done(null, false, { message: 'Google hesabınızın e-posta adresi doğrulanmamış.' });
+          return done(null, false, { message: 'flash.google_email_unverified' });
         }
 
         const email = String(primaryEmail.value).trim().toLowerCase();

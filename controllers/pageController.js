@@ -1,4 +1,6 @@
 const listingPolicy = require('../config/listingPolicy');
+const appConfig = require('../config/app');
+const Listing = require('../models/Listing');
 
 const faq = (req, res) => {
     res.locals.meta = res.locals.meta || {};
@@ -48,14 +50,39 @@ const cookiePolicy = (req, res) => {
     res.render('pages/cookie-policy', { title: res.locals.t('footer.cookie_policy') });
 };
 
-const pricing = (req, res) => {
-    res.locals.meta = res.locals.meta || {};
-    res.locals.meta.title = 'İlan Paketleri | CYPILAN.COM';
-    res.render('pages/pricing', {
-        packages: listingPolicy.PACKAGES,
-        freeQuota: listingPolicy.FREE_LISTING_QUOTA,
-        title: 'İlan Paketleri'
-    });
+const pricing = async (req, res, next) => {
+    try {
+        res.locals.meta = res.locals.meta || {};
+        res.locals.meta.title = 'İlan Paketleri';
+
+        // Users are sent here when they run out of free listings, so the page has
+        // to know whether that is why they arrived — otherwise its call to action
+        // sends them straight back to the form that rejected them.
+        let quota = null;
+        if (req.session && req.session.userId) {
+            const used = await Listing.countByUserInRootCategories(
+                req.session.userId,
+                listingPolicy.QUOTA_CATEGORIES
+            );
+            quota = {
+                limit: listingPolicy.FREE_LISTING_QUOTA,
+                used,
+                remaining: Math.max(0, listingPolicy.FREE_LISTING_QUOTA - used)
+            };
+        }
+
+        res.render('pages/pricing', {
+            packages: listingPolicy.PACKAGES,
+            freeQuota: listingPolicy.FREE_LISTING_QUOTA,
+            paidTiersLive: listingPolicy.PAID_TIERS_LIVE,
+            supportEmail: appConfig.app.supportEmail,
+            quota,
+            title: 'İlan Paketleri'
+        });
+    } catch (error) {
+        console.error('Pricing Page Error:', error);
+        next(error);
+    }
 };
 
 module.exports = {

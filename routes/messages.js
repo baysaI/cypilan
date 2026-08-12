@@ -11,7 +11,7 @@ const sendLimiter = rateLimit({
     legacyHeaders: false,
     keyGenerator: (req) => String(req.session.userId),
     handler: (req, res) => {
-        req.flash('error', 'Saatlik mesaj gönderme sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.');
+        req.flash('error', 'flash.rate_limit_message');
         res.redirect('/messages');
     }
 });

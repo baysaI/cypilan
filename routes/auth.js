@@ -9,11 +9,13 @@ router.post('/login', authController.login);
 router.get('/register', authController.showRegister);
 router.post('/register', authController.register);
 
-router.get('/logout', authController.logout);
+// POST only: a GET logout can be triggered by any third-party page embedding
+// the URL, signing the visitor out without their intent.
+router.post('/logout', authController.logout);
 
 router.get('/google', (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    req.flash('error', 'Google ile giriş yapabilmek için .env dosyasına GOOGLE_CLIENT_ID ve GOOGLE_CLIENT_SECRET eklenmelidir.');
+    req.flash('error', 'flash.google_not_configured');
     return res.redirect('/auth/login');
   }
   passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
@@ -23,14 +25,14 @@ router.get('/google/callback', (req, res, next) => {
   passport.authenticate('google', (err, user, info) => {
     if (err || !user) {
       console.error('Google OAuth callback error:', err || info);
-      req.flash('error', (info && info.message) || 'Google ile giriş yapılırken bir hata oluştu.');
+      req.flash('error', (info && info.message) || 'flash.google_login_failed');
       return res.redirect('/auth/login');
     }
 
     req.logIn(user, (loginErr) => {
       if (loginErr) {
         console.error('Login error:', loginErr);
-        req.flash('error', 'Oturum açılırken hata oluştu.');
+        req.flash('error', 'flash.session_open_failed');
         return res.redirect('/auth/login');
       }
 
@@ -43,7 +45,7 @@ router.get('/google/callback', (req, res, next) => {
         if (saveErr) {
           console.error('Session save error:', saveErr);
         }
-        req.flash('success', 'Google ile başarıyla giriş yaptınız.');
+        req.flash('success', 'flash.google_login_success');
         res.redirect('/');
       });
     });

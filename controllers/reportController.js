@@ -13,17 +13,17 @@ const reportListing = async (req, res) => {
 
         const listing = await Listing.findById(listingId);
         if (!listing) {
-            req.flash('error', 'İlan bulunamadı.');
+            req.flash('error', 'flash.listing_not_found');
             return res.redirect('/listings');
         }
 
         if (listing.user_id === req.session.userId) {
-            req.flash('error', 'Kendi ilanınızı şikayet edemezsiniz.');
+            req.flash('error', 'flash.cannot_report_own_listing');
             return res.redirect(backTo(req, `/listings/${listing.slug}`));
         }
 
         if (!Report.listingReasons.includes(reason)) {
-            req.flash('error', 'Lütfen geçerli bir şikayet nedeni seçin.');
+            req.flash('error', 'flash.select_report_reason');
             return res.redirect(backTo(req, `/listings/${listing.slug}`));
         }
 
@@ -34,7 +34,7 @@ const reportListing = async (req, res) => {
         });
 
         if (already) {
-            req.flash('info', 'Bu ilanı zaten şikayet ettiniz. Ekibimiz inceliyor.');
+            req.flash('info', 'flash.listing_already_reported');
             return res.redirect(backTo(req, `/listings/${listing.slug}`));
         }
 
@@ -47,11 +47,11 @@ const reportListing = async (req, res) => {
             description: (description || '').trim().slice(0, MAX_DESCRIPTION) || null
         });
 
-        req.flash('success', 'Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecek.');
+        req.flash('success', 'flash.report_received');
         res.redirect(backTo(req, `/listings/${listing.slug}`));
     } catch (error) {
         console.error('Report Listing Error:', error);
-        req.flash('error', 'Şikayet gönderilemedi.');
+        req.flash('error', 'flash.report_send_failed');
         res.redirect('/listings');
     }
 };
@@ -62,18 +62,18 @@ const reportUser = async (req, res) => {
         const { reason, description, message_id, thread_listing_id } = req.body;
 
         if (userId === req.session.userId) {
-            req.flash('error', 'Kendinizi şikayet edemezsiniz.');
+            req.flash('error', 'flash.cannot_report_self');
             return res.redirect('/messages');
         }
 
         const target = await User.findById(userId);
         if (!target) {
-            req.flash('error', 'Kullanıcı bulunamadı.');
+            req.flash('error', 'flash.user_not_found');
             return res.redirect('/messages');
         }
 
         if (!Report.userReasons.includes(reason)) {
-            req.flash('error', 'Lütfen geçerli bir şikayet nedeni seçin.');
+            req.flash('error', 'flash.select_report_reason');
             return res.redirect(backTo(req, `/messages/${userId}`));
         }
 
@@ -84,7 +84,7 @@ const reportUser = async (req, res) => {
         });
 
         if (already) {
-            req.flash('info', 'Bu kullanıcıyı zaten şikayet ettiniz. Ekibimiz inceliyor.');
+            req.flash('info', 'flash.user_already_reported');
             return res.redirect(backTo(req, `/messages/${userId}`));
         }
 
@@ -100,11 +100,11 @@ const reportUser = async (req, res) => {
             description: (description || '').trim().slice(0, MAX_DESCRIPTION) || null
         });
 
-        req.flash('success', 'Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecek.');
+        req.flash('success', 'flash.report_received');
         res.redirect(backTo(req, `/messages/${userId}`));
     } catch (error) {
         console.error('Report User Error:', error);
-        req.flash('error', 'Şikayet gönderilemedi.');
+        req.flash('error', 'flash.report_send_failed');
         res.redirect('/messages');
     }
 };

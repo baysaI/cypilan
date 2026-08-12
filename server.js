@@ -97,15 +97,22 @@ app.use((req, res, next) => {
   delete req.session.flashError;
   delete req.session.flashInfo;
 
-  req.flash = (type, message) => {
+  // Messages are stored translated: the reader is the same user in the same
+  // request cycle, so the language is already known here. Anything that does not
+  // look like a locale key is passed through as literal text.
+  const LOOKS_LIKE_KEY = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/;
+
+  req.flash = (type, message, params) => {
     const key = `flash${type.charAt(0).toUpperCase() + type.slice(1)}`;
-    req.session[key] = message;
+    const translate = res.locals.t;
+
+    req.session[key] = (typeof translate === 'function' && LOOKS_LIKE_KEY.test(message))
+      ? translate(message, params || {})
+      : message;
   };
 
   next();
 });
-
-app.use(csrfProtection);
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -114,7 +121,10 @@ app.set('layout', 'layouts/main');
 app.set('layout extractScripts', true);
 app.set('layout extractStyles', true);
 
+// After i18n so that a rejected request can report the failure in the
+// visitor's own language.
 app.use(i18nMiddleware);
+app.use(csrfProtection);
 app.use(seoMiddleware);
 app.use(setUserLocal);
 
@@ -173,6 +183,19 @@ async function startServer() {
 
     console.log('🌱 Seeding database...');
     await seed();
+
+    const Listing = require('./models/Listing');
+    const sweepExpiredListings = async () => {
+      try {
+        const expired = await Listing.expireOverdue();
+        if (expired > 0) console.log(`⏳ ${expired} ilan süresi doldu olarak işaretlendi.`);
+      } catch (error) {
+        console.error('Expiry sweep failed:', error);
+      }
+    };
+
+    await sweepExpiredListings();
+    setInterval(sweepExpiredListings, 24 * 60 * 60 * 1000).unref();
 
     app.listen(PORT, () => {
       console.log('');

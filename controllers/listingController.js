@@ -13,9 +13,9 @@ const MAX_TITLE_LENGTH = 150;
 
 // Any early exit from an upload-backed action has to clean up the files that
 // processImagesWithWatermark already wrote, otherwise they leak onto disk forever.
-const abort = async (req, res, message, redirectTo) => {
+const abort = async (req, res, message, redirectTo, params) => {
     await discardProcessedImages(req);
-    req.flash('error', message);
+    req.flash('error', message, params);
     return res.redirect(redirectTo);
 };
 
@@ -76,7 +76,7 @@ const show = async (req, res, next) => {
         const listing = await Listing.findDetailBySlug(slug);
 
         if (!listing) {
-            req.flash('error', 'İlan bulunamadı.');
+            req.flash('error', 'flash.listing_not_found');
             return res.redirect('/listings');
         }
 
@@ -149,36 +149,36 @@ const create = async (req, res, next) => {
         const { title, description, category_id, price, currency, city, district, phone } = req.body;
 
         if (!title || !title.trim() || !category_id || !city) {
-            return abort(req, res, 'Lütfen zorunlu alanları doldurun.', backToForm);
+            return abort(req, res, 'flash.fill_mandatory_fields', backToForm);
         }
 
         if (title.trim().length > MAX_TITLE_LENGTH) {
-            return abort(req, res, `İlan başlığı en fazla ${MAX_TITLE_LENGTH} karakter olabilir.`, backToForm);
+            return abort(req, res, 'flash.title_too_long', backToForm, { max: MAX_TITLE_LENGTH });
         }
 
         if (!phone || !isValidPhone(phone)) {
-            return abort(req, res, 'İlan verebilmek için geçerli bir iletişim telefonu girmelisiniz.', backToForm);
+            return abort(req, res, 'flash.listing_phone_required', backToForm);
         }
 
         const rootSlug = await Category.getRootSlug(parseInt(category_id, 10));
 
         if (!rootSlug) {
-            return abort(req, res, 'Geçerli bir kategori seçin.', backToForm);
+            return abort(req, res, 'flash.select_valid_category', backToForm);
         }
 
         const images = (req.processedImages || []).map(f => f.path);
         const parsedPrice = parseFloat(price);
 
         if (listingPolicy.requiresPhotos(rootSlug) && images.length === 0) {
-            return abort(req, res, 'Bu kategoride ilan verebilmek için en az 1 fotoğraf yüklemelisiniz.', backToForm);
+            return abort(req, res, 'flash.photo_required', backToForm);
         }
 
         if (!description || description.trim().length < MIN_DESCRIPTION_LENGTH) {
-            return abort(req, res, `İlan açıklaması en az ${MIN_DESCRIPTION_LENGTH} karakter olmalıdır.`, backToForm);
+            return abort(req, res, 'flash.description_too_short', backToForm, { min: MIN_DESCRIPTION_LENGTH });
         }
 
         if (listingPolicy.requiresPrice(rootSlug) && (!Number.isFinite(parsedPrice) || parsedPrice <= 0)) {
-            return abort(req, res, 'Bu kategoride geçerli bir fiyat girmelisiniz.', backToForm);
+            return abort(req, res, 'flash.price_required', backToForm);
         }
 
         const usedQuota = await Listing.countByUserInRootCategories(
@@ -196,8 +196,9 @@ const create = async (req, res, next) => {
             return abort(
                 req,
                 res,
-                `Emlak, Vasıta ve İkinci El kategorilerinde ilk ${listingPolicy.FREE_LISTING_QUOTA} ilan ücretsizdir. Ücretsiz hakkınızı doldurdunuz; yeni ilan için ilan paketleri gerekiyor.`,
-                '/ilan-paketleri'
+                'flash.quota_exhausted',
+                '/ilan-paketleri',
+                { quota: listingPolicy.FREE_LISTING_QUOTA }
             );
         }
 
@@ -205,6 +206,8 @@ const create = async (req, res, next) => {
             phone: phone.trim(),
             show_phone: req.body.hide_phone ? 0 : 1
         });
+
+        const status = listingPolicy.initialStatus(req.session.userRole);
 
         const listing = await Listing.create({
             user_id: req.session.userId,
@@ -216,16 +219,17 @@ const create = async (req, res, next) => {
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : 'TRY',
             city,
             district,
-            status: 'active',
+            status,
+            expires_at: listingPolicy.expiresAt(),
             images
         });
 
-        req.flash('success', 'İlanınız başarıyla yayınlandı.');
-        res.redirect(`/listings/${listing.slug}`);
+        req.flash('success', status === 'pending' ? 'flash.listing_pending_review' : 'flash.listing_published');
+        res.redirect(status === 'pending' ? '/profile/listings' : `/listings/${listing.slug}`);
     } catch (error) {
         console.error('Listing Create Error:', error);
         await discardProcessedImages(req);
-        req.flash('error', 'İlan eklenirken bir hata oluştu.');
+        req.flash('error', 'flash.listing_create_failed');
         res.redirect(backToForm);
     }
 };
@@ -266,52 +270,62 @@ const update = async (req, res, next) => {
         const { title, description, price, currency, city, district, status } = req.body;
 
         if (!title || !title.trim()) {
-            return abort(req, res, 'İlan başlığı zorunludur.', backToForm);
+            return abort(req, res, 'flash.title_required', backToForm);
         }
 
         if (title.trim().length > MAX_TITLE_LENGTH) {
-            return abort(req, res, `İlan başlığı en fazla ${MAX_TITLE_LENGTH} karakter olabilir.`, backToForm);
+            return abort(req, res, 'flash.title_too_long', backToForm, { max: MAX_TITLE_LENGTH });
         }
 
         if (!description || description.trim().length < MIN_DESCRIPTION_LENGTH) {
-            return abort(req, res, `İlan açıklaması en az ${MIN_DESCRIPTION_LENGTH} karakter olmalıdır.`, backToForm);
+            return abort(req, res, 'flash.description_too_short', backToForm, { min: MIN_DESCRIPTION_LENGTH });
         }
 
         const rootSlug = await Category.getRootSlug(listing.category_id);
         const parsedPrice = parseFloat(price);
 
         if (listingPolicy.requiresPrice(rootSlug) && (!Number.isFinite(parsedPrice) || parsedPrice <= 0)) {
-            return abort(req, res, 'Bu kategoride geçerli bir fiyat girmelisiniz.', backToForm);
+            return abort(req, res, 'flash.price_required', backToForm);
         }
 
         const newImages = (req.processedImages || []).map(f => f.path);
         const existingImages = await Listing.getImages(listing.id);
 
         if (listingPolicy.requiresPhotos(rootSlug) && newImages.length === 0 && existingImages.length === 0) {
-            return abort(req, res, 'Bu kategoride en az 1 fotoğraf gereklidir.', backToForm);
+            return abort(req, res, 'flash.photo_required_short', backToForm);
         }
 
-        await Listing.update(listing.id, {
+        const nextStatus = OWNER_EDITABLE_STATUSES.includes(status) ? status : listing.status;
+
+        const updates = {
             title: title.trim(),
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : listing.currency,
             location_city: city || listing.location_city,
             location_district: district ? district.trim() : null,
-            status: OWNER_EDITABLE_STATUSES.includes(status) ? status : listing.status
-        });
+            status: nextStatus
+        };
+
+        // Reviving an expired listing without a fresh deadline would just let the
+        // next expiry sweep bury it again.
+        if (nextStatus === 'active' && listing.status === 'expired') {
+            updates.expires_at = listingPolicy.expiresAt();
+        }
+
+        await Listing.update(listing.id, updates);
 
         if (newImages.length > 0) {
             await Listing.replaceImages(listing.id, newImages);
             await removeImagesByUrl(existingImages);
         }
 
-        req.flash('success', 'İlan başarıyla güncellendi.');
+        req.flash('success', 'flash.listing_updated');
         res.redirect(`/listings/${listing.slug}`);
     } catch (error) {
         console.error('Listing Update Error:', error);
         await discardProcessedImages(req);
-        req.flash('error', 'Güncelleme sırasında hata oluştu.');
+        req.flash('error', 'flash.listing_update_failed');
         res.redirect(backToForm);
     }
 };
@@ -324,11 +338,11 @@ const deleteListing = async (req, res, next) => {
         await Listing.delete(listing.id);
         await removeImagesByUrl(images);
 
-        req.flash('success', 'İlan silindi.');
+        req.flash('success', 'flash.listing_deleted');
         res.redirect('/profile/listings');
     } catch (error) {
         console.error('Listing Delete Error:', error);
-        req.flash('error', 'Silme işlemi başarısız.');
+        req.flash('error', 'flash.delete_failed');
         res.redirect('/profile/listings');
     }
 };
@@ -338,18 +352,18 @@ const revealPhone = async (req, res) => {
         const listing = await Listing.findById(req.params.id);
 
         if (!listing || listing.status !== 'active') {
-            return res.status(404).json({ error: 'İlan bulunamadı.' });
+            return res.status(404).json({ error: res.locals.t('flash.listing_not_found') });
         }
 
         const owner = await User.findById(listing.user_id);
 
         if (!owner || !owner.phone) {
-            return res.status(404).json({ error: 'Bu ilan için telefon numarası yok.' });
+            return res.status(404).json({ error: res.locals.t('flash.phone_not_available') });
         }
 
         if (Number(owner.show_phone) === 0) {
             return res.status(403).json({
-                error: 'Satıcı telefonunu gizlemiş. Mesaj göndererek iletişime geçebilirsiniz.'
+                error: res.locals.t('flash.phone_hidden')
             });
         }
 
@@ -359,24 +373,24 @@ const revealPhone = async (req, res) => {
         });
     } catch (error) {
         console.error('Reveal Phone Error:', error);
-        res.status(500).json({ error: 'Numara alınamadı.' });
+        res.status(500).json({ error: res.locals.t('flash.phone_fetch_failed') });
     }
 };
 
 const toggleFavorite = async (req, res) => {
     try {
         if (!req.session.userId) {
-            return res.status(401).json({ error: 'Lütfen giriş yapın.' });
+            return res.status(401).json({ error: res.locals.t('flash.login_required') });
         }
 
         const listingId = parseInt(req.params.id, 10);
         if (!Number.isInteger(listingId)) {
-            return res.status(400).json({ error: 'Geçersiz ilan.' });
+            return res.status(400).json({ error: res.locals.t('flash.invalid_listing') });
         }
 
         const listing = await Listing.findById(listingId);
         if (!listing) {
-            return res.status(404).json({ error: 'İlan bulunamadı.' });
+            return res.status(404).json({ error: res.locals.t('flash.listing_not_found') });
         }
 
         const result = await Listing.toggleFavorite(listingId, req.session.userId);
@@ -384,7 +398,7 @@ const toggleFavorite = async (req, res) => {
         res.json({ success: true, favorited: result.favorited });
     } catch (error) {
         console.error('Toggle Favorite Error:', error);
-        res.status(500).json({ error: 'Bir hata oluştu.' });
+        res.status(500).json({ error: res.locals.t('flash.generic_error') });
     }
 };
 

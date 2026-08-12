@@ -14,14 +14,14 @@ const show = async (req, res) => {
         const userId = parseInt(req.params.id, 10);
 
         if (!Number.isInteger(userId)) {
-            req.flash('error', 'Kullanıcı bulunamadı.');
+            req.flash('error', 'flash.user_not_found');
             return res.redirect('/');
         }
 
         const user = await User.findById(userId);
 
         if (!user) {
-            req.flash('error', 'Kullanıcı bulunamadı.');
+            req.flash('error', 'flash.user_not_found');
             return res.redirect('/');
         }
 
@@ -44,7 +44,7 @@ const show = async (req, res) => {
         });
     } catch (error) {
         console.error('Profile Show Error:', error);
-        req.flash('error', 'Profil yüklenirken bir hata oluştu.');
+        req.flash('error', 'flash.profile_load_failed');
         res.redirect('/');
     }
 };
@@ -54,7 +54,7 @@ const edit = async (req, res, next) => {
         const user = await User.findById(req.session.userId);
 
         if (!user) {
-            req.flash('error', 'Kullanıcı bulunamadı.');
+            req.flash('error', 'flash.user_not_found');
             return res.redirect('/');
         }
 
@@ -85,7 +85,7 @@ const update = async (req, res) => {
         if (phone !== undefined) {
             const trimmed = phone.trim();
             if (trimmed && !isValidPhone(trimmed)) {
-                req.flash('error', 'Geçerli bir telefon numarası girin.');
+                req.flash('error', 'flash.invalid_phone');
                 return res.redirect('/profile/edit');
             }
             updates.phone = trimmed || null;
@@ -99,11 +99,11 @@ const update = async (req, res) => {
             req.session.userName = updates.full_name;
         }
 
-        req.flash('success', 'Profiliniz güncellendi.');
+        req.flash('success', 'flash.profile_updated');
         res.redirect('/profile/edit');
     } catch (error) {
         console.error('Profile Update Error:', error);
-        req.flash('error', 'Profil güncellenirken hata oluştu.');
+        req.flash('error', 'flash.profile_update_failed');
         res.redirect('/profile/edit');
     }
 };
@@ -114,7 +114,7 @@ const changePassword = async (req, res) => {
         const user = await User.findById(req.session.userId);
 
         if (!user) {
-            req.flash('error', 'Kullanıcı bulunamadı.');
+            req.flash('error', 'flash.user_not_found');
             return res.redirect('/profile/edit');
         }
 
@@ -122,33 +122,33 @@ const changePassword = async (req, res) => {
 
         if (needsCurrent) {
             if (!current_password) {
-                req.flash('error', 'Mevcut şifrenizi girin.');
+                req.flash('error', 'flash.current_password_required');
                 return res.redirect('/profile/edit');
             }
             const matches = await User.verifyPassword(current_password, user.password_hash);
             if (!matches) {
-                req.flash('error', 'Mevcut şifreniz hatalı.');
+                req.flash('error', 'flash.current_password_wrong');
                 return res.redirect('/profile/edit');
             }
         }
 
         if (!new_password || !isValidPassword(new_password)) {
-            req.flash('error', 'Yeni şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.');
+            req.flash('error', 'flash.new_password_weak');
             return res.redirect('/profile/edit');
         }
 
         if (new_password !== confirm_password) {
-            req.flash('error', 'Yeni şifreler birbiriyle eşleşmiyor.');
+            req.flash('error', 'flash.new_passwords_do_not_match');
             return res.redirect('/profile/edit');
         }
 
         await User.setPassword(user.id, new_password);
 
-        req.flash('success', needsCurrent ? 'Şifreniz güncellendi.' : 'Şifreniz belirlendi. Artık e-posta ile de giriş yapabilirsiniz.');
+        req.flash('success', needsCurrent ? 'flash.password_updated' : 'flash.password_created');
         res.redirect('/profile/edit');
     } catch (error) {
         console.error('Change Password Error:', error);
-        req.flash('error', 'Şifre güncellenirken hata oluştu.');
+        req.flash('error', 'flash.password_update_failed');
         res.redirect('/profile/edit');
     }
 };
@@ -159,46 +159,46 @@ const changeEmail = async (req, res) => {
         const user = await User.findById(req.session.userId);
 
         if (!user) {
-            req.flash('error', 'Kullanıcı bulunamadı.');
+            req.flash('error', 'flash.user_not_found');
             return res.redirect('/profile/edit');
         }
 
         if (Number(user.has_password) === 0) {
-            req.flash('error', 'E-posta adresinizi değiştirmeden önce bir şifre belirlemelisiniz.');
+            req.flash('error', 'flash.set_password_before_email');
             return res.redirect('/profile/edit');
         }
 
         const matches = await User.verifyPassword(current_password, user.password_hash);
         if (!matches) {
-            req.flash('error', 'Şifreniz hatalı.');
+            req.flash('error', 'flash.password_wrong');
             return res.redirect('/profile/edit');
         }
 
         const email = (new_email || '').trim().toLowerCase();
 
         if (!isValidEmail(email)) {
-            req.flash('error', 'Geçerli bir e-posta adresi girin.');
+            req.flash('error', 'flash.invalid_email');
             return res.redirect('/profile/edit');
         }
 
         if (email === (user.email || '').toLowerCase()) {
-            req.flash('info', 'E-posta adresiniz zaten bu.');
+            req.flash('info', 'flash.email_unchanged');
             return res.redirect('/profile/edit');
         }
 
         if (await User.isEmailTaken(email, user.id)) {
-            req.flash('error', 'Bu e-posta adresi başka bir hesap tarafından kullanılıyor.');
+            req.flash('error', 'flash.email_in_use_by_other');
             return res.redirect('/profile/edit');
         }
 
         await User.update(user.id, { email });
         req.session.userEmail = email;
 
-        req.flash('success', 'E-posta adresiniz güncellendi. Bundan sonra bu adresle giriş yapacaksınız.');
+        req.flash('success', 'flash.email_updated');
         res.redirect('/profile/edit');
     } catch (error) {
         console.error('Change Email Error:', error);
-        req.flash('error', 'E-posta güncellenirken hata oluştu.');
+        req.flash('error', 'flash.email_update_failed');
         res.redirect('/profile/edit');
     }
 };

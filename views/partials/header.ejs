@@ -67,7 +67,14 @@
                                 <li><a class="dropdown-item py-2" href="/favorites"><i class="fa-solid fa-heart me-3 text-accent"></i><%= t('nav.my_favorites') %></a></li>
                                 <li><a class="dropdown-item py-2" href="/profile/edit"><i class="fa-solid fa-gear me-3 text-muted"></i>Profil Ayarları</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 text-danger" href="/auth/logout"><i class="fa-solid fa-right-from-bracket me-3"></i><%= t('nav.logout') %></a></li>
+                                <li>
+                                    <form action="/auth/logout" method="POST" class="m-0">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button type="submit" class="dropdown-item py-2 text-danger">
+                                            <i class="fa-solid fa-right-from-bracket me-3"></i><%= t('nav.logout') %>
+                                        </button>
+                                    </form>
+                                </li>
                             </ul>
                         </div>
                     <% } else { %>

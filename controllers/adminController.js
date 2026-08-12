@@ -36,7 +36,7 @@ const dashboard = async (req, res) => {
         });
     } catch (error) {
         console.error('Admin Dashboard Error:', error);
-        req.flash('error', 'Panel yüklenirken bir hata oluştu.');
+        req.flash('error', 'flash.admin_dashboard_failed');
         res.redirect('/');
     }
 };
@@ -60,7 +60,7 @@ const users = async (req, res) => {
         });
     } catch (error) {
         console.error('Admin Users Error:', error);
-        req.flash('error', 'Kullanıcılar yüklenemedi.');
+        req.flash('error', 'flash.admin_users_failed');
         res.redirect('/admin');
     }
 };
@@ -86,7 +86,7 @@ const listings = async (req, res) => {
         });
     } catch (error) {
         console.error('Admin Listings Error:', error);
-        req.flash('error', 'İlanlar yüklenemedi.');
+        req.flash('error', 'flash.admin_listings_failed');
         res.redirect('/admin');
     }
 };
@@ -110,7 +110,7 @@ const reports = async (req, res) => {
         });
     } catch (error) {
         console.error('Admin Reports Error:', error);
-        req.flash('error', 'Şikayetler yüklenemedi.');
+        req.flash('error', 'flash.admin_reports_failed');
         res.redirect('/admin');
     }
 };
@@ -120,12 +120,12 @@ const reportConversation = async (req, res) => {
         const report = await Report.findById(parseInt(req.params.id, 10));
 
         if (!report) {
-            req.flash('error', 'Şikayet bulunamadı.');
+            req.flash('error', 'flash.report_not_found');
             return res.redirect('/admin/reports');
         }
 
         if (!report.reported_user_id) {
-            req.flash('error', 'Bu şikayet bir kullanıcı sohbetine ait değil.');
+            req.flash('error', 'flash.report_not_conversation');
             return res.redirect('/admin/reports');
         }
 
@@ -148,7 +148,7 @@ const reportConversation = async (req, res) => {
         });
     } catch (error) {
         console.error('Admin Report Conversation Error:', error);
-        req.flash('error', 'Sohbet yüklenemedi.');
+        req.flash('error', 'flash.conversation_load_failed');
         res.redirect('/admin/reports');
     }
 };
@@ -159,27 +159,26 @@ const toggleListingStatus = async (req, res) => {
         const { status } = req.body;
 
         if (!['active', 'pending', 'rejected'].includes(status)) {
-            if (wantsJson(req)) return res.status(400).json({ error: 'Geçersiz durum.' });
-            req.flash('error', 'Geçersiz durum.');
+            if (wantsJson(req)) return res.status(400).json({ error: res.locals.t('flash.invalid_status') });
+            req.flash('error', 'flash.invalid_status');
             return res.redirect('/admin/listings');
         }
 
         const updated = await Listing.updateStatus(id, status);
         if (!updated) {
-            if (wantsJson(req)) return res.status(404).json({ error: 'İlan bulunamadı.' });
-            req.flash('error', 'İlan bulunamadı.');
+            if (wantsJson(req)) return res.status(404).json({ error: res.locals.t('flash.listing_not_found') });
+            req.flash('error', 'flash.listing_not_found');
             return res.redirect('/admin/listings');
         }
 
         if (wantsJson(req)) return res.json({ success: true, status });
 
-        const labels = { active: 'yayına alındı', pending: 'onay bekliyor', rejected: 'reddedildi' };
-        req.flash('success', `İlan ${labels[status]}.`);
+        req.flash('success', `flash.listing_set_${status}`);
         res.redirect(req.get('referer') || '/admin/listings');
     } catch (error) {
         console.error('Admin Toggle Listing Error:', error);
-        if (wantsJson(req)) return res.status(500).json({ error: 'İşlem başarısız.' });
-        req.flash('error', 'İşlem başarısız.');
+        if (wantsJson(req)) return res.status(500).json({ error: res.locals.t('flash.action_failed') });
+        req.flash('error', 'flash.action_failed');
         res.redirect('/admin/listings');
     }
 };
@@ -190,8 +189,8 @@ const deleteListing = async (req, res) => {
         const listing = await Listing.findById(id);
 
         if (!listing) {
-            if (wantsJson(req)) return res.status(404).json({ error: 'İlan bulunamadı.' });
-            req.flash('error', 'İlan bulunamadı.');
+            if (wantsJson(req)) return res.status(404).json({ error: res.locals.t('flash.listing_not_found') });
+            req.flash('error', 'flash.listing_not_found');
             return res.redirect('/admin/listings');
         }
 
@@ -206,12 +205,12 @@ const deleteListing = async (req, res) => {
 
         if (wantsJson(req)) return res.json({ success: true });
 
-        req.flash('success', 'İlan kalıcı olarak silindi.');
+        req.flash('success', 'flash.listing_permanently_deleted');
         res.redirect(req.get('referer') || '/admin/listings');
     } catch (error) {
         console.error('Admin Delete Listing Error:', error);
-        if (wantsJson(req)) return res.status(500).json({ error: 'Silme işlemi başarısız.' });
-        req.flash('error', 'Silme işlemi başarısız.');
+        if (wantsJson(req)) return res.status(500).json({ error: res.locals.t('flash.delete_failed') });
+        req.flash('error', 'flash.delete_failed');
         res.redirect('/admin/listings');
     }
 };
@@ -222,32 +221,32 @@ const toggleUserStatus = async (req, res) => {
         const { status } = req.body;
 
         if (!['active', 'suspended'].includes(status)) {
-            if (wantsJson(req)) return res.status(400).json({ error: 'Geçersiz durum.' });
-            req.flash('error', 'Geçersiz durum.');
+            if (wantsJson(req)) return res.status(400).json({ error: res.locals.t('flash.invalid_status') });
+            req.flash('error', 'flash.invalid_status');
             return res.redirect('/admin/users');
         }
 
         if (parseInt(id, 10) === req.session.userId) {
-            if (wantsJson(req)) return res.status(400).json({ error: 'Kendi hesabınızı askıya alamazsınız.' });
-            req.flash('error', 'Kendi hesabınızı askıya alamazsınız.');
+            if (wantsJson(req)) return res.status(400).json({ error: res.locals.t('flash.cannot_suspend_self') });
+            req.flash('error', 'flash.cannot_suspend_self');
             return res.redirect('/admin/users');
         }
 
         const updated = await User.setActive(id, status === 'active');
         if (!updated) {
-            if (wantsJson(req)) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
-            req.flash('error', 'Kullanıcı bulunamadı.');
+            if (wantsJson(req)) return res.status(404).json({ error: res.locals.t('flash.user_not_found') });
+            req.flash('error', 'flash.user_not_found');
             return res.redirect('/admin/users');
         }
 
         if (wantsJson(req)) return res.json({ success: true, status });
 
-        req.flash('success', status === 'active' ? 'Kullanıcı aktifleştirildi.' : 'Kullanıcı askıya alındı.');
+        req.flash('success', status === 'active' ? 'flash.user_activated' : 'flash.user_suspended');
         res.redirect(req.get('referer') || '/admin/users');
     } catch (error) {
         console.error('Admin Toggle User Error:', error);
-        if (wantsJson(req)) return res.status(500).json({ error: 'İşlem başarısız.' });
-        req.flash('error', 'İşlem başarısız.');
+        if (wantsJson(req)) return res.status(500).json({ error: res.locals.t('flash.action_failed') });
+        req.flash('error', 'flash.action_failed');
         res.redirect('/admin/users');
     }
 };
@@ -258,17 +257,17 @@ const resolveReport = async (req, res) => {
         const { status, admin_note } = req.body;
 
         if (!['reviewed', 'resolved', 'dismissed'].includes(status)) {
-            req.flash('error', 'Geçersiz durum.');
+            req.flash('error', 'flash.invalid_status');
             return res.redirect('/admin/reports');
         }
 
         await Report.updateStatus(id, status, admin_note || null);
 
-        req.flash('success', status === 'dismissed' ? 'Şikayet reddedildi.' : 'Şikayet işleme alındı.');
+        req.flash('success', status === 'dismissed' ? 'flash.report_dismissed' : 'flash.report_processed');
         res.redirect(req.get('referer') || '/admin/reports');
     } catch (error) {
         console.error('Admin Resolve Report Error:', error);
-        req.flash('error', 'İşlem başarısız.');
+        req.flash('error', 'flash.action_failed');
         res.redirect('/admin/reports');
     }
 };

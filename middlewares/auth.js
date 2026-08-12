@@ -14,7 +14,7 @@ const isAuthenticated = (req, res, next) => {
         return res.status(401).json({ error: 'Authentication required' });
     }
     
-    req.flash('error', 'Lütfen önce giriş yapın.');
+    req.flash('error', 'flash.login_required_first');
     return res.redirect('/auth/login');
 };
 
@@ -28,7 +28,7 @@ const isAdmin = (req, res, next) => {
         return res.status(403).json({ error: 'Admin access required' });
     }
     
-    req.flash('error', 'Bu sayfaya erişim yetkiniz yok.');
+    req.flash('error', 'flash.no_page_access');
     return res.redirect('/');
 };
 
@@ -45,7 +45,7 @@ const isOwner = (req, res, next) => {
         return res.status(403).json({ error: 'Ownership required' });
     }
     
-    req.flash('error', 'Bu işlemi yapmaya yetkiniz yok.');
+    req.flash('error', 'flash.no_action_permission');
     return res.redirect('back');
 };
 
