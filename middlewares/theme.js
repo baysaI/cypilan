@@ -1,14 +1,15 @@
-const THEMES = ['auto', 'light', 'dark'];
-const DEFAULT_THEME = 'auto';
+const THEMES = ['light', 'dark'];
+const DEFAULT_THEME = 'light';
 const COOKIE_MAX_AGE = 31536000000;
 
 // Resolved server-side so the document is rendered with the right theme from the
-// first byte. 'auto' is the exception: the browser is the only one that knows the
-// OS preference, so the layout resolves that one inline before first paint.
+// first byte, with no client-side correction and so no flash. Light is the
+// baseline; dark is opt-in and remembered per browser.
 const themeMiddleware = (req, res, next) => {
     const cookies = req.cookies || {};
     let theme = req.query.theme || cookies.theme;
 
+    // Also catches the retired 'auto' value, which falls back to light.
     if (!THEMES.includes(theme)) {
         theme = DEFAULT_THEME;
     }
@@ -18,10 +19,10 @@ const themeMiddleware = (req, res, next) => {
     }
 
     res.locals.theme = theme;
-    res.locals.resolvedTheme = theme === 'auto' ? null : theme;
 
     next();
 };
 
 module.exports = themeMiddleware;
 module.exports.THEMES = THEMES;
+module.exports.DEFAULT_THEME = DEFAULT_THEME;

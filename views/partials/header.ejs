@@ -40,27 +40,19 @@
                         </ul>
                     </div>
 
-                    <% const activeTheme = typeof theme !== 'undefined' ? theme : 'auto'; %>
-                    <div class="dropdown">
-                        <button class="btn btn-light border-0" type="button" data-bs-toggle="dropdown"
-                                aria-label="<%= t('common.theme') %>" title="<%= t('common.theme') %>">
-                            <i class="fa-solid fa-circle-half-stroke text-primary" id="themeIcon"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <% [
-                                { value: 'auto',  icon: 'fa-circle-half-stroke', label: t('common.theme_auto') },
-                                { value: 'light', icon: 'fa-sun',                label: t('common.theme_light') },
-                                { value: 'dark',  icon: 'fa-moon',               label: t('common.theme_dark') }
-                            ].forEach(function (option) { %>
-                                <li>
-                                    <a class="dropdown-item theme-switch d-flex align-items-center gap-2 <%= activeTheme === option.value ? 'active' : '' %>"
-                                       href="#" data-theme="<%= option.value %>">
-                                        <i class="fa-solid <%= option.icon %> fa-fw"></i><%= option.label %>
-                                    </a>
-                                </li>
-                            <% }); %>
-                        </ul>
-                    </div>
+                    <%
+                        const activeTheme = (typeof theme !== 'undefined' && theme === 'dark') ? 'dark' : 'light';
+                        // The button shows the theme it switches *to*, not the one in use.
+                        const themeAction = activeTheme === 'dark'
+                            ? { icon: 'fa-sun',  label: t('common.theme_switch_to_light') }
+                            : { icon: 'fa-moon', label: t('common.theme_switch_to_dark') };
+                    %>
+                    <button class="btn btn-light border-0 theme-toggle" type="button"
+                            aria-label="<%= themeAction.label %>" title="<%= themeAction.label %>"
+                            data-label-to-dark="<%= t('common.theme_switch_to_dark') %>"
+                            data-label-to-light="<%= t('common.theme_switch_to_light') %>">
+                        <i class="fa-solid <%= themeAction.icon %> text-primary" id="themeIcon"></i>
+                    </button>
 
                     <% const activeUser = (typeof user !== 'undefined' && user) ? user : ((typeof currentUser !== 'undefined' && currentUser) ? currentUser : null); %>
                     <% if (activeUser) { %>

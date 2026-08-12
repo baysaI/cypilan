@@ -91,10 +91,8 @@
     "show_more": "Show More",
     "submit": "Submit",
     "success": "Success",
-    "theme": "Theme",
-    "theme_auto": "Automatic",
-    "theme_dark": "Dark",
-    "theme_light": "Light",
+    "theme_switch_to_dark": "Switch to dark theme",
+    "theme_switch_to_light": "Switch to light theme",
     "today": "Today",
     "try_again": "Try Again",
     "yes": "Yes"

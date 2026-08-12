@@ -91,10 +91,8 @@
     "show_more": "نمایش بیشتر",
     "submit": "ارسال",
     "success": "عملیات با موفقیت انجام شد",
-    "theme": "پوسته",
-    "theme_auto": "خودکار",
-    "theme_dark": "تیره",
-    "theme_light": "روشن",
+    "theme_switch_to_dark": "تغییر به پوسته تیره",
+    "theme_switch_to_light": "تغییر به پوسته روشن",
     "today": "امروز",
     "try_again": "تلاش مجدد",
     "yes": "بله"

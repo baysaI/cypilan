@@ -16,23 +16,11 @@
     const rawImage = pageMeta.ogImage || '/img/logo.png';
     const ogImageUrl = rawImage.indexOf('http') === 0 ? rawImage : base + rawImage;
 %>
-<html lang="<%= pageLang %>" dir="<%= pageDir %>"<%- resolvedTheme ? ` data-bs-theme="${resolvedTheme}"` : '' %>>
+<html lang="<%= pageLang %>" dir="<%= pageDir %>" data-bs-theme="<%= theme %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-
-    <% if (!resolvedTheme) { %>
-    <script>
-        // 'auto': only the browser knows the OS preference. Runs before first
-        // paint so the page never flashes the wrong theme.
-        (function () {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-bs-theme', 'dark');
-            }
-        })();
-    </script>
-    <% } %>
-    <meta name="theme-color" content="<%= resolvedTheme === 'dark' ? '#15181b' : '#ffffff' %>">
+    <meta name="theme-color" content="<%= theme === 'dark' ? '#15181b' : '#ffffff' %>">
     <title><%= pageTitle %></title>
     <meta name="description" content="<%= pageDescription %>">
     <% if (pageMeta.keywords) { %><meta name="keywords" content="<%= pageMeta.keywords %>"><% } %>

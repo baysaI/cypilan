@@ -1,18 +1,8 @@
 <!DOCTYPE html>
-<html lang="<%= typeof lang !== 'undefined' ? lang : 'tr' %>"<%- (typeof resolvedTheme !== 'undefined' && resolvedTheme) ? ` data-bs-theme="${resolvedTheme}"` : '' %>>
+<html lang="<%= typeof lang !== 'undefined' ? lang : 'tr' %>" data-bs-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <% if (typeof resolvedTheme === 'undefined' || !resolvedTheme) { %>
-    <script>
-        (function () {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-bs-theme', 'dark');
-            }
-        })();
-    </script>
-    <% } %>
     <title><%= typeof title !== 'undefined' ? title : 'Admin' %> | CYPILAN.COM</title>
     <meta name="robots" content="noindex, nofollow">
     <% if (typeof csrfToken !== 'undefined' && csrfToken) { %><meta name="csrf-token" content="<%= csrfToken %>"><% } %>

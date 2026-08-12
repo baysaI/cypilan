@@ -91,10 +91,8 @@
     "show_more": "Προβολή Περισσότερων",
     "submit": "Υποβολή",
     "success": "Επιτυχής διαδικασία",
-    "theme": "Θέμα",
-    "theme_auto": "Αυτόματο",
-    "theme_dark": "Σκοτεινό",
-    "theme_light": "Φωτεινό",
+    "theme_switch_to_dark": "Εναλλαγή σε σκοτεινό θέμα",
+    "theme_switch_to_light": "Εναλλαγή σε φωτεινό θέμα",
     "today": "Σήμερα",
     "try_again": "Δοκιμάστε ξανά",
     "yes": "Ναι"

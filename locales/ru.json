@@ -91,10 +91,8 @@
     "show_more": "Показать больше",
     "submit": "Отправить",
     "success": "Успешно",
-    "theme": "Тема",
-    "theme_auto": "Авто",
-    "theme_dark": "Тёмная",
-    "theme_light": "Светлая",
+    "theme_switch_to_dark": "Переключить на тёмную тему",
+    "theme_switch_to_light": "Переключить на светлую тему",
     "today": "Сегодня",
     "try_again": "Попробовать снова",
     "yes": "Да"
