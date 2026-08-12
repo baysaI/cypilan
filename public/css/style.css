@@ -9,6 +9,7 @@
 
     --cyp-accent: #E8982D;
     --cyp-accent-dark: #CC8220;
+    --cyp-on-accent: #1F2933;
 
     --cyp-success: #2ECC71;
     --cyp-dark: #2C3E50;
@@ -27,10 +28,12 @@
     --cyp-glass: rgba(255, 255, 255, 0.9);
     --cyp-glass-heavy: rgba(255, 255, 255, 0.95);
 
-    /* Brand blue plays two roles: a background (footer, hero, buttons) and a
-       foreground (icons, links). They need to move in opposite directions in
-       dark mode, so they are separate tokens. Identical in the light theme. */
-    --cyp-primary-fg: var(--cyp-primary);
+    /* Brand blue plays three roles that pull apart once contrast is accounted
+       for: a button fill, a foreground for icons and links, and a large panel
+       carrying paragraphs of white text. The panel needs to be the darkest of
+       the three — at #3A7CA5 the footer copy sits at 2.3:1. */
+    --cyp-primary-fg: #33708F;
+    --cyp-primary-panel: #24536E;
 }
 
 /* ==========================================================================
@@ -63,6 +66,7 @@
     --cyp-primary-dark: #24536E;
     --cyp-primary-light: #1C2A34;
     --cyp-primary-fg: #7FB8DC;
+    --cyp-primary-panel: #1D4459;
 
     --cyp-dark: #E4E7EB;
     --cyp-light: #1E2328;
@@ -211,12 +215,15 @@ body {
     border-color: var(--bs-border-color) !important;
 }
 
-/* Half-opacity white is body copy in the footer and hero, not decoration.
-   At 0.5 it never cleared AA even in the light theme; on the darker blue this
-   theme uses for those panels, 0.85 does. */
-[data-bs-theme="dark"] .text-white-50 {
-    color: rgba(255, 255, 255, 0.85) !important;
-}
+/* Bootstrap lightens its semantic *background* palette for dark mode but leaves
+   the text utilities on the light-theme values, which are too dark to read on a
+   dark card — .text-success lands at 3.9:1. */
+[data-bs-theme="dark"] .text-success { color: #4ADE80 !important; }
+[data-bs-theme="dark"] .text-danger  { color: #F87171 !important; }
+[data-bs-theme="dark"] .text-warning { color: #FBBF24 !important; }
+[data-bs-theme="dark"] .text-info    { color: #67C8E8 !important; }
+[data-bs-theme="dark"] .text-secondary { color: #A8B2BC !important; }
+
 
 /* Inputs written as `bg-light border-0` lose all definition once bg-light is a
    near-body colour, so give them their edge back. */
@@ -262,15 +269,55 @@ body {
     color: #fff;
 }
 
+/* Amber is too light to carry white text — that pairing sits at 2.3:1. Dark
+   ink on amber is the readable version and keeps the accent colour intact. */
 .btn-accent {
     background-color: var(--cyp-accent);
     border-color: var(--cyp-accent);
-    color: white;
 }
-.btn-accent:hover {
+.btn-accent:hover,
+.btn-accent:focus,
+.btn-accent:active {
     background-color: var(--cyp-accent-dark);
     border-color: var(--cyp-accent-dark);
-    color: white;
+}
+
+/* Several of these buttons also carry .text-white, which is !important, so the
+   readable colour has to be as well. */
+.btn-accent,
+.btn-accent:hover,
+.btn-accent:focus,
+.btn-accent:active,
+.btn-accent.text-white,
+.btn-accent .text-white {
+    color: var(--cyp-on-accent) !important;
+}
+
+/* Anything sitting on amber gets the dark ink by default — badges and cards
+   take their colour from their own component rules, not from .text-white. */
+.bg-accent {
+    color: var(--cyp-on-accent);
+}
+.bg-accent.text-white,
+.bg-accent .text-white,
+.badge.bg-accent {
+    color: var(--cyp-on-accent) !important;
+}
+.bg-accent .text-white-50 {
+    color: rgba(31, 41, 51, 0.8) !important;
+}
+
+/* Panels that pair the brand background with body copy get the deeper shade;
+   a badge or a button keeps the brighter brand blue. */
+.bg-primary.text-white,
+.site-footer {
+    background-color: var(--cyp-primary-panel) !important;
+}
+
+/* Used for paragraphs in the footer and hero, not as decoration. At 0.5 it
+   never cleared AA in either theme. */
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.85) !important;
 }
 
 .hover-lift {
