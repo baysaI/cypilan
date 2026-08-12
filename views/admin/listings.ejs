@@ -73,6 +73,7 @@ const list = (typeof listings !== 'undefined' && listings) ? listings : [];
                                     </a>
                                     <% if (l.status !== 'active') { %>
                                         <form action="/admin/listings/<%= l.id %>/status" method="POST" class="d-inline">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <input type="hidden" name="_method" value="PUT">
                                             <input type="hidden" name="status" value="active">
                                             <button class="btn btn-sm btn-success" title="Yayına al"><i class="fa-solid fa-check"></i></button>
@@ -80,12 +81,14 @@ const list = (typeof listings !== 'undefined' && listings) ? listings : [];
                                     <% } %>
                                     <% if (l.status !== 'rejected') { %>
                                         <form action="/admin/listings/<%= l.id %>/status" method="POST" class="d-inline">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <input type="hidden" name="_method" value="PUT">
                                             <input type="hidden" name="status" value="rejected">
                                             <button class="btn btn-sm btn-warning" title="Reddet"><i class="fa-solid fa-ban"></i></button>
                                         </form>
                                     <% } %>
                                     <form action="/admin/listings/<%= l.id %>" method="POST" class="d-inline js-confirm-delete" data-title="<%= l.title %>">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <button class="btn btn-sm btn-danger" title="Kalıcı olarak sil"><i class="fa-solid fa-trash"></i></button>
                                     </form>

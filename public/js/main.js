@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
     const langSwitches = document.querySelectorAll('.lang-switch');
     langSwitches.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -42,7 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': csrfToken
                     }
                 });
 
@@ -51,6 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         window.location.href = '/auth/login';
                     }, 1200);
+                    return;
+                }
+
+                if (res.status === 403) {
+                    showToast('Güvenlik doğrulaması başarısız. Sayfayı yenileyin.', 'danger');
                     return;
                 }
 

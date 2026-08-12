@@ -84,6 +84,27 @@ class Listing {
     return results;
   }
 
+  static async replaceImages(listingId, images = []) {
+    const db = await getDb();
+
+    const deleteStmt = db.prepare('DELETE FROM listing_images WHERE listing_id = ?');
+    deleteStmt.run([listingId]);
+    deleteStmt.free();
+
+    if (Array.isArray(images) && images.length > 0) {
+      const imgStmt = db.prepare(
+        'INSERT INTO listing_images (listing_id, image_url, is_primary, sort_order) VALUES (?, ?, ?, ?)'
+      );
+      images.forEach((imageUrl, index) => {
+        imgStmt.run([listingId, imageUrl, index === 0 ? 1 : 0, index]);
+      });
+      imgStmt.free();
+    }
+
+    saveDb();
+    return true;
+  }
+
   static async findDetailBySlug(slug) {
     const db = await getDb();
     const stmt = db.prepare(`
@@ -343,6 +364,25 @@ class Listing {
 
   static async findAll(filters, page, limit) {
     return this.search(filters, page, limit);
+  }
+
+  static async suggestTitles(query, limit = 8) {
+    if (!query || query.length < 2) return [];
+
+    const db = await getDb();
+    const stmt = db.prepare(`
+      SELECT title, slug FROM listings
+      WHERE status = 'active' AND title LIKE ?
+      ORDER BY is_premium DESC, views_count DESC, created_at DESC
+      LIMIT ?
+    `);
+    stmt.bind([`%${query}%`, limit]);
+    const results = [];
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+    return results;
   }
 
   static async adminFindAll(filters = {}, page = 1, limit = 20) {

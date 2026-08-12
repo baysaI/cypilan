@@ -15,8 +15,18 @@ if (clientID && clientSecret) {
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-        if (!email) return done(null, false, { message: 'Google hesabı e-postası alınamadı.' });
+        const primaryEmail = profile.emails && profile.emails[0] ? profile.emails[0] : null;
+        if (!primaryEmail || !primaryEmail.value) {
+          return done(null, false, { message: 'Google hesabı e-postası alınamadı.' });
+        }
+
+        // Without this an unverified Google address could be used to take over an
+        // existing password account that happens to share the same e-mail.
+        if (primaryEmail.verified === false) {
+          return done(null, false, { message: 'Google hesabınızın e-posta adresi doğrulanmamış.' });
+        }
+
+        const email = String(primaryEmail.value).trim().toLowerCase();
 
         let user = await User.findByEmail(email);
         if (!user) {

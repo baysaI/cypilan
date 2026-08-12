@@ -72,7 +72,7 @@ function translate(key, lang = 'tr', params = {}) {
 
   let translated = getNestedValue(locales[targetLang], key);
 
-  const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin'];
+  const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin', 'pages', 'report_modal', 'profile_edit', 'errors', 'messages'];
   if (translated === undefined && !key.includes('.')) {
     for (const ns of namespaces) {
       translated = getNestedValue(locales[targetLang], `${ns}.${key}`);

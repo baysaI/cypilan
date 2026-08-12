@@ -1,25 +1,52 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const { isValidEmail, isValidPassword, isValidPhone } = require('../utils/validators');
+
+const BCRYPT_ROUNDS = 10;
+
+// Re-issues the session id on privilege change so a pre-login session id captured
+// by an attacker cannot be reused as an authenticated one (session fixation).
+const startAuthenticatedSession = (req, user, redirectTo, successMessage, res) => {
+    req.session.regenerate((regenerateErr) => {
+        if (regenerateErr) {
+            console.error('Session Regenerate Error:', regenerateErr);
+            req.flash('error', 'Oturum başlatılamadı. Lütfen tekrar deneyin.');
+            return res.redirect('/auth/login');
+        }
+
+        req.session.userId = user.id;
+        req.session.userRole = user.role;
+        req.session.userEmail = user.email;
+        req.session.userName = user.full_name;
+
+        req.session.save((saveErr) => {
+            if (saveErr) console.error('Session Save Error:', saveErr);
+            req.flash('success', successMessage);
+            res.redirect(redirectTo);
+        });
+    });
+};
 
 const showLogin = (req, res) => {
     if (req.session && req.session.userId) {
         return res.redirect('/');
     }
-    res.locals.meta.title = 'Giriş Yap | CYPILAN.COM';
+    res.locals.meta.title = 'Giriş Yap';
     res.render('auth/login', { title: 'Giriş Yap' });
 };
 
 const login = async (req, res) => {
     try {
-        const { email, password, remember } = req.body;
-        
+        const { password, remember } = req.body;
+        const email = String(req.body.email || '').trim().toLowerCase();
+
         if (!email || !password) {
             req.flash('error', 'Lütfen tüm alanları doldurun.');
             return res.redirect('/auth/login');
         }
 
         const user = await User.findByEmail(email);
-        
+
         if (!user || !user.password_hash) {
             req.flash('error', 'Geçersiz e-posta veya şifre.');
             return res.redirect('/auth/login');
@@ -31,27 +58,36 @@ const login = async (req, res) => {
             return res.redirect('/auth/login');
         }
 
-        if (user.is_active === 0) {
+        if (Number(user.is_active) === 0) {
             req.flash('error', 'Hesabınız askıya alınmış veya henüz onaylanmamış.');
             return res.redirect('/auth/login');
         }
 
-        req.session.userId = user.id;
-        req.session.userRole = user.role;
-        req.session.userEmail = user.email;
-        req.session.userName = user.full_name;
-
-        if (remember) {
-            req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-        }
-
+        // Read before regenerating — the old session is discarded.
         const returnTo = req.session.returnTo || '/';
-        delete req.session.returnTo;
+        const rememberMe = Boolean(remember);
 
-        req.session.save((err) => {
-            if (err) console.error('Session Save Error:', err);
-            req.flash('success', 'Başarıyla giriş yaptınız.');
-            res.redirect(returnTo);
+        req.session.regenerate((regenerateErr) => {
+            if (regenerateErr) {
+                console.error('Session Regenerate Error:', regenerateErr);
+                req.flash('error', 'Oturum başlatılamadı. Lütfen tekrar deneyin.');
+                return res.redirect('/auth/login');
+            }
+
+            req.session.userId = user.id;
+            req.session.userRole = user.role;
+            req.session.userEmail = user.email;
+            req.session.userName = user.full_name;
+
+            if (rememberMe) {
+                req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+            }
+
+            req.session.save((saveErr) => {
+                if (saveErr) console.error('Session Save Error:', saveErr);
+                req.flash('success', 'Başarıyla giriş yaptınız.');
+                res.redirect(returnTo);
+            });
         });
     } catch (error) {
         console.error('Login Error:', error);
@@ -64,21 +100,44 @@ const showRegister = (req, res) => {
     if (req.session && req.session.userId) {
         return res.redirect('/');
     }
-    res.locals.meta.title = 'Kayıt Ol | CYPILAN.COM';
+    res.locals.meta.title = 'Kayıt Ol';
     res.render('auth/register', { title: 'Kayıt Ol' });
 };
 
 const register = async (req, res) => {
     try {
-        const { email, password, passwordConfirm, fullName, phone, accountType, terms } = req.body;
+        const { password, passwordConfirm, accountType } = req.body;
+        const email = String(req.body.email || '').trim().toLowerCase();
+        const fullName = String(req.body.fullName || '').trim();
+        const phone = String(req.body.phone || '').trim();
 
         if (!email || !password || !fullName) {
             req.flash('error', 'Lütfen gerekli alanları doldurun.');
             return res.redirect('/auth/register');
         }
 
+        if (!isValidEmail(email)) {
+            req.flash('error', 'Geçerli bir e-posta adresi girin.');
+            return res.redirect('/auth/register');
+        }
+
+        if (fullName.length < 2) {
+            req.flash('error', 'Ad Soyad en az 2 karakter olmalıdır.');
+            return res.redirect('/auth/register');
+        }
+
+        if (!isValidPassword(password)) {
+            req.flash('error', 'Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.');
+            return res.redirect('/auth/register');
+        }
+
         if (password !== passwordConfirm) {
             req.flash('error', 'Şifreler birbiriyle uyuşmuyor.');
+            return res.redirect('/auth/register');
+        }
+
+        if (phone && !isValidPhone(phone)) {
+            req.flash('error', 'Geçerli bir telefon numarası girin.');
             return res.redirect('/auth/register');
         }
 
@@ -88,28 +147,25 @@ const register = async (req, res) => {
             return res.redirect('/auth/register');
         }
 
-        const password_hash = await bcrypt.hash(password, 10);
+        const password_hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
         const userId = await User.create({
             email,
             password_hash,
             full_name: fullName,
-            phone: phone || '',
+            phone: phone || null,
             role: 'user',
             company_name: accountType === 'corporate' ? fullName : null
         });
 
         const user = await User.findById(userId);
 
-        req.session.userId = user.id;
-        req.session.userRole = user.role;
-        req.session.userEmail = user.email;
-        req.session.userName = user.full_name;
-
-        req.session.save((err) => {
-            if (err) console.error('Session Save Error:', err);
-            req.flash('success', 'Hesabınız başarıyla oluşturuldu ve giriş yapıldı.');
-            res.redirect('/');
-        });
+        startAuthenticatedSession(
+            req,
+            user,
+            '/',
+            'Hesabınız başarıyla oluşturuldu ve giriş yapıldı.',
+            res
+        );
     } catch (error) {
         console.error('Register Error:', error);
         req.flash('error', 'Kayıt sırasında bir hata oluştu.');

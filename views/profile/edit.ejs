@@ -3,61 +3,61 @@
         <div class="col-12 col-lg-8 col-xl-7">
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="fs-4 fw-bold mb-0">Profil Ayarları</h1>
-                <a href="/profile/<%= user.id %>" class="btn btn-light border btn-sm">Profilimi Gör</a>
+                <h1 class="fs-4 fw-bold mb-0"><%= t('profile_edit.title') %></h1>
+                <a href="/profile/<%= user.id %>" class="btn btn-light border btn-sm"><%= t('profile_edit.view_profile') %></a>
             </div>
 
             <form action="/profile" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="hidden" name="_method" value="PUT">
 
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
-                        <h2 class="fs-6 fw-bold mb-0">Hesap Bilgileri</h2>
+                        <h2 class="fs-6 fw-bold mb-0"><%= t('profile_edit.account_info') %></h2>
                     </div>
                     <div class="card-body p-4">
                         <div class="mb-3">
-                            <label for="fullName" class="form-label fw-medium small">Ad Soyad</label>
+                            <label for="fullName" class="form-label fw-medium small"><%= t('profile_edit.full_name') %></label>
                             <input type="text" class="form-control" id="fullName" name="full_name"
                                    value="<%= user.full_name || '' %>" required maxlength="120">
                         </div>
 
                         <div class="mb-0">
-                            <label for="bio" class="form-label fw-medium small">Hakkımda</label>
+                            <label for="bio" class="form-label fw-medium small"><%= t('profile_edit.bio') %></label>
                             <textarea class="form-control" id="bio" name="bio" rows="3" maxlength="500"
-                                      placeholder="Kendinizden kısaca bahsedin (opsiyonel)"><%= user.bio || '' %></textarea>
+                                      placeholder="<%= t('profile_edit.bio_placeholder') %>"><%= user.bio || '' %></textarea>
                         </div>
                     </div>
                 </div>
 
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
-                        <h2 class="fs-6 fw-bold mb-0">İletişim ve Gizlilik</h2>
+                        <h2 class="fs-6 fw-bold mb-0"><%= t('profile_edit.contact_privacy') %></h2>
                     </div>
                     <div class="card-body p-4">
                         <div class="mb-3">
-                            <label for="phone" class="form-label fw-medium small">Telefon Numarası</label>
+                            <label for="phone" class="form-label fw-medium small"><%= t('profile_edit.phone') %></label>
                             <input type="tel" class="form-control" id="phone" name="phone"
                                    value="<%= user.phone || '' %>" placeholder="0533 123 4567">
-                            <div class="form-text small">İlan verebilmek için geçerli bir numara gerekir.</div>
+                            <div class="form-text small"><%= t('profile_edit.phone_help') %></div>
                         </div>
 
                         <div class="form-check">
                             <input class="form-check-input cursor-pointer" type="checkbox" name="hide_phone" value="1" id="hidePhone"
                                    <%= Number(user.show_phone) === 0 ? 'checked' : '' %>>
                             <label class="form-check-label cursor-pointer fw-medium" for="hidePhone">
-                                Telefonumu ilanlarımda gösterme
+                                <%= t('profile_edit.hide_phone') %>
                             </label>
                             <div class="form-text small">
-                                İşaretlerseniz numaranız hiçbir ilanınızda görünmez ve alıcılar size yalnızca
-                                site içi mesajla ulaşabilir. Numaranız kayıtlı kalır, sadece gizlenir.
+                                <%= t('profile_edit.hide_phone_help') %>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex gap-2 justify-content-end">
-                    <a href="/profile/<%= user.id %>" class="btn btn-light border px-4">Vazgeç</a>
-                    <button type="submit" class="btn btn-primary px-4 fw-medium">Kaydet</button>
+                    <a href="/profile/<%= user.id %>" class="btn btn-light border px-4"><%= t('common.cancel') %></a>
+                    <button type="submit" class="btn btn-primary px-4 fw-medium"><%= t('common.save') %></button>
                 </div>
             </form>
 
@@ -65,20 +65,20 @@
 
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-white py-3">
-                    <h2 class="fs-6 fw-bold mb-0"><%= hasPassword ? 'Şifre Değiştir' : 'Şifre Belirle' %></h2>
+                    <h2 class="fs-6 fw-bold mb-0"><%= hasPassword ? t('profile_edit.change_password') : t('profile_edit.set_password') %></h2>
                 </div>
                 <div class="card-body p-4">
                     <% if (!hasPassword) { %>
                         <div class="alert alert-info small">
-                            Hesabınız Google ile oluşturulduğu için bir şifreniz yok.
-                            Buradan şifre belirlerseniz e-posta ve şifreyle de giriş yapabilirsiniz.
+                            <%= t('profile_edit.google_account_info') %>
                         </div>
                     <% } %>
 
                     <form action="/profile/password" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <% if (hasPassword) { %>
                             <div class="mb-3">
-                                <label for="currentPassword" class="form-label fw-medium small">Mevcut Şifre</label>
+                                <label for="currentPassword" class="form-label fw-medium small"><%= t('profile_edit.current_password') %></label>
                                 <input type="password" class="form-control" id="currentPassword"
                                        name="current_password" required autocomplete="current-password">
                             </div>
@@ -86,13 +86,13 @@
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="newPassword" class="form-label fw-medium small">Yeni Şifre</label>
+                                <label for="newPassword" class="form-label fw-medium small"><%= t('profile_edit.new_password') %></label>
                                 <input type="password" class="form-control" id="newPassword"
                                        name="new_password" required autocomplete="new-password">
-                                <div class="form-text small">En az 8 karakter, 1 büyük harf ve 1 rakam.</div>
+                                <div class="form-text small"><%= t('profile_edit.new_password_help') %></div>
                             </div>
                             <div class="col-md-6">
-                                <label for="confirmPassword" class="form-label fw-medium small">Yeni Şifre (Tekrar)</label>
+                                <label for="confirmPassword" class="form-label fw-medium small"><%= t('profile_edit.confirm_password') %></label>
                                 <input type="password" class="form-control" id="confirmPassword"
                                        name="confirm_password" required autocomplete="new-password">
                             </div>
@@ -100,7 +100,7 @@
 
                         <div class="d-flex justify-content-end mt-3">
                             <button type="submit" class="btn btn-primary px-4 fw-medium">
-                                <%= hasPassword ? 'Şifreyi Güncelle' : 'Şifreyi Belirle' %>
+                                <%= hasPassword ? t('profile_edit.update_password') : t('profile_edit.create_password') %>
                             </button>
                         </div>
                     </form>
@@ -109,32 +109,33 @@
 
             <div class="card border-0 shadow-sm mt-4 mb-5">
                 <div class="card-header bg-white py-3">
-                    <h2 class="fs-6 fw-bold mb-0">E-posta Adresi</h2>
+                    <h2 class="fs-6 fw-bold mb-0"><%= t('profile_edit.email_address') %></h2>
                 </div>
                 <div class="card-body p-4">
                     <% if (!hasPassword) { %>
-                        <p class="text-muted small mb-2">Mevcut adres: <strong><%= user.email %></strong></p>
+                        <p class="text-muted small mb-2"><%= t('profile_edit.current_email', { email: user.email }) %></p>
                         <div class="alert alert-warning small mb-0">
-                            E-posta adresinizi değiştirebilmek için önce yukarıdan bir şifre belirlemelisiniz.
+                            <%= t('profile_edit.google_email_warning') %>
                         </div>
                     <% } else { %>
                         <form action="/profile/email" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                             <div class="mb-3">
-                                <label for="newEmail" class="form-label fw-medium small">E-posta Adresi</label>
+                                <label for="newEmail" class="form-label fw-medium small"><%= t('profile_edit.email_address') %></label>
                                 <input type="email" class="form-control" id="newEmail" name="new_email"
                                        value="<%= user.email || '' %>" required>
-                                <div class="form-text small">Giriş yaparken bu adresi kullanacaksınız.</div>
+                                <div class="form-text small"><%= t('profile_edit.email_help') %></div>
                             </div>
 
                             <div class="mb-0">
-                                <label for="emailPassword" class="form-label fw-medium small">Şifreniz</label>
+                                <label for="emailPassword" class="form-label fw-medium small"><%= t('auth.password') %></label>
                                 <input type="password" class="form-control" id="emailPassword"
                                        name="current_password" required autocomplete="current-password">
-                                <div class="form-text small">Güvenlik için şifrenizi doğrulamanız gerekir.</div>
+                                <div class="form-text small"><%= t('profile_edit.verify_password_help') %></div>
                             </div>
 
                             <div class="d-flex justify-content-end mt-3">
-                                <button type="submit" class="btn btn-primary px-4 fw-medium">E-postayı Güncelle</button>
+                                <button type="submit" class="btn btn-primary px-4 fw-medium"><%= t('profile_edit.update_email') %></button>
                             </div>
                         </form>
                     <% } %>

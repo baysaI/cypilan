@@ -20,6 +20,7 @@
                     </div>
 
                     <form action="/auth/register" method="POST" class="needs-validation" novalidate>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <div class="mb-4 d-flex gap-3">
                             <div class="form-check bg-light rounded-3 p-3 flex-fill text-center border cursor-pointer hover-bg-primary-light transition-all">
                                 <input class="form-check-input float-none mx-auto d-block mb-2 shadow-none cursor-pointer" type="radio" name="accountType" id="typeIndividual" value="individual" checked>

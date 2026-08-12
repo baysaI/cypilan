@@ -8,7 +8,6 @@ const authRoutes = require('./auth');
 const listingsRoutes = require('./listings');
 const apiRoutes = require('./api');
 const adminRoutes = require('./admin');
-const profileRoutes = require('./profile');
 const messagesRoutes = require('./messages');
 const reportsRoutes = require('./reports');
 
@@ -26,7 +25,6 @@ router.use('/report', reportsRoutes);
 const profileController = require('../controllers/profileController');
 router.get('/profile', isAuthenticated, profileController.index);
 router.get('/favorites', isAuthenticated, (req, res) => res.redirect('/profile/favorites'));
-router.get('/listings/my-listings', isAuthenticated, (req, res) => res.redirect('/profile/listings'));
 router.get('/profile/edit', isAuthenticated, profileController.edit);
 router.put('/profile', isAuthenticated, profileController.update);
 router.post('/profile/password', isAuthenticated, profileController.changePassword);

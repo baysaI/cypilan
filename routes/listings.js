@@ -2,11 +2,25 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const listingController = require('../controllers/listingController');
+const Listing = require('../models/Listing');
 const { isAuthenticated, isOwner } = require('../middlewares/auth');
+const { verifyCsrf } = require('../middlewares/csrf');
 const { uploadListingImages, processImagesWithWatermark } = require('../middlewares/upload');
 
 const fetchListingForOwnership = async (req, res, next) => {
-    next();
+    try {
+        const listing = await Listing.findBySlug(req.params.slug);
+
+        if (!listing) {
+            req.flash('error', 'İlan bulunamadı.');
+            return res.redirect('/profile/listings');
+        }
+
+        req.listing = listing;
+        next();
+    } catch (error) {
+        next(error);
+    }
 };
 
 const phoneRevealLimiter = rateLimit({
@@ -23,12 +37,34 @@ const phoneRevealLimiter = rateLimit({
 router.get('/', listingController.index);
 
 router.get('/create', isAuthenticated, listingController.showCreate);
-router.post('/', isAuthenticated, uploadListingImages, processImagesWithWatermark, listingController.create);
+
+// Multipart bodies are parsed by multer, so the CSRF token is only readable
+// after uploadListingImages has run — and images hit the disk only after it passes.
+router.post(
+    '/',
+    isAuthenticated,
+    uploadListingImages,
+    verifyCsrf,
+    processImagesWithWatermark,
+    listingController.create
+);
 
 router.get('/:slug', listingController.show);
 
 router.get('/:slug/edit', isAuthenticated, fetchListingForOwnership, isOwner, listingController.showEdit);
-router.put('/:slug', isAuthenticated, fetchListingForOwnership, isOwner, listingController.update);
+
+// POST rather than the _method PUT override: the override reads req.body, which is
+// not populated for multipart requests until multer runs inside this chain.
+router.post(
+    '/:slug/edit',
+    isAuthenticated,
+    fetchListingForOwnership,
+    isOwner,
+    uploadListingImages,
+    verifyCsrf,
+    processImagesWithWatermark,
+    listingController.update
+);
 
 router.delete('/:slug', isAuthenticated, fetchListingForOwnership, isOwner, listingController.delete);
 

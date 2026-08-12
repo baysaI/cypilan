@@ -1,6 +1,5 @@
--- Demo Admin User (Email: admin@cypilan.com | Password: ADMIN_SIFRESI)
-INSERT OR IGNORE INTO users (id, email, password_hash, full_name, phone, role, is_verified, is_active) VALUES
-(1, 'admin@cypilan.com', '$2a$10$REPLACED.ADMIN.HASH.SET.ADMIN_PASSWORD.IN.ENV.xxxxxxxx', 'System Admin', '+90 533 000 0000', 'admin', 1, 1);
+-- The admin account is created by config/database.js (ensureAdminUser) so its
+-- password is never committed to the repository.
 
 -- Main Categories
 INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, name_en, icon, sort_order) VALUES

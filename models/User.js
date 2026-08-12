@@ -16,10 +16,13 @@ class User {
     return row;
   }
 
+  // Case-insensitive so that accounts registered before e-mails were normalised
+  // (and users typing a capitalised address) still resolve to the same row.
   static async findByEmail(email) {
+    if (!email) return null;
     const db = await getDb();
-    const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
-    stmt.bind([email]);
+    const stmt = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)');
+    stmt.bind([String(email).trim()]);
     let row = null;
     if (stmt.step()) {
       row = stmt.getAsObject();
@@ -31,7 +34,6 @@ class User {
   static async create(userData) {
     const db = await getDb();
     const {
-      email,
       full_name,
       phone = null,
       role = 'user',
@@ -40,6 +42,8 @@ class User {
       currency_pref = 'TRY',
       has_password = 1
     } = userData;
+
+    const email = String(userData.email || '').trim().toLowerCase();
 
     const password_hash = userData.password_hash
       || (userData.password ? await bcrypt.hash(userData.password, SALT_ROUNDS) : null);

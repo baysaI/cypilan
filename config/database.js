@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const initSqlJs = require('sql.js');
 
 const dbPath = path.join(__dirname, '..', 'database', 'cypilan.db');
@@ -112,11 +114,44 @@ const initialize = async () => {
   }
 };
 
+// Creates the first admin only when none exists. The password comes from the
+// environment, or is generated and printed once — never committed to the repo.
+const ensureAdminUser = async (db) => {
+  const result = db.exec("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+  const adminCount = result[0] ? result[0].values[0][0] : 0;
+  if (adminCount > 0) return;
+
+  const email = (process.env.ADMIN_EMAIL || 'admin@cypilan.com').trim().toLowerCase();
+  const generated = !process.env.ADMIN_PASSWORD;
+  const password = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const stmt = db.prepare(`
+    INSERT INTO users (email, password_hash, full_name, role, is_verified, is_active)
+    VALUES (?, ?, ?, 'admin', 1, 1)
+  `);
+  stmt.run([email, passwordHash, 'System Admin']);
+  stmt.free();
+  saveDb();
+
+  if (generated) {
+    console.log('');
+    console.log('⚠️  Admin hesabı oluşturuldu — bu şifre bir daha gösterilmeyecek:');
+    console.log(`   E-posta : ${email}`);
+    console.log(`   Şifre   : ${password}`);
+    console.log('   Sabitlemek için .env dosyasına ADMIN_EMAIL / ADMIN_PASSWORD ekleyin.');
+    console.log('');
+  } else {
+    console.log(`Admin hesabı oluşturuldu: ${email}`);
+  }
+};
+
 const seed = async () => {
   try {
     const db = await getDb();
     const seedData = fs.readFileSync(seedPath, 'utf8');
     db.run(seedData);
+    await ensureAdminUser(db);
     saveDb();
     console.log('Database seeded successfully.');
   } catch (error) {

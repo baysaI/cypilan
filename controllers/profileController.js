@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const User = require('../models/User');
 const Listing = require('../models/Listing');
 const { isValidPhone, isValidPassword, isValidEmail } = require('../utils/validators');
@@ -51,20 +49,23 @@ const show = async (req, res) => {
     }
 };
 
-const edit = async (req, res) => {
+const edit = async (req, res, next) => {
     try {
         const user = await User.findById(req.session.userId);
-        res.locals.meta = res.locals.meta || {};
-        res.locals.meta.title = 'Profilimi Düzenle | CYPILAN.COM';
-        
-        const viewPath = path.join(__dirname, '..', 'views', 'profile', 'edit.ejs');
-        if (fs.existsSync(viewPath)) {
-            return res.render('profile/edit', { user, title: 'Profili Düzenle' });
+
+        if (!user) {
+            req.flash('error', 'Kullanıcı bulunamadı.');
+            return res.redirect('/');
         }
-        res.redirect(`/profile/${req.session.userId}`);
+
+        res.locals.meta = res.locals.meta || {};
+        res.locals.meta.title = 'Profilimi Düzenle';
+        res.locals.meta.robots = 'noindex, nofollow';
+
+        res.render('profile/edit', { user, title: 'Profili Düzenle' });
     } catch (error) {
         console.error('Profile Edit Error:', error);
-        res.redirect('/');
+        next(error);
     }
 };
 
@@ -202,47 +203,33 @@ const changeEmail = async (req, res) => {
     }
 };
 
-const myListings = async (req, res) => {
+const myListings = async (req, res, next) => {
     try {
-        const viewPath = path.join(__dirname, '..', 'views', 'profile', 'listings.ejs');
-        if (fs.existsSync(viewPath)) {
-            const listings = await Listing.getByUser(req.session.userId);
-            res.locals.meta = res.locals.meta || {};
-            res.locals.meta.title = 'İlanlarım | CYPILAN.COM';
-            return res.render('profile/listings', { listings, title: 'İlanlarım' });
-        }
-        res.redirect(`/profile/${req.session.userId}`);
+        const listings = await Listing.getByUser(req.session.userId);
+
+        res.locals.meta = res.locals.meta || {};
+        res.locals.meta.title = 'İlanlarım';
+        res.locals.meta.robots = 'noindex, nofollow';
+
+        res.render('profile/listings', { listings, title: 'İlanlarım' });
     } catch (error) {
         console.error('My Listings Error:', error);
-        res.redirect('/');
+        next(error);
     }
 };
 
-const myFavorites = async (req, res) => {
+const myFavorites = async (req, res, next) => {
     try {
         const favorites = await Listing.findFavoritesByUser(req.session.userId);
+
         res.locals.meta = res.locals.meta || {};
-        res.locals.meta.title = 'Favorilerim | CYPILAN.COM';
-        return res.render('profile/favorites', { favorites, title: 'Favorilerim' });
+        res.locals.meta.title = 'Favorilerim';
+        res.locals.meta.robots = 'noindex, nofollow';
+
+        res.render('profile/favorites', { favorites, title: 'Favorilerim' });
     } catch (error) {
         console.error('My Favorites Error:', error);
-        res.redirect('/');
-    }
-};
-
-const myMessages = async (req, res) => {
-    try {
-        const viewPath = path.join(__dirname, '..', 'views', 'profile', 'messages.ejs');
-        if (fs.existsSync(viewPath)) {
-            const messages = [];
-            res.locals.meta = res.locals.meta || {};
-            res.locals.meta.title = 'Mesajlarım | CYPILAN.COM';
-            return res.render('profile/messages', { messages, title: 'Mesajlarım' });
-        }
-        res.redirect(`/profile/${req.session.userId}`);
-    } catch (error) {
-        console.error('My Messages Error:', error);
-        res.redirect('/');
+        next(error);
     }
 };
 
@@ -254,6 +241,5 @@ module.exports = {
     changePassword,
     changeEmail,
     myListings,
-    myFavorites,
-    myMessages
+    myFavorites
 };

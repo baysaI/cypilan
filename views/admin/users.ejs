@@ -72,6 +72,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                         <span class="text-muted small">siz</span>
                                     <% } else { %>
                                         <form action="/admin/users/<%= u.id %>/status" method="POST" class="d-inline">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <input type="hidden" name="_method" value="PUT">
                                             <input type="hidden" name="status" value="<%= u.is_active ? 'suspended' : 'active' %>">
                                             <button class="btn btn-sm <%= u.is_active ? 'btn-outline-danger' : 'btn-outline-success' %>">

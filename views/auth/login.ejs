@@ -20,6 +20,7 @@
                     </div>
 
                     <form action="/auth/login" method="POST" class="needs-validation" novalidate>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <div class="mb-3">
                             <label for="email" class="form-label fw-medium small"><%= t('auth.email') %></label>
                             <input type="email" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="email" name="email" required placeholder="ornek@email.com">

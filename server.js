@@ -14,10 +14,18 @@ const { initialize, seed, getDb } = require('./config/database');
 const seoMiddleware = require('./middlewares/seo');
 const i18nMiddleware = require('./middlewares/i18n');
 const { setUserLocal } = require('./middlewares/auth');
+const { csrfProtection } = require('./middlewares/csrf');
 const routes = require('./routes/index');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+const SESSION_SECRET = process.env.SESSION_SECRET;
+if (!SESSION_SECRET && IS_PRODUCTION) {
+  console.error('FATAL: SESSION_SECRET tanımlı değil. Üretim ortamında oturumlar taklit edilebilir hale gelir.');
+  process.exit(1);
+}
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -55,7 +63,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
+  maxAge: IS_PRODUCTION ? '7d' : 0,
   etag: true
 }));
 
@@ -63,11 +71,11 @@ app.use(session({
   store: new MemoryStore({
     checkPeriod: 86400000
   }),
-  secret: process.env.SESSION_SECRET || 'cypilan-secret-key',
+  secret: SESSION_SECRET || 'cypilan-development-only-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: IS_PRODUCTION,
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'lax'
@@ -97,6 +105,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(csrfProtection);
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
@@ -118,33 +128,41 @@ app.use((req, res, next) => {
 
 app.use('/', routes);
 
-app.use((req, res) => {
-  res.status(404).render('home', {
-    meta: {
-      title: '404 - Sayfa Bulunamadı | CYPILAN.COM',
-      description: 'Aradığınız sayfa bulunamadı.',
-      robots: 'noindex, nofollow'
-    },
-    featuredListings: [],
-    recentListings: [],
-    categories: [],
-    stats: { totalListings: 0, totalUsers: 0, totalCities: 5 }
+app.use((req, res, next) => {
+  res.locals.meta = {
+    ...(res.locals.meta || {}),
+    title: 'Sayfa Bulunamadı',
+    description: 'Aradığınız sayfa bulunamadı.',
+    robots: 'noindex, nofollow'
+  };
+
+  res.status(404).render('errors/404', { title: 'Sayfa Bulunamadı' }, (err, html) => {
+    if (err) return next(err);
+    res.send(html);
   });
 });
 
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
   const statusCode = err.status || 500;
-  res.status(statusCode).render('home', {
-    meta: {
-      title: 'Hata | CYPILAN.COM',
-      description: 'Bir hata oluştu.',
-      robots: 'noindex, nofollow'
-    },
-    featuredListings: [],
-    recentListings: [],
-    categories: [],
-    stats: { totalListings: 0, totalUsers: 0, totalCities: 5 }
+  res.locals.meta = {
+    ...(res.locals.meta || {}),
+    title: 'Hata',
+    description: 'Bir hata oluştu.',
+    robots: 'noindex, nofollow'
+  };
+
+  res.status(statusCode).render('errors/500', { title: 'Hata' }, (renderErr, html) => {
+    if (renderErr) {
+      console.error('Error page render failed:', renderErr);
+      return res.type('text/plain').send('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+    }
+    res.send(html);
   });
 });
 

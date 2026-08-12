@@ -1,18 +1,7 @@
-<%
-const reasonLabels = {
-  wrong_category: 'Yanlış kategoride',
-  misleading_price: 'Yanıltıcı fiyat',
-  missing_photos: 'Fotoğraflar eksik veya sahte',
-  spam: 'Spam / tekrarlayan içerik',
-  fraud: 'Dolandırıcılık şüphesi',
-  inappropriate: 'Uygunsuz içerik',
-  harassment: 'Taciz veya hakaret',
-  other: 'Diğer'
-};
-%>
 <div class="modal fade" id="<%= modalId %>" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form class="modal-content" action="<%= action %>" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <% if (typeof messageId !== 'undefined' && messageId) { %>
                 <input type="hidden" name="message_id" value="<%= messageId %>">
             <% } %>
@@ -22,35 +11,35 @@ const reasonLabels = {
 
             <div class="modal-header">
                 <h5 class="modal-title"><%= modalTitle %></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<%= t('common.close') %>"></button>
             </div>
 
             <div class="modal-body">
                 <p class="text-muted small"><%= modalIntro %></p>
 
                 <div class="mb-3">
-                    <label class="form-label fw-medium small">Şikayet Nedeni</label>
+                    <label class="form-label fw-medium small"><%= t('report_modal.reason_label') %></label>
                     <% reasons.forEach(function(r, i) { %>
                         <div class="form-check">
                             <input class="form-check-input cursor-pointer" type="radio" name="reason"
                                    value="<%= r %>" id="<%= modalId %>_<%= r %>" <%= i === 0 ? 'required' : '' %>>
                             <label class="form-check-label cursor-pointer" for="<%= modalId %>_<%= r %>">
-                                <%= reasonLabels[r] || r %>
+                                <%= t('report_modal.reasons.' + r) !== 'report_modal.reasons.' + r ? t('report_modal.reasons.' + r) : r %>
                             </label>
                         </div>
                     <% }); %>
                 </div>
 
                 <div class="mb-0">
-                    <label for="<%= modalId %>_desc" class="form-label fw-medium small">Açıklama (opsiyonel)</label>
+                    <label for="<%= modalId %>_desc" class="form-label fw-medium small"><%= t('report_modal.desc_label') %></label>
                     <textarea class="form-control" id="<%= modalId %>_desc" name="description" rows="3"
-                              maxlength="1000" placeholder="Durumu kısaca anlatın"></textarea>
+                              maxlength="1000" placeholder="<%= t('report_modal.desc_placeholder') %>"></textarea>
                 </div>
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Vazgeç</button>
-                <button type="submit" class="btn btn-danger fw-medium">Şikayeti Gönder</button>
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal"><%= t('common.cancel') %></button>
+                <button type="submit" class="btn btn-danger fw-medium"><%= t('report_modal.submit') %></button>
             </div>
         </form>
     </div>
