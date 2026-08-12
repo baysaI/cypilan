@@ -21,6 +21,60 @@
     --cyp-transition-fast: 0.15s ease-in-out;
     --cyp-transition-normal: 0.3s ease-in-out;
     --cyp-transition-slow: 0.5s ease-in-out;
+
+    --cyp-surface: #ffffff;
+    --cyp-surface-muted: #F5F3EE;
+    --cyp-glass: rgba(255, 255, 255, 0.9);
+    --cyp-glass-heavy: rgba(255, 255, 255, 0.95);
+
+    /* Brand blue plays two roles: a background (footer, hero, buttons) and a
+       foreground (icons, links). They need to move in opposite directions in
+       dark mode, so they are separate tokens. Identical in the light theme. */
+    --cyp-primary-fg: var(--cyp-primary);
+}
+
+/* ==========================================================================
+   Dark theme
+   Bootstrap 5.3 themes its own components off data-bs-theme, but the fixed
+   utilities the markup leans on (bg-white, bg-light, text-dark) are literal
+   colours in both themes. Remapping those three here flips the whole site
+   without touching 145 call sites in the templates.
+   ========================================================================== */
+/* Elevation ladder, darkest to lightest:
+   page #15181B  <  subtle fill #1E2328  <  raised surface #262B31
+   bg-light is the subtle fill and bg-white the raised surface, mirroring how
+   the two read in the light theme. */
+[data-bs-theme="dark"] {
+    --bs-body-bg: #15181B;
+    --bs-body-bg-rgb: 21, 24, 27;
+    --bs-body-color: #E4E7EB;
+    --bs-body-color-rgb: 228, 231, 235;
+    --bs-emphasis-color: #FFFFFF;
+    --bs-secondary-color: rgba(228, 231, 235, 0.65);
+    --bs-secondary-bg: #262B31;
+    --bs-tertiary-bg: #15181B;
+    --bs-border-color: #333A42;
+    --bs-border-color-translucent: rgba(255, 255, 255, 0.12);
+
+    /* Darkened as a background so white text on the footer and hero stays
+       readable; lightened as a foreground so icons and links stay visible on
+       the dark surfaces. */
+    --cyp-primary: #2F6A8C;
+    --cyp-primary-dark: #24536E;
+    --cyp-primary-light: #1C2A34;
+    --cyp-primary-fg: #7FB8DC;
+
+    --cyp-dark: #E4E7EB;
+    --cyp-light: #1E2328;
+    --cyp-cream: #1E2328;
+    --cyp-gray: #7A848E;
+
+    --cyp-surface: #262B31;
+    --cyp-surface-muted: #1E2328;
+    --cyp-glass: rgba(38, 43, 49, 0.9);
+    --cyp-glass-heavy: rgba(38, 43, 49, 0.95);
+
+    color-scheme: dark;
 }
 
 body {
@@ -30,7 +84,159 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-.text-primary { color: var(--cyp-primary) !important; }
+/* The three fixed utilities, remapped. `.theme-fixed` opts an element out —
+   used by the footer logo chip, which must stay white on the blue footer. */
+[data-bs-theme="dark"] .bg-white:not(.theme-fixed) {
+    background-color: var(--cyp-surface) !important;
+}
+
+[data-bs-theme="dark"] .bg-light:not(.theme-fixed) {
+    background-color: var(--cyp-surface-muted) !important;
+}
+
+[data-bs-theme="dark"] .text-dark:not(.theme-fixed) {
+    color: var(--bs-body-color) !important;
+}
+
+/* body carries bg-light for the page backdrop, but it has to sit *below* the
+   cards rather than level with them. Needs to out-specify the .bg-light rule
+   above, hence repeating the :not(). */
+[data-bs-theme="dark"] body.bg-light:not(.theme-fixed) {
+    background-color: var(--bs-body-bg) !important;
+}
+
+/* A drop shadow does almost nothing against a dark backdrop, so surfaces get a
+   hairline ring as well — otherwise every card melts into the page. It is drawn
+   with box-shadow rather than a border because nearly every card in the markup
+   carries .border-0, which would override any border we set. */
+[data-bs-theme="dark"] .shadow-sm {
+    box-shadow: 0 0 0 1px var(--bs-border-color), 0 .125rem .5rem rgba(0, 0, 0, .45) !important;
+}
+
+[data-bs-theme="dark"] .shadow {
+    box-shadow: 0 0 0 1px var(--bs-border-color), 0 .5rem 1rem rgba(0, 0, 0, .5) !important;
+}
+
+[data-bs-theme="dark"] .shadow-lg {
+    box-shadow: 0 0 0 1px var(--bs-border-color), 0 1rem 2rem rgba(0, 0, 0, .6) !important;
+}
+
+/* Bootstrap declares these on the component itself, which beats anything set on
+   an ancestor, so they have to be re-declared at the same level rather than in
+   the theme block above. Everything that floats above the page shares the
+   raised surface. */
+[data-bs-theme="dark"] .card {
+    --bs-card-bg: var(--cyp-surface);
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+    --bs-dropdown-bg: var(--cyp-surface);
+    --bs-dropdown-border-color: var(--bs-border-color);
+    --bs-dropdown-link-hover-bg: #333A42;
+    --bs-dropdown-link-active-bg: var(--cyp-primary);
+}
+
+[data-bs-theme="dark"] .modal-content {
+    --bs-modal-bg: var(--cyp-surface);
+    --bs-modal-border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .list-group {
+    --bs-list-group-bg: var(--cyp-surface);
+    --bs-list-group-border-color: var(--bs-border-color);
+}
+
+/* Bootstrap leaves the -light variants literal in both themes. */
+[data-bs-theme="dark"] .btn-light {
+    --bs-btn-bg: var(--cyp-surface-muted);
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-hover-bg: #303740;
+    --bs-btn-hover-border-color: #3D454E;
+    --bs-btn-hover-color: var(--bs-emphasis-color);
+    --bs-btn-active-bg: #363E47;
+    --bs-btn-active-color: var(--bs-emphasis-color);
+}
+
+/* .btn-dark / .btn-outline-dark keep their literal near-black in both themes,
+   which leaves them all but invisible on a dark surface. */
+[data-bs-theme="dark"] .btn-dark {
+    --bs-btn-bg: var(--cyp-surface-muted);
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-hover-bg: #333A42;
+    --bs-btn-hover-border-color: #3D454E;
+    --bs-btn-hover-color: var(--bs-emphasis-color);
+}
+
+[data-bs-theme="dark"] .btn-outline-dark {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-hover-bg: var(--cyp-surface-muted);
+    --bs-btn-hover-border-color: var(--bs-border-color);
+    --bs-btn-hover-color: var(--bs-emphasis-color);
+}
+
+/* Bootstrap's dark-theme secondary lands just under AA on this background. */
+[data-bs-theme="dark"] .btn-outline-secondary {
+    --bs-btn-color: #A8B2BC;
+    --bs-btn-border-color: #4A535C;
+    --bs-btn-hover-bg: var(--cyp-surface-muted);
+    --bs-btn-hover-border-color: #5A636C;
+    --bs-btn-hover-color: var(--bs-emphasis-color);
+}
+
+[data-bs-theme="dark"] .btn-outline-light {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-hover-bg: var(--cyp-surface-muted);
+    --bs-btn-hover-border-color: var(--bs-border-color);
+    --bs-btn-hover-color: var(--bs-emphasis-color);
+}
+
+[data-bs-theme="dark"] .alert-light {
+    --bs-alert-bg: var(--cyp-surface-muted);
+    --bs-alert-border-color: var(--bs-border-color);
+    --bs-alert-color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .table-light {
+    --bs-table-bg: var(--cyp-surface-muted);
+    --bs-table-color: var(--bs-body-color);
+    --bs-table-border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .border-white,
+[data-bs-theme="dark"] .border-light {
+    border-color: var(--bs-border-color) !important;
+}
+
+/* Half-opacity white is body copy in the footer and hero, not decoration.
+   At 0.5 it never cleared AA even in the light theme; on the darker blue this
+   theme uses for those panels, 0.85 does. */
+[data-bs-theme="dark"] .text-white-50 {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Inputs written as `bg-light border-0` lose all definition once bg-light is a
+   near-body colour, so give them their edge back. */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: var(--cyp-surface-muted);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .form-control::placeholder {
+    color: var(--bs-secondary-color);
+}
+
+/* Only one image set exists per theme, so swap rather than filter. */
+.site-logo-dark { display: none; }
+[data-bs-theme="dark"] .site-logo-light { display: none; }
+[data-bs-theme="dark"] .site-logo-dark { display: inline-block; }
+
+.text-primary { color: var(--cyp-primary-fg) !important; }
 .bg-primary { background-color: var(--cyp-primary) !important; }
 .text-secondary { color: var(--cyp-secondary) !important; }
 .bg-secondary { background-color: var(--cyp-secondary) !important; }
@@ -47,11 +253,12 @@ body {
 }
 
 .btn-outline-primary {
-    color: var(--cyp-primary);
-    border-color: var(--cyp-primary);
+    color: var(--cyp-primary-fg);
+    border-color: var(--cyp-primary-fg);
 }
 .btn-outline-primary:hover {
     background-color: var(--cyp-primary);
+    border-color: var(--cyp-primary);
     color: #fff;
 }
 
@@ -95,12 +302,12 @@ body {
 }
 
 .glassmorphism {
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: var(--cyp-glass) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
 .glassmorphism-heavy {
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: var(--cyp-glass-heavy) !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }

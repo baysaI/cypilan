@@ -3,7 +3,8 @@
         <div class="container py-2">
             <div class="d-flex align-items-center gap-2 gap-md-3">
                 <a href="/" class="d-flex align-items-center flex-shrink-0">
-                    <img src="/img/logo.png" alt="CypIlan" style="height: 44px; width: auto; object-fit: contain; mix-blend-mode: multiply;">
+                    <img src="/img/logo.png" alt="CypIlan" class="site-logo site-logo-light" style="height: 44px; width: auto; object-fit: contain;">
+                    <img src="/img/logo-white.png" alt="CypIlan" class="site-logo site-logo-dark" style="height: 44px; width: auto; object-fit: contain;">
                 </a>
 
                 <form action="/listings" method="GET" class="flex-grow-1 d-none d-sm-block" style="max-width: 640px;">
@@ -36,6 +37,28 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item currency-switch" href="#" data-currency="TRY">₺ TRY</a></li>
                             <li><a class="dropdown-item currency-switch" href="#" data-currency="GBP">£ GBP</a></li>
+                        </ul>
+                    </div>
+
+                    <% const activeTheme = typeof theme !== 'undefined' ? theme : 'auto'; %>
+                    <div class="dropdown">
+                        <button class="btn btn-light border-0" type="button" data-bs-toggle="dropdown"
+                                aria-label="<%= t('common.theme') %>" title="<%= t('common.theme') %>">
+                            <i class="fa-solid fa-circle-half-stroke text-primary" id="themeIcon"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <% [
+                                { value: 'auto',  icon: 'fa-circle-half-stroke', label: t('common.theme_auto') },
+                                { value: 'light', icon: 'fa-sun',                label: t('common.theme_light') },
+                                { value: 'dark',  icon: 'fa-moon',               label: t('common.theme_dark') }
+                            ].forEach(function (option) { %>
+                                <li>
+                                    <a class="dropdown-item theme-switch d-flex align-items-center gap-2 <%= activeTheme === option.value ? 'active' : '' %>"
+                                       href="#" data-theme="<%= option.value %>">
+                                        <i class="fa-solid <%= option.icon %> fa-fw"></i><%= option.label %>
+                                    </a>
+                                </li>
+                            <% }); %>
                         </ul>
                     </div>
 

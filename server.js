@@ -13,6 +13,7 @@ const rateLimit = require('express-rate-limit');
 const { initialize, seed, getDb, closeDb } = require('./config/database');
 const seoMiddleware = require('./middlewares/seo');
 const i18nMiddleware = require('./middlewares/i18n');
+const themeMiddleware = require('./middlewares/theme');
 const { setUserLocal } = require('./middlewares/auth');
 const { csrfProtection } = require('./middlewares/csrf');
 const routes = require('./routes/index');
@@ -127,6 +128,7 @@ app.set('layout extractStyles', true);
 // After i18n so that a rejected request can report the failure in the
 // visitor's own language.
 app.use(i18nMiddleware);
+app.use(themeMiddleware);
 app.use(csrfProtection);
 app.use(seoMiddleware);
 app.use(setUserLocal);

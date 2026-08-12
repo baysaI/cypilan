@@ -17,6 +17,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const themeSwitches = document.querySelectorAll('.theme-switch');
+    const themeIcon = document.getElementById('themeIcon');
+    const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+    const applyTheme = (choice) => {
+        const resolved = choice === 'auto'
+            ? (darkQuery && darkQuery.matches ? 'dark' : 'light')
+            : choice;
+
+        document.documentElement.setAttribute('data-bs-theme', resolved);
+
+        const themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) themeColor.setAttribute('content', resolved === 'dark' ? '#15181b' : '#ffffff');
+
+        if (themeIcon) {
+            const icons = { auto: 'fa-circle-half-stroke', light: 'fa-sun', dark: 'fa-moon' };
+            themeIcon.className = `fa-solid ${icons[choice] || icons.auto} text-primary`;
+        }
+
+        themeSwitches.forEach((item) => {
+            item.classList.toggle('active', item.getAttribute('data-theme') === choice);
+        });
+    };
+
+    themeSwitches.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const choice = e.currentTarget.getAttribute('data-theme');
+            if (!choice) return;
+
+            document.cookie = `theme=${choice}; path=/; max-age=31536000; samesite=lax`;
+            applyTheme(choice);
+        });
+    });
+
+    if (themeSwitches.length > 0) {
+        const current = document.querySelector('.theme-switch.active');
+        applyTheme(current ? current.getAttribute('data-theme') : 'auto');
+
+        // Follow the OS while the choice is "auto", without needing a reload.
+        if (darkQuery && darkQuery.addEventListener) {
+            darkQuery.addEventListener('change', () => {
+                const active = document.querySelector('.theme-switch.active');
+                if (active && active.getAttribute('data-theme') === 'auto') applyTheme('auto');
+            });
+        }
+    }
+
     const currencySwitches = document.querySelectorAll('.currency-switch');
     currencySwitches.forEach(btn => {
         btn.addEventListener('click', (e) => {
