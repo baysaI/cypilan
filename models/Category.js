@@ -47,14 +47,24 @@ class Category {
       .map(row => row.id);
   }
 
+  // Counting per root category with `ON (l.category_id = c.id OR l.category_id
+  // IN (SELECT ...))` forced a nested scan per root — half a second on the home
+  // page once listings reached 50k. Rolling the listings up to their root once
+  // and joining that keeps it linear in the number of active listings.
   static async getMainCategoriesWithCount() {
     const db = getDb();
     return db.prepare(`
-      SELECT c.*, COUNT(l.id) as listing_count
+      SELECT c.*, COALESCE(counts.listing_count, 0) AS listing_count
       FROM categories c
-      LEFT JOIN listings l ON (l.category_id = c.id OR l.category_id IN (SELECT id FROM categories WHERE parent_id = c.id)) AND l.status = 'active'
+      LEFT JOIN (
+        SELECT COALESCE(parent.id, child.id) AS root_id, COUNT(*) AS listing_count
+        FROM listings l
+        JOIN categories child ON child.id = l.category_id
+        LEFT JOIN categories parent ON parent.id = child.parent_id
+        WHERE l.status = 'active'
+        GROUP BY COALESCE(parent.id, child.id)
+      ) counts ON counts.root_id = c.id
       WHERE c.parent_id IS NULL AND c.is_active = 1
-      GROUP BY c.id
       ORDER BY c.sort_order ASC
     `).all();
   }

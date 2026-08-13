@@ -155,6 +155,20 @@ CREATE INDEX IF NOT EXISTS idx_listings_status ON listings(status);
 CREATE INDEX IF NOT EXISTS idx_listings_type ON listings(listing_type);
 CREATE INDEX IF NOT EXISTS idx_listings_slug ON listings(slug);
 CREATE INDEX IF NOT EXISTS idx_listing_attrs ON listing_attributes(listing_id, attribute_key);
+
+-- Every listing card resolves its thumbnail with a correlated subquery against
+-- listing_images. Without this the planner falls back to scanning the whole
+-- table once per row on screen.
+CREATE INDEX IF NOT EXISTS idx_listing_images_listing ON listing_images(listing_id, is_primary DESC, sort_order ASC);
+
+-- Browsing is always "active listings, newest first". Indexing the pair lets
+-- the planner walk the index instead of sorting the matches in a temp b-tree.
+CREATE INDEX IF NOT EXISTS idx_listings_status_created ON listings(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_listings_category_status ON listings(category_id, status, created_at DESC);
+
+-- The admin queue lists every status at once, so it cannot use the composite
+-- above and would otherwise sort the whole table on each page.
+CREATE INDEX IF NOT EXISTS idx_listings_created ON listings(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_categories_parent ON categories(parent_id);

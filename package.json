@@ -11,7 +11,8 @@
     "i18n:check": "node scripts/i18n-tool.js check",
     "i18n:sync": "node scripts/i18n-tool.js sync",
     "i18n:scan": "node scripts/i18n-tool.js scan",
-    "uploads:prune": "node scripts/prune-uploads.js"
+    "uploads:prune": "node scripts/prune-uploads.js",
+    "bench": "node scripts/bench.js"
   },
   "keywords": [
     "cyprus",

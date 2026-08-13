@@ -305,10 +305,11 @@ class Listing {
       params.push(`%${filters.q}%`, `%${filters.q}%`);
     }
 
-    const { total } = db.prepare(`
-      SELECT COUNT(*) as total FROM listings l
-      LEFT JOIN users u ON l.user_id = u.id${where}
-    `).get(params);
+    // The join only exists so the search term can match an owner's e-mail;
+    // without a term there is nothing to join to for a count.
+    const { total } = filters.q
+      ? db.prepare(`SELECT COUNT(*) as total FROM listings l LEFT JOIN users u ON l.user_id = u.id${where}`).get(params)
+      : db.prepare(`SELECT COUNT(*) as total FROM listings l${where}`).get(params);
 
     const offset = (page - 1) * limit;
     const data = db.prepare(`

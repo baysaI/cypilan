@@ -4,7 +4,10 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const Database = require('better-sqlite3');
 
-const dbPath = path.join(__dirname, '..', 'database', 'cypilan.db');
+// .env.example has documented DB_PATH all along; it was never read.
+const dbPath = process.env.DB_PATH
+  ? path.resolve(__dirname, '..', process.env.DB_PATH)
+  : path.join(__dirname, '..', 'database', 'cypilan.db');
 const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
 const seedPath = path.join(__dirname, '..', 'database', 'seed.sql');
 
