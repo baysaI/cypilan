@@ -899,7 +899,18 @@
   "smart": {
     "from": "from",
     "placeholder": "What are you looking for? e.g. 3+1 flat in Kyrenia up to 2 million",
+    "placeholders": [
+      "3+1 flats for up to 2 million in Kyrenia...",
+      "Roommate for rent in Nicosia...",
+      "Clean second hand car in Famagusta...",
+      "Luxury seafront villa in Iskele...",
+      "Detached house for sale in Güzelyurt...",
+      "Part-time waiter or experienced master...",
+      "End of season budget-friendly household items...",
+      "Flat for rent close to the university in Lefke..."
+    ],
     "plain_search": "Clear the filters and search plainly",
+    "search_prefix": "What are you looking for? Ex:",
     "understood": "What we understood from your search",
     "up_to": "up to"
   },

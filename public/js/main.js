@@ -259,7 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentIdx = 0;
             let charIdx = 0;
             let isDeleting = false;
-            const prefix = "Ne arıyorsun? Örn: ";
+            let rawPrefix = input.getAttribute('data-prefix') || "Ne arıyorsun? Örn: ";
+            try { rawPrefix = decodeURIComponent(rawPrefix); } catch(e) {}
+            const prefix = rawPrefix;
 
             function type() {
                 // Do not animate if input is focused or has user typed text
@@ -269,8 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 let currentText = placeholders[currentIdx];
-                if (currentText.startsWith("Ne arıyorsun? Örn: ")) {
-                    currentText = currentText.replace("Ne arıyorsun? Örn: ", "");
+                if (currentText.startsWith(prefix)) {
+                    currentText = currentText.substring(prefix.length);
                 }
 
                 if (isDeleting) {

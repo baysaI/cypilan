@@ -910,6 +910,7 @@
       "Lefke'de üniversiteye yakın kiralık daire..."
     ],
     "plain_search": "Filtreleri kaldır, düz arama yap",
+    "search_prefix": "Ne arıyorsun? Örn: ",
     "understood": "Aramandan anladıklarımız",
     "up_to": "en fazla"
   },

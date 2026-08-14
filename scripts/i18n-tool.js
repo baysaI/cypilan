@@ -35,6 +35,10 @@ function getAllKeys(obj, prefix = '') {
     const full = prefix ? `${prefix}.${k}` : k;
     if (isObject(obj[k])) {
       keys = keys.concat(getAllKeys(obj[k], full));
+    } else if (Array.isArray(obj[k])) {
+      obj[k].forEach((_, idx) => {
+        keys.push(`${full}.${idx}`);
+      });
     } else {
       keys.push(full);
     }
@@ -46,7 +50,7 @@ function getNestedValue(obj, keyPath) {
   const keys = keyPath.split('.');
   let current = obj;
   for (const k of keys) {
-    if (current && typeof current === 'object' && k in current) {
+    if (current && (typeof current === 'object' || Array.isArray(current)) && k in current) {
       current = current[k];
     } else {
       return undefined;
@@ -60,19 +64,24 @@ function setNestedValue(obj, keyPath, value) {
   let current = obj;
   for (let i = 0; i < keys.length - 1; i++) {
     const k = keys[i];
-    if (!current[k] || !isObject(current[k])) {
-      current[k] = {};
+    const nextKeyIsNum = !isNaN(Number(keys[i + 1]));
+    if (!current[k] || (typeof current[k] !== 'object' && !Array.isArray(current[k]))) {
+      current[k] = nextKeyIsNum ? [] : {};
     }
     current = current[k];
   }
-  current[keys[keys.length - 1]] = value;
+  const lastKey = keys[keys.length - 1];
+  current[lastKey] = value;
 }
 
 function sortObject(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(item => sortObject(item));
+  }
   if (!isObject(obj)) return obj;
   const sorted = {};
   Object.keys(obj).sort().forEach(key => {
-    if (isObject(obj[key])) {
+    if (isObject(obj[key]) || Array.isArray(obj[key])) {
       sorted[key] = sortObject(obj[key]);
     } else {
       sorted[key] = obj[key];
