@@ -147,6 +147,67 @@
                                     </label>
                                     <div class="form-text small mb-0"><%= t('bids.opt_in_help') %></div>
                                 </div>
+
+                                <div class="border rounded-4 p-3 mt-3 bg-light" id="jobFieldsBox" hidden>
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fa-solid fa-briefcase text-primary me-1"></i><%= t('career.job_details') %>
+                                    </h6>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="workType" class="form-label small fw-semibold"><%= t('career.work_type') %></label>
+                                            <select class="form-select" id="workType" name="work_type">
+                                                <% ['full_time', 'part_time', 'contract', 'seasonal', 'internship'].forEach(function (workType) { %>
+                                                    <option value="<%= workType %>"><%= t('career.work_type_' + workType) %></option>
+                                                <% }); %>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="experienceRequired" class="form-label small fw-semibold"><%= t('career.experience_required') %></label>
+                                            <input type="number" class="form-control" id="experienceRequired"
+                                                   name="experience_required" min="0" max="40" value="0">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label for="salaryMin" class="form-label small fw-semibold"><%= t('career.salary_min') %></label>
+                                            <input type="number" class="form-control" id="salaryMin" name="salary_min" min="0" step="any">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label for="salaryMax" class="form-label small fw-semibold"><%= t('career.salary_max') %></label>
+                                            <input type="number" class="form-control" id="salaryMax" name="salary_max" min="0" step="any">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label for="salaryPeriod" class="form-label small fw-semibold"><%= t('career.salary_period') %></label>
+                                            <select class="form-select" id="salaryPeriod" name="salary_period">
+                                                <% ['monthly', 'hourly', 'daily', 'yearly'].forEach(function (period) { %>
+                                                    <option value="<%= period %>"><%= t('career.period_' + period) %></option>
+                                                <% }); %>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label for="requiredSkills" class="form-label small fw-semibold"><%= t('career.required_skills') %></label>
+                                            <input type="text" class="form-control" id="requiredSkills" name="required_skills"
+                                                   maxlength="600" placeholder="<%= t('career.skills_placeholder') %>">
+                                            <div class="form-text small"><%= t('career.match_help') %></div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label for="requiredLanguages" class="form-label small fw-semibold"><%= t('career.required_languages') %></label>
+                                            <input type="text" class="form-control" id="requiredLanguages" name="required_languages"
+                                                   maxlength="300" placeholder="<%= t('career.languages_placeholder') %>">
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label for="benefits" class="form-label small fw-semibold"><%= t('career.benefits') %></label>
+                                            <textarea class="form-control" id="benefits" name="benefits" rows="2" maxlength="600"
+                                                      placeholder="<%= t('career.benefits_placeholder') %>"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -311,20 +372,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const collectBidsBox = document.getElementById('collectBidsBox');
     const collectBids = document.getElementById('collectBids');
 
+    const jobFieldsBox = document.getElementById('jobFieldsBox');
+
     if (categorySelect && collectBidsBox && collectBids) {
         const BID_ROOTS = ['emlak', 'vasita'];
 
-        const syncBidOption = function () {
+        const syncCategoryOptions = function () {
             const option = categorySelect.options[categorySelect.selectedIndex];
             const root = option ? option.getAttribute('data-root') : null;
-            const eligible = BID_ROOTS.indexOf(root) > -1;
 
-            collectBidsBox.hidden = !eligible;
-            if (!eligible) collectBids.checked = false;
+            const bidEligible = BID_ROOTS.indexOf(root) > -1;
+            collectBidsBox.hidden = !bidEligible;
+            if (!bidEligible) collectBids.checked = false;
+
+            // Pay and requirements only make sense on a job advert.
+            if (jobFieldsBox) jobFieldsBox.hidden = root !== 'is-ilanlari';
         };
 
-        categorySelect.addEventListener('change', syncBidOption);
-        syncBidOption();
+        categorySelect.addEventListener('change', syncCategoryOptions);
+        syncCategoryOptions();
     }
 });
 </script>

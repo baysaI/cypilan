@@ -1,0 +1,92 @@
+<%
+    const statusStyles = {
+        pending: 'bg-primary-subtle text-primary-emphasis border-primary-subtle',
+        reviewed: 'bg-info-subtle text-info-emphasis border-info-subtle',
+        shortlisted: 'bg-success-subtle text-success-emphasis border-success-subtle',
+        rejected: 'bg-danger-subtle text-danger-emphasis border-danger-subtle',
+        withdrawn: 'bg-secondary-subtle text-secondary-emphasis border-secondary-subtle'
+    };
+%>
+
+<div class="container py-4 py-md-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="fs-3 fw-bold mb-1"><%= t('career.my_applications') %></h1>
+            <p class="text-muted small mb-0"><%= t('career.my_applications_desc') %></p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/kariyer/cv" class="btn btn-outline-primary rounded-pill px-4 fw-medium">
+                <i class="fa-regular fa-file-lines me-2"></i><%= t('career.my_cv') %> (<%= completeness %>%)
+            </a>
+            <a href="/kariyer" class="btn btn-primary rounded-pill px-4 fw-medium">
+                <i class="fa-solid fa-briefcase me-2"></i><%= t('career.openings') %>
+            </a>
+        </div>
+    </div>
+
+    <% if (applications.length > 0) { %>
+        <div class="d-flex flex-column gap-3">
+            <% applications.forEach(function (application) { %>
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <h2 class="fs-6 fw-bold mb-1">
+                                    <a href="/listings/<%= application.listing_slug %>" class="text-decoration-none text-body">
+                                        <%= application.listing_title %>
+                                    </a>
+                                </h2>
+                                <div class="d-flex flex-wrap gap-3 text-muted small">
+                                    <span><i class="fa-solid fa-building me-1"></i><%= application.employer_company || application.employer_name %></span>
+                                    <span><i class="fa-solid fa-location-dot me-1"></i><%= helpers.getCityName(application.listing_city, lang) %></span>
+                                    <span><i class="fa-regular fa-clock me-1"></i><%= helpers.timeAgo(application.created_at, lang) %></span>
+                                </div>
+                            </div>
+
+                            <span class="badge rounded-pill border <%= statusStyles[application.status] || statusStyles.pending %>">
+                                <%= t('career.status_' + application.status) %>
+                            </span>
+                        </div>
+
+                        <% if (application.salary_min || application.salary_max) { %>
+                            <p class="small mb-2">
+                                <span class="text-muted"><%= t('career.salary') %>:</span>
+                                <strong>
+                                    <%= helpers.formatPrice(application.salary_min || application.salary_max, application.salary_currency, currency) %>
+                                    <% if (application.salary_min && application.salary_max) { %>
+                                        &ndash; <%= helpers.formatPrice(application.salary_max, application.salary_currency, currency) %>
+                                    <% } %>
+                                </strong>
+                                <span class="text-muted">/ <%= t('career.period_' + (application.salary_period || 'monthly')) %></span>
+                            </p>
+                        <% } %>
+
+                        <% if (application.cover_letter) { %>
+                            <p class="text-muted small fst-italic mb-2">"<%= helpers.truncate(application.cover_letter, 200) %>"</p>
+                        <% } %>
+
+                        <% if (application.status === 'shortlisted') { %>
+                            <div class="alert alert-success py-2 px-3 small mb-0">
+                                <i class="fa-solid fa-star me-1"></i><%= t('career.you_are_shortlisted') %>
+                            </div>
+                        <% } else if (application.status !== 'withdrawn' && application.status !== 'rejected') { %>
+                            <form action="/kariyer/basvuru/<%= application.id %>/geri-cek" method="POST" class="d-inline"
+                                  onsubmit="return confirm('<%= t('career.withdraw_confirm') %>');">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                    <i class="fa-solid fa-rotate-left me-1"></i><%= t('career.withdraw') %>
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="text-center py-5 bg-white rounded-4 border">
+            <i class="fa-regular fa-paper-plane fs-1 text-muted mb-3 opacity-50 d-block"></i>
+            <p class="text-muted mb-3"><%= t('career.no_applications') %></p>
+            <a href="/kariyer" class="btn btn-primary rounded-pill px-4 fw-medium"><%= t('career.openings') %></a>
+        </div>
+    <% } %>
+</div>

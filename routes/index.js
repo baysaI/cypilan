@@ -12,6 +12,7 @@ const messagesRoutes = require('./messages');
 const reportsRoutes = require('./reports');
 const reviewsRoutes = require('./reviews');
 const bidsRoutes = require('./bids');
+const careerRoutes = require('./career');
 
 router.get('/', homeController.index);
 
@@ -25,6 +26,7 @@ router.use('/messages', messagesRoutes);
 router.use('/report', reportsRoutes);
 router.use('/reviews', reviewsRoutes);
 router.use('/teklifler', bidsRoutes);
+router.use('/kariyer', careerRoutes);
 
 const profileController = require('../controllers/profileController');
 router.get('/profile', isAuthenticated, profileController.index);

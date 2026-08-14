@@ -193,3 +193,66 @@ CREATE INDEX IF NOT EXISTS idx_reviews_reviewed ON reviews(reviewed_user_id, cre
 CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_categories_parent ON categories(parent_id);
 CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
+
+-- ---------------------------------------------------------------------------
+-- Careers
+--
+-- A job advert is an ordinary listing under the is-ilanlari tree, so it already
+-- has a title, a description, a city and an owner. job_details only carries what
+-- an ordinary listing has no column for — pay, contract shape, benefits — rather
+-- than duplicating the listing itself.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS job_details (
+  listing_id INTEGER PRIMARY KEY REFERENCES listings(id) ON DELETE CASCADE,
+  work_type TEXT DEFAULT 'full_time' CHECK(work_type IN ('full_time', 'part_time', 'contract', 'seasonal', 'internship')),
+  salary_min REAL,
+  salary_max REAL,
+  salary_currency TEXT DEFAULT 'TRY' CHECK(salary_currency IN ('TRY', 'GBP')),
+  salary_period TEXT DEFAULT 'monthly' CHECK(salary_period IN ('hourly', 'daily', 'monthly', 'yearly')),
+  experience_required INTEGER DEFAULT 0,
+  benefits TEXT,
+  required_skills TEXT,
+  required_languages TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- The CV a job seeker fills in once and applies with. Kept as one row per user
+-- rather than normalised child tables: it is written by hand in a single form
+-- and always read whole, so splitting it would buy nothing but joins.
+CREATE TABLE IF NOT EXISTS candidate_profiles (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  headline TEXT,
+  summary TEXT,
+  experience_years INTEGER DEFAULT 0,
+  education TEXT,
+  skills TEXT,
+  languages TEXT,
+  certificates TEXT,
+  preferred_city TEXT,
+  preferred_work_type TEXT,
+  is_open_to_work INTEGER DEFAULT 1,
+  is_public INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS job_applications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  applicant_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  cover_letter TEXT,
+  status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'reviewed', 'shortlisted', 'rejected', 'withdrawn')),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- One application per person per advert: re-applying updates the existing one
+-- instead of flooding the employer's list with duplicates.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_applications_pair ON job_applications(listing_id, applicant_id);
+
+-- The employer's "applicants for this advert" and the seeker's "where I applied"
+-- are the two reads that happen on every page load of those screens.
+CREATE INDEX IF NOT EXISTS idx_applications_listing ON job_applications(listing_id, status);
+CREATE INDEX IF NOT EXISTS idx_applications_applicant ON job_applications(applicant_id, created_at DESC);

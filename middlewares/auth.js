@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Message = require('../models/Message');
 const Bid = require('../models/Bid');
+const Career = require('../models/Career');
 
 const isAuthenticated = (req, res, next) => {
     if ((req.session && req.session.userId) || req.isAuthenticated()) {
@@ -87,11 +88,19 @@ const setUserLocal = async (req, res, next) => {
             console.error('Pending bid count error:', error);
             res.locals.pendingBidCount = 0;
         }
+
+        try {
+            res.locals.pendingApplicationCount = await Career.countPendingForEmployer(userId);
+        } catch (error) {
+            console.error('Pending application count error:', error);
+            res.locals.pendingApplicationCount = 0;
+        }
     } else {
         res.locals.user = null;
         res.locals.currentUser = null;
         res.locals.unreadMessages = 0;
         res.locals.pendingBidCount = 0;
+        res.locals.pendingApplicationCount = 0;
     }
     next();
 };

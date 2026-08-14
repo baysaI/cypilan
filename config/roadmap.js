@@ -19,7 +19,7 @@ const ROADMAP_GROUPS = [
     items: [
       { key: 'ai_search', icon: 'fa-magnifying-glass-chart', status: 'live', href: '/listings' },
       { key: 'ai_listing', icon: 'fa-pen-fancy', status: 'soon' },
-      { key: 'ai_job_match', icon: 'fa-people-arrows', status: 'soon' }
+      { key: 'ai_job_match', icon: 'fa-people-arrows', status: 'live', href: '/kariyer' }
     ]
   },
   {
@@ -38,9 +38,9 @@ const ROADMAP_GROUPS = [
     icon: 'fa-briefcase',
     accent: 'accent',
     items: [
-      { key: 'cv', icon: 'fa-file-lines', status: 'soon' },
-      { key: 'one_click', icon: 'fa-hand-pointer', status: 'soon' },
-      { key: 'employer_panel', icon: 'fa-building-user', status: 'soon' }
+      { key: 'cv', icon: 'fa-file-lines', status: 'live', href: '/kariyer/cv' },
+      { key: 'one_click', icon: 'fa-hand-pointer', status: 'live', href: '/kariyer' },
+      { key: 'employer_panel', icon: 'fa-building-user', status: 'live', href: '/kariyer/basvurular' }
     ]
   },
   {

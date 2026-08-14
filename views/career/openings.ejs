@@ -1,0 +1,178 @@
+<div class="container py-4 py-md-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="fs-3 fw-bold mb-1"><%= t('career.openings') %></h1>
+            <p class="text-muted small mb-0"><%= t('career.openings_desc') %></p>
+        </div>
+        <% if (typeof user !== 'undefined' && user) { %>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/kariyer/cv" class="btn btn-outline-primary rounded-pill px-4 fw-medium">
+                    <i class="fa-regular fa-file-lines me-2"></i><%= t('career.my_cv') %>
+                </a>
+                <a href="/kariyer/basvurularim" class="btn btn-outline-secondary rounded-pill px-4 fw-medium">
+                    <%= t('career.my_applications') %>
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+    <% if (typeof user !== 'undefined' && user && !profileReady) { %>
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 d-flex flex-wrap align-items-center gap-3 mb-4">
+            <i class="fa-solid fa-triangle-exclamation fs-4"></i>
+            <div class="flex-grow-1">
+                <strong class="d-block"><%= t('career.cv_needed_title') %></strong>
+                <span class="small"><%= t('career.cv_needed_body') %></span>
+            </div>
+            <a href="/kariyer/cv" class="btn btn-warning rounded-pill px-4 fw-semibold"><%= t('career.build_cv') %></a>
+        </div>
+    <% } %>
+
+    <% if (profile && profileReady) { %>
+        <div class="alert alert-light border rounded-4 small mb-4">
+            <i class="fa-solid fa-arrow-down-short-wide text-primary me-1"></i><%= t('career.sorted_by_match') %>
+        </div>
+    <% } %>
+
+    <form method="GET" action="/kariyer" class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label for="filterCity" class="form-label small fw-semibold mb-1"><%= t('listing.city') %></label>
+                <%- include('../partials/citySelect', { selectedCity: filters.city, selectClass: 'form-select' }) %>
+            </div>
+            <div class="col-md-4">
+                <label for="filterWorkType" class="form-label small fw-semibold mb-1"><%= t('career.work_type') %></label>
+                <select class="form-select" id="filterWorkType" name="workType">
+                    <option value=""><%= t('common.all') %></option>
+                    <% workTypes.forEach(function (workType) { %>
+                        <option value="<%= workType %>" <%= filters.workType === workType ? 'selected' : '' %>>
+                            <%= t('career.work_type_' + workType) %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100 fw-medium">
+                    <i class="fa-solid fa-filter me-2"></i><%= t('common.filter') %>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <% if (openings.length > 0) { %>
+        <div class="d-flex flex-column gap-3">
+            <% openings.forEach(function (opening) { %>
+                <% const alreadyApplied = appliedListingIds.indexOf(opening.id) > -1; %>
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <h2 class="fs-5 fw-bold mb-1">
+                                    <a href="/listings/<%= opening.slug %>" class="text-decoration-none text-body"><%= opening.title %></a>
+                                </h2>
+                                <div class="d-flex flex-wrap gap-3 text-muted small">
+                                    <span><i class="fa-solid fa-building me-1"></i><%= opening.employer_company || opening.employer_name %></span>
+                                    <span><i class="fa-solid fa-location-dot me-1"></i><%= helpers.getCityName(opening.location_city, lang) %></span>
+                                    <% if (opening.work_type) { %>
+                                        <span><i class="fa-regular fa-clock me-1"></i><%= t('career.work_type_' + opening.work_type) %></span>
+                                    <% } %>
+                                    <span><i class="fa-regular fa-user me-1"></i><%= t('career.applicants', { count: opening.application_count }) %></span>
+                                </div>
+                            </div>
+
+                            <% if (typeof opening.matchScore !== 'undefined' && opening.matchScore > 0) { %>
+                                <span class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">
+                                    <i class="fa-solid fa-bullseye me-1"></i><%= t('career.match', { score: opening.matchScore }) %>
+                                </span>
+                            <% } %>
+                        </div>
+
+                        <% if (opening.salary_min || opening.salary_max) { %>
+                            <p class="mb-2">
+                                <strong class="text-primary">
+                                    <% if (opening.salary_min && opening.salary_max) { %>
+                                        <%= helpers.formatPrice(opening.salary_min, opening.salary_currency, currency) %>
+                                        &ndash;
+                                        <%= helpers.formatPrice(opening.salary_max, opening.salary_currency, currency) %>
+                                    <% } else { %>
+                                        <%= helpers.formatPrice(opening.salary_min || opening.salary_max, opening.salary_currency, currency) %>
+                                    <% } %>
+                                </strong>
+                                <span class="text-muted small">/ <%= t('career.period_' + (opening.salary_period || 'monthly')) %></span>
+                            </p>
+                        <% } %>
+
+                        <% if (opening.matchReasons && opening.matchReasons.length > 0) { %>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <% opening.matchReasons.forEach(function (reason) { %>
+                                    <span class="badge rounded-pill bg-light text-muted border small">
+                                        <% if (reason.type === 'skills') { %>
+                                            <i class="fa-solid fa-check text-success me-1"></i><%= t('career.reason_skills', { count: reason.count, total: reason.total }) %>
+                                        <% } else if (reason.type === 'languages') { %>
+                                            <i class="fa-solid fa-check text-success me-1"></i><%= t('career.reason_languages', { count: reason.count, total: reason.total }) %>
+                                        <% } else if (reason.type === 'city') { %>
+                                            <i class="fa-solid fa-check text-success me-1"></i><%= helpers.getCityName(reason.value, lang) %>
+                                        <% } else if (reason.type === 'work_type') { %>
+                                            <i class="fa-solid fa-check text-success me-1"></i><%= t('career.work_type_' + reason.value) %>
+                                        <% } else if (reason.type === 'experience') { %>
+                                            <i class="fa-solid fa-check text-success me-1"></i><%= t('career.reason_experience', { held: reason.held, required: reason.required }) %>
+                                        <% } %>
+                                    </span>
+                                <% }); %>
+                            </div>
+                        <% } %>
+
+                        <% if (opening.description) { %>
+                            <p class="text-muted small mb-3"><%= helpers.truncate(opening.description, 200) %></p>
+                        <% } %>
+
+                        <% if (opening.required_skills) { %>
+                            <p class="small mb-3">
+                                <span class="text-muted"><%= t('career.required_skills') %>:</span>
+                                <%= opening.required_skills %>
+                            </p>
+                        <% } %>
+
+                        <% if (typeof user === 'undefined' || !user) { %>
+                            <a href="/auth/login" class="btn btn-outline-primary rounded-pill px-4 fw-medium">
+                                <%= t('career.login_to_apply') %>
+                            </a>
+                        <% } else if (alreadyApplied) { %>
+                            <span class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">
+                                <i class="fa-solid fa-check me-1"></i><%= t('career.already_applied') %>
+                            </span>
+                            <a href="/kariyer/basvurularim" class="small fw-semibold text-decoration-none ms-2"><%= t('career.my_applications') %></a>
+                        <% } else if (!profileReady) { %>
+                            <a href="/kariyer/cv" class="btn btn-outline-warning rounded-pill px-4 fw-medium">
+                                <i class="fa-regular fa-file-lines me-2"></i><%= t('career.build_cv_to_apply') %>
+                            </a>
+                        <% } else { %>
+                            <form action="/kariyer/basvuru/<%= opening.id %>" method="POST" class="d-inline">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-medium">
+                                    <i class="fa-solid fa-hand-pointer me-2"></i><%= t('career.one_click_apply') %>
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <% if (pagination.totalPages > 1) { %>
+            <nav class="mt-4" aria-label="<%= t('common.pagination') %>">
+                <ul class="pagination justify-content-center">
+                    <% helpers.paginationHelper(pagination.currentPage, pagination.totalPages).pages.forEach(function (pageNumber) { %>
+                        <li class="page-item <%= pageNumber === pagination.currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="/kariyer?page=<%= pageNumber %><%= filters.city ? '&city=' + encodeURIComponent(filters.city) : '' %><%= filters.workType ? '&workType=' + filters.workType : '' %>"><%= pageNumber %></a>
+                        </li>
+                    <% }); %>
+                </ul>
+            </nav>
+        <% } %>
+    <% } else { %>
+        <div class="text-center py-5 bg-white rounded-4 border">
+            <i class="fa-solid fa-briefcase fs-1 text-muted mb-3 opacity-50 d-block"></i>
+            <p class="text-muted mb-0"><%= t('career.no_openings') %></p>
+        </div>
+    <% } %>
+</div>

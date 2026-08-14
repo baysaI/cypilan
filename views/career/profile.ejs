@@ -1,0 +1,156 @@
+<div class="container py-4 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9 col-xl-8">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h1 class="fs-3 fw-bold mb-1"><%= t('career.my_cv') %></h1>
+                    <p class="text-muted small mb-0"><%= t('career.my_cv_desc') %></p>
+                </div>
+                <a href="/kariyer" class="btn btn-outline-primary rounded-pill px-4 fw-medium">
+                    <i class="fa-solid fa-briefcase me-2"></i><%= t('career.openings') %>
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold small"><%= t('career.completeness') %></span>
+                        <span class="fw-bold"><%= completeness %>%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;" role="progressbar"
+                         aria-label="<%= t('career.completeness') %>" aria-valuenow="<%= completeness %>"
+                         aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar <%= completeness >= 70 ? 'bg-success' : 'bg-warning' %>"
+                             style="width: <%= completeness %>%"></div>
+                    </div>
+                    <p class="text-muted small mb-0 mt-2"><%= t('career.completeness_help') %></p>
+                </div>
+            </div>
+
+            <form action="/kariyer/cv" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="fs-5 fw-bold mb-3"><%= t('career.section_basics') %></h2>
+
+                        <div class="mb-3">
+                            <label for="headline" class="form-label small fw-semibold">
+                                <%= t('career.headline') %> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="headline" name="headline"
+                                   maxlength="120" required
+                                   placeholder="<%= t('career.headline_placeholder') %>"
+                                   value="<%= profile && profile.headline ? profile.headline : '' %>">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="summary" class="form-label small fw-semibold"><%= t('career.summary') %></label>
+                            <textarea class="form-control" id="summary" name="summary" rows="4" maxlength="2000"
+                                      placeholder="<%= t('career.summary_placeholder') %>"><%= profile && profile.summary ? profile.summary : '' %></textarea>
+                            <div class="form-text small"><%= t('career.summary_help') %></div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="experience_years" class="form-label small fw-semibold"><%= t('career.experience_years') %></label>
+                                <input type="number" class="form-control" id="experience_years" name="experience_years"
+                                       min="0" max="60"
+                                       value="<%= profile ? profile.experience_years : 0 %>">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="preferred_city" class="form-label small fw-semibold"><%= t('career.preferred_city') %></label>
+                                <select class="form-select" id="preferred_city" name="preferred_city">
+                                    <option value=""><%= t('common.all') %></option>
+                                    <% cities.grouped().forEach(function (group) { %>
+                                        <optgroup label="<%= t('cities.region_' + group.region) %>">
+                                            <% group.cities.forEach(function (cityName) { %>
+                                                <option value="<%= cityName %>" <%= profile && profile.preferred_city === cityName ? 'selected' : '' %>>
+                                                    <%= helpers.getCityName(cityName, lang) %>
+                                                </option>
+                                            <% }); %>
+                                        </optgroup>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="preferred_work_type" class="form-label small fw-semibold"><%= t('career.preferred_work_type') %></label>
+                                <select class="form-select" id="preferred_work_type" name="preferred_work_type">
+                                    <option value=""><%= t('common.all') %></option>
+                                    <% workTypes.forEach(function (workType) { %>
+                                        <option value="<%= workType %>" <%= profile && profile.preferred_work_type === workType ? 'selected' : '' %>>
+                                            <%= t('career.work_type_' + workType) %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="fs-5 fw-bold mb-3"><%= t('career.section_background') %></h2>
+
+                        <div class="mb-3">
+                            <label for="education" class="form-label small fw-semibold"><%= t('career.education') %></label>
+                            <textarea class="form-control" id="education" name="education" rows="3" maxlength="1000"
+                                      placeholder="<%= t('career.education_placeholder') %>"><%= profile && profile.education ? profile.education : '' %></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="skills" class="form-label small fw-semibold"><%= t('career.skills') %></label>
+                            <input type="text" class="form-control" id="skills" name="skills" maxlength="600"
+                                   placeholder="<%= t('career.skills_placeholder') %>"
+                                   value="<%= profile && profile.skills ? profile.skills : '' %>">
+                            <div class="form-text small"><%= t('career.comma_help') %></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="languages" class="form-label small fw-semibold"><%= t('career.languages') %></label>
+                            <input type="text" class="form-control" id="languages" name="languages" maxlength="300"
+                                   placeholder="<%= t('career.languages_placeholder') %>"
+                                   value="<%= profile && profile.languages ? profile.languages : '' %>">
+                            <div class="form-text small"><%= t('career.comma_help') %></div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label for="certificates" class="form-label small fw-semibold"><%= t('career.certificates') %></label>
+                            <textarea class="form-control" id="certificates" name="certificates" rows="2" maxlength="800"
+                                      placeholder="<%= t('career.certificates_placeholder') %>"><%= profile && profile.certificates ? profile.certificates : '' %></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="fs-5 fw-bold mb-3"><%= t('career.section_visibility') %></h2>
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="is_open_to_work" value="1" id="isOpenToWork"
+                                   <%= !profile || Number(profile.is_open_to_work) === 1 ? 'checked' : '' %>>
+                            <label class="form-check-label" for="isOpenToWork"><%= t('career.open_to_work') %></label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_public" value="1" id="isPublic"
+                                   <%= !profile || Number(profile.is_public) === 1 ? 'checked' : '' %>>
+                            <label class="form-check-label" for="isPublic"><%= t('career.public_cv') %></label>
+                            <div class="form-text small"><%= t('career.public_cv_help') %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold">
+                        <i class="fa-solid fa-floppy-disk me-2"></i><%= t('career.save_cv') %>
+                    </button>
+                    <a href="/kariyer/basvurularim" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                        <%= t('career.my_applications') %>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

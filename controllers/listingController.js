@@ -3,6 +3,7 @@ const Category = require('../models/Category');
 const User = require('../models/User');
 const Review = require('../models/Review');
 const Bid = require('../models/Bid');
+const Career = require('../models/Career');
 const { generateSlug, maskPhone } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
 const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/upload');
@@ -276,6 +277,12 @@ const create = async (req, res, next) => {
             expires_at: listingPolicy.expiresAt(),
             images
         });
+
+        // Pay, contract shape and requirements live beside the listing rather than
+        // inside it, and only exist for adverts under the jobs tree.
+        if (rootSlug === 'is-ilanlari') {
+            await Career.saveJobDetails(listing.id, req.body);
+        }
 
         req.flash('success', status === 'pending' ? 'flash.listing_pending_review' : 'flash.listing_published');
         res.redirect(status === 'pending' ? '/profile/listings' : `/listings/${listing.slug}`);

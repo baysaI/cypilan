@@ -88,6 +88,17 @@
                                         <% } %>
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item py-2 d-flex align-items-center" href="/kariyer/basvurular">
+                                        <i class="fa-solid fa-users me-3 text-info"></i>
+                                        <span class="flex-grow-1"><%= t('career.employer_panel') %></span>
+                                        <% if (typeof pendingApplicationCount !== 'undefined' && pendingApplicationCount > 0) { %>
+                                            <span class="badge bg-info rounded-pill ms-2"><%= pendingApplicationCount %></span>
+                                        <% } %>
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item py-2" href="/kariyer/cv"><i class="fa-regular fa-file-lines me-3 text-primary"></i><%= t('career.my_cv') %></a></li>
+                                <li><a class="dropdown-item py-2" href="/kariyer/basvurularim"><i class="fa-regular fa-paper-plane me-3 text-primary"></i><%= t('career.my_applications') %></a></li>
                                 <% if (['agent', 'business', 'admin'].indexOf(activeUser.role) > -1) { %>
                                     <li><a class="dropdown-item py-2" href="/teklifler"><i class="fa-solid fa-gavel me-3 text-primary"></i><%= t('bids.open_requests') %></a></li>
                                     <li><a class="dropdown-item py-2" href="/teklifler/verdiklerim"><i class="fa-solid fa-hand-holding-dollar me-3 text-primary"></i><%= t('bids.my_bids') %></a></li>
