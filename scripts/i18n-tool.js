@@ -228,29 +228,51 @@ function scanCmd() {
   const trData = loadJson('tr');
 
   const registeredKeys = new Set(getAllKeys(trData));
-  const usedKeys = new Set();
-  const regexes = [/t\(['"]([^'"]+)['"]/g, /__\(['"]([^'"]+)['"]/g];
+  const usedKeys = new Map();
+
+  // The `t` must not be the tail of a longer identifier, otherwise the `t(` at
+  // the end of `redirect('/admin')` and `createElement('div')` is read as a
+  // translation call and the report fills with URLs and tag names — which is
+  // exactly why a real missing key could sit in this output unnoticed.
+  const regexes = [
+    /(?<![\w$.])t\(\s*(['"])([^'"]+)\1/g,
+    /(?<![\w$.])__\(\s*(['"])([^'"]+)\1/g
+  ];
 
   [...ejsFiles, ...jsFiles].forEach(filePath => {
     const content = fs.readFileSync(filePath, 'utf8');
+    const relPath = path.relative(rootDir, filePath).split(path.sep).join('/');
+
     regexes.forEach(regex => {
       let match;
       while ((match = regex.exec(content)) !== null) {
-        usedKeys.add(match[1]);
+        const key = match[2];
+
+        // Keys assembled at render time — t('bids.status_' + bid.status) — reach
+        // here as a bare prefix. The prefix itself is never a real key.
+        if (/[._]$/.test(key)) continue;
+        if (!/^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*$/.test(key)) continue;
+
+        const line = content.slice(0, match.index).split('\n').length;
+        if (!usedKeys.has(key)) usedKeys.set(key, []);
+        usedKeys.get(key).push(`${relPath}:${line}`);
       }
     });
   });
 
-  const unregistered = [...usedKeys].filter(k => {
-    if (registeredKeys.has(k)) return false;
-    // Check namespace fallbacks
-    const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin', 'pages', 'profile_edit', 'report_modal'];
-    return !namespaces.some(ns => registeredKeys.has(`${ns}.${k}`));
+  const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin', 'pages', 'profile_edit', 'report_modal'];
+  const unregistered = [...usedKeys.entries()].filter(([key]) => {
+    if (registeredKeys.has(key)) return false;
+    return !namespaces.some(ns => registeredKeys.has(`${ns}.${key}`));
   });
 
   if (unregistered.length > 0) {
     console.log(`⚠️ Used t() keys missing from tr.json (${unregistered.length}):`);
-    unregistered.forEach(k => console.log(`   - ${k}`));
+    unregistered.forEach(([key, places]) => {
+      console.log(`   - ${key}`);
+      console.log(`     ${places.join(', ')}`);
+    });
+    process.exitCode = 1;
   } else {
     console.log(`✅ All t() keys in code exist in tr.json.`);
   }
