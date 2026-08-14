@@ -237,4 +237,63 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(container);
         return container;
     }
+
+    // Typewriter Search Placeholder Animation
+    const searchInputs = document.querySelectorAll('.smart-search-input');
+    if (searchInputs.length > 0) {
+        searchInputs.forEach(input => {
+            const rawPlaceholders = input.getAttribute('data-placeholders');
+            let placeholders = [];
+            try {
+                placeholders = JSON.parse(rawPlaceholders);
+            } catch (e) {
+                const defaultPh = input.getAttribute('placeholder') || 'Ne arıyorsun?';
+                placeholders = [defaultPh];
+            }
+
+            if (!Array.isArray(placeholders) || placeholders.length === 0) return;
+
+            let currentIdx = 0;
+            let charIdx = 0;
+            let isDeleting = false;
+            const prefix = "Ne arıyorsun? Örn: ";
+
+            function type() {
+                // Do not animate if input is focused or has user typed text
+                if (document.activeElement === input || input.value.trim() !== '') {
+                    setTimeout(type, 1000);
+                    return;
+                }
+
+                let currentText = placeholders[currentIdx];
+                if (currentText.startsWith("Ne arıyorsun? Örn: ")) {
+                    currentText = currentText.replace("Ne arıyorsun? Örn: ", "");
+                }
+
+                if (isDeleting) {
+                    charIdx--;
+                } else {
+                    charIdx++;
+                }
+
+                const displayedText = prefix + currentText.substring(0, charIdx);
+                input.setAttribute('placeholder', displayedText);
+
+                let typeSpeed = isDeleting ? 25 : 55;
+
+                if (!isDeleting && charIdx === currentText.length) {
+                    typeSpeed = 2300; // Pause at full sentence
+                    isDeleting = true;
+                } else if (isDeleting && charIdx === 0) {
+                    isDeleting = false;
+                    currentIdx = (currentIdx + 1) % placeholders.length;
+                    typeSpeed = 350; // Pause before typing next sentence
+                }
+
+                setTimeout(type, typeSpeed);
+            }
+
+            setTimeout(type, 600);
+        });
+    }
 });

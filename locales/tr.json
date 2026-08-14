@@ -899,6 +899,16 @@
   "smart": {
     "from": "en az",
     "placeholder": "Ne arıyorsun? Örn: Girne'de 2 milyona kadar 3+1 daire",
+    "placeholders": [
+      "Girne'de 2 milyona kadar 3+1 daire...",
+      "Lefkoşa'da kiralık ev arkadaşı...",
+      "Mağusa'da temiz ikinci el araba...",
+      "İskele'de denize sıfır lüks villa...",
+      "Güzelyurt'ta satılık müstakil ev...",
+      "Part-time garson veya tecrübeli usta...",
+      "Dönem sonu bütçe dostu ev eşyası...",
+      "Lefke'de üniversiteye yakın kiralık daire..."
+    ],
     "plain_search": "Filtreleri kaldır, düz arama yap",
     "understood": "Aramandan anladıklarımız",
     "up_to": "en fazla"
