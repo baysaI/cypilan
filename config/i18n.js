@@ -98,6 +98,11 @@ function translate(key, lang = 'tr', params = {}) {
   }
 
   if (translated === undefined) {
+    loadLocales();
+    translated = getNestedValue(locales[targetLang], key);
+  }
+
+  if (translated === undefined) {
     return key;
   }
 
