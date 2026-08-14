@@ -13,7 +13,7 @@
                         const searchPlaceholdersJson = Array.isArray(searchPlaceholders) ? JSON.stringify(searchPlaceholders) : JSON.stringify([t('smart.placeholder')]);
                     %>
                     <div class="input-group">
-                        <input type="text" name="q" class="form-control smart-search-input" placeholder="<%= t('smart.placeholder') %>" data-placeholders='<%- searchPlaceholdersJson %>'>
+                        <input type="text" name="q" class="form-control smart-search-input" placeholder="<%= t('smart.placeholder') %>" data-placeholders="<%= encodeURIComponent(searchPlaceholdersJson) %>">
                         <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                 </form>
@@ -153,7 +153,7 @@
 
             <form action="/search" method="GET" class="d-sm-none mt-2">
                 <div class="input-group">
-                    <input type="text" name="q" class="form-control smart-search-input" placeholder="<%= t('smart.placeholder') %>" data-placeholders='<%- searchPlaceholdersJson %>'>
+                    <input type="text" name="q" class="form-control smart-search-input" placeholder="<%= t('smart.placeholder') %>" data-placeholders="<%= encodeURIComponent(searchPlaceholdersJson) %>">
                     <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
             </form>

@@ -242,10 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInputs = document.querySelectorAll('.smart-search-input');
     if (searchInputs.length > 0) {
         searchInputs.forEach(input => {
-            const rawPlaceholders = input.getAttribute('data-placeholders');
+            let rawPlaceholders = input.getAttribute('data-placeholders');
             let placeholders = [];
             try {
-                placeholders = JSON.parse(rawPlaceholders);
+                if (rawPlaceholders) {
+                    try { rawPlaceholders = decodeURIComponent(rawPlaceholders); } catch(err) {}
+                    placeholders = JSON.parse(rawPlaceholders);
+                }
             } catch (e) {
                 const defaultPh = input.getAttribute('placeholder') || 'Ne arıyorsun?';
                 placeholders = [defaultPh];

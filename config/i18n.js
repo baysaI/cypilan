@@ -42,7 +42,14 @@ function getNestedValue(obj, keyPath) {
     }
   }
 
-  return typeof current === 'string' || typeof current === 'number' ? String(current) : undefined;
+  if (typeof current === 'string' || typeof current === 'number') {
+    return String(current);
+  }
+  if (Array.isArray(current) || isObject(current)) {
+    return current;
+  }
+
+  return undefined;
 }
 
 function mergeDeep(target, ...sources) {
@@ -72,7 +79,7 @@ function translate(key, lang = 'tr', params = {}) {
 
   let translated = getNestedValue(locales[targetLang], key);
 
-  const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin', 'pages', 'report_modal', 'profile_edit', 'errors', 'messages'];
+  const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin', 'pages', 'report_modal', 'profile_edit', 'errors', 'messages', 'smart'];
   if (translated === undefined && !key.includes('.')) {
     for (const ns of namespaces) {
       translated = getNestedValue(locales[targetLang], `${ns}.${key}`);
@@ -94,7 +101,7 @@ function translate(key, lang = 'tr', params = {}) {
     return key;
   }
 
-  if (params && typeof params === 'object') {
+  if (typeof translated === 'string' && params && typeof params === 'object') {
     Object.keys(params).forEach((paramKey) => {
       const value = params[paramKey];
       translated = translated.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), value);
