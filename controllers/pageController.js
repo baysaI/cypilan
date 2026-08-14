@@ -1,6 +1,7 @@
 const listingPolicy = require('../config/listingPolicy');
 const appConfig = require('../config/app');
 const { ROADMAP_GROUPS, countByStatus } = require('../config/roadmap');
+const cities = require('../config/cities');
 const Listing = require('../models/Listing');
 
 const faq = (req, res) => {
@@ -43,6 +44,40 @@ const terms = (req, res) => {
     res.locals.meta = res.locals.meta || {};
     res.locals.meta.title = `${res.locals.t('footer.terms')} | CYPILAN.COM`;
     res.render('pages/terms', { title: res.locals.t('footer.terms') });
+};
+
+// Student life pulls together the four things a student actually needs at the
+// start and end of term. It is a real query over live listings rather than a
+// brochure: an empty section says so instead of showing a placeholder.
+const students = async (req, res, next) => {
+    try {
+        const city = cities.isKnown(req.query.city) ? req.query.city : undefined;
+
+        const [roommates, housing, secondHand, partTime] = await Promise.all([
+            Listing.search({ category: 'ev-arkadasi', city }, 1, 8),
+            Listing.search({ category: 'ogrenci-evi', city }, 1, 8),
+            Listing.search({ category: 'ikinci-el', city }, 1, 8),
+            Listing.search({ category: 'yari-zamanli', city }, 1, 8)
+        ]);
+
+        res.locals.meta = res.locals.meta || {};
+        res.locals.meta.title = `${res.locals.t('students.title')} | CYPILAN.COM`;
+        res.locals.meta.description = res.locals.t('students.subtitle');
+
+        res.render('pages/students', {
+            sections: [
+                { key: 'roommates', category: 'ev-arkadasi', icon: 'fa-user-group', listings: roommates.data, total: roommates.total },
+                { key: 'housing', category: 'ogrenci-evi', icon: 'fa-house-chimney', listings: housing.data, total: housing.total },
+                { key: 'second_hand', category: 'ikinci-el', icon: 'fa-couch', listings: secondHand.data, total: secondHand.total },
+                { key: 'part_time', category: 'yari-zamanli', icon: 'fa-briefcase', listings: partTime.data, total: partTime.total }
+            ],
+            selectedCity: city || '',
+            title: res.locals.t('students.title')
+        });
+    } catch (error) {
+        console.error('Students Page Error:', error);
+        next(error);
+    }
 };
 
 const soon = (req, res) => {
@@ -109,5 +144,6 @@ module.exports = {
     privacy,
     terms,
     cookiePolicy,
-    soon
+    soon,
+    students
 };

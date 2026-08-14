@@ -39,6 +39,9 @@ router.get('/profile/listings', isAuthenticated, profileController.myListings);
 router.get('/profile/favorites', isAuthenticated, profileController.myFavorites);
 router.get('/profile/messages', isAuthenticated, (req, res) => res.redirect('/messages'));
 
+const panelController = require('../controllers/panelController');
+router.get('/panel', isAuthenticated, panelController.index);
+
 const bidController = require('../controllers/bidController');
 router.get('/profile/teklifler', isAuthenticated, bidController.received);
 router.post('/profile/teklifler/:id/kabul', isAuthenticated, bidController.accept);
@@ -59,5 +62,6 @@ router.get('/gizlilik-politikasi', pageController.privacy);
 router.get('/kullanim-kosullari', pageController.terms);
 router.get('/cerez-politikasi', pageController.cookiePolicy);
 router.get('/yakinda', pageController.soon);
+router.get('/ogrenci', pageController.students);
 
 module.exports = router;

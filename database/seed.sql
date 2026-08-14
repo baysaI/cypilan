@@ -17,7 +17,9 @@ INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, sort_order) VALU
 (104, 1, 'arsa', 'Arsa', 4),
 (105, 1, 'kiralik-villa', 'Kiralık Villa', 5),
 (106, 1, 'satilik-isyeri', 'Satılık İşyeri', 6),
-(107, 1, 'kiralik-isyeri', 'Kiralık İşyeri', 7);
+(107, 1, 'kiralik-isyeri', 'Kiralık İşyeri', 7),
+(108, 1, 'ev-arkadasi', 'Ev Arkadaşı', 8),
+(109, 1, 'ogrenci-evi', 'Öğrenci Evi', 9);
 
 -- Subcategories (Vasıta)
 INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, sort_order) VALUES
@@ -60,6 +62,8 @@ UPDATE categories SET name_en = 'Land',                  name_el = 'Οικόπε
 UPDATE categories SET name_en = 'Villa for Rent',        name_el = 'Βίλα προς ενοικίαση',       name_ru = 'Вилла в аренду',      name_fa = 'ویلا اجاره‌ای'       WHERE slug = 'kiralik-villa';
 UPDATE categories SET name_en = 'Commercial for Sale',   name_el = 'Επαγγελματικός χώρος προς πώληση', name_ru = 'Коммерческая недвижимость на продажу', name_fa = 'ملک تجاری فروشی' WHERE slug = 'satilik-isyeri';
 UPDATE categories SET name_en = 'Commercial for Rent',   name_el = 'Επαγγελματικός χώρος προς ενοικίαση', name_ru = 'Коммерческая недвижимость в аренду', name_fa = 'ملک تجاری اجاره‌ای' WHERE slug = 'kiralik-isyeri';
+UPDATE categories SET name_en = 'Flatmate Wanted',       name_el = 'Ζητείται συγκάτοικος',      name_ru = 'Ищу соседа по квартире', name_fa = 'هم‌خانه'          WHERE slug = 'ev-arkadasi';
+UPDATE categories SET name_en = 'Student Housing',       name_el = 'Φοιτητική κατοικία',        name_ru = 'Студенческое жильё',  name_fa = 'خانه دانشجویی'      WHERE slug = 'ogrenci-evi';
 
 UPDATE categories SET name_en = 'Cars',                  name_el = 'Αυτοκίνητα',                name_ru = 'Автомобили',          name_fa = 'خودرو'              WHERE slug = 'otomobil';
 UPDATE categories SET name_en = 'Motorcycles',           name_el = 'Μοτοσικλέτες',              name_ru = 'Мотоциклы',           name_fa = 'موتورسیکلت'         WHERE slug = 'motosiklet';

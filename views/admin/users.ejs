@@ -45,6 +45,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                             <th>Rol</th>
                             <th class="d-none d-sm-table-cell">İlan</th>
                             <th>Durum</th>
+                            <th>Uyarı</th>
                             <th class="pe-3 text-end">İşlem</th>
                         </tr>
                     </thead>
@@ -67,10 +68,25 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                         <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2">Askıda</span>
                                     <% } %>
                                 </td>
+                                <td>
+                                    <% const warnCount = (typeof warningCounts !== 'undefined' && warningCounts[u.id]) || 0; %>
+                                    <% if (warnCount > 0) { %>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2"
+                                              title="<%= warnCount %>/<%= suspensionThreshold %>">
+                                            <i class="fa-solid fa-triangle-exclamation me-1"></i><%= warnCount %>/<%= suspensionThreshold %>
+                                        </span>
+                                    <% } else { %>
+                                        <span class="text-muted small">&mdash;</span>
+                                    <% } %>
+                                </td>
                                 <td class="pe-3 text-end text-nowrap">
                                     <% if (u.id === activeAdminUser.id) { %>
                                         <span class="text-muted small">siz</span>
                                     <% } else { %>
+                                        <button class="btn btn-sm btn-outline-warning" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#warnForm<%= u.id %>">
+                                            Uyar
+                                        </button>
                                         <form action="/admin/users/<%= u.id %>/status" method="POST" class="d-inline">
                                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <input type="hidden" name="_method" value="PUT">
@@ -82,6 +98,27 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                     <% } %>
                                 </td>
                             </tr>
+                            <% if (u.id !== activeAdminUser.id) { %>
+                                <tr class="collapse" id="warnForm<%= u.id %>">
+                                    <td colspan="7" class="bg-light">
+                                        <form action="/admin/users/<%= u.id %>/uyari" method="POST"
+                                              class="d-flex flex-wrap gap-2 align-items-center py-2">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <select name="reason" class="form-select form-select-sm" style="width: auto;" required>
+                                                <% reportReasons.forEach(function (r) { %>
+                                                    <option value="<%= r %>"><%= t('report_modal.reasons.' + r) %></option>
+                                                <% }); %>
+                                            </select>
+                                            <input type="text" name="note" class="form-control form-control-sm"
+                                                   style="max-width: 320px;" maxlength="500" placeholder="Açıklama (opsiyonel)">
+                                            <button class="btn btn-sm btn-warning fw-medium">Uyarı Gönder</button>
+                                            <span class="text-muted small">
+                                                <%= suspensionThreshold %>. uyarıda hesap otomatik askıya alınır.
+                                            </span>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% } %>
                         <% }); %>
                     </tbody>
                 </table>

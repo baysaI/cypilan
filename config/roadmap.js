@@ -30,7 +30,7 @@ const ROADMAP_GROUPS = [
       { key: 'ratings', icon: 'fa-star', status: 'live', href: '/sss#puanlama' },
       { key: 'guarantee', icon: 'fa-handshake', status: 'soon' },
       { key: 'bidding', icon: 'fa-gavel', status: 'live', href: '/teklifler' },
-      { key: 'violation', icon: 'fa-triangle-exclamation', status: 'soon' }
+      { key: 'violation', icon: 'fa-triangle-exclamation', status: 'live', href: '/guvenlik' }
     ]
   },
   {
@@ -48,8 +48,8 @@ const ROADMAP_GROUPS = [
     icon: 'fa-chart-line',
     accent: 'warning',
     items: [
-      { key: 'pro_panel', icon: 'fa-table-columns', status: 'soon' },
-      { key: 'pro_stats', icon: 'fa-chart-simple', status: 'soon' },
+      { key: 'pro_panel', icon: 'fa-table-columns', status: 'live', href: '/panel' },
+      { key: 'pro_stats', icon: 'fa-chart-simple', status: 'live', href: '/panel' },
       { key: 'premium', icon: 'fa-crown', status: 'soon' }
     ]
   },
@@ -58,7 +58,7 @@ const ROADMAP_GROUPS = [
     icon: 'fa-users',
     accent: 'danger',
     items: [
-      { key: 'student', icon: 'fa-graduation-cap', status: 'soon' },
+      { key: 'student', icon: 'fa-graduation-cap', status: 'live', href: '/ogrenci' },
       { key: 'investor', icon: 'fa-chart-pie', status: 'soon' },
       { key: 'south_cyprus', icon: 'fa-map-location-dot', status: 'live', href: '/listings' }
     ]

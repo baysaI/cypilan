@@ -263,6 +263,7 @@
     "cannot_report_self": "You cannot report yourself.",
     "cannot_review_self": "You cannot review yourself.",
     "cannot_suspend_self": "You cannot suspend your own account.",
+    "cannot_warn_self": "You cannot warn yourself.",
     "conversation_load_failed": "The conversation could not be loaded.",
     "csrf_failed": "Security check failed. Please submit the form again.",
     "csrf_failed_json": "Security check failed. Refresh the page and try again.",
@@ -366,6 +367,9 @@
     "user_already_reported": "You have already reported this user. Our team is reviewing it.",
     "user_not_found": "User not found.",
     "user_suspended": "The user was suspended.",
+    "warning_issued": "The warning has been sent.",
+    "warning_issued_suspended": "The warning was sent and the account was suspended on reaching the limit.",
+    "warning_revoked": "The warning has been lifted.",
     "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit."
   },
   "footer": {
@@ -788,6 +792,37 @@
       "violation_note": "We are working on staged warnings and account restrictions for repeated violations."
     }
   },
+  "panel": {
+    "above_market": "Your listings get {percent}% more views than the market average.",
+    "active_listings": "Live Listings",
+    "activity": "Recent Activity",
+    "activity_desc": "Listings you published in the last {days} days.",
+    "applications": "Applications Received",
+    "below_market": "Your listings get {percent}% fewer views than the market average. Review your photos and description.",
+    "benchmark": "Market Comparison",
+    "days_ago": "{days} days ago",
+    "enquiries": "People Who Got in Touch",
+    "favorites": "Times Favourited",
+    "listing": "Listing",
+    "market_average": "Market average",
+    "no_activity": "You have not published anything in this period.",
+    "no_benchmark": "Not enough data to compare yet.",
+    "no_listings": "You have not posted anything yet.",
+    "offers_received": "Offers Received",
+    "offers_won": "Offers Won / Made",
+    "pending_applications": "{count} applications waiting for you",
+    "pending_offers": "{count} offers waiting for you",
+    "per_listing": "Performance by Listing",
+    "per_listing_desc": "See which advert is doing the work; most viewed first.",
+    "promoted": "Promoted",
+    "subtitle": "See how your listings are doing on one screen.",
+    "title": "Performance Panel",
+    "today": "today",
+    "views": "Total Views",
+    "win_rate": "{percent}% win rate",
+    "win_rate_pending": "At least 3 offers needed for a rate",
+    "your_average": "Your average per listing"
+  },
   "profile_edit": {
     "account_info": "Account Information",
     "bio": "about me",
@@ -865,6 +900,34 @@
     "understood": "What we understood from your search",
     "up_to": "up to"
   },
+  "students": {
+    "badge": "For Students",
+    "cta_body": "Posting is free. What you no longer need at the end of term is exactly what somebody else is looking for.",
+    "cta_title": "Sell your things, find a flatmate",
+    "empty_section": "Nothing here yet. Be the first to post.",
+    "filter_city": "Choose a city",
+    "housing_body": "Rentals near campus that suit a student budget.",
+    "housing_title": "Student Housing",
+    "part_time_body": "Jobs you can fit around your studies.",
+    "part_time_title": "Part-Time Work",
+    "roommates_body": "Find a flatmate safely and share the rent.",
+    "roommates_title": "Find a Flatmate",
+    "second_hand_body": "Buying and selling at the start and end of term.",
+    "second_hand_title": "Affordable Second Hand",
+    "see_all": "See all ({count})",
+    "subtitle": "Flatmates, furniture, part-time work and budget shopping — all on one page.",
+    "tip_contract_body": "Rent, deposit and duration in writing — do not rely on a verbal deal.",
+    "tip_contract_title": "Ask for a Written Contract",
+    "tip_deposit_body": "Pay nothing before you have seen the place and agreed terms.",
+    "tip_deposit_title": "Never Send a Deposit Up Front",
+    "tip_onsite_body": "Use on-site messaging; if a dispute arises your thread is on record.",
+    "tip_onsite_title": "Keep the Conversation On-Platform",
+    "tip_viewing_body": "Do not rely on photos; see it in person, in daylight if you can.",
+    "tip_viewing_title": "Always View the Place",
+    "tips_intro": "If this is your first tenancy in Cyprus, do not skip these four.",
+    "tips_title": "Safety Notes for Students",
+    "title": "Student Life in Cyprus"
+  },
   "user": {
     "agent_member": "Real Estate Agent",
     "business_member": "Business Account",
@@ -872,5 +935,13 @@
     "member": "Member",
     "member_since": "Member since",
     "seller_profile": "Seller's Profile"
+  },
+  "warnings": {
+    "notify_suspended": "Your account has been suspended after warning {count}. You can contact our support team to appeal.",
+    "notify_warned": "You have received a warning for a rule breach on your listings (warning {count}). {remaining} more and your account will be suspended. You can see the details on the \"My Listings\" page.",
+    "read_rules": "Read the terms of use",
+    "remaining_body": "{remaining} more warnings and your account will be suspended automatically.",
+    "suspended_body": "Your account has been suspended because you reached the warning limit. Contact support to appeal.",
+    "title": "Your account has {count}/{threshold} warnings"
   }
 }

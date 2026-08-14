@@ -1,0 +1,100 @@
+<div class="bg-primary text-white py-4 py-md-5">
+    <div class="container text-center">
+        <span class="badge rounded-pill bg-accent text-white px-3 py-2 mb-3 text-uppercase fw-bold" style="letter-spacing: 1px;">
+            <%= t('students.badge') %>
+        </span>
+        <h1 class="fw-bold mb-2"><%= t('students.title') %></h1>
+        <p class="text-white-50 mb-0"><%= t('students.subtitle') %></p>
+    </div>
+</div>
+
+<div class="container py-4 py-md-5">
+    <form method="GET" action="/ogrenci" class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label for="studentCity" class="form-label small fw-semibold mb-1"><%= t('students.filter_city') %></label>
+                <%- include('../partials/citySelect', { selectedCity: selectedCity, selectClass: 'form-select' }) %>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100 fw-medium">
+                    <i class="fa-solid fa-filter me-2"></i><%= t('common.filter') %>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <% sections.forEach(function (section) { %>
+        <section class="mb-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width: 48px; height: 48px;">
+                        <i class="fa-solid <%= section.icon %>"></i>
+                    </div>
+                    <div>
+                        <h2 class="fs-5 fw-bold mb-0"><%= t('students.' + section.key + '_title') %></h2>
+                        <p class="text-muted small mb-0"><%= t('students.' + section.key + '_body') %></p>
+                    </div>
+                </div>
+
+                <a href="/listings?category=<%= section.category %><%= selectedCity ? '&city=' + encodeURIComponent(selectedCity) : '' %>"
+                   class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
+                    <%= t('students.see_all', { count: section.total }) %>
+                </a>
+            </div>
+
+            <% if (section.listings.length > 0) { %>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+                    <% section.listings.forEach(function (listing) { %>
+                        <div class="col">
+                            <%- include('../partials/listingCard', { listing: listing }) %>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="text-center py-4 bg-white rounded-4 border">
+                    <p class="text-muted small mb-2"><%= t('students.empty_section') %></p>
+                    <a href="/listings/create" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
+                        <i class="fa-solid fa-plus me-1"></i><%= t('nav.post_ad') %>
+                    </a>
+                </div>
+            <% } %>
+        </section>
+    <% }); %>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="fs-4 fw-bold mb-2"><%= t('students.tips_title') %></h2>
+            <p class="text-muted mb-4"><%= t('students.tips_intro') %></p>
+
+            <div class="row g-3">
+                <% ['viewing', 'deposit', 'contract', 'onsite'].forEach(function (tip) { %>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-3 h-100">
+                            <div class="d-flex gap-3">
+                                <i class="fa-solid fa-shield-halved text-primary mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1"><%= t('students.tip_' + tip + '_title') %></h6>
+                                    <p class="text-muted small mb-0"><%= t('students.tip_' + tip + '_body') %></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
+        <h3 class="fw-bold mb-2"><%= t('students.cta_title') %></h3>
+        <p class="text-white-50 mb-4"><%= t('students.cta_body') %></p>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold text-white shadow">
+                <i class="fa-solid fa-plus me-2"></i><%= t('nav.post_ad') %>
+            </a>
+            <a href="/kariyer" class="btn btn-outline-light btn-lg rounded-pill px-5 fw-bold">
+                <%= t('career.openings') %>
+            </a>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Listing = require('../models/Listing');
 const Report = require('../models/Report');
 const Message = require('../models/Message');
+const Warning = require('../models/Warning');
 
 const PAGE_SIZE = 20;
 
@@ -48,6 +49,13 @@ const users = async (req, res) => {
         const result = await User.findAll(page, PAGE_SIZE, filters);
         const pendingReports = await Report.countPending();
 
+        // Standing warnings for exactly the rows on screen, so the table can show
+        // how close each member is to an automatic suspension.
+        const warningCounts = {};
+        await Promise.all(result.data.map(async (user) => {
+            warningCounts[user.id] = await Warning.countActive(user.id);
+        }));
+
         res.locals.meta.title = 'Kullanıcı Yönetimi | Admin Paneli';
         res.render('admin/users', {
             layout: 'admin/layout',
@@ -55,6 +63,9 @@ const users = async (req, res) => {
             pagination: { page, totalItems: result.total, totalPages: result.pages },
             filters,
             pendingReports,
+            warningCounts,
+            suspensionThreshold: Warning.SUSPENSION_THRESHOLD,
+            reportReasons: Report.listingReasons,
             activePage: 'users',
             title: 'Kullanıcılar'
         });
@@ -272,6 +283,84 @@ const resolveReport = async (req, res) => {
     }
 };
 
+// Warning a member is the step that was missing between doing nothing and
+// suspending them. The third standing warning suspends the account by itself,
+// inside Warning.issue, so the count and the account state stay in step.
+const issueWarning = async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id, 10);
+        const { reason, note, report_id } = req.body;
+
+        if (!Number.isInteger(userId)) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        if (userId === req.session.userId) {
+            req.flash('error', 'flash.cannot_warn_self');
+            return res.redirect(req.get('referer') || '/admin/users');
+        }
+
+        if (!Report.listingReasons.includes(reason) && !Report.userReasons.includes(reason)) {
+            req.flash('error', 'flash.select_report_reason');
+            return res.redirect(req.get('referer') || '/admin/users');
+        }
+
+        const target = await User.findById(userId);
+        if (!target) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        const reportId = parseInt(report_id, 10);
+        const result = await Warning.issue({
+            user_id: userId,
+            issued_by: req.session.userId,
+            report_id: Number.isInteger(reportId) ? reportId : null,
+            reason,
+            note: (note || '').trim().slice(0, 500) || null
+        });
+
+        // The member has to be told what happened and why, or a warning is just a
+        // row in a table they never see.
+        try {
+            await Message.create({
+                sender_id: req.session.userId,
+                receiver_id: userId,
+                content: result.suspended
+                    ? res.locals.t('warnings.notify_suspended', { count: result.count })
+                    : res.locals.t('warnings.notify_warned', {
+                        count: result.count,
+                        remaining: Warning.remainingBeforeSuspension(result.count)
+                    })
+            });
+        } catch (notifyError) {
+            console.error('Warning notification failed:', notifyError);
+        }
+
+        req.flash('success', result.suspended ? 'flash.warning_issued_suspended' : 'flash.warning_issued');
+        res.redirect(req.get('referer') || '/admin/users');
+    } catch (error) {
+        console.error('Issue Warning Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/users');
+    }
+};
+
+const revokeWarning = async (req, res) => {
+    try {
+        const warningId = parseInt(req.params.id, 10);
+        const done = Number.isInteger(warningId) && await Warning.revoke(warningId);
+
+        req.flash(done ? 'success' : 'error', done ? 'flash.warning_revoked' : 'flash.action_failed');
+        res.redirect(req.get('referer') || '/admin/users');
+    } catch (error) {
+        console.error('Revoke Warning Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/users');
+    }
+};
+
 module.exports = {
     dashboard,
     users,
@@ -281,5 +370,7 @@ module.exports = {
     toggleListingStatus,
     deleteListing,
     toggleUserStatus,
-    resolveReport
+    resolveReport,
+    issueWarning,
+    revokeWarning
 };

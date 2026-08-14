@@ -256,3 +256,25 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_applications_pair ON job_applications(list
 -- are the two reads that happen on every page load of those screens.
 CREATE INDEX IF NOT EXISTS idx_applications_listing ON job_applications(listing_id, status);
 CREATE INDEX IF NOT EXISTS idx_applications_applicant ON job_applications(applicant_id, created_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- Moderation: staged warnings
+--
+-- Suspending an account was the only lever moderation had, which meant a first
+-- offence and a repeat offender were treated identically. A warning records the
+-- decision, tells the member what was wrong, and only the accumulation of them
+-- reaches for the suspension.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS user_warnings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  issued_by INTEGER REFERENCES users(id),
+  report_id INTEGER REFERENCES reports(id),
+  reason TEXT NOT NULL CHECK(reason IN ('wrong_category', 'misleading_price', 'missing_photos', 'spam', 'fraud', 'inappropriate', 'harassment', 'other')),
+  note TEXT,
+  is_active INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_warnings_user ON user_warnings(user_id, is_active, created_at DESC);

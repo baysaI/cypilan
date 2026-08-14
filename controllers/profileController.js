@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Listing = require('../models/Listing');
 const Review = require('../models/Review');
+const Warning = require('../models/Warning');
 const reviewController = require('./reviewController');
 const { isValidPhone, isValidPassword, isValidEmail } = require('../utils/validators');
 
@@ -230,11 +231,22 @@ const myListings = async (req, res, next) => {
     try {
         const listings = await Listing.getByUser(req.session.userId);
 
+        // A warning the member never sees teaches them nothing, so it is surfaced
+        // where they manage the listings that caused it.
+        const warnings = await Warning.forUser(req.session.userId, 10);
+        const activeWarnings = warnings.filter((warning) => Number(warning.is_active) === 1);
+
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = 'İlanlarım';
         res.locals.meta.robots = 'noindex, nofollow';
 
-        res.render('profile/listings', { listings, title: 'İlanlarım' });
+        res.render('profile/listings', {
+            listings,
+            warnings: activeWarnings,
+            warningsRemaining: Warning.remainingBeforeSuspension(activeWarnings.length),
+            suspensionThreshold: Warning.SUSPENSION_THRESHOLD,
+            title: 'İlanlarım'
+        });
     } catch (error) {
         console.error('My Listings Error:', error);
         next(error);

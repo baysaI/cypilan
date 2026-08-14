@@ -263,6 +263,7 @@
     "cannot_report_self": "Kendinizi şikayet edemezsiniz.",
     "cannot_review_self": "Kendini değerlendiremezsin.",
     "cannot_suspend_self": "Kendi hesabınızı askıya alamazsınız.",
+    "cannot_warn_self": "Kendine uyarı gönderemezsin.",
     "conversation_load_failed": "Sohbet yüklenemedi.",
     "csrf_failed": "Güvenlik doğrulaması başarısız oldu. Lütfen formu tekrar gönderin.",
     "csrf_failed_json": "Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.",
@@ -366,6 +367,9 @@
     "user_already_reported": "Bu kullanıcıyı zaten şikayet ettiniz. Ekibimiz inceliyor.",
     "user_not_found": "Kullanıcı bulunamadı.",
     "user_suspended": "Kullanıcı askıya alındı.",
+    "warning_issued": "Uyarı gönderildi.",
+    "warning_issued_suspended": "Uyarı gönderildi ve sınıra ulaşıldığı için hesap askıya alındı.",
+    "warning_revoked": "Uyarı kaldırıldı.",
     "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir."
   },
   "footer": {
@@ -788,6 +792,37 @@
       "violation_note": "Tekrarlanan ihlallerde kademeli uyarı ve hesap kısıtlaması üzerinde çalışıyoruz."
     }
   },
+  "panel": {
+    "above_market": "İlanların piyasa ortalamasının %{percent} üzerinde görüntüleniyor.",
+    "active_listings": "Yayındaki İlan",
+    "activity": "Son Hareketler",
+    "activity_desc": "Son {days} günde yayınladığın ilanlar.",
+    "applications": "Gelen Başvuru",
+    "below_market": "İlanların piyasa ortalamasının %{percent} altında görüntüleniyor. Fotoğraf ve açıklamayı gözden geçir.",
+    "benchmark": "Piyasa Karşılaştırması",
+    "days_ago": "{days} gün önce",
+    "enquiries": "İletişime Geçen Kişi",
+    "favorites": "Favoriye Eklenme",
+    "listing": "İlan",
+    "market_average": "Piyasa ortalaması",
+    "no_activity": "Bu dönemde yeni ilan yayınlamadın.",
+    "no_benchmark": "Karşılaştırma için henüz yeterli veri yok.",
+    "no_listings": "Henüz ilan vermedin.",
+    "offers_received": "Aldığın Teklif",
+    "offers_won": "Kazandığın / Verdiğin Teklif",
+    "pending_applications": "{count} başvuru seni bekliyor",
+    "pending_offers": "{count} teklif seni bekliyor",
+    "per_listing": "İlan Bazında Performans",
+    "per_listing_desc": "Hangi ilanın iş yaptığını gör; en çok görüntülenen üstte.",
+    "promoted": "Öne çıkarılmış",
+    "subtitle": "İlanlarının nasıl gittiğini tek ekrandan gör.",
+    "title": "Performans Paneli",
+    "today": "bugün",
+    "views": "Toplam Görüntülenme",
+    "win_rate": "Kazanma oranı %{percent}",
+    "win_rate_pending": "Oran için en az 3 teklif gerekli",
+    "your_average": "İlan başına ortalaman"
+  },
   "profile_edit": {
     "account_info": "Hesap Bilgileri",
     "bio": "Hakkımda",
@@ -865,6 +900,34 @@
     "understood": "Aramandan anladıklarımız",
     "up_to": "en fazla"
   },
+  "students": {
+    "badge": "Öğrencilere Özel",
+    "cta_body": "İlan vermek ücretsiz. Dönem sonu eşyaların birine lazım olabilir.",
+    "cta_title": "Eşyanı sat, ev arkadaşını bul",
+    "empty_section": "Bu bölümde henüz ilan yok. İlkini sen ver.",
+    "filter_city": "Şehir seç",
+    "housing_body": "Okuluna yakın, öğrenciye uygun kiralık evler.",
+    "housing_title": "Öğrenci Evi",
+    "part_time_body": "Okulunla birlikte yürütebileceğin işler.",
+    "part_time_title": "Yarı Zamanlı İş",
+    "roommates_body": "Güvenle ev arkadaşı bul, kirayı birlikte paylaş.",
+    "roommates_title": "Ev Arkadaşı Bul",
+    "second_hand_body": "Dönem başı ve sonu eşya alım satımı.",
+    "second_hand_title": "Uygun Fiyata İkinci El",
+    "see_all": "Tümü ({count})",
+    "subtitle": "Ev arkadaşından eşyaya, yarı zamanlı işten bütçe dostu alışverişe — hepsi tek sayfada.",
+    "tip_contract_body": "Kira, depozito ve süre yazılı olsun; sözlü anlaşmaya güvenme.",
+    "tip_contract_title": "Yazılı Sözleşme İste",
+    "tip_deposit_body": "Evi görmeden ve anlaşma yapmadan hiçbir ödeme yapma.",
+    "tip_deposit_title": "Depozitoyu Peşin Gönderme",
+    "tip_onsite_body": "Site içi mesajlaşmayı kullan; anlaşmazlıkta yazışman kayıtta olur.",
+    "tip_onsite_title": "Görüşmeyi Platformda Tut",
+    "tip_viewing_body": "Fotoğrafla yetinme; mümkünse gündüz saatinde yerinde gör.",
+    "tip_viewing_title": "Evi Mutlaka Gör",
+    "tips_intro": "Kıbrıs'ta ilk kez ev tutuyorsan, şu dördünü atlama.",
+    "tips_title": "Öğrenciye Güvenlik Notları",
+    "title": "Kıbrıs'ta Öğrenci Hayatı"
+  },
   "user": {
     "agent_member": "Emlak Danışmanı",
     "business_member": "Kurumsal Üye",
@@ -872,5 +935,13 @@
     "member": "Üye",
     "member_since": "tarihinden beri üye",
     "seller_profile": "Satıcının Profili"
+  },
+  "warnings": {
+    "notify_suspended": "{count}. uyarını aldığın için hesabın askıya alındı. İtiraz için destek ekibimizle iletişime geçebilirsin.",
+    "notify_warned": "İlanlarınla ilgili bir kural ihlali nedeniyle uyarı aldın ({count}. uyarı). {remaining} uyarı daha alırsan hesabın askıya alınır. Ayrıntıları \"İlanlarım\" sayfasında görebilirsin.",
+    "read_rules": "Kullanım koşullarını oku",
+    "remaining_body": "{remaining} uyarı daha alırsan hesabın otomatik olarak askıya alınır.",
+    "suspended_body": "Uyarı sınırına ulaştığın için hesabın askıya alındı. İtiraz için destek ekibiyle iletişime geç.",
+    "title": "Hesabında {count}/{threshold} uyarı var"
   }
 }

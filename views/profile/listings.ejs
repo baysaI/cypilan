@@ -10,6 +10,34 @@
 %>
 
 <div class="container py-4 py-md-5">
+
+    <% if (typeof warnings !== 'undefined' && warnings.length > 0) { %>
+        <div class="alert <%= warningsRemaining === 0 ? 'alert-danger' : 'alert-warning' %> border-0 shadow-sm rounded-4 mb-4">
+            <div class="d-flex gap-3">
+                <i class="fa-solid fa-triangle-exclamation fs-4 mt-1"></i>
+                <div class="flex-grow-1">
+                    <h2 class="fs-6 fw-bold mb-1">
+                        <%= t('warnings.title', { count: warnings.length, threshold: suspensionThreshold }) %>
+                    </h2>
+                    <p class="small mb-2">
+                        <%= warningsRemaining === 0
+                            ? t('warnings.suspended_body')
+                            : t('warnings.remaining_body', { remaining: warningsRemaining }) %>
+                    </p>
+                    <ul class="small mb-0 ps-3">
+                        <% warnings.forEach(function (warning) { %>
+                            <li>
+                                <strong><%= t('report_modal.reasons.' + warning.reason) %></strong>
+                                <span class="text-muted">&middot; <%= helpers.timeAgo(warning.created_at, lang) %></span>
+                                <% if (warning.note) { %><div class="text-muted"><%= warning.note %></div><% } %>
+                            </li>
+                        <% }); %>
+                    </ul>
+                    <a href="/kullanim-kosullari" class="small fw-semibold d-inline-block mt-2"><%= t('warnings.read_rules') %></a>
+                </div>
+            </div>
+        </div>
+    <% } %>
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0 small">
             <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="fa-solid fa-house"></i> <%= t('nav.home') %></a></li>
