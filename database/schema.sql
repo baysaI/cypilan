@@ -278,3 +278,35 @@ CREATE TABLE IF NOT EXISTS user_warnings (
 );
 
 CREATE INDEX IF NOT EXISTS idx_warnings_user ON user_warnings(user_id, is_active, created_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- Service requests
+--
+-- Two of the announced services are the same shape: the member asks, a human on
+-- the team acts. "Cypilan assurance" is a request to have a sale or rental run
+-- by staff; "promotion" is a request to have a listing featured. Neither can be
+-- self-served yet — there is no payment provider wired up — so the platform's
+-- job is to capture the request, show the member where it stands, and put it in
+-- a queue somebody actually works.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS service_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  listing_id INTEGER REFERENCES listings(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK(type IN ('assurance', 'promotion')),
+  status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'contacted', 'approved', 'rejected', 'completed')),
+  note TEXT,
+  admin_note TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- One open request per listing per service, so a member cannot flood the queue
+-- by clicking twice. A settled request leaves the way clear for a new one.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_service_requests_open
+  ON service_requests(listing_id, type)
+  WHERE status IN ('pending', 'contacted');
+
+CREATE INDEX IF NOT EXISTS idx_service_requests_queue ON service_requests(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_service_requests_user ON service_requests(user_id, created_at DESC);

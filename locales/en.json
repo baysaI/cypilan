@@ -488,6 +488,9 @@
     "real_estate": "Real Estate",
     "register": "Register",
     "second_hand": "Second Hand",
+    "section_account": "Account & Listings",
+    "section_bids": "Offers & Tenders",
+    "section_jobs": "Business & Career",
     "services": "Services",
     "vehicles": "Vehicles"
   },

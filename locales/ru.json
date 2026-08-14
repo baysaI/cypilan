@@ -488,6 +488,9 @@
     "real_estate": "Недвижимость",
     "register": "Регистрация",
     "second_hand": "Барахолка",
+    "section_account": "Аккаунт и списки",
+    "section_bids": "Предложения и тендеры",
+    "section_jobs": "Бизнес и карьера",
     "services": "Услуги и Мастера",
     "vehicles": "Транспорт"
   },

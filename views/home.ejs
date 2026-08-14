@@ -110,4 +110,69 @@
             </div>
         </div>
     </section>
+
+    <section class="student-hub-section py-5 bg-light border-top">
+        <div class="container">
+            <div class="card border-0 rounded-4 shadow-sm bg-white p-4 p-md-5 position-relative overflow-hidden">
+                <div class="row align-items-center position-relative z-1 g-4">
+                    <div class="col-lg-6 text-center text-lg-start">
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-20 px-3 py-2 rounded-pill fw-bold mb-3 text-uppercase" style="letter-spacing: 1px;">
+                            <i class="fa-solid fa-graduation-cap me-1"></i> <%= t('students.badge') %>
+                        </span>
+                        <h2 class="display-6 fw-bold mb-2 text-dark"><%= t('students.title') %></h2>
+                        <p class="lead text-muted mb-4"><%= t('students.subtitle') %></p>
+                        <div class="d-flex justify-content-center justify-content-lg-start">
+                            <a href="/ogrenci" class="btn btn-primary btn-lg rounded-pill px-4 fw-bold shadow-sm">
+                                <i class="fa-solid fa-graduation-cap me-2"></i><%= t('students.title') %>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <a href="/ogrenci" class="text-decoration-none">
+                                    <div class="card h-100 border-0 bg-light p-3 p-md-4 text-center rounded-4 hover-lift group">
+                                        <div class="icon-box mx-auto mb-2 bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-user-group fs-4"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-0 small"><%= t('students.roommates_title') %></h6>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="/ogrenci" class="text-decoration-none">
+                                    <div class="card h-100 border-0 bg-light p-3 p-md-4 text-center rounded-4 hover-lift group">
+                                        <div class="icon-box mx-auto mb-2 bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-house-user fs-4"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-0 small"><%= t('students.housing_title') %></h6>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="/ogrenci" class="text-decoration-none">
+                                    <div class="card h-100 border-0 bg-light p-3 p-md-4 text-center rounded-4 hover-lift group">
+                                        <div class="icon-box mx-auto mb-2 bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-box-open fs-4"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-0 small"><%= t('students.second_hand_title') %></h6>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="/ogrenci" class="text-decoration-none">
+                                    <div class="card h-100 border-0 bg-light p-3 p-md-4 text-center rounded-4 hover-lift group">
+                                        <div class="icon-box mx-auto mb-2 bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-briefcase fs-4"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-0 small"><%= t('students.part_time_title') %></h6>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
