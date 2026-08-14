@@ -134,8 +134,10 @@ app.use(seoMiddleware);
 app.use(setUserLocal);
 
 const helpers = require('./utils/helpers');
+const cities = require('./config/cities');
 app.use((req, res, next) => {
   res.locals.helpers = helpers;
+  res.locals.cities = cities;
   res.locals.currentPath = req.path;
   res.locals.siteUrl = process.env.SITE_URL || `http://localhost:${PORT}`;
   next();

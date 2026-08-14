@@ -274,7 +274,11 @@ const CITY_TRANSLATIONS = {
   'Girne': { tr: 'Girne', en: 'Kyrenia', el: 'Κερύνεια', ru: 'Гирне (Кирения)', fa: 'گیرنه' },
   'Gazimağusa': { tr: 'Gazimağusa', en: 'Famagusta', el: 'Αμμόχωστος', ru: 'Газимагуса (Фамагуста)', fa: 'فاماگوستا' },
   'İskele': { tr: 'İskele', en: 'Iskele', el: 'Τρίκωμο', ru: 'Искеле', fa: 'اسکله' },
-  'Güzelyurt': { tr: 'Güzelyurt', en: 'Guzelyurt', el: 'Μόρφου', ru: 'Гюзельюрт', fa: 'گوزل‌یورت' }
+  'Güzelyurt': { tr: 'Güzelyurt', en: 'Guzelyurt', el: 'Μόρφου', ru: 'Гюзельюрт', fa: 'گوزل‌یورت' },
+  'Larnaka': { tr: 'Larnaka', en: 'Larnaca', el: 'Λάρνακα', ru: 'Ларнака', fa: 'لارناکا' },
+  'Limasol': { tr: 'Limasol', en: 'Limassol', el: 'Λεμεσός', ru: 'Лимасол', fa: 'لیماسول' },
+  'Baf': { tr: 'Baf', en: 'Paphos', el: 'Πάφος', ru: 'Пафос', fa: 'پافوس' },
+  'Larnaka Kırsal': { tr: 'Larnaka Kırsal', en: 'Larnaca Rural', el: 'Επαρχία Λάρνακας', ru: 'Ларнака (район)', fa: 'حومه لارناکا' }
 };
 
 function getCityName(cityName, lang = 'tr') {

@@ -10,6 +10,8 @@ const apiRoutes = require('./api');
 const adminRoutes = require('./admin');
 const messagesRoutes = require('./messages');
 const reportsRoutes = require('./reports');
+const reviewsRoutes = require('./reviews');
+const bidsRoutes = require('./bids');
 
 router.get('/', homeController.index);
 
@@ -21,6 +23,8 @@ router.use('/api', apiRoutes);
 router.use('/admin', adminRoutes);
 router.use('/messages', messagesRoutes);
 router.use('/report', reportsRoutes);
+router.use('/reviews', reviewsRoutes);
+router.use('/teklifler', bidsRoutes);
 
 const profileController = require('../controllers/profileController');
 router.get('/profile', isAuthenticated, profileController.index);
@@ -32,6 +36,12 @@ router.post('/profile/email', isAuthenticated, profileController.changeEmail);
 router.get('/profile/listings', isAuthenticated, profileController.myListings);
 router.get('/profile/favorites', isAuthenticated, profileController.myFavorites);
 router.get('/profile/messages', isAuthenticated, (req, res) => res.redirect('/messages'));
+
+const bidController = require('../controllers/bidController');
+router.get('/profile/teklifler', isAuthenticated, bidController.received);
+router.post('/profile/teklifler/:id/kabul', isAuthenticated, bidController.accept);
+router.post('/profile/teklifler/:id/reddet', isAuthenticated, bidController.reject);
+
 router.get('/profile/:id', profileController.show);
 
 
@@ -46,5 +56,6 @@ router.get('/reklam', pageController.advertise);
 router.get('/gizlilik-politikasi', pageController.privacy);
 router.get('/kullanim-kosullari', pageController.terms);
 router.get('/cerez-politikasi', pageController.cookiePolicy);
+router.get('/yakinda', pageController.soon);
 
 module.exports = router;

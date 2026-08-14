@@ -1,0 +1,125 @@
+<%
+    const statusStyles = {
+        pending: 'bg-primary-subtle text-primary-emphasis border-primary-subtle',
+        accepted: 'bg-success-subtle text-success-emphasis border-success-subtle',
+        rejected: 'bg-danger-subtle text-danger-emphasis border-danger-subtle',
+        withdrawn: 'bg-secondary-subtle text-secondary-emphasis border-secondary-subtle'
+    };
+%>
+
+<div class="container py-4 py-md-5">
+    <div class="mb-4">
+        <h1 class="fs-3 fw-bold mb-1"><%= t('bids.received') %></h1>
+        <p class="text-muted small mb-0"><%= t('bids.received_desc') %></p>
+    </div>
+
+    <% if (groups.length > 0) { %>
+        <% groups.forEach(function (group) { %>
+            <%
+                const pendingBids = group.bids.filter(function (b) { return b.status === 'pending'; });
+                const bestAmount = pendingBids.length > 0
+                    ? Math.max.apply(null, pendingBids.map(function (b) { return b.amount; }))
+                    : null;
+                const settled = group.bids.some(function (b) { return b.status === 'accepted'; });
+            %>
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-3 border-bottom">
+                        <h2 class="fs-5 fw-bold mb-0">
+                            <a href="/listings/<%= group.listingSlug %>" class="text-decoration-none text-body"><%= group.listingTitle %></a>
+                        </h2>
+                        <% if (settled) { %>
+                            <span class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">
+                                <i class="fa-solid fa-circle-check me-1"></i><%= t('bids.settled') %>
+                            </span>
+                        <% } else { %>
+                            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                                <%= t('bids.competing', { count: pendingBids.length }) %>
+                            </span>
+                        <% } %>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <% group.bids.forEach(function (bid) { %>
+                            <% const isBest = bid.status === 'pending' && bestAmount !== null && bid.amount === bestAmount; %>
+                            <div class="border rounded-4 p-3 <%= isBest ? 'border-success border-2' : '' %>">
+                                <div class="d-flex flex-wrap align-items-start gap-3">
+                                    <img src="<%= bid.bidder_avatar || '/img/logo.png' %>"
+                                         class="rounded-circle border bg-light object-fit-cover flex-shrink-0"
+                                         width="48" height="48" alt="<%= bid.bidder_name %>">
+
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <a href="/profile/<%= bid.bidder_id %>" class="fw-semibold text-decoration-none text-body">
+                                                <%= bid.bidder_company || bid.bidder_name %>
+                                            </a>
+                                            <span class="badge rounded-pill bg-light text-muted border">
+                                                <%= bid.bidder_role === 'agent' ? t('user.agent_member') : t('user.business_member') %>
+                                            </span>
+                                            <% if (bid.bidder_review_count > 0) { %>
+                                                <span class="small text-warning">
+                                                    <i class="fa-solid fa-star"></i>
+                                                    <%= Number(bid.bidder_rating).toFixed(1) %>
+                                                    <span class="text-muted">(<%= bid.bidder_review_count %>)</span>
+                                                </span>
+                                            <% } else { %>
+                                                <span class="small text-muted"><i class="fa-regular fa-star me-1"></i><%= t('reviews.not_rated_yet') %></span>
+                                            <% } %>
+                                            <% if (isBest) { %>
+                                                <span class="badge rounded-pill bg-success"><i class="fa-solid fa-arrow-up me-1"></i><%= t('bids.highest') %></span>
+                                            <% } %>
+                                            <span class="badge rounded-pill border ms-auto <%= statusStyles[bid.status] || statusStyles.pending %>">
+                                                <%= t('bids.status_' + bid.status) %>
+                                            </span>
+                                        </div>
+
+                                        <p class="mb-1">
+                                            <strong class="fs-4"><%= helpers.formatPrice(bid.amount, bid.currency, currency) %></strong>
+                                            <span class="text-muted small ms-2"><%= helpers.timeAgo(bid.created_at, lang) %></span>
+                                        </p>
+
+                                        <% if (bid.message) { %>
+                                            <p class="text-muted small mb-2 fst-italic">"<%= bid.message %>"</p>
+                                        <% } %>
+
+                                        <% if (bid.status === 'pending' && !settled) { %>
+                                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                                <form action="/profile/teklifler/<%= bid.id %>/kabul" method="POST"
+                                                      onsubmit="return confirm('<%= t('bids.accept_confirm') %>');">
+                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-medium">
+                                                        <i class="fa-solid fa-check me-1"></i><%= t('bids.accept') %>
+                                                    </button>
+                                                </form>
+
+                                                <form action="/profile/teklifler/<%= bid.id %>/reddet" method="POST">
+                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                        <i class="fa-solid fa-xmark me-1"></i><%= t('bids.reject') %>
+                                                    </button>
+                                                </form>
+
+                                                <a href="/messages/<%= bid.bidder_id %>?listing=<%= bid.listing_id %>"
+                                                   class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                    <i class="fa-regular fa-comment me-1"></i><%= t('listing.send_message') %>
+                                                </a>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <div class="text-center py-5 bg-white rounded-4 border">
+            <i class="fa-solid fa-inbox fs-1 text-muted mb-3 opacity-50 d-block"></i>
+            <p class="text-muted mb-3"><%= t('bids.no_received') %></p>
+            <a href="/listings/create" class="btn btn-primary rounded-pill px-4 fw-medium">
+                <i class="fa-solid fa-plus me-2"></i><%= t('bids.create_request') %>
+            </a>
+        </div>
+    <% } %>
+</div>

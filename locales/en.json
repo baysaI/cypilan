@@ -54,6 +54,47 @@
     "remember_me": "Remember Me",
     "terms_agree": "I agree to the Terms & Conditions"
   },
+  "bids": {
+    "accept": "Accept",
+    "accept_confirm": "Accepting this offer automatically rejects the others and marks the listing as sold. Do you confirm?",
+    "already_bid": "Offer sent",
+    "amount_placeholder": "Offer amount",
+    "browse_requests": "Browse open listings",
+    "collecting_offers": "This listing is collecting offers from professionals",
+    "competing": "Competing offers: {count}",
+    "create_request": "Post a listing open to offers",
+    "go_to_messages": "Go to messages",
+    "highest": "Highest",
+    "make_offer": "Make an Offer",
+    "message": "Your message (optional)",
+    "message_placeholder": "Why should they pick you? Keep it short.",
+    "my_bids": "Offers I Made",
+    "my_bids_desc": "The current status of the offers you have sent.",
+    "no_bids_yet": "You have not made any offers yet.",
+    "no_open_requests": "No listings are open to offers right now.",
+    "no_received": "You have not received any offers yet.",
+    "notify_accepted": "Your offer on the listing \"{title}\" has been accepted.",
+    "notify_owner": "A new offer has arrived on your listing \"{title}\". You can view offers on the \"Offers I Received\" page.",
+    "open_requests": "Listings Open to Offers",
+    "open_requests_desc": "Listings whose owners want offers from professionals. Send yours and compete.",
+    "opt_in_help": "Your listing is opened to registered professionals who then bid on it. You compare the offers and pick whichever you want. Only you can see the amounts.",
+    "opt_in_label": "Collect offers from estate agents and car dealers",
+    "owner_expectation": "Owner's expectation",
+    "received": "Offers I Received",
+    "received_desc": "Compare the offers on your listings and pick the best one.",
+    "reject": "Reject",
+    "revise": "Revise your offer",
+    "send_offer": "Send Offer",
+    "settled": "Settled",
+    "status_accepted": "Accepted",
+    "status_pending": "Pending",
+    "status_rejected": "Rejected",
+    "status_withdrawn": "Withdrawn",
+    "withdraw": "Withdraw offer",
+    "withdraw_confirm": "Your offer will be withdrawn. Are you sure?",
+    "you_won": "Your offer was accepted!",
+    "your_offer": "Your offer"
+  },
   "categories": {
     "jobs": "Jobs",
     "real_estate": "Real Estate",
@@ -66,7 +107,9 @@
     "guzelyurt": "Guzelyurt",
     "iskele": "Iskele",
     "kyrenia": "Kyrenia",
-    "nicosia": "Nicosia"
+    "nicosia": "Nicosia",
+    "region_north": "Northern Cyprus",
+    "region_south": "Southern Cyprus"
   },
   "common": {
     "all": "All",
@@ -78,11 +121,13 @@
     "detailed_search": "Detailed Search",
     "edit": "Edit",
     "error": "An error occurred",
+    "filter": "Filter",
     "loading": "Loading...",
     "next": "Next",
     "no": "No",
     "no_results": "No results found",
     "or": "or",
+    "pagination": "Pagination",
     "previous": "Previous",
     "save": "Save",
     "search": "Search",
@@ -110,9 +155,21 @@
     "admin_listings_failed": "Listings could not be loaded.",
     "admin_reports_failed": "Reports could not be loaded.",
     "admin_users_failed": "Users could not be loaded.",
+    "bid_accepted": "The offer was accepted, the others were rejected and the listing was marked as sold.",
+    "bid_amount_required": "Enter a valid offer amount.",
+    "bid_cannot_bid_own": "You cannot bid on your own listing.",
+    "bid_failed": "The action could not be completed. Please try again.",
+    "bid_listing_closed": "This listing is closed to offers.",
+    "bid_not_found": "The offer was not found or can no longer be acted on.",
+    "bid_professionals_only": "Making offers is available to estate agent and dealer accounts only.",
+    "bid_rejected": "The offer was rejected.",
+    "bid_sent": "Your offer has been sent.",
+    "bid_updated": "Your offer has been updated.",
+    "bid_withdrawn": "Your offer has been withdrawn.",
     "cannot_message_self": "You cannot message yourself.",
     "cannot_report_own_listing": "You cannot report your own listing.",
     "cannot_report_self": "You cannot report yourself.",
+    "cannot_review_self": "You cannot review yourself.",
     "cannot_suspend_self": "You cannot suspend your own account.",
     "conversation_load_failed": "The conversation could not be loaded.",
     "csrf_failed": "Security check failed. Please submit the form again.",
@@ -194,8 +251,15 @@
     "report_processed": "The report was actioned.",
     "report_received": "Your report was received. Our team will review it shortly.",
     "report_send_failed": "The report could not be sent.",
+    "review_failed": "The review could not be saved. Please try again.",
+    "review_rating_required": "Please choose a rating between 1 and 5.",
+    "review_removed": "Your review has been deleted.",
+    "review_requires_contact": "You need to message this member before reviewing them.",
+    "review_saved": "Your review has been saved. Thank you!",
+    "review_updated": "Your review has been updated.",
     "select_report_reason": "Choose a valid reason for the report.",
     "select_valid_category": "Choose a valid category.",
+    "select_valid_city": "Please choose a valid city from the list.",
     "session_open_failed": "Something went wrong opening your session.",
     "session_start_failed": "The session could not be started. Please try again.",
     "set_password_before_email": "Set a password before changing your e-mail address.",
@@ -222,6 +286,7 @@
     "pricing": "Listing Packages",
     "privacy": "Privacy Policy",
     "safety_tips": "Safety Tips",
+    "soon": "Coming Soon",
     "support": "Support",
     "terms": "Terms of Service"
   },
@@ -365,12 +430,30 @@
       "a3": "For your safety, we recommend that you make your payments face to face after seeing and testing the product. Never send an advance deposit or money order to people you do not know. For more detailed information, you can review our Security Tips page.",
       "a4": "With our Corporate Membership packages offered specifically for real estate offices, car dealerships and commercial businesses, you will have advantages such as posting unlimited advertisements, opening a corporate store page with the company logo and benefiting from the priority support line.",
       "a5": "For your questions, suggestions or complaints, you can reach us 7 days a week at info@cypilan.com or our support line +90 555 000 00 00.",
+      "a6": "You can only rate a member <strong>you have previously messaged</strong>; this rule exists to prevent fake reviews. You can leave one rating per member and update or delete it at any time. Ratings run from 1 to 5 stars and appear as an average on the seller profile.",
+      "a7": "No. Some features are still in development and are labelled \"Coming Soon\" in our promotions. You can see which features are live and which are on the way on the <a href=\"/yakinda\">Coming Soon page</a>.",
       "q1": "Is it free to post an ad on CYPILAN.COM?",
       "q2": "How can I post an ad?",
       "q3": "How can I ensure safety while shopping?",
       "q4": "What is the difference between corporate membership and individual membership?",
       "q5": "How can I contact the support team?",
+      "q6": "How does the rating system work?",
+      "q7": "Are all the features I see in your promotions available now?",
       "subtitle": "The most frequently asked questions and answers about the CYPILAN.COM platform."
+    },
+    "golden": {
+      "description_body": "Listings with detailed information get far more clicks.",
+      "description_title": "Fill In the Description Completely",
+      "intro": "Before you publish, run through these five points for a faster and safer sale.",
+      "onsite_body": "Use on-site messaging; if a dispute arises, your correspondence is on record.",
+      "onsite_title": "Keep the Conversation On-Platform",
+      "photo_body": "Clear photos taken in daylight multiply the interest your listing gets.",
+      "photo_title": "Use Sharp, Well-Lit Photos",
+      "price_body": "A price in line with the market means a faster result.",
+      "price_title": "Set a Realistic Price",
+      "reply_body": "A fast response builds trust and speeds up the sale.",
+      "reply_title": "Reply to Messages Quickly",
+      "title": "Five Golden Rules That Make Your Listing Stand Out"
     },
     "how_to_post": {
       "cta_body": "Create your free ad and instantly reach thousands of people across Cyprus.",
@@ -472,6 +555,119 @@
       "tip4_body": "Report advertisements that offer unrealistic prices, contain deceptive information or shake your trust to our team by using the \"Report\" option on the advertisement detail page.",
       "tip4_title": "4. Report Suspicious Ads"
     },
+    "soon": {
+      "badge": "COMING SOON",
+      "badge_short": "New",
+      "cta_body": "Posting is free. Have your listings already live when the new features arrive.",
+      "cta_title": "Post today, be first to benefit from what is coming",
+      "groups": {
+        "ai": {
+          "body": "AI features to make searching, writing listings and job matching easier.",
+          "title": "AI Assistance"
+        },
+        "audience": {
+          "body": "Areas built for students, investors and our expanding regional network.",
+          "title": "Dedicated Audiences"
+        },
+        "jobs": {
+          "body": "An end-to-end career platform for job seekers and employers.",
+          "title": "Jobs Module"
+        },
+        "pro": {
+          "body": "Portfolio and performance tools for estate agents and car dealers.",
+          "title": "For Professionals"
+        },
+        "trust": {
+          "body": "Tools that make trust between buyer and seller measurable.",
+          "title": "Trust and Transparency"
+        }
+      },
+      "honesty_note": "Features marked \"Coming Soon\" are not live yet — they are still in development. Once released, they will be marked \"Live\" on this page.",
+      "items": {
+        "ai_job_match": {
+          "body": "Get job openings suggested automatically based on your profile and experience.",
+          "title": "AI-Powered Job Matching"
+        },
+        "ai_listing": {
+          "body": "Prepare your title and description in seconds with AI assistance.",
+          "title": "AI-Assisted Listing Creation"
+        },
+        "ai_search": {
+          "body": "Type what you want as a sentence — \"3+1 flat in Kyrenia up to 2 million\" — and let city, budget and room count become filters automatically, with the closest matches first. Available now.",
+          "title": "AI-Powered Search"
+        },
+        "bidding": {
+          "body": "Send your listing to registered agents and dealers, compare their offers and pick the best one.",
+          "title": "Sell Your Home / Car"
+        },
+        "cv": {
+          "body": "Add your education, experience, certificates and languages to your profile in minutes.",
+          "title": "Free CV Builder"
+        },
+        "employer_panel": {
+          "body": "Post roles with salary and benefit details, and manage candidates from one panel.",
+          "title": "Employer Panel"
+        },
+        "guarantee": {
+          "body": "On request, let our specialists manage your sale or rental process end to end.",
+          "title": "Cypilan Assurance"
+        },
+        "investor": {
+          "body": "Step-by-step guidance on company formation, residency and relocation.",
+          "title": "Investor Guidance"
+        },
+        "one_click": {
+          "body": "No long forms — apply in a single click with the profile you already built.",
+          "title": "One-Click Applications"
+        },
+        "premium": {
+          "body": "Reach more buyers with featured membership options.",
+          "title": "Premium Visibility"
+        },
+        "pro_panel": {
+          "body": "Run portfolio and listing management from a dedicated panel, separate from a standard account.",
+          "title": "Professional Panel"
+        },
+        "pro_stats": {
+          "body": "Track views, offers and sales data in real time.",
+          "title": "Performance Statistics"
+        },
+        "ratings": {
+          "body": "Estate agents, dealers, tradespeople and private users rate each other after a deal. Available now.",
+          "title": "Ratings and Reviews"
+        },
+        "south_cyprus": {
+          "body": "Alongside Northern Cyprus, listings in Larnaca, Limassol and Paphos are live. Available now.",
+          "title": "Expanding Regional Network"
+        },
+        "student": {
+          "body": "A dedicated space for finding a flatmate and trading furniture at the start and end of term.",
+          "title": "Student Services"
+        },
+        "violation": {
+          "body": "Repeated rule breaches trigger a warning first, then account restrictions.",
+          "title": "Staged Violation Handling"
+        }
+      },
+      "learn_more": "Details",
+      "see_roadmap": "See the roadmap",
+      "status_live": "Live",
+      "status_soon": "Coming Soon",
+      "subtitle": "What you can use today and what is still in development, on a single page.",
+      "title": "What's Next on Cypilan?"
+    },
+    "standards": {
+      "categories_body": "Property, vehicles, second hand, trades & services and jobs share one infrastructure.",
+      "categories_title": "Five Categories, One Platform",
+      "currency_body": "Listings support both Turkish Lira and British Pound.",
+      "currency_title": "Multiple Currencies",
+      "intro": "The technical foundations our corporate members and partners should know about.",
+      "languages_body": "Turkish, English, Greek, Russian and Persian, with right-to-left support for Persian.",
+      "languages_title": "Access in Five Languages",
+      "region_body": "We are working on regional infrastructure reaching from Northern Cyprus into Southern Cyprus.",
+      "region_title": "Expanding Regional Network",
+      "title": "Our Infrastructure Standards"
+    },
     "terms": {
       "intro": "By using the CYPILAN.COM platform you are deemed to have accepted the following terms of use. Please read these terms carefully before using our services.",
       "section1_body": "CYPILAN.COM is an independent listing platform that brings buyers and sellers together. The accuracy and legal responsibility of the advertisement content belongs entirely to the advertiser.",
@@ -480,6 +676,19 @@
       "section2_title": "2. User Obligations",
       "section3_body": "CYPILAN.COM is not a direct party in the buying-selling, payment and shipping processes between users and cannot be held responsible for any disputes that may arise.",
       "section3_title": "3. Limitation of Liability"
+    },
+    "trust": {
+      "intro": "Safety is not just a list of warnings — it is a choice about how the platform works.",
+      "moderation_body": "Listings with missing details, misleading prices or no photos are reviewed, and reported listings are investigated.",
+      "moderation_title": "Active Moderation",
+      "onsite_body": "Buyers and sellers talk through the platform. You can move to WhatsApp if you want, but your thread stays on record here.",
+      "onsite_title": "On-Site Messaging",
+      "phone_body": "Your number is masked on the listing and can only be revealed by signed-in users. You can also hide it completely.",
+      "phone_title": "Phone Privacy",
+      "ratings_body": "You can only rate a user you have actually messaged, which makes fake reviews considerably harder.",
+      "ratings_title": "Mutual Ratings",
+      "title": "The Details That Make Cypilan Trustworthy",
+      "violation_note": "We are working on staged warnings and account restrictions for repeated violations."
     }
   },
   "profile_edit": {
@@ -527,10 +736,37 @@
     "submit": "Send Complaint",
     "title": "Report Ad"
   },
+  "reviews": {
+    "comment": "Your comment (optional)",
+    "comment_placeholder": "Briefly describe your experience with this member.",
+    "count": "{count} reviews",
+    "delete": "Delete your review",
+    "delete_confirm": "Your review will be deleted. Are you sure?",
+    "edit": "Update Your Review",
+    "login_to_review": "Sign in to write a review",
+    "no_listing": "No listing",
+    "no_reviews": "No reviews yet.",
+    "no_reviews_desc": "Be the first to leave one.",
+    "not_rated_yet": "Not rated yet",
+    "related_listing": "Related listing (optional)",
+    "requires_contact": "You need to message this member before you can review them.",
+    "submit": "Submit",
+    "title": "Reviews",
+    "update": "Update",
+    "write": "Write a Review",
+    "your_rating": "Your rating"
+  },
   "site": {
     "description": "Real estate, vehicles, job listings, services and second-hand items in Cyprus",
     "name": "CYPILAN.COM",
     "tagline": "Cyprus' Largest Classifieds Platform"
+  },
+  "smart": {
+    "from": "from",
+    "placeholder": "What are you looking for? e.g. 3+1 flat in Kyrenia up to 2 million",
+    "plain_search": "Clear the filters and search plainly",
+    "understood": "What we understood from your search",
+    "up_to": "up to"
   },
   "user": {
     "agent_member": "Real Estate Agent",

@@ -165,6 +165,26 @@
         </div>
     </div>
 
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="fs-4 fw-bold mb-2"><%= t('pages.golden.title') %></h2>
+            <p class="text-muted mb-4"><%= t('pages.golden.intro') %></p>
+
+            <div class="d-flex flex-column gap-3">
+                <% ['photo', 'reply', 'price', 'description', 'onsite'].forEach(function (rule, index) { %>
+                    <div class="d-flex gap-3 align-items-start border rounded-4 p-3">
+                        <span class="badge rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0 fs-6"
+                              style="width: 40px; height: 40px;"><%= index + 1 %></span>
+                        <div>
+                            <h6 class="fw-bold mb-1"><%= t('pages.golden.' + rule + '_title') %></h6>
+                            <p class="text-muted small mb-0"><%= t('pages.golden.' + rule + '_body') %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
     <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
         <h3 class="fw-bold mb-2"><%= t('pages.how_to_post.cta_title') %></h3>
         <p class="text-white-50 mb-4"><%= t('pages.how_to_post.cta_body') %></p>

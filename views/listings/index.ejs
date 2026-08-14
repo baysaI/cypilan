@@ -7,6 +7,53 @@
         </ol>
     </nav>
 
+    <% if (typeof smartQuery !== 'undefined' && smartQuery && smartParsed) { %>
+        <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-primary">
+            <div class="card-body p-3 p-md-4">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
+                    <span class="fw-bold"><%= t('smart.understood') %></span>
+                    <span class="text-muted small">"<%= smartQuery %>"</span>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <% if (smartParsed.filters.city) { %>
+                        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                            <i class="fa-solid fa-location-dot me-1"></i><%= helpers.getCityName(smartParsed.filters.city, lang) %>
+                        </span>
+                    <% } %>
+                    <% if (smartParsed.filters.rooms) { %>
+                        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                            <i class="fa-solid fa-door-open me-1"></i><%= smartParsed.filters.rooms %>
+                        </span>
+                    <% } %>
+                    <% if (smartParsed.filters.maxPrice) { %>
+                        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                            <i class="fa-solid fa-wallet me-1"></i><%= t('smart.up_to') %>
+                            <%= helpers.formatPrice(smartParsed.filters.maxPrice, smartParsed.filters.currency || 'TRY', currency) %>
+                        </span>
+                    <% } %>
+                    <% if (smartParsed.filters.minPrice) { %>
+                        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                            <i class="fa-solid fa-arrow-up me-1"></i><%= t('smart.from') %>
+                            <%= helpers.formatPrice(smartParsed.filters.minPrice, smartParsed.filters.currency || 'TRY', currency) %>
+                        </span>
+                    <% } %>
+                    <% if (smartParsed.leftover) { %>
+                        <span class="badge rounded-pill bg-light text-muted border">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i><%= smartParsed.leftover %>
+                        </span>
+                    <% } %>
+                </div>
+
+                <a href="/listings?q=<%= encodeURIComponent(smartParsed.leftover || smartQuery) %>"
+                   class="small text-decoration-none d-inline-block mt-2">
+                    <%= t('smart.plain_search') %>
+                </a>
+            </div>
+        </div>
+    <% } %>
+
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h1 class="fs-3 fw-bold mb-1"><%= typeof currentCategoryName !== 'undefined' ? currentCategoryName : t('listing.all_categories') %></h1>
@@ -64,14 +111,7 @@
 
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.city') %></label>
-                            <select name="city" class="form-select bg-light border-0 shadow-none cursor-pointer">
-                                <option value=""><%= t('listing.all_cities') %></option>
-                                <option value="Lefkoşa" <%= filters.city === 'Lefkoşa' ? 'selected' : '' %>><%= t('cities.nicosia') %></option>
-                                <option value="Girne" <%= filters.city === 'Girne' ? 'selected' : '' %>><%= t('cities.kyrenia') %></option>
-                                <option value="Gazimağusa" <%= filters.city === 'Gazimağusa' ? 'selected' : '' %>><%= t('cities.famagusta') %></option>
-                                <option value="İskele" <%= filters.city === 'İskele' ? 'selected' : '' %>><%= t('cities.iskele') %></option>
-                                <option value="Güzelyurt" <%= filters.city === 'Güzelyurt' ? 'selected' : '' %>><%= t('cities.guzelyurt') %></option>
-                            </select>
+                            <%- include('../partials/citySelect', { selectedCity: filters.city }) %>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift"><%= t('listing.apply_filters') %></button>
@@ -149,14 +189,7 @@
 
             <div class="mb-4">
                 <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.city') %></label>
-                <select name="city" class="form-select bg-light border-0 shadow-none cursor-pointer">
-                    <option value=""><%= t('listing.all_cities') %></option>
-                    <option value="Lefkoşa" <%= filters.city === 'Lefkoşa' ? 'selected' : '' %>><%= t('cities.nicosia') %></option>
-                    <option value="Girne" <%= filters.city === 'Girne' ? 'selected' : '' %>><%= t('cities.kyrenia') %></option>
-                    <option value="Gazimağusa" <%= filters.city === 'Gazimağusa' ? 'selected' : '' %>><%= t('cities.famagusta') %></option>
-                    <option value="İskele" <%= filters.city === 'İskele' ? 'selected' : '' %>><%= t('cities.iskele') %></option>
-                    <option value="Güzelyurt" <%= filters.city === 'Güzelyurt' ? 'selected' : '' %>><%= t('cities.guzelyurt') %></option>
-                </select>
+                <%- include('../partials/citySelect', { selectedCity: filters.city }) %>
             </div>
 
             <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift"><%= t('listing.apply_filters') %></button>

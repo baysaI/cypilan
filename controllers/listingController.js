@@ -1,13 +1,19 @@
 const Listing = require('../models/Listing');
 const Category = require('../models/Category');
 const User = require('../models/User');
+const Review = require('../models/Review');
+const Bid = require('../models/Bid');
 const { generateSlug, maskPhone } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
 const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/upload');
 const listingPolicy = require('../config/listingPolicy');
+const smartSearch = require('../utils/smartSearch');
+const cities = require('../config/cities');
 
 const ALLOWED_CURRENCIES = ['TRY', 'GBP'];
 const OWNER_EDITABLE_STATUSES = ['active', 'sold'];
+const BID_ELIGIBLE_ROOTS = ['emlak', 'vasita'];
+const SMART_POOL_SIZE = 200;
 const MIN_DESCRIPTION_LENGTH = 20;
 const MAX_TITLE_LENGTH = 150;
 
@@ -23,8 +29,17 @@ const index = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = 20;
+        const rawQuery = req.query.q ? req.query.q.trim() : undefined;
+
+        // In smart mode the query box held a sentence, and the city/category/price
+        // it named were already lifted into the URL. Searching the database for
+        // the whole sentence as literal text would then match nothing, so only
+        // the words left over after parsing are used as the text term.
+        const smartMode = req.query.smart === '1' && Boolean(rawQuery);
+        const parsed = smartMode ? smartSearch.parse(rawQuery) : null;
+
         const filters = {
-            q: req.query.q ? req.query.q.trim() : undefined,
+            q: smartMode ? (parsed.leftover || undefined) : rawQuery,
             category: req.query.category,
             city: req.query.city,
             minPrice: req.query.minPrice,
@@ -40,7 +55,24 @@ const index = async (req, res, next) => {
             }
         }
 
-        const result = await Listing.findAll(filters, page, limit);
+        let result;
+        if (smartMode) {
+            // Relevance has to be judged across the whole match set, not within one
+            // page, so a pool is fetched and ranked before being paged in memory.
+            // Beyond the pool the ordering falls back to newest first.
+            const pool = await Listing.findAll({ ...filters, sort: 'newest' }, 1, SMART_POOL_SIZE);
+            const ranked = smartSearch.rank(pool.data, parsed);
+            const offset = (page - 1) * limit;
+
+            result = {
+                data: ranked.slice(offset, offset + limit),
+                total: pool.total,
+                pages: Math.ceil(pool.total / limit) || 1
+            };
+        } else {
+            result = await Listing.findAll(filters, page, limit);
+        }
+
         const categories = await Category.getMainCategoriesWithCount();
 
         res.locals.meta = res.locals.meta || {};
@@ -62,6 +94,8 @@ const index = async (req, res, next) => {
             filters,
             currentCategoryName,
             userFavoriteIds,
+            smartQuery: smartMode ? rawQuery : null,
+            smartParsed: parsed,
             title: currentCategoryName ? `${currentCategoryName} İlanları` : 'İlanlar'
         });
     } catch (error) {
@@ -99,9 +133,16 @@ const show = async (req, res, next) => {
             isFavorited = userFavs.includes(listing.id);
         }
 
+        const sellerRating = await Review.getSummary(listing.user_id);
+        const bidSummary = listing.listing_type === 'bid_request'
+            ? await Bid.summaryForListing(listing.id)
+            : { total: 0, best_amount: null };
+
         res.render('listings/show', {
             listing,
             isFavorited,
+            sellerRating,
+            bidSummary,
             title: listing.title
         });
     } catch (error) {
@@ -150,6 +191,12 @@ const create = async (req, res, next) => {
 
         if (!title || !title.trim() || !category_id || !city) {
             return abort(req, res, 'flash.fill_mandatory_fields', backToForm);
+        }
+
+        // The dropdown is built from config/cities.js, but a posted form is not
+        // bound by it, and a free-text city would never match any filter again.
+        if (!cities.isKnown(city)) {
+            return abort(req, res, 'flash.select_valid_city', backToForm);
         }
 
         if (title.trim().length > MAX_TITLE_LENGTH) {
@@ -209,6 +256,11 @@ const create = async (req, res, next) => {
 
         const status = listingPolicy.initialStatus(req.session.userRole);
 
+        // Opting in turns the ad into a request for offers: registered agents and
+        // dealers can then bid on it. Only property and vehicles are eligible, so
+        // the flag is ignored elsewhere even if the form is bypassed.
+        const collectsBids = Boolean(req.body.collect_bids) && BID_ELIGIBLE_ROOTS.includes(rootSlug);
+
         const listing = await Listing.create({
             user_id: req.session.userId,
             category_id,
@@ -217,6 +269,7 @@ const create = async (req, res, next) => {
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : 'TRY',
+            listing_type: collectsBids ? 'bid_request' : 'sale',
             city,
             district,
             status,
@@ -302,7 +355,7 @@ const update = async (req, res, next) => {
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : listing.currency,
-            location_city: city || listing.location_city,
+            location_city: cities.isKnown(city) ? city : listing.location_city,
             location_district: district ? district.trim() : null,
             status: nextStatus
         };

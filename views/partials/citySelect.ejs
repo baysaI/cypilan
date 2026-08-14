@@ -1,0 +1,27 @@
+<%
+    // One city dropdown for every form that needs one. Options come from
+    // config/cities.js, so a new district is added in a single place.
+    const selected = typeof selectedCity !== 'undefined' && selectedCity ? selectedCity : '';
+    const isRequired = typeof required !== 'undefined' && required;
+    const cssClass = typeof selectClass !== 'undefined' && selectClass
+        ? selectClass
+        : 'form-select bg-light border-0 shadow-none cursor-pointer';
+    const showAll = typeof includeAll === 'undefined' ? true : includeAll;
+%>
+<select name="city" class="<%= cssClass %>" <%= isRequired ? 'required' : '' %>>
+    <% if (showAll) { %>
+        <option value=""><%= t('listing.all_cities') %></option>
+    <% } else { %>
+        <option value=""><%= t('listing.all_cities') %></option>
+    <% } %>
+
+    <% cities.grouped().forEach(function (group) { %>
+        <optgroup label="<%= t('cities.region_' + group.region) %>">
+            <% group.cities.forEach(function (cityName) { %>
+                <option value="<%= cityName %>" <%= selected === cityName ? 'selected' : '' %>>
+                    <%= helpers.getCityName(cityName, lang) %>
+                </option>
+            <% }); %>
+        </optgroup>
+    <% }); %>
+</select>

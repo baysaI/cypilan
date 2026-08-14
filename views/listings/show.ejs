@@ -153,7 +153,34 @@
                     </div>
 
                     <h5 class="fw-bold mb-1"><%= listing.seller_company || listing.seller_name || t('user.member') %></h5>
-                    <p class="text-muted small mb-3"><%= listing.seller_role === 'business' ? t('user.business_member') : (listing.seller_role === 'agent' ? t('user.agent_member') : t('user.individual_member')) %></p>
+                    <p class="text-muted small mb-2"><%= listing.seller_role === 'business' ? t('user.business_member') : (listing.seller_role === 'agent' ? t('user.agent_member') : t('user.individual_member')) %></p>
+
+                    <% if (listing.listing_type === 'bid_request') { %>
+                        <div class="alert alert-primary py-2 px-3 small mb-3 text-start">
+                            <i class="fa-solid fa-gavel me-1"></i>
+                            <strong><%= t('bids.collecting_offers') %></strong>
+                            <div class="mt-1"><%= t('bids.competing', { count: bidSummary.total }) %></div>
+                            <% if (typeof user !== 'undefined' && user && user.id === listing.user_id) { %>
+                                <a href="/profile/teklifler" class="fw-semibold d-inline-block mt-1"><%= t('bids.received') %> <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                    <p class="small mb-3">
+                        <% if (sellerRating.total > 0) { %>
+                            <a href="/profile/<%= listing.user_id %>#reviews" class="text-decoration-none">
+                                <span class="text-warning">
+                                    <% for (let star = 1; star <= 5; star++) { %>
+                                        <i class="fa-<%= star <= Math.round(sellerRating.average) ? 'solid' : 'regular' %> fa-star"></i>
+                                    <% } %>
+                                </span>
+                                <span class="fw-semibold ms-1"><%= sellerRating.average.toFixed(1) %></span>
+                                <span class="text-muted">(<%= t('reviews.count', { count: sellerRating.total }) %>)</span>
+                            </a>
+                        <% } else { %>
+                            <span class="text-muted"><i class="fa-regular fa-star me-1"></i><%= t('reviews.not_rated_yet') %></span>
+                        <% } %>
+                    </p>
 
                     <% if (listing.seller_since) { %>
                         <p class="small text-muted mb-4"><i class="fa-regular fa-calendar me-1"></i> <%= helpers.formatDate(listing.seller_since, lang) %> (<%= t('user.member_since') %>)</p>

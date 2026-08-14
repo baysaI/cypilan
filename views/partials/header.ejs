@@ -7,9 +7,9 @@
                     <img src="/img/logo-white.png" alt="CypIlan" class="site-logo site-logo-dark" style="height: 44px; width: auto; object-fit: contain;">
                 </a>
 
-                <form action="/listings" method="GET" class="flex-grow-1 d-none d-sm-block" style="max-width: 640px;">
+                <form action="/search" method="GET" class="flex-grow-1 d-none d-sm-block" style="max-width: 640px;">
                     <div class="input-group">
-                        <input type="text" name="q" class="form-control" placeholder="<%= t('home.search_placeholder') %>">
+                        <input type="text" name="q" class="form-control" placeholder="<%= t('smart.placeholder') %>">
                         <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                 </form>
@@ -79,6 +79,19 @@
                                         <% } %>
                                     </a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item py-2 d-flex align-items-center" href="/profile/teklifler">
+                                        <i class="fa-solid fa-inbox me-3 text-success"></i>
+                                        <span class="flex-grow-1"><%= t('bids.received') %></span>
+                                        <% if (typeof pendingBidCount !== 'undefined' && pendingBidCount > 0) { %>
+                                            <span class="badge bg-success rounded-pill ms-2"><%= pendingBidCount %></span>
+                                        <% } %>
+                                    </a>
+                                </li>
+                                <% if (['agent', 'business', 'admin'].indexOf(activeUser.role) > -1) { %>
+                                    <li><a class="dropdown-item py-2" href="/teklifler"><i class="fa-solid fa-gavel me-3 text-primary"></i><%= t('bids.open_requests') %></a></li>
+                                    <li><a class="dropdown-item py-2" href="/teklifler/verdiklerim"><i class="fa-solid fa-hand-holding-dollar me-3 text-primary"></i><%= t('bids.my_bids') %></a></li>
+                                <% } %>
                                 <li><a class="dropdown-item py-2" href="/favorites"><i class="fa-solid fa-heart me-3 text-accent"></i><%= t('nav.my_favorites') %></a></li>
                                 <li><a class="dropdown-item py-2" href="/profile/edit"><i class="fa-solid fa-gear me-3 text-muted"></i>Profil Ayarları</a></li>
                                 <li><hr class="dropdown-divider"></li>
@@ -102,9 +115,9 @@
                 </div>
             </div>
 
-            <form action="/listings" method="GET" class="d-sm-none mt-2">
+            <form action="/search" method="GET" class="d-sm-none mt-2">
                 <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="<%= t('home.search_placeholder') %>">
+                    <input type="text" name="q" class="form-control" placeholder="<%= t('smart.placeholder') %>">
                     <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
             </form>

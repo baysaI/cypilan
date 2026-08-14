@@ -1,0 +1,150 @@
+<div class="container py-4 py-md-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="fs-3 fw-bold mb-1"><%= t('bids.open_requests') %></h1>
+            <p class="text-muted small mb-0"><%= t('bids.open_requests_desc') %></p>
+        </div>
+        <a href="/teklifler/verdiklerim" class="btn btn-outline-primary rounded-pill px-4 fw-medium">
+            <i class="fa-solid fa-gavel me-2"></i><%= t('bids.my_bids') %>
+        </a>
+    </div>
+
+    <form method="GET" action="/teklifler" class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label for="filterCategory" class="form-label small fw-semibold mb-1"><%= t('listing.category') %></label>
+                <select class="form-select" id="filterCategory" name="category">
+                    <option value=""><%= t('common.all') %></option>
+                    <% categories.forEach(function (category) { %>
+                        <option value="<%= category.slug %>" <%= filters.category === category.slug ? 'selected' : '' %>>
+                            <%= category['name_' + lang] || category.name_tr %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="filterCity" class="form-label small fw-semibold mb-1"><%= t('listing.city') %></label>
+                <%- include('../partials/citySelect', { selectedCity: filters.city, selectClass: 'form-select' }) %>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100 fw-medium">
+                    <i class="fa-solid fa-filter me-2"></i><%= t('common.filter') %>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <% if (requests.length > 0) { %>
+        <div class="d-flex flex-column gap-3">
+            <% requests.forEach(function (request) { %>
+                <% const alreadyBid = myBidListingIds.indexOf(request.id) > -1; %>
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-sm-3">
+                            <img src="<%= request.primary_image || '/img/logo.png' %>"
+                                 class="w-100 h-100 object-fit-cover bg-light" style="min-height: 160px;"
+                                 alt="<%= request.title %>">
+                        </div>
+
+                        <div class="col-sm-9">
+                            <div class="card-body p-4">
+                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                                    <div>
+                                        <h2 class="fs-5 fw-bold mb-1">
+                                            <a href="/listings/<%= request.slug %>" class="text-decoration-none text-body"><%= request.title %></a>
+                                        </h2>
+                                        <div class="d-flex flex-wrap gap-3 text-muted small">
+                                            <span><i class="fa-solid fa-tag me-1"></i><%= request['category_name_' + lang] || request.category_name %></span>
+                                            <span><i class="fa-solid fa-location-dot me-1"></i><%= helpers.getCityName(request.location_city, lang) %></span>
+                                            <span><i class="fa-regular fa-clock me-1"></i><%= helpers.timeAgo(request.created_at, lang) %></span>
+                                        </div>
+                                    </div>
+
+                                    <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                                        <i class="fa-solid fa-gavel me-1"></i><%= t('bids.competing', { count: request.bid_count }) %>
+                                    </span>
+                                </div>
+
+                                <% if (request.price) { %>
+                                    <p class="small mb-2">
+                                        <span class="text-muted"><%= t('bids.owner_expectation') %>:</span>
+                                        <strong><%= helpers.formatPrice(request.price, request.currency, currency) %></strong>
+                                    </p>
+                                <% } %>
+
+                                <% if (request.description) { %>
+                                    <p class="text-muted small mb-3"><%= helpers.truncate(request.description, 180) %></p>
+                                <% } %>
+
+                                <% if (alreadyBid) { %>
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        <span class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">
+                                            <i class="fa-solid fa-check me-1"></i><%= t('bids.already_bid') %>
+                                        </span>
+                                        <a href="/teklifler/verdiklerim" class="small fw-semibold text-decoration-none"><%= t('bids.revise') %></a>
+                                    </div>
+                                <% } else { %>
+                                    <button class="btn btn-primary rounded-pill px-4 fw-medium" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#bidForm<%= request.id %>"
+                                            aria-expanded="false" aria-controls="bidForm<%= request.id %>">
+                                        <i class="fa-solid fa-gavel me-2"></i><%= t('bids.make_offer') %>
+                                    </button>
+
+                                    <div class="collapse mt-3" id="bidForm<%= request.id %>">
+                                        <form action="/teklifler/<%= request.id %>" method="POST" class="border rounded-4 p-3">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                                            <div class="row g-2 mb-2">
+                                                <div class="col-8">
+                                                    <label for="amount<%= request.id %>" class="form-label small fw-semibold mb-1"><%= t('bids.your_offer') %></label>
+                                                    <input type="number" class="form-control" id="amount<%= request.id %>"
+                                                           name="amount" min="1" step="any" required
+                                                           placeholder="<%= t('bids.amount_placeholder') %>">
+                                                </div>
+                                                <div class="col-4">
+                                                    <label for="currency<%= request.id %>" class="form-label small fw-semibold mb-1"><%= t('listing.currency') %></label>
+                                                    <select class="form-select" id="currency<%= request.id %>" name="currency">
+                                                        <option value="TRY" <%= request.currency === 'TRY' ? 'selected' : '' %>>TRY ₺</option>
+                                                        <option value="GBP" <%= request.currency === 'GBP' ? 'selected' : '' %>>GBP £</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label for="message<%= request.id %>" class="form-label small fw-semibold mb-1"><%= t('bids.message') %></label>
+                                                <textarea class="form-control" id="message<%= request.id %>" name="message"
+                                                          rows="2" maxlength="500"
+                                                          placeholder="<%= t('bids.message_placeholder') %>"></textarea>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-medium">
+                                                <i class="fa-solid fa-paper-plane me-2"></i><%= t('bids.send_offer') %>
+                                            </button>
+                                        </form>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <% if (pagination.totalPages > 1) { %>
+            <nav class="mt-4" aria-label="<%= t('common.pagination') %>">
+                <ul class="pagination justify-content-center">
+                    <% helpers.paginationHelper(pagination.currentPage, pagination.totalPages).pages.forEach(function (pageNumber) { %>
+                        <li class="page-item <%= pageNumber === pagination.currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="/teklifler?page=<%= pageNumber %><%= filters.city ? '&city=' + encodeURIComponent(filters.city) : '' %><%= filters.category ? '&category=' + encodeURIComponent(filters.category) : '' %>"><%= pageNumber %></a>
+                        </li>
+                    <% }); %>
+                </ul>
+            </nav>
+        <% } %>
+    <% } else { %>
+        <div class="text-center py-5 bg-white rounded-4 border">
+            <i class="fa-solid fa-gavel fs-1 text-muted mb-3 opacity-50 d-block"></i>
+            <p class="text-muted mb-0"><%= t('bids.no_open_requests') %></p>
+        </div>
+    <% } %>
+</div>

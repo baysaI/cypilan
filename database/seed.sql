@@ -14,13 +14,18 @@ INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, sort_order) VALU
 (101, 1, 'satilik-daire', 'Satılık Daire', 1),
 (102, 1, 'kiralik-daire', 'Kiralık Daire', 2),
 (103, 1, 'satilik-villa', 'Satılık Villa', 3),
-(104, 1, 'arsa', 'Arsa', 4);
+(104, 1, 'arsa', 'Arsa', 4),
+(105, 1, 'kiralik-villa', 'Kiralık Villa', 5),
+(106, 1, 'satilik-isyeri', 'Satılık İşyeri', 6),
+(107, 1, 'kiralik-isyeri', 'Kiralık İşyeri', 7);
 
 -- Subcategories (Vasıta)
 INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, sort_order) VALUES
 (201, 2, 'otomobil', 'Otomobil', 1),
 (202, 2, 'motosiklet', 'Motosiklet', 2),
-(203, 2, 'ticari-araclar', 'Ticari Araçlar', 3);
+(203, 2, 'ticari-araclar', 'Ticari Araçlar', 3),
+(204, 2, 'suv-arazi', 'SUV & Arazi', 4),
+(205, 2, 'pickup', 'Pickup', 5);
 
 -- Subcategories (İş İlanları)
 INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, sort_order) VALUES
@@ -52,10 +57,15 @@ UPDATE categories SET name_en = 'Apartment for Sale',    name_el = 'Διαμέρ
 UPDATE categories SET name_en = 'Apartment for Rent',    name_el = 'Διαμέρισμα προς ενοικίαση', name_ru = 'Квартира в аренду',   name_fa = 'آپارتمان اجاره‌ای'   WHERE slug = 'kiralik-daire';
 UPDATE categories SET name_en = 'Villa for Sale',        name_el = 'Βίλα προς πώληση',          name_ru = 'Вилла на продажу',    name_fa = 'ویلا فروشی'         WHERE slug = 'satilik-villa';
 UPDATE categories SET name_en = 'Land',                  name_el = 'Οικόπεδο',                  name_ru = 'Земельный участок',   name_fa = 'زمین'               WHERE slug = 'arsa';
+UPDATE categories SET name_en = 'Villa for Rent',        name_el = 'Βίλα προς ενοικίαση',       name_ru = 'Вилла в аренду',      name_fa = 'ویلا اجاره‌ای'       WHERE slug = 'kiralik-villa';
+UPDATE categories SET name_en = 'Commercial for Sale',   name_el = 'Επαγγελματικός χώρος προς πώληση', name_ru = 'Коммерческая недвижимость на продажу', name_fa = 'ملک تجاری فروشی' WHERE slug = 'satilik-isyeri';
+UPDATE categories SET name_en = 'Commercial for Rent',   name_el = 'Επαγγελματικός χώρος προς ενοικίαση', name_ru = 'Коммерческая недвижимость в аренду', name_fa = 'ملک تجاری اجاره‌ای' WHERE slug = 'kiralik-isyeri';
 
 UPDATE categories SET name_en = 'Cars',                  name_el = 'Αυτοκίνητα',                name_ru = 'Автомобили',          name_fa = 'خودرو'              WHERE slug = 'otomobil';
 UPDATE categories SET name_en = 'Motorcycles',           name_el = 'Μοτοσικλέτες',              name_ru = 'Мотоциклы',           name_fa = 'موتورسیکلت'         WHERE slug = 'motosiklet';
 UPDATE categories SET name_en = 'Commercial Vehicles',   name_el = 'Επαγγελματικά οχήματα',     name_ru = 'Коммерческий транспорт', name_fa = 'خودروهای تجاری'  WHERE slug = 'ticari-araclar';
+UPDATE categories SET name_en = 'SUV & Off-Road',        name_el = 'SUV & Εκτός δρόμου',        name_ru = 'Внедорожники',        name_fa = 'شاسی‌بلند و آفرود'  WHERE slug = 'suv-arazi';
+UPDATE categories SET name_en = 'Pickup',                name_el = 'Pickup',                    name_ru = 'Пикапы',              name_fa = 'وانت'               WHERE slug = 'pickup';
 
 UPDATE categories SET name_en = 'Full Time',             name_el = 'Πλήρης απασχόληση',         name_ru = 'Полная занятость',    name_fa = 'تمام‌وقت'            WHERE slug = 'tam-zamanli';
 UPDATE categories SET name_en = 'Part Time',             name_el = 'Μερική απασχόληση',         name_ru = 'Частичная занятость', name_fa = 'پاره‌وقت'            WHERE slug = 'yari-zamanli';

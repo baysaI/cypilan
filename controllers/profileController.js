@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const Listing = require('../models/Listing');
+const Review = require('../models/Review');
+const reviewController = require('./reviewController');
 const { isValidPhone, isValidPassword, isValidEmail } = require('../utils/validators');
 
 const index = async (req, res) => {
@@ -28,6 +30,22 @@ const show = async (req, res) => {
         const listings = await Listing.getByUser(userId);
         const stats = await User.getStats(userId);
 
+        const [reviewSummary, reviews] = await Promise.all([
+            Review.getSummary(userId),
+            Review.getByUser(userId, 20)
+        ]);
+
+        // The rating form is only drawn for someone who has actually messaged this
+        // user. reviewController re-checks the same rule before writing.
+        const viewerId = req.session && req.session.userId;
+        let canReview = false;
+        let myReview = null;
+
+        if (viewerId && viewerId !== userId) {
+            canReview = await Review.hasInteracted(viewerId, userId);
+            myReview = await Review.findByPair(viewerId, userId);
+        }
+
         user.has_phone = Boolean(user.phone);
         delete user.phone;
         delete user.password_hash;
@@ -40,6 +58,11 @@ const show = async (req, res) => {
             profileUser: user,
             listings,
             stats,
+            reviewSummary,
+            reviews,
+            canReview,
+            myReview,
+            maxCommentLength: reviewController.MAX_COMMENT_LENGTH,
             title: user.full_name
         });
     } catch (error) {

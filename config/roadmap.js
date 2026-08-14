@@ -1,0 +1,76 @@
+// What the marketing material promises, and where each promise actually stands.
+//
+// Every item renders from a locale key pair (pages.soon.items.<key>.title/body),
+// so the copy stays translatable, and from a status flag:
+//
+//   'live' — shipped; the card links somewhere real and reads as available
+//   'soon' — announced but not built; the card carries a "coming soon" badge
+//
+// When a feature ships, flip its status to 'live' and give it a href. Nothing
+// else has to change. Keeping the roadmap in one file is deliberate: it is the
+// only place that decides whether the site claims to do something, so a promise
+// cannot drift away from the code by accident.
+
+const ROADMAP_GROUPS = [
+  {
+    key: 'ai',
+    icon: 'fa-wand-magic-sparkles',
+    accent: 'primary',
+    items: [
+      { key: 'ai_search', icon: 'fa-magnifying-glass-chart', status: 'live', href: '/listings' },
+      { key: 'ai_listing', icon: 'fa-pen-fancy', status: 'soon' },
+      { key: 'ai_job_match', icon: 'fa-people-arrows', status: 'soon' }
+    ]
+  },
+  {
+    key: 'trust',
+    icon: 'fa-shield-halved',
+    accent: 'success',
+    items: [
+      { key: 'ratings', icon: 'fa-star', status: 'live', href: '/sss#puanlama' },
+      { key: 'guarantee', icon: 'fa-handshake', status: 'soon' },
+      { key: 'bidding', icon: 'fa-gavel', status: 'live', href: '/teklifler' },
+      { key: 'violation', icon: 'fa-triangle-exclamation', status: 'soon' }
+    ]
+  },
+  {
+    key: 'jobs',
+    icon: 'fa-briefcase',
+    accent: 'accent',
+    items: [
+      { key: 'cv', icon: 'fa-file-lines', status: 'soon' },
+      { key: 'one_click', icon: 'fa-hand-pointer', status: 'soon' },
+      { key: 'employer_panel', icon: 'fa-building-user', status: 'soon' }
+    ]
+  },
+  {
+    key: 'pro',
+    icon: 'fa-chart-line',
+    accent: 'warning',
+    items: [
+      { key: 'pro_panel', icon: 'fa-table-columns', status: 'soon' },
+      { key: 'pro_stats', icon: 'fa-chart-simple', status: 'soon' },
+      { key: 'premium', icon: 'fa-crown', status: 'soon' }
+    ]
+  },
+  {
+    key: 'audience',
+    icon: 'fa-users',
+    accent: 'danger',
+    items: [
+      { key: 'student', icon: 'fa-graduation-cap', status: 'soon' },
+      { key: 'investor', icon: 'fa-chart-pie', status: 'soon' },
+      { key: 'south_cyprus', icon: 'fa-map-location-dot', status: 'live', href: '/listings' }
+    ]
+  }
+];
+
+const allItems = () => ROADMAP_GROUPS.flatMap((group) => group.items);
+
+const countByStatus = (status) => allItems().filter((item) => item.status === status).length;
+
+module.exports = {
+  ROADMAP_GROUPS,
+  allItems,
+  countByStatus
+};

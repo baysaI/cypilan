@@ -170,6 +170,26 @@ CREATE INDEX IF NOT EXISTS idx_listings_category_status ON listings(category_id,
 -- above and would otherwise sort the whole table on each page.
 CREATE INDEX IF NOT EXISTS idx_listings_created ON listings(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id, is_read);
+
+-- One score per reviewer per reviewed user: a second submission updates the
+-- first instead of stacking, so nobody can inflate a profile by re-posting.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_pair ON reviews(reviewer_id, reviewed_user_id);
+
+-- One standing offer per professional per listing. Revising an offer replaces
+-- it, so an owner comparing bids sees one current number per bidder, not a
+-- history of every revision.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_bids_pair ON bids(listing_id, bidder_id);
+
+-- The owner's "offers I received" page and the professional's "offers I made"
+-- page are the two hot reads.
+CREATE INDEX IF NOT EXISTS idx_bids_listing ON bids(listing_id, status);
+CREATE INDEX IF NOT EXISTS idx_bids_bidder ON bids(bidder_id, created_at DESC);
+
+-- Professionals browse listings that are open to offers.
+CREATE INDEX IF NOT EXISTS idx_listings_bid_request ON listings(listing_type, status, created_at DESC);
+
+-- The profile page reads "this user's reviews, newest first" on every visit.
+CREATE INDEX IF NOT EXISTS idx_reviews_reviewed ON reviews(reviewed_user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_categories_parent ON categories(parent_id);
 CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);

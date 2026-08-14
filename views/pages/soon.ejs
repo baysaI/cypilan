@@ -1,0 +1,82 @@
+<div class="container py-4 py-md-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="fa-solid fa-house"></i> <%= t('nav.home') %></a></li>
+            <li class="breadcrumb-item active fw-medium" aria-current="page"><%= t('footer.soon') %></li>
+        </ol>
+    </nav>
+
+    <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge rounded-pill bg-accent text-white px-3 py-2 mb-3 text-uppercase fw-bold" style="letter-spacing: 1px;">
+            <%= t('pages.soon.badge') %>
+        </span>
+        <h1 class="display-6 fw-bold mb-3"><%= t('pages.soon.title') %></h1>
+        <p class="text-muted lead fs-6"><%= t('pages.soon.subtitle') %></p>
+    </div>
+
+    <div class="alert alert-light border rounded-4 d-flex gap-3 align-items-start mb-5 max-w-700 mx-auto">
+        <i class="fa-solid fa-circle-info text-primary fs-5 mt-1"></i>
+        <p class="small mb-0"><%= t('pages.soon.honesty_note') %></p>
+    </div>
+
+    <% roadmapGroups.forEach(function (group) { %>
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="rounded-circle bg-<%= group.accent %> bg-opacity-10 text-<%= group.accent %> d-flex align-items-center justify-content-center flex-shrink-0" style="width: 56px; height: 56px;">
+                        <i class="fa-solid <%= group.icon %> fs-4"></i>
+                    </div>
+                    <div>
+                        <h2 class="fs-4 fw-bold mb-1"><%= t('pages.soon.groups.' + group.key + '.title') %></h2>
+                        <p class="text-muted small mb-0"><%= t('pages.soon.groups.' + group.key + '.body') %></p>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <% group.items.forEach(function (item) { %>
+                        <div class="col-md-6">
+                            <div class="border rounded-4 p-3 h-100 <%= item.status === 'live' ? 'border-success' : '' %>">
+                                <div class="d-flex gap-3">
+                                    <i class="fa-solid <%= item.icon %> text-<%= item.status === 'live' ? 'success' : 'muted' %> mt-1"></i>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <h6 class="fw-bold mb-0"><%= t('pages.soon.items.' + item.key + '.title') %></h6>
+                                            <% if (item.status === 'live') { %>
+                                                <span class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">
+                                                    <i class="fa-solid fa-check me-1"></i><%= t('pages.soon.status_live') %>
+                                                </span>
+                                            <% } else { %>
+                                                <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
+                                                    <i class="fa-regular fa-clock me-1"></i><%= t('pages.soon.status_soon') %>
+                                                </span>
+                                            <% } %>
+                                        </div>
+                                        <p class="text-muted small mb-<%= item.href ? '2' : '0' %>"><%= t('pages.soon.items.' + item.key + '.body') %></p>
+                                        <% if (item.href) { %>
+                                            <a href="<%= item.href %>" class="small fw-semibold text-decoration-none">
+                                                <%= t('pages.soon.learn_more') %> <i class="fa-solid fa-arrow-right ms-1"></i>
+                                            </a>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+    <% }); %>
+
+    <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
+        <h3 class="fw-bold mb-2"><%= t('pages.soon.cta_title') %></h3>
+        <p class="text-white-50 mb-4"><%= t('pages.soon.cta_body') %></p>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold text-white shadow">
+                <i class="fa-solid fa-plus me-2"></i><%= t('nav.post_ad') %>
+            </a>
+            <a href="/listings" class="btn btn-outline-light btn-lg rounded-pill px-5 fw-bold">
+                <%= t('nav.listings') %>
+            </a>
+        </div>
+    </div>
+</div>

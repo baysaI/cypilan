@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Message = require('../models/Message');
+const Bid = require('../models/Bid');
 
 const isAuthenticated = (req, res, next) => {
     if ((req.session && req.session.userId) || req.isAuthenticated()) {
@@ -79,10 +80,18 @@ const setUserLocal = async (req, res, next) => {
             console.error('Unread count error:', error);
             res.locals.unreadMessages = 0;
         }
+
+        try {
+            res.locals.pendingBidCount = await Bid.countPendingForOwner(userId);
+        } catch (error) {
+            console.error('Pending bid count error:', error);
+            res.locals.pendingBidCount = 0;
+        }
     } else {
         res.locals.user = null;
         res.locals.currentUser = null;
         res.locals.unreadMessages = 0;
+        res.locals.pendingBidCount = 0;
     }
     next();
 };

@@ -1,5 +1,6 @@
 const listingPolicy = require('../config/listingPolicy');
 const appConfig = require('../config/app');
+const { ROADMAP_GROUPS, countByStatus } = require('../config/roadmap');
 const Listing = require('../models/Listing');
 
 const faq = (req, res) => {
@@ -42,6 +43,19 @@ const terms = (req, res) => {
     res.locals.meta = res.locals.meta || {};
     res.locals.meta.title = `${res.locals.t('footer.terms')} | CYPILAN.COM`;
     res.render('pages/terms', { title: res.locals.t('footer.terms') });
+};
+
+const soon = (req, res) => {
+    res.locals.meta = res.locals.meta || {};
+    res.locals.meta.title = `${res.locals.t('footer.soon')} | CYPILAN.COM`;
+    res.locals.meta.description = res.locals.t('pages.soon.subtitle');
+
+    res.render('pages/soon', {
+        roadmapGroups: ROADMAP_GROUPS,
+        liveCount: countByStatus('live'),
+        soonCount: countByStatus('soon'),
+        title: res.locals.t('footer.soon')
+    });
 };
 
 const cookiePolicy = (req, res) => {
@@ -94,5 +108,6 @@ module.exports = {
     advertise,
     privacy,
     terms,
-    cookiePolicy
+    cookiePolicy,
+    soon
 };

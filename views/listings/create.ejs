@@ -48,11 +48,24 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <select name="category_id" class="form-select form-select-lg bg-light border-0 shadow-none focus-ring-primary fw-medium cursor-pointer" required>
+                        <%
+                            // The "collect offers from professionals" option only applies to
+                            // property and vehicles, so each option carries its root slug and
+                            // the form decides client-side whether to reveal the checkbox.
+                            const categoryById = {};
+                            if (typeof categories !== 'undefined') {
+                                categories.forEach(function (cat) { categoryById[cat.id] = cat; });
+                            }
+                            const rootSlugOf = function (cat) {
+                                const parent = cat.parent_id ? categoryById[cat.parent_id] : null;
+                                return parent ? parent.slug : cat.slug;
+                            };
+                        %>
+                        <select name="category_id" id="categorySelect" class="form-select form-select-lg bg-light border-0 shadow-none focus-ring-primary fw-medium cursor-pointer" required>
                             <option value=""><%= t('listing.all_categories') %>...</option>
                             <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
                                 <% categories.forEach(function(cat) { %>
-                                    <option value="<%= cat.id %>"><%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %></option>
+                                    <option value="<%= cat.id %>" data-root="<%= rootSlugOf(cat) %>"><%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %></option>
                                 <% }); %>
                             <% } %>
                         </select>
@@ -105,14 +118,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted"><%= t('listing.city') %> <span class="text-danger">*</span></label>
-                                <select name="city" class="form-select bg-light border-0 shadow-none focus-ring-primary cursor-pointer" required>
-                                    <option value=""><%= t('listing.all_cities') %></option>
-                                    <option value="Lefkoşa"><%= t('cities.nicosia') %></option>
-                                    <option value="Girne"><%= t('cities.kyrenia') %></option>
-                                    <option value="Gazimağusa"><%= t('cities.famagusta') %></option>
-                                    <option value="İskele"><%= t('cities.iskele') %></option>
-                                    <option value="Güzelyurt"><%= t('cities.guzelyurt') %></option>
-                                </select>
+                                <%- include('../partials/citySelect', { required: true, selectClass: 'form-select bg-light border-0 shadow-none focus-ring-primary cursor-pointer' }) %>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted"><%= t('listing.district') %></label>
@@ -132,6 +138,14 @@
                                     <div class="form-text small">
                                         Numaranız kayıtlı kalır ama alıcılara gösterilmez. Bu ayar tüm ilanlarınız için geçerlidir.
                                     </div>
+                                </div>
+
+                                <div class="form-check mt-3 border rounded-4 p-3 bg-light" id="collectBidsBox" hidden>
+                                    <input class="form-check-input cursor-pointer" type="checkbox" name="collect_bids" value="1" id="collectBids">
+                                    <label class="form-check-label cursor-pointer fw-semibold" for="collectBids">
+                                        <i class="fa-solid fa-gavel text-primary me-1"></i><%= t('bids.opt_in_label') %>
+                                    </label>
+                                    <div class="form-text small mb-0"><%= t('bids.opt_in_help') %></div>
                                 </div>
                             </div>
                         </div>
@@ -288,6 +302,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Submit sync error:', err);
             }
         });
+    }
+
+    // Offers from registered agents and dealers only make sense for property and
+    // vehicles, so the checkbox appears once such a category is chosen and is
+    // cleared again if the seller switches away.
+    const categorySelect = document.getElementById('categorySelect');
+    const collectBidsBox = document.getElementById('collectBidsBox');
+    const collectBids = document.getElementById('collectBids');
+
+    if (categorySelect && collectBidsBox && collectBids) {
+        const BID_ROOTS = ['emlak', 'vasita'];
+
+        const syncBidOption = function () {
+            const option = categorySelect.options[categorySelect.selectedIndex];
+            const root = option ? option.getAttribute('data-root') : null;
+            const eligible = BID_ROOTS.indexOf(root) > -1;
+
+            collectBidsBox.hidden = !eligible;
+            if (!eligible) collectBids.checked = false;
+        };
+
+        categorySelect.addEventListener('change', syncBidOption);
+        syncBidOption();
     }
 });
 </script>

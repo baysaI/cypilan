@@ -14,6 +14,14 @@
                         <span><i class="fa-regular fa-calendar me-1"></i> <%= helpers.formatDate(profileUser.created_at, lang) %> (<%= t('user.member_since') %>)</span>
                     <% } %>
                     <span><i class="fa-solid fa-list me-1"></i> <%= stats.listingsCount %> <%= t('home.ad_unit') %></span>
+                    <% if (reviewSummary.total > 0) { %>
+                        <a href="#reviews" class="text-decoration-none text-warning fw-semibold">
+                            <i class="fa-solid fa-star me-1"></i><%= reviewSummary.average.toFixed(1) %>
+                            <span class="text-muted fw-normal">(<%= t('reviews.count', { count: reviewSummary.total }) %>)</span>
+                        </a>
+                    <% } else { %>
+                        <span><i class="fa-regular fa-star me-1"></i><%= t('reviews.not_rated_yet') %></span>
+                    <% } %>
                 </div>
                 <% if (profileUser.bio) { %>
                     <p class="text-muted small mt-2 mb-0"><%= profileUser.bio %></p>
@@ -48,4 +56,160 @@
             <p class="text-muted mb-0"><%= t('listing.no_listings_desc') %></p>
         </div>
     <% } %>
+</div>
+
+<div class="container pb-4 pb-md-5" id="reviews">
+    <h2 class="fs-5 fw-bold mb-3"><%= t('reviews.title') %></h2>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="bg-white border rounded-3 p-4 h-100">
+                <% if (reviewSummary.total > 0) { %>
+                    <div class="text-center mb-3">
+                        <div class="display-5 fw-bold lh-1"><%= reviewSummary.average.toFixed(1) %></div>
+                        <div class="text-warning my-2">
+                            <% for (let star = 1; star <= 5; star++) { %>
+                                <i class="fa-<%= star <= Math.round(reviewSummary.average) ? 'solid' : 'regular' %> fa-star"></i>
+                            <% } %>
+                        </div>
+                        <div class="text-muted small"><%= t('reviews.count', { count: reviewSummary.total }) %></div>
+                    </div>
+
+                    <% for (let star = 5; star >= 1; star--) { %>
+                        <% const barCount = reviewSummary.distribution[star]; %>
+                        <% const barPercent = Math.round((barCount / reviewSummary.total) * 100); %>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="text-muted small" style="width: 2.5rem;"><%= star %> <i class="fa-solid fa-star text-warning"></i></span>
+                            <div class="progress flex-grow-1" style="height: 6px;" role="progressbar"
+                                 aria-label="<%= star %>" aria-valuenow="<%= barPercent %>" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar bg-warning" style="width: <%= barPercent %>%"></div>
+                            </div>
+                            <span class="text-muted small" style="width: 1.75rem;"><%= barCount %></span>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="text-center py-4">
+                        <i class="fa-regular fa-star fs-1 text-muted opacity-50 d-block mb-3"></i>
+                        <p class="text-muted small mb-0"><%= t('reviews.no_reviews_desc') %></p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <% if (typeof user !== 'undefined' && user && user.id !== profileUser.id) { %>
+                <% if (canReview) { %>
+                    <form action="/reviews/user/<%= profileUser.id %>" method="POST" class="bg-white border rounded-3 p-4 mb-4">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                        <h3 class="fs-6 fw-bold mb-3">
+                            <%= myReview ? t('reviews.edit') : t('reviews.write') %>
+                        </h3>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold d-block"><%= t('reviews.your_rating') %></label>
+                            <div class="btn-group" role="group" aria-label="<%= t('reviews.your_rating') %>">
+                                <% for (let star = 1; star <= 5; star++) { %>
+                                    <input type="radio" class="btn-check" name="rating" id="rating<%= star %>"
+                                           value="<%= star %>" autocomplete="off" required
+                                           <%= myReview && myReview.rating === star ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-warning" for="rating<%= star %>">
+                                        <%= star %> <i class="fa-solid fa-star"></i>
+                                    </label>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <% if (activeListings.length > 0) { %>
+                            <div class="mb-3">
+                                <label for="reviewListing" class="form-label small fw-semibold"><%= t('reviews.related_listing') %></label>
+                                <select class="form-select" id="reviewListing" name="listing_id">
+                                    <option value=""><%= t('reviews.no_listing') %></option>
+                                    <% activeListings.forEach(function (listing) { %>
+                                        <option value="<%= listing.id %>" <%= myReview && myReview.listing_id === listing.id ? 'selected' : '' %>>
+                                            <%= listing.title %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        <% } %>
+
+                        <div class="mb-3">
+                            <label for="reviewComment" class="form-label small fw-semibold"><%= t('reviews.comment') %></label>
+                            <textarea class="form-control" id="reviewComment" name="comment" rows="3"
+                                      maxlength="<%= maxCommentLength %>"
+                                      placeholder="<%= t('reviews.comment_placeholder') %>"><%= myReview && myReview.comment ? myReview.comment : '' %></textarea>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-paper-plane me-1"></i>
+                                <%= myReview ? t('reviews.update') : t('reviews.submit') %>
+                            </button>
+                        </div>
+                    </form>
+
+                    <% if (myReview) { %>
+                        <form action="/reviews/user/<%= profileUser.id %>/delete" method="POST" class="mb-4"
+                              onsubmit="return confirm('<%= t('reviews.delete_confirm') %>');">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="fa-regular fa-trash-can me-1"></i><%= t('reviews.delete') %>
+                            </button>
+                        </form>
+                    <% } %>
+                <% } else { %>
+                    <div class="alert alert-light border small mb-4">
+                        <i class="fa-solid fa-circle-info me-1 text-primary"></i><%= t('reviews.requires_contact') %>
+                    </div>
+                <% } %>
+            <% } else if (typeof user === 'undefined' || !user) { %>
+                <div class="alert alert-light border small mb-4">
+                    <i class="fa-solid fa-circle-info me-1 text-primary"></i>
+                    <a href="/auth/login" class="fw-semibold"><%= t('reviews.login_to_review') %></a>
+                </div>
+            <% } %>
+
+            <% if (reviews.length > 0) { %>
+                <div class="d-flex flex-column gap-3">
+                    <% reviews.forEach(function (review) { %>
+                        <div class="bg-white border rounded-3 p-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <img src="<%= review.reviewer_avatar || '/img/logo.png' %>"
+                                     class="rounded-circle border bg-light object-fit-cover flex-shrink-0"
+                                     width="44" height="44" alt="<%= review.reviewer_name %>">
+
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        <span class="fw-semibold"><%= review.reviewer_name %></span>
+                                        <span class="text-warning small">
+                                            <% for (let star = 1; star <= 5; star++) { %>
+                                                <i class="fa-<%= star <= review.rating ? 'solid' : 'regular' %> fa-star"></i>
+                                            <% } %>
+                                        </span>
+                                        <span class="text-muted small ms-auto"><%= helpers.timeAgo(review.created_at, lang) %></span>
+                                    </div>
+
+                                    <% if (review.listing_title && review.listing_slug) { %>
+                                        <a href="/listings/<%= review.listing_slug %>" class="d-inline-block text-muted small text-decoration-none mt-1">
+                                            <i class="fa-solid fa-tag me-1"></i><%= review.listing_title %>
+                                        </a>
+                                    <% } %>
+
+                                    <% if (review.comment) { %>
+                                        <p class="mb-0 mt-2 small"><%= review.comment %></p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="text-center py-5 bg-white rounded-3 border">
+                    <i class="fa-regular fa-comment-dots fs-1 text-muted mb-3 opacity-50 d-block"></i>
+                    <p class="text-muted mb-0"><%= t('reviews.no_reviews') %></p>
+                </div>
+            <% } %>
+        </div>
+    </div>
 </div>

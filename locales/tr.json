@@ -54,6 +54,47 @@
     "remember_me": "Beni Hatırla",
     "terms_agree": "Kullanım koşullarını kabul ediyorum"
   },
+  "bids": {
+    "accept": "Kabul Et",
+    "accept_confirm": "Bu teklifi kabul edersen diğer teklifler otomatik reddedilir ve ilan satıldı olarak işaretlenir. Onaylıyor musun?",
+    "already_bid": "Teklif gönderildi",
+    "amount_placeholder": "Teklif tutarı",
+    "browse_requests": "Teklif bekleyenlere göz at",
+    "collecting_offers": "Bu ilan profesyonellerden teklif topluyor",
+    "competing": "Yarışan teklif: {count}",
+    "create_request": "Teklif toplayan ilan ver",
+    "go_to_messages": "Mesajlara git",
+    "highest": "En yüksek",
+    "make_offer": "Teklif Ver",
+    "message": "Mesajın (opsiyonel)",
+    "message_placeholder": "Neden seni seçmeli? Kısaca anlat.",
+    "my_bids": "Verdiğim Teklifler",
+    "my_bids_desc": "Gönderdiğin tekliflerin güncel durumu.",
+    "no_bids_yet": "Henüz teklif vermedin.",
+    "no_open_requests": "Şu anda teklif bekleyen ilan yok.",
+    "no_received": "Henüz teklif almadın.",
+    "notify_accepted": "\"{title}\" ilanı için verdiğiniz teklif kabul edildi.",
+    "notify_owner": "\"{title}\" ilanınıza yeni bir teklif geldi. Teklifleri \"Aldığım Teklifler\" sayfasından görebilirsiniz.",
+    "open_requests": "Teklif Bekleyen İlanlar",
+    "open_requests_desc": "Sahibi profesyonellerden teklif toplamak isteyen ilanlar. Teklifini gönder, rakiplerinle yarış.",
+    "opt_in_help": "İlanın kayıtlı profesyonellere açılır, sana teklif verirler. Teklifleri karşılaştırıp istediğini seçersin. Teklif tutarlarını yalnızca sen görürsün.",
+    "opt_in_label": "Emlakçı ve galericilerden teklif toplansın",
+    "owner_expectation": "Sahibinin beklentisi",
+    "received": "Aldığım Teklifler",
+    "received_desc": "İlanlarına gelen teklifleri karşılaştır ve en iyisini seç.",
+    "reject": "Reddet",
+    "revise": "Teklifini güncelle",
+    "send_offer": "Teklifi Gönder",
+    "settled": "Sonuçlandı",
+    "status_accepted": "Kabul edildi",
+    "status_pending": "Beklemede",
+    "status_rejected": "Reddedildi",
+    "status_withdrawn": "Geri çekildi",
+    "withdraw": "Teklifi geri çek",
+    "withdraw_confirm": "Teklifin geri çekilecek. Emin misin?",
+    "you_won": "Teklifin kabul edildi!",
+    "your_offer": "Teklifin"
+  },
   "categories": {
     "jobs": "İş İlanları",
     "real_estate": "Emlak",
@@ -66,7 +107,9 @@
     "guzelyurt": "Güzelyurt",
     "iskele": "İskele",
     "kyrenia": "Girne",
-    "nicosia": "Lefkoşa"
+    "nicosia": "Lefkoşa",
+    "region_north": "Kuzey Kıbrıs",
+    "region_south": "Güney Kıbrıs"
   },
   "common": {
     "all": "Tümü",
@@ -78,11 +121,13 @@
     "detailed_search": "Detaylı Arama",
     "edit": "Düzenle",
     "error": "Bir hata oluştu",
+    "filter": "Filtrele",
     "loading": "Yükleniyor...",
     "next": "İleri",
     "no": "Hayır",
     "no_results": "Sonuç bulunamadı",
     "or": "veya",
+    "pagination": "Sayfalama",
     "previous": "Önceki",
     "save": "Kaydet",
     "search": "Bul",
@@ -110,9 +155,21 @@
     "admin_listings_failed": "İlanlar yüklenemedi.",
     "admin_reports_failed": "Şikayetler yüklenemedi.",
     "admin_users_failed": "Kullanıcılar yüklenemedi.",
+    "bid_accepted": "Teklif kabul edildi, diğer teklifler reddedildi ve ilan satıldı olarak işaretlendi.",
+    "bid_amount_required": "Geçerli bir teklif tutarı gir.",
+    "bid_cannot_bid_own": "Kendi ilanına teklif veremezsin.",
+    "bid_failed": "İşlem tamamlanamadı. Lütfen tekrar dene.",
+    "bid_listing_closed": "Bu ilan teklife kapalı.",
+    "bid_not_found": "Teklif bulunamadı veya işlem yapılamaz durumda.",
+    "bid_professionals_only": "Teklif verme özelliği yalnızca emlakçı ve galerici hesapları içindir.",
+    "bid_rejected": "Teklif reddedildi.",
+    "bid_sent": "Teklifin gönderildi.",
+    "bid_updated": "Teklifin güncellendi.",
+    "bid_withdrawn": "Teklifin geri çekildi.",
     "cannot_message_self": "Kendinize mesaj gönderemezsiniz.",
     "cannot_report_own_listing": "Kendi ilanınızı şikayet edemezsiniz.",
     "cannot_report_self": "Kendinizi şikayet edemezsiniz.",
+    "cannot_review_self": "Kendini değerlendiremezsin.",
     "cannot_suspend_self": "Kendi hesabınızı askıya alamazsınız.",
     "conversation_load_failed": "Sohbet yüklenemedi.",
     "csrf_failed": "Güvenlik doğrulaması başarısız oldu. Lütfen formu tekrar gönderin.",
@@ -194,8 +251,15 @@
     "report_processed": "Şikayet işleme alındı.",
     "report_received": "Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecek.",
     "report_send_failed": "Şikayet gönderilemedi.",
+    "review_failed": "Değerlendirme kaydedilemedi. Lütfen tekrar dene.",
+    "review_rating_required": "Lütfen 1 ile 5 arasında bir puan seç.",
+    "review_removed": "Değerlendirmen silindi.",
+    "review_requires_contact": "Bu üyeyi değerlendirmek için önce onunla mesajlaşmalısın.",
+    "review_saved": "Değerlendirmen kaydedildi. Teşekkürler!",
+    "review_updated": "Değerlendirmen güncellendi.",
     "select_report_reason": "Lütfen geçerli bir şikayet nedeni seçin.",
     "select_valid_category": "Geçerli bir kategori seçin.",
+    "select_valid_city": "Lütfen listeden geçerli bir şehir seçin.",
     "session_open_failed": "Oturum açılırken hata oluştu.",
     "session_start_failed": "Oturum başlatılamadı. Lütfen tekrar deneyin.",
     "set_password_before_email": "E-posta adresinizi değiştirmeden önce bir şifre belirlemelisiniz.",
@@ -222,6 +286,7 @@
     "pricing": "İlan Paketleri",
     "privacy": "Gizlilik Politikası",
     "safety_tips": "Güvenlik İpuçları",
+    "soon": "Çok Yakında",
     "support": "Destek",
     "terms": "Kullanım Koşulları"
   },
@@ -365,12 +430,30 @@
       "a3": "Güvenliğiniz için ödemelerinizi ürünü görüp test ettikten sonra yüz yüze yapmanızı tavsiye ederiz. Tanımadığınız kişilere kesinlikle önden kapora veya havale göndermeyiniz. Daha detaylı bilgi için Güvenlik İpuçları sayfamızı inceleyebilirsiniz.",
       "a4": "Emlak ofisleri, oto galeriler ve ticari işletmeler için özel olarak sunulan Kurumsal Üyelik paketlerimizle sınırsız ilan verme, firma logosu ile kurumsal mağaza sayfası açma ve öncelikli destek hattından yararlanma gibi avantajlara sahip olursunuz.",
       "a5": "Sorularınız, önerileriniz veya şikayetleriniz için info@cypilan.com adresinden veya +90 555 000 00 00 destek hattımızdan bize haftanın 7 günü ulaşabilirsiniz.",
+      "a6": "Bir üyeyi yalnızca <strong>onunla daha önce mesajlaştıysan</strong> puanlayabilirsin; bu kural sahte yorumları önlemek için var. Her üyeye bir puan verebilirsin, dilediğin zaman güncelleyebilir veya silebilirsin. Puanlar 1 ile 5 yıldız arasındadır ve satıcı profilinde ortalama olarak görünür.",
+      "a7": "Hayır. Bazı özellikler geliştirme aşamasında ve tanıtımlarda \"Çok Yakında\" olarak belirtiliyor. Hangi özelliğin şu an aktif, hangisinin yolda olduğunu <a href=\"/yakinda\">Çok Yakında sayfasından</a> güncel olarak görebilirsin.",
       "q1": "CYPILAN.COM'da ilan vermek ücretsiz mi?",
       "q2": "Nasıl ilan verebilirim?",
       "q3": "Alışveriş yaparken güvenliği nasıl sağlarım?",
       "q4": "Kurumsal üyelik ile bireysel üyelik arasındaki fark nedir?",
       "q5": "Destek ekibiyle nasıl iletişime geçebilirim?",
+      "q6": "Puanlama sistemi nasıl çalışıyor?",
+      "q7": "Tanıtımlarda gördüğüm özelliklerin hepsi şu an kullanılabilir mi?",
       "subtitle": "CYPILAN.COM platformu hakkında en çok merak edilen sorular ve yanıtları."
+    },
+    "golden": {
+      "description_body": "Detaylı bilgi verilen ilanlar çok daha fazla tıklanır.",
+      "description_title": "Açıklamayı Eksiksiz Doldur",
+      "intro": "Daha hızlı ve güvenli satış için, ilanını yayına almadan önce şu beş maddeyi gözden geçir.",
+      "onsite_body": "Site içi mesajlaşmayı kullan; anlaşmazlık halinde yazışman kayıt altında olur.",
+      "onsite_title": "Görüşmeyi Platformda Tut",
+      "photo_body": "Gün ışığında çekilmiş net fotoğraflar ilgiyi kat kat artırır.",
+      "photo_title": "Net ve Aydınlık Fotoğraf Kullan",
+      "price_body": "Piyasaya uygun fiyat, daha hızlı sonuç demektir.",
+      "price_title": "Gerçekçi Fiyat Belirle",
+      "reply_body": "Hızlı dönüş güven kazandırır ve satışı hızlandırır.",
+      "reply_title": "Mesajlara Hızlı Yanıt Ver",
+      "title": "İlanını Öne Çıkaran 5 Altın Kural"
     },
     "how_to_post": {
       "cta_body": "Ücretsiz ilanınızı oluşturup Kıbrıs genelinde binlerce kişiye anında ulaşın.",
@@ -472,6 +555,119 @@
       "tip4_body": "Gerçek dışı fiyat veren, aldatıcı bilgi içeren veya güveninizi sarsan ilanları ilan detay sayfasındaki \"Bildir\" seçeneğini kullanarak ekibimize raporlayın.",
       "tip4_title": "4. Şüpheli İlanları Bildirin"
     },
+    "soon": {
+      "badge": "ÇOK YAKINDA",
+      "badge_short": "Yeni",
+      "cta_body": "İlan vermek ücretsiz. Yeni özellikler geldiğinde ilanların çoktan yayında olsun.",
+      "cta_title": "Bugün ilanını ver, yeni özelliklerden ilk sen yararlan",
+      "groups": {
+        "ai": {
+          "body": "Aramayı, ilan hazırlamayı ve iş eşleştirmeyi kolaylaştıracak yapay zekâ özellikleri.",
+          "title": "Yapay Zekâ Desteği"
+        },
+        "audience": {
+          "body": "Öğrenciler, yatırımcılar ve genişleyen bölge ağı için hazırlanan alanlar.",
+          "title": "Özel Kullanıcı Grupları"
+        },
+        "jobs": {
+          "body": "İş arayanlar ve işverenler için uçtan uca kariyer platformu.",
+          "title": "İş İlanları Modülü"
+        },
+        "pro": {
+          "body": "Emlakçı ve galericiler için portföy ve performans araçları.",
+          "title": "Profesyoneller İçin"
+        },
+        "trust": {
+          "body": "Alıcıyla satıcı arasındaki güveni ölçülebilir hale getiren araçlar.",
+          "title": "Güven ve Şeffaflık"
+        }
+      },
+      "honesty_note": "\"Çok Yakında\" etiketli özellikler henüz yayında değil, geliştirme aşamasındalar. Yayına alındıklarında bu sayfada \"Aktif\" olarak işaretlenecekler.",
+      "items": {
+        "ai_job_match": {
+          "body": "Profiline ve tecrübene en uygun iş ilanları otomatik önerilsin.",
+          "title": "YZ Destekli İş Eşleştirme"
+        },
+        "ai_listing": {
+          "body": "İlan başlığını ve açıklamanı yapay zekâ desteğiyle saniyeler içinde hazırla.",
+          "title": "YZ Destekli İlan Oluşturma"
+        },
+        "ai_search": {
+          "body": "Aradığını cümleyle yaz — \"Girne'de 2 milyona kadar 3+1 daire\" — şehir, bütçe ve oda sayısı otomatik filtreye dönüşsün, sonuçlar sana en uygunundan sıralansın. Şu an kullanımda.",
+          "title": "Yapay Zekâ Destekli Arama"
+        },
+        "bidding": {
+          "body": "İlanın kayıtlı emlakçı ve galericilere iletilsin, gelen teklifleri karşılaştırıp en iyisini seç.",
+          "title": "Evini / Aracını Sat"
+        },
+        "cv": {
+          "body": "Eğitim, deneyim, sertifika ve yabancı dil bilgilerini dakikalar içinde profiline ekle.",
+          "title": "Ücretsiz CV Oluşturma"
+        },
+        "employer_panel": {
+          "body": "Pozisyon, maaş ve yan hak detaylarıyla ilan oluştur, adayları tek panelden yönet.",
+          "title": "İşveren Paneli"
+        },
+        "guarantee": {
+          "body": "Talep halinde satış veya kiralama sürecini uzman ekibimiz uçtan uca yönetsin.",
+          "title": "Cypilan Güvencesi"
+        },
+        "investor": {
+          "body": "Şirket kuruluşu, oturum ve yerleşim süreçleri için adım adım rehberlik.",
+          "title": "Yatırımcı Rehberliği"
+        },
+        "one_click": {
+          "body": "Uzun formlar yok; hazırladığın profille tek tıkla başvurunu tamamla.",
+          "title": "Tek Tık ile Başvuru"
+        },
+        "premium": {
+          "body": "Öne çıkan üyelik seçenekleriyle ilanların daha fazla müşteriye ulaşsın.",
+          "title": "Premium Görünürlük"
+        },
+        "pro_panel": {
+          "body": "Portföy ve ilan yönetimini normal üyelikten ayrı, özel bir panelden yürüt.",
+          "title": "Profesyonel Panel"
+        },
+        "pro_stats": {
+          "body": "Görüntülenme, teklif ve satış verilerini anlık olarak takip et.",
+          "title": "Performans İstatistikleri"
+        },
+        "ratings": {
+          "body": "Emlakçı, galerici, usta ve bireysel kullanıcılar; alışveriş sonrası karşılıklı puanlanır. Şu an kullanımda.",
+          "title": "Puanlama ve Değerlendirme"
+        },
+        "south_cyprus": {
+          "body": "Kuzey Kıbrıs'ın yanı sıra Larnaka, Limasol ve Baf ilanları da yayında. Şu an kullanımda.",
+          "title": "Genişleyen Bölge Ağı"
+        },
+        "student": {
+          "body": "Ev arkadaşı bulma ve dönem başı/sonu eşya alım satımı için öğrencilere özel alan.",
+          "title": "Öğrenci Hizmetleri"
+        },
+        "violation": {
+          "body": "Tekrarlanan kural ihlallerinde önce uyarı, sonra hesap kısıtlaması uygulansın.",
+          "title": "Kademeli İhlal Yönetimi"
+        }
+      },
+      "learn_more": "Detaylar",
+      "see_roadmap": "Yol haritasına göz at",
+      "status_live": "Aktif",
+      "status_soon": "Çok Yakında",
+      "subtitle": "Şu an kullanabildiğin özellikler ve geliştirme aşamasındakiler, tek sayfada.",
+      "title": "Cypilan'da Sırada Ne Var?"
+    },
+    "standards": {
+      "categories_body": "Emlak, vasıta, ikinci el, usta & hizmetler ve iş ilanları aynı altyapıda toplanır.",
+      "categories_title": "Tek Platformda Beş Kategori",
+      "currency_body": "İlanlarda Türk Lirası ve İngiliz Sterlini desteği sunulur.",
+      "currency_title": "Çoklu Para Birimi",
+      "intro": "Kurumsal üyelerimizin ve iş ortaklarımızın bilmesi gereken teknik temeller.",
+      "languages_body": "Türkçe, İngilizce, Rumca, Rusça ve Farsça; Farsça için sağdan sola yazım desteğiyle.",
+      "languages_title": "5 Dilde Erişim",
+      "region_body": "Kuzey Kıbrıs’tan başlayıp Güney Kıbrıs’a uzanan bölge altyapısı üzerinde çalışıyoruz.",
+      "region_title": "Genişleyen Bölge Ağı",
+      "title": "Altyapı Standartlarımız"
+    },
     "terms": {
       "intro": "CYPILAN.COM platformunu kullanarak aşağıdaki kullanım koşullarını kabul etmiş sayılırsınız. Lütfen hizmetlerimizi kullanmadan önce bu koşulları dikkatlice okuyunuz.",
       "section1_body": "CYPILAN.COM, alıcılar ile satıcıları bir araya getiren bağımsız bir ilan platformudur. İlan içeriklerindeki doğruluk ve hukuki sorumluluk tamamen ilan verene aittir.",
@@ -480,6 +676,19 @@
       "section2_title": "2. Kullanıcı Yükümlülükleri",
       "section3_body": "CYPILAN.COM, kullanıcılar arasında gerçekleşen alım-satım, ödeme ve kargo süreçlerinde doğrudan taraf değildir ve doğabilecek uyuşmazlıklardan sorumlu tutulamaz.",
       "section3_title": "3. Sorumluluk Sınırlaması"
+    },
+    "trust": {
+      "intro": "Güvenlik yalnızca bir uyarı listesi değil; platformun nasıl çalıştığıyla ilgili bir tercih.",
+      "moderation_body": "Eksik bilgi, yanıltıcı fiyat ve fotoğrafsız ilanlar denetlenir; şikayet edilen ilanlar incelenir.",
+      "moderation_title": "Aktif Moderasyon",
+      "onsite_body": "Alıcı ve satıcı platform üzerinden yazışır. İstersen WhatsApp’a geçebilirsin, ama yazışman burada kayıtlı kalır.",
+      "onsite_title": "Site İçi Mesajlaşma",
+      "phone_body": "Numaran ilanda maskeli görünür; yalnızca giriş yapmış kullanıcılar açabilir. Dilersen tamamen gizleyebilirsin.",
+      "phone_title": "Telefon Gizliliği",
+      "ratings_body": "Yalnızca gerçekten mesajlaştığın kullanıcıyı puanlayabilirsin. Bu, sahte yorumu ciddi ölçüde zorlaştırır.",
+      "ratings_title": "Karşılıklı Puanlama",
+      "title": "Cypilan’ı Güvenilir Kılan Detaylar",
+      "violation_note": "Tekrarlanan ihlallerde kademeli uyarı ve hesap kısıtlaması üzerinde çalışıyoruz."
     }
   },
   "profile_edit": {
@@ -527,10 +736,37 @@
     "submit": "Şikayeti Gönder",
     "title": "İlanı Bildir"
   },
+  "reviews": {
+    "comment": "Yorumun (opsiyonel)",
+    "comment_placeholder": "Bu üyeyle yaşadığın alışveriş deneyimini kısaca anlat.",
+    "count": "{count} değerlendirme",
+    "delete": "Değerlendirmeni sil",
+    "delete_confirm": "Değerlendirmen silinecek. Emin misin?",
+    "edit": "Değerlendirmeni Güncelle",
+    "login_to_review": "Değerlendirme yazmak için giriş yap",
+    "no_listing": "İlan seçme",
+    "no_reviews": "Henüz değerlendirme yapılmamış.",
+    "no_reviews_desc": "İlk değerlendirmeyi sen yaz.",
+    "not_rated_yet": "Henüz puanlanmadı",
+    "related_listing": "İlgili ilan (opsiyonel)",
+    "requires_contact": "Bu üyeyi değerlendirebilmek için önce onunla mesajlaşman gerekir.",
+    "submit": "Gönder",
+    "title": "Değerlendirmeler",
+    "update": "Güncelle",
+    "write": "Değerlendirme Yaz",
+    "your_rating": "Puanın"
+  },
   "site": {
     "description": "Kıbrıs'ta emlak, araç, iş ilanı, usta hizmeti ve ikinci el eşya ilanları",
     "name": "CYPILAN.COM",
     "tagline": "Kıbrıs'ın En Büyük İlan Platformu"
+  },
+  "smart": {
+    "from": "en az",
+    "placeholder": "Ne arıyorsun? Örn: Girne'de 2 milyona kadar 3+1 daire",
+    "plain_search": "Filtreleri kaldır, düz arama yap",
+    "understood": "Aramandan anladıklarımız",
+    "up_to": "en fazla"
   },
   "user": {
     "agent_member": "Emlak Danışmanı",
