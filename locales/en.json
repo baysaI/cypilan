@@ -391,6 +391,8 @@
     "login_required": "Please sign in.",
     "login_required_first": "Please sign in first.",
     "login_success": "You are now signed in.",
+    "maintenance_off": "Maintenance mode is off. The site is running normally.",
+    "maintenance_on": "Maintenance mode is on. The site is now closed to visitors.",
     "message_empty": "The message cannot be empty.",
     "message_send_failed": "The message could not be sent.",
     "message_too_long": "A message can be at most {max} characters.",
@@ -602,6 +604,14 @@
     "title": "Title",
     "total_found": "listings found",
     "views": "Views"
+  },
+  "maintenance": {
+    "admin_banner": "Maintenance mode is on — only administrators can see the site.",
+    "admin_banner_action": "Maintenance settings",
+    "default_message": "We are carrying out maintenance on the site. We will be back shortly.",
+    "expected_back": "Expected back:",
+    "thanks": "Thank you for your patience.",
+    "title": "We Will Be Right Back"
   },
   "messages": {
     "block_confirm": "Are you sure you want to block this user? You won't be able to send messages to each other.",

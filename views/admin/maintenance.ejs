@@ -1,0 +1,107 @@
+<div class="mb-4">
+    <h1 class="h4 fw-bold mb-1">Bakım Modu</h1>
+    <p class="text-muted small mb-0">Siteyi ziyaretçilere geçici olarak kapatın.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+
+                <% if (enabled) { %>
+                    <div class="alert alert-danger border-0 d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-triangle-exclamation fs-4 mt-1"></i>
+                        <div>
+                            <strong class="d-block">Site şu anda ziyaretçilere kapalı.</strong>
+                            <span class="small">
+                                Ziyaretçiler bakım sayfasını görüyor. Siz admin olduğunuz için gezinmeye devam edebilirsiniz.
+                            </span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-success border-0 d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-circle-check fs-4 mt-1"></i>
+                        <div>
+                            <strong class="d-block">Site normal çalışıyor.</strong>
+                            <span class="small">Ziyaretçiler siteyi görebiliyor.</span>
+                        </div>
+                    </div>
+                <% } %>
+
+                <form action="/admin/bakim" method="POST" class="mt-4">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                               name="enabled" value="1" id="maintenanceEnabled"
+                               style="width: 3rem; height: 1.5rem;"
+                               <%= enabled ? 'checked' : '' %>>
+                        <label class="form-check-label fw-semibold ms-2" for="maintenanceEnabled">
+                            Bakım modunu aç
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="maintenanceMessage" class="form-label small fw-semibold">
+                            Ziyaretçiye gösterilecek mesaj
+                        </label>
+                        <textarea class="form-control" id="maintenanceMessage" name="message"
+                                  rows="3" maxlength="500"
+                                  placeholder="Örn: Sistemimizi güncelliyoruz, kısa süre içinde geri döneceğiz."><%= message || '' %></textarea>
+                        <div class="form-text small">Boş bırakırsanız varsayılan metin gösterilir. Beş dilde de aynı metin görünür.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="maintenanceUntil" class="form-label small fw-semibold">
+                            Tahmini bitiş (opsiyonel)
+                        </label>
+                        <input type="datetime-local" class="form-control" id="maintenanceUntil"
+                               name="until" value="<%= until || '' %>">
+                        <div class="form-text small">
+                            Girilirse ziyaretçiye gösterilir ve arama motorlarına "ne zaman tekrar denesin" bilgisi olarak iletilir.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn <%= enabled ? 'btn-success' : 'btn-danger' %> fw-medium px-4">
+                        <% if (enabled) { %>
+                            <i class="fa-solid fa-play me-2"></i>Kaydet
+                        <% } else { %>
+                            <i class="fa-solid fa-power-off me-2"></i>Kaydet
+                        <% } %>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h2 class="fs-6 fw-bold mb-3">Bakım modu açıkken</h2>
+                <ul class="small text-muted mb-0 ps-3">
+                    <li class="mb-2">Ziyaretçiler bakım sayfasını görür, siteye giremez.</li>
+                    <li class="mb-2"><strong>Admin hesapları normal gezinir</strong> — kendinizi dışarıda bırakmazsınız.</li>
+                    <li class="mb-2">Giriş sayfası açık kalır, böylece başka bir cihazdan giriş yapabilirsiniz.</li>
+                    <li class="mb-2">Sunucu <code>503</code> yanıtı döner; arama motorları sıralamanızı düşürmez.</li>
+                    <li class="mb-0">Yeni ilan, mesaj ve başvuru alınmaz.</li>
+                </ul>
+            </div>
+        </div>
+
+        <% if (lastChange) { %>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="fs-6 fw-bold mb-2">Son değişiklik</h2>
+                    <p class="small text-muted mb-0">
+                        <%= lastChange.value === '1' ? 'Açıldı' : 'Kapatıldı' %>
+                        <% if (lastChange.updated_by_name) { %>
+                            &middot; <%= lastChange.updated_by_name %>
+                        <% } %>
+                        <br>
+                        <span class="text-muted"><%= helpers.timeAgo(lastChange.updated_at, lang) %></span>
+                    </p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>

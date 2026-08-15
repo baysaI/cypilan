@@ -76,6 +76,18 @@
     
     <%- include('../partials/header') %>
 
+    <% if (typeof maintenanceBypass !== 'undefined' && maintenanceBypass) { %>
+        <div class="bg-danger text-white py-2">
+            <div class="container d-flex flex-wrap align-items-center gap-2 small">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+                <strong><%= t('maintenance.admin_banner') %></strong>
+                <a href="/admin/bakim" class="text-white text-decoration-underline ms-auto fw-semibold">
+                    <%= t('maintenance.admin_banner_action') %>
+                </a>
+            </div>
+        </div>
+    <% } %>
+
     <% if (typeof flash !== 'undefined' && flash && (flash.success || flash.error || flash.info)) { %>
         <div class="container mt-3">
             <% if (flash.error) { %>

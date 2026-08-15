@@ -391,6 +391,8 @@
     "login_required": "Lütfen giriş yapın.",
     "login_required_first": "Lütfen önce giriş yapın.",
     "login_success": "Başarıyla giriş yaptınız.",
+    "maintenance_off": "Bakım modu kapatıldı. Site normal çalışıyor.",
+    "maintenance_on": "Bakım modu açıldı. Site artık ziyaretçilere kapalı.",
     "message_empty": "Mesaj boş olamaz.",
     "message_send_failed": "Mesaj gönderilemedi.",
     "message_too_long": "Mesaj en fazla {max} karakter olabilir.",
@@ -602,6 +604,14 @@
     "title": "Başlık",
     "total_found": "ilan bulundu",
     "views": "Görüntülenme"
+  },
+  "maintenance": {
+    "admin_banner": "Bakım modu açık — siteyi yalnızca yöneticiler görebiliyor.",
+    "admin_banner_action": "Bakım ayarları",
+    "default_message": "Sitemizde bakım çalışması yapıyoruz. Kısa süre içinde geri döneceğiz.",
+    "expected_back": "Tahmini dönüş:",
+    "thanks": "Anlayışınız için teşekkür ederiz.",
+    "title": "Kısa Bir Ara Veriyoruz"
   },
   "messages": {
     "block_confirm": "Bu kullanıcıyı engellemek istediğinize emin misiniz? Birbirinize mesaj gönderemeyeceksiniz.",

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const serviceController = require('../controllers/serviceController');
+const maintenanceController = require('../controllers/maintenanceController');
 const { isAuthenticated, isAdmin } = require('../middlewares/auth');
 
 router.use(isAuthenticated, isAdmin);
@@ -11,7 +12,9 @@ router.use(isAuthenticated, isAdmin);
 router.use(async (req, res, next) => {
     try {
         const ServiceRequest = require('../models/ServiceRequest');
+        const Setting = require('../models/Setting');
         res.locals.pendingServices = await ServiceRequest.countPending();
+        res.locals.maintenanceOn = Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false);
     } catch (error) {
         console.error('Pending service count error:', error);
         res.locals.pendingServices = 0;
@@ -32,6 +35,9 @@ router.put('/reports/:id', adminController.resolveReport);
 
 router.post('/users/:id/uyari', adminController.issueWarning);
 router.post('/uyari/:id/kaldir', adminController.revokeWarning);
+
+router.get('/bakim', maintenanceController.show);
+router.post('/bakim', maintenanceController.update);
 
 router.get('/hizmet-talepleri', serviceController.adminQueue);
 router.post('/hizmet-talepleri/:id/durum', serviceController.adminSetStatus);

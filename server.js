@@ -16,6 +16,7 @@ const i18nMiddleware = require('./middlewares/i18n');
 const themeMiddleware = require('./middlewares/theme');
 const { setUserLocal } = require('./middlewares/auth');
 const { csrfProtection } = require('./middlewares/csrf');
+const maintenanceMiddleware = require('./middlewares/maintenance');
 const routes = require('./routes/index');
 
 const app = express();
@@ -142,6 +143,11 @@ app.use((req, res, next) => {
   res.locals.siteUrl = process.env.SITE_URL || `http://localhost:${PORT}`;
   next();
 });
+
+// Last gate before the routes: session, language and user are already resolved,
+// so the closed-for-maintenance page can be rendered in the visitor's language
+// and an admin can be recognised and let through.
+app.use(maintenanceMiddleware);
 
 app.use('/', routes);
 
