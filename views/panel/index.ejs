@@ -198,7 +198,7 @@
                                                  class="rounded-3 object-fit-cover bg-light flex-shrink-0"
                                                  width="40" height="40" alt="">
                                             <div class="min-w-0">
-                                                <a href="/listings/<%= listing.slug %>" class="text-decoration-none text-body fw-medium d-block text-truncate" style="max-width: 260px;">
+                                                <a href="/listings/<%= listing.slug %>" class="text-decoration-none text-body fw-medium d-block text-truncate truncate-md">
                                                     <%= listing.title %>
                                                 </a>
                                                 <% if (Number(listing.is_premium) === 1 || Number(listing.is_featured) === 1) { %>

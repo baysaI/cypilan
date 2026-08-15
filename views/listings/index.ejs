@@ -78,7 +78,7 @@
 
     <div class="row g-4">
         <aside class="col-lg-3 d-none d-lg-block">
-            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px; z-index: 1;">
+            <div class="card border-0 shadow-sm rounded-4 sticky-below-header">
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4 d-flex align-items-center">
                         <i class="fa-solid fa-sliders text-primary me-2"></i> <%= t('listing.filters') %>
@@ -143,20 +143,50 @@
             </div>
 
             <% if (pagination.totalPages > 1) { %>
+                <%
+                    const pageQuery = (filters.category ? '&category=' + filters.category : '')
+                        + (filters.city ? '&city=' + filters.city : '');
+
+                    // A category with 40 pages used to render 40 circles, which is
+                    // three screens wide on a phone. Five around the current page
+                    // fits every viewport down to 320px.
+                    const windowSize = 5;
+                    let firstPage = Math.max(1, pagination.page - Math.floor(windowSize / 2));
+                    const lastPage = Math.min(pagination.totalPages, firstPage + windowSize - 1);
+                    firstPage = Math.max(1, lastPage - windowSize + 1);
+                %>
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center">
                         <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
-                            <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center" href="?page=<%= pagination.page - 1 %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.city ? '&city=' + filters.city : '' %>" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-left"></i></a>
+                            <a class="page-link page-circle border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center" href="?page=<%= pagination.page - 1 %><%= pageQuery %>" aria-label="<%= t('common.previous') %>"><i class="fa-solid fa-chevron-left"></i></a>
                         </li>
-                        
-                        <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+
+                        <% if (firstPage > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link page-circle border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark" href="?page=1<%= pageQuery %>">1</a>
+                            </li>
+                            <% if (firstPage > 2) { %>
+                                <li class="page-item disabled"><span class="page-link page-circle border-0 bg-transparent shadow-none d-flex align-items-center justify-content-center">…</span></li>
+                            <% } %>
+                        <% } %>
+
+                        <% for (let p = firstPage; p <= lastPage; p++) { %>
                             <li class="page-item <%= pagination.page === p ? 'active' : '' %>">
-                                <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center <%= pagination.page === p ? 'bg-primary text-white' : 'bg-white text-dark hover-bg-primary hover-text-white' %>" href="?page=<%= p %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.city ? '&city=' + filters.city : '' %>" style="width: 40px; height: 40px;"><%= p %></a>
+                                <a class="page-link page-circle border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center <%= pagination.page === p ? 'bg-primary text-white' : 'bg-white text-dark hover-bg-primary hover-text-white' %>" href="?page=<%= p %><%= pageQuery %>" <%= pagination.page === p ? 'aria-current="page"' : '' %>><%= p %></a>
                             </li>
                         <% } %>
-                        
+
+                        <% if (lastPage < pagination.totalPages) { %>
+                            <% if (lastPage < pagination.totalPages - 1) { %>
+                                <li class="page-item disabled"><span class="page-link page-circle border-0 bg-transparent shadow-none d-flex align-items-center justify-content-center">…</span></li>
+                            <% } %>
+                            <li class="page-item">
+                                <a class="page-link page-circle border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark" href="?page=<%= pagination.totalPages %><%= pageQuery %>"><%= pagination.totalPages %></a>
+                            </li>
+                        <% } %>
+
                         <li class="page-item <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>">
-                            <a class="page-link border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="?page=<%= pagination.page + 1 %><%= filters.category ? '&category=' + filters.category : '' %><%= filters.city ? '&city=' + filters.city : '' %>" style="width: 40px; height: 40px;"><i class="fa-solid fa-chevron-right"></i></a>
+                            <a class="page-link page-circle border-0 shadow-sm rounded-circle mx-1 d-flex align-items-center justify-content-center bg-white text-dark hover-bg-primary hover-text-white" href="?page=<%= pagination.page + 1 %><%= pageQuery %>" aria-label="<%= t('common.next') %>"><i class="fa-solid fa-chevron-right"></i></a>
                         </li>
                     </ul>
                 </nav>

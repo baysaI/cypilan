@@ -19,8 +19,11 @@
 <html lang="<%= pageLang %>" dir="<%= pageDir %>" data-bs-theme="<%= theme %>">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <%# viewport-fit=cover lets the page paint under the notch and home bar; the
+        safe-area insets in style.css keep content out from under them. %>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="theme-color" content="<%= theme === 'dark' ? '#15181b' : '#ffffff' %>">
+    <meta name="color-scheme" content="<%= theme === 'dark' ? 'dark' : 'light' %>">
     <title><%= pageTitle %></title>
     <meta name="description" content="<%= pageDescription %>">
     <% if (pageMeta.keywords) { %><meta name="keywords" content="<%= pageMeta.keywords %>"><% } %>

@@ -9,7 +9,7 @@
                 <% if (listing.category_slug) { %>
                     <li class="breadcrumb-item"><a href="/listings?category=<%= listing.category_id %>" class="text-decoration-none text-muted"><%= listing.category_name %></a></li>
                 <% } %>
-                <li class="breadcrumb-item active fw-medium text-dark text-truncate" style="max-width: 260px;" aria-current="page"><%= listing.title %></li>
+                <li class="breadcrumb-item active fw-medium text-dark text-truncate truncate-md" aria-current="page"><%= listing.title %></li>
             </ol>
         </nav>
     </div>
@@ -20,9 +20,9 @@
 
         <div class="col-12 col-lg-8">
 
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <h1 class="fs-3 fw-bold mb-2"><%= listing.title %></h1>
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div class="min-w-0">
+                    <h1 class="fs-3 fw-bold mb-2 text-break-anywhere"><%= listing.title %></h1>
                     <div class="d-flex align-items-center text-muted small fw-medium gap-3 flex-wrap">
                         <span><i class="fa-solid fa-location-dot text-primary me-1"></i> <%= helpers.getCityName(listing.location_city, lang) || '-' %><%= listing.location_district ? ', ' + listing.location_district : '' %></span>
                         <span><i class="fa-regular fa-clock me-1"></i> <%= helpers.timeAgo(listing.created_at, lang) %></span>
@@ -30,7 +30,7 @@
                         <span><%= t('listing.ad_no') %> <strong class="text-dark">#<%= listing.id %></strong></span>
                     </div>
                 </div>
-                <div class="text-end d-none d-md-block">
+                <div class="text-end d-none d-md-block flex-shrink-0">
                     <h2 class="text-primary fw-bolder mb-0"><%= fmt(listing.price, listing.currency) %></h2>
                 </div>
             </div>
@@ -51,7 +51,7 @@
             <div class="card border-0 rounded-4 overflow-hidden mb-4 shadow-sm">
                 <% if (imgs.length > 0) { %>
                     <div id="listingCarousel" class="carousel slide">
-                        <div class="carousel-inner bg-dark" style="aspect-ratio: 16/10;">
+                        <div class="carousel-inner bg-dark listing-gallery">
                             <% imgs.forEach(function(img, i) { %>
                                 <div class="carousel-item h-100 <%= i === 0 ? 'active' : '' %>">
                                     <img src="<%= img %>" class="d-block w-100 h-100 object-fit-contain" alt="<%= listing.title %>">
@@ -70,7 +70,7 @@
                         <% } %>
                     </div>
                 <% } else { %>
-                    <div class="bg-light d-flex flex-column align-items-center justify-content-center text-muted" style="aspect-ratio: 16/10;">
+                    <div class="bg-light listing-gallery d-flex flex-column align-items-center justify-content-center text-muted">
                         <i class="fa-regular fa-image fs-1 mb-2 opacity-50"></i>
                         <span class="small"><%= t('listing.no_images') %></span>
                     </div>
@@ -146,7 +146,7 @@
                 </button>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px; z-index: 1;">
+            <div class="card border-0 shadow-sm rounded-4 sticky-below-header">
                 <div class="card-body p-4 text-center">
                     <div class="position-relative d-inline-block mb-3">
                         <img src="<%= listing.seller_avatar || '/img/logo.png' %>" class="rounded-circle border border-3 border-white shadow-sm object-fit-cover bg-light" width="90" height="90" alt="<%= listing.seller_name %>">

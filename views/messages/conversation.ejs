@@ -2,34 +2,39 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-9 col-xl-8">
 
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <a href="/messages" class="btn btn-light border" title="Geri">
+            <%# Below sm the block/unblock button drops its label: the name is the
+                one thing in this row that must not be squeezed. %>
+            <div class="d-flex align-items-center gap-2 gap-md-3 mb-3">
+                <a href="/messages" class="btn btn-light border flex-shrink-0" title="Geri" aria-label="Geri">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <img src="<%= otherUser.avatar_url || '/img/logo.png' %>"
-                     class="rounded-circle bg-light object-fit-cover" width="44" height="44" alt="">
-                <div class="flex-grow-1">
-                    <a href="/profile/<%= otherUser.id %>" class="fw-bold text-dark text-decoration-none">
+                     class="rounded-circle bg-light object-fit-cover flex-shrink-0" width="44" height="44" alt="">
+                <div class="flex-grow-1 min-w-0">
+                    <a href="/profile/<%= otherUser.id %>" class="fw-bold text-dark text-decoration-none d-block text-truncate">
                         <%= otherUser.full_name %>
                     </a>
                 </div>
-                <button type="button" class="btn btn-light border btn-sm text-muted"
-                        data-bs-toggle="modal" data-bs-target="#reportUserModal" title="Kullanıcıyı şikayet et">
+                <button type="button" class="btn btn-light border btn-sm text-muted flex-shrink-0"
+                        data-bs-toggle="modal" data-bs-target="#reportUserModal" title="Kullanıcıyı şikayet et"
+                        aria-label="Kullanıcıyı şikayet et">
                     <i class="fa-regular fa-flag"></i>
                 </button>
 
                 <% if (isBlockedByMe) { %>
-                    <form action="/messages/unblock/<%= otherUser.id %><%= listing ? '?listing=' + listing.id : '' %>" method="POST" class="d-inline">
+                    <form action="/messages/unblock/<%= otherUser.id %><%= listing ? '?listing=' + listing.id : '' %>" method="POST" class="flex-shrink-0">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button type="submit" class="btn btn-outline-success btn-sm text-nowrap">
-                            <i class="fa-solid fa-user-check me-1"></i> <%= t('messages.unblock_user') %>
+                        <button type="submit" class="btn btn-outline-success btn-sm text-nowrap" title="<%= t('messages.unblock_user') %>">
+                            <i class="fa-solid fa-user-check"></i>
+                            <span class="d-none d-sm-inline ms-1"><%= t('messages.unblock_user') %></span>
                         </button>
                     </form>
                 <% } else { %>
-                    <form action="/messages/block/<%= otherUser.id %><%= listing ? '?listing=' + listing.id : '' %>" method="POST" class="d-inline" onsubmit="return confirm('<%= t('messages.block_confirm') %>')">
+                    <form action="/messages/block/<%= otherUser.id %><%= listing ? '?listing=' + listing.id : '' %>" method="POST" class="flex-shrink-0" onsubmit="return confirm('<%= t('messages.block_confirm') %>')">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button type="submit" class="btn btn-outline-danger btn-sm text-nowrap">
-                            <i class="fa-solid fa-user-slash me-1"></i> <%= t('messages.block_user') %>
+                        <button type="submit" class="btn btn-outline-danger btn-sm text-nowrap" title="<%= t('messages.block_user') %>">
+                            <i class="fa-solid fa-user-slash"></i>
+                            <span class="d-none d-sm-inline ms-1"><%= t('messages.block_user') %></span>
                         </button>
                     </form>
                 <% } %>
@@ -39,7 +44,7 @@
                 <a href="/listings/<%= listing.slug %>" class="card border-0 shadow-sm mb-3 text-decoration-none">
                     <div class="card-body py-2 px-3 d-flex align-items-center gap-3">
                         <i class="fa-solid fa-tag text-primary"></i>
-                        <div class="flex-grow-1 min-width-0">
+                        <div class="flex-grow-1 min-w-0">
                             <div class="fw-medium text-dark text-truncate"><%= listing.title %></div>
                             <div class="small text-muted"><%= helpers.formatPrice(listing.price, listing.currency) %></div>
                         </div>
@@ -49,7 +54,7 @@
             <% } %>
 
             <div class="card border-0 shadow-sm mb-3">
-                <div class="card-body p-3 p-md-4" id="messageList" style="max-height: 55vh; overflow-y: auto;">
+                <div class="card-body p-3 p-md-4 message-scroll" id="messageList">
                     <% if (messages.length === 0) { %>
                         <p class="text-muted text-center mb-0 py-4">
                             Henüz mesaj yok. İlk mesajı siz yazın.
@@ -58,9 +63,8 @@
                         <% messages.forEach(function(m) { %>
                             <% const mine = m.sender_id === currentUser.id; %>
                             <div class="d-flex mb-3 <%= mine ? 'justify-content-end' : 'justify-content-start' %>">
-                                <div class="<%= mine ? 'bg-primary text-white' : 'bg-light text-dark' %> rounded-4 px-3 py-2"
-                                     style="max-width: 75%;">
-                                    <div style="white-space: pre-wrap; word-break: break-word;"><%= m.content %></div>
+                                <div class="message-bubble <%= mine ? 'bg-primary text-white' : 'bg-light text-dark' %> rounded-4 px-3 py-2">
+                                    <div class="text-break-anywhere" style="white-space: pre-wrap;"><%= m.content %></div>
                                     <div class="small <%= mine ? 'text-white-50' : 'text-muted' %> text-end mt-1" style="font-size: 0.75rem;">
                                         <%= helpers.timeAgo(m.created_at, lang) %>
                                     </div>
@@ -111,10 +115,6 @@
     messageId: messages.length > 0 ? messages[messages.length - 1].id : null,
     threadListingId: listing ? listing.id : null
 }) %>
-
-<style>
-    .min-width-0 { min-width: 0; }
-</style>
 
 <script>
 (function () {
