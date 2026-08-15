@@ -391,6 +391,7 @@
     "login_required": "Lütfen giriş yapın.",
     "login_required_first": "Lütfen önce giriş yapın.",
     "login_success": "Başarıyla giriş yaptınız.",
+    "maintenance_no_user_login": "Bakım modu aktif. Şu anda sadece yöneticiler giriş yapabilir.",
     "maintenance_off": "Bakım modu kapatıldı. Site normal çalışıyor.",
     "maintenance_on": "Bakım modu açıldı. Site artık ziyaretçilere kapalı.",
     "message_empty": "Mesaj boş olamaz.",

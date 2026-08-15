@@ -69,6 +69,12 @@ router.get('/google/callback', (req, res, next) => {
       return res.redirect('/auth/login');
     }
 
+    const Setting = require('../models/Setting');
+    if (Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false) && user.role !== 'admin') {
+      req.flash('error', 'flash.maintenance_no_user_login');
+      return res.redirect('/auth/login');
+    }
+
     req.logIn(user, (loginErr) => {
       if (loginErr) {
         console.error('Login error:', loginErr);

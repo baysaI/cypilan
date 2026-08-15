@@ -65,6 +65,12 @@ const login = async (req, res) => {
             return res.redirect('/auth/login');
         }
 
+        const Setting = require('../models/Setting');
+        if (Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false) && user.role !== 'admin') {
+            req.flash('error', 'flash.maintenance_no_user_login');
+            return res.redirect('/auth/login');
+        }
+
         // Read before regenerating — the old session is discarded.
         const returnTo = req.session.returnTo || '/';
         const rememberMe = Boolean(remember);

@@ -391,6 +391,7 @@
     "login_required": "Please sign in.",
     "login_required_first": "Please sign in first.",
     "login_success": "You are now signed in.",
+    "maintenance_no_user_login": "Maintenance mode is active. Currently only administrators can log in.",
     "maintenance_off": "Maintenance mode is off. The site is running normally.",
     "maintenance_on": "Maintenance mode is on. The site is now closed to visitors.",
     "message_empty": "The message cannot be empty.",
