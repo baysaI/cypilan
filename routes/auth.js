@@ -1,13 +1,36 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const passport = require('../config/passport');
 const authController = require('../controllers/authController');
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    req.flash('error', 'flash.rate_limit_login');
+    res.redirect('/auth/login');
+  }
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    req.flash('error', 'flash.rate_limit_login');
+    res.redirect('/auth/register');
+  }
+});
+
 router.get('/login', authController.showLogin);
-router.post('/login', authController.login);
+router.post('/login', loginLimiter, authController.login);
 
 router.get('/register', authController.showRegister);
-router.post('/register', authController.register);
+router.post('/register', registerLimiter, authController.register);
 
 // POST only: a GET logout can be triggered by any third-party page embedding
 // the URL, signing the visitor out without their intent.

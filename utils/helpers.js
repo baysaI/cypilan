@@ -51,10 +51,7 @@ function getCurrencySymbol(code) {
   return CURRENCY_SYMBOLS[upper] || upper;
 }
 
-const EXCHANGE_RATES = {
-  GBP_TO_TRY: 45.0,
-  TRY_TO_GBP: 1 / 45.0
-};
+const { convertCurrency } = require('./exchangeRates');
 
 function formatPrice(amount, itemCurrency = 'TRY', targetCurrency = null) {
   const num = Number(amount);
@@ -67,20 +64,15 @@ function formatPrice(amount, itemCurrency = 'TRY', targetCurrency = null) {
   let finalCurrency = source;
 
   if (target && target !== source) {
-    if (source === 'TRY' && target === 'GBP') {
-      finalAmount = num * EXCHANGE_RATES.TRY_TO_GBP;
-      finalCurrency = 'GBP';
-    } else if (source === 'GBP' && target === 'TRY') {
-      finalAmount = num * EXCHANGE_RATES.GBP_TO_TRY;
-      finalCurrency = 'TRY';
-    }
+    finalAmount = convertCurrency(num, source, target);
+    finalCurrency = target;
   }
 
   const symbol = getCurrencySymbol(finalCurrency);
-  const locale = finalCurrency === 'GBP' ? 'en-GB' : 'tr-TR';
+  const locale = finalCurrency === 'GBP' ? 'en-GB' : (finalCurrency === 'EUR' ? 'de-DE' : (finalCurrency === 'USD' ? 'en-US' : 'tr-TR'));
   const formattedNumber = finalAmount.toLocaleString(locale, {
     minimumFractionDigits: 0,
-    maximumFractionDigits: (finalAmount < 100 && finalCurrency === 'GBP') ? 2 : 0
+    maximumFractionDigits: (finalAmount < 100 && finalCurrency !== 'TRY') ? 2 : 0
   });
 
   return `${symbol}${formattedNumber}`;

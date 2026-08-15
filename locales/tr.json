@@ -404,6 +404,7 @@
     "profile_update_failed": "Profil güncellenirken hata oluştu.",
     "profile_updated": "Profiliniz güncellendi.",
     "quota_exhausted": "Emlak, Vasıta ve İkinci El kategorilerinde ilk {quota} ilan ücretsizdir. Ücretsiz hakkınızı doldurdunuz; yeni ilan için ilan paketleri gerekiyor.",
+    "rate_limit_login": "Çok fazla giriş veya kayıt denemesi yaptınız. Lütfen daha sonra tekrar deneyin.",
     "rate_limit_message": "Saatlik mesaj gönderme sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.",
     "rate_limit_phone": "Saatlik numara görüntüleme sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.",
     "rate_limit_report": "Saatlik şikayet sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.",
