@@ -444,35 +444,559 @@ body {
     background: var(--cyp-primary);
 }
 
-@media (max-width: 767.98px) {
-    .btn, .nav-link, .dropdown-item {
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-    }
-}
-
-[dir="rtl"] .me-2 {
-    margin-right: 0 !important;
-    margin-left: 0.5rem !important;
-}
-[dir="rtl"] .ms-2 {
-    margin-left: 0 !important;
-    margin-right: 0.5rem !important;
-}
-[dir="rtl"] .pe-2 {
-    padding-right: 0 !important;
-    padding-left: 0.5rem !important;
-}
-[dir="rtl"] .ps-2 {
-    padding-left: 0 !important;
-    padding-right: 0.5rem !important;
-}
-
 .site-header {
     z-index: 1040 !important;
 }
 
 .site-header .dropdown-menu {
     z-index: 1050 !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYER
+   Everything below is layout that has to hold from a 320px phone up to a wide
+   desktop. It is organised the same way the page is built: foundation first,
+   then the shell (header / nav / footer), then the components inside it.
+
+   Breakpoints follow Bootstrap so the CSS and the markup's `col-*` classes
+   never disagree: xs <576, sm ≥576, md ≥768, lg ≥992, xl ≥1200, xxl ≥1400.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Foundation
+   -------------------------------------------------------------------------- */
+
+/* A single element wider than the viewport turns the whole page into a
+   side-scroller on a phone, and the offender is usually invisible. This is the
+   backstop for that.
+
+   It has to go on `html`, and the vertical axis has to be named explicitly.
+   `overflow-x: clip` on its own coerces the other axis away from `visible`,
+   and on the element the viewport takes its overflow from that lands as "no
+   vertical scrolling at all" — the page freezes. Declaring `overflow-y: auto`
+   alongside keeps the vertical axis a normal scroller. `clip` rather than
+   `hidden` so `position: sticky` keeps working for the header and the filter
+   rails. */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: clip;
+    overflow-y: auto;
+}
+
+/* Long unbroken strings — pasted URLs in a description, an e-mail address in a
+   narrow table cell — are the other common source of overflow. */
+body {
+    overflow-wrap: break-word;
+}
+
+/* Media never dictates the width of its container. Heights are deliberately
+   left alone: many images here carry width/height attributes plus an
+   object-fit class, and forcing `height:auto` would undo that framing. */
+img,
+svg,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+}
+
+/* A flex or grid item refuses to shrink below its content by default, which is
+   what defeats `text-truncate` inside a `d-flex` row. The markup already asks
+   for this class in several places; it never existed. */
+.min-w-0 {
+    min-width: 0 !important;
+}
+
+/* Truncation caps written as inline `max-width: 320px` overflow a 320px phone.
+   These keep the desktop cap and yield on small screens. */
+.truncate-sm { max-width: min(200px, 100%); }
+.truncate-md { max-width: min(260px, 100%); }
+.truncate-lg { max-width: min(320px, 100%); }
+
+.text-break-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.whitespace-nowrap { white-space: nowrap; }
+.letter-spacing-1 { letter-spacing: 0.5px; }
+
+/* Horizontal scrollers (the category rail, filter chips) look unfinished with
+   a scrollbar carved through them on desktop. */
+.no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Utilities the templates reference for hover states. Confined to devices that
+   can actually hover, so a tap on a phone does not leave an element stuck in
+   its hover colour. */
+@media (hover: hover) {
+    .hover-text-primary:hover { color: var(--cyp-primary-fg) !important; }
+    .hover-text-white:hover { color: #fff !important; }
+    .hover-bg-light:hover { background-color: var(--cyp-surface-muted) !important; }
+    .hover-bg-primary-light:hover { background-color: var(--cyp-primary-light) !important; }
+    .hover-bg-primary:hover { background-color: var(--cyp-primary) !important; }
+    .group:hover .group-hover-scale { transform: scale(1.08); }
+}
+
+.group-hover-scale {
+    transition: transform var(--cyp-transition-normal);
+}
+
+.text-shadow {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Keyboard users get a visible ring; pointer users do not get one on click. */
+:focus-visible {
+    outline: 2px solid var(--cyp-primary-fg);
+    outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Fluid type
+   Bootstrap's headings are fixed rem values tuned for desktop: `display-5` is
+   3.2rem, which eats half a phone screen. Each step below scales with the
+   viewport between a readable phone size and the original desktop size, so no
+   heading has to be hand-tuned per breakpoint again.
+   -------------------------------------------------------------------------- */
+h1, .h1 { font-size: clamp(1.625rem, 1.35rem + 1.35vw, 2.5rem); }
+h2, .h2 { font-size: clamp(1.4rem, 1.22rem + 0.9vw, 2rem); }
+h3, .h3 { font-size: clamp(1.25rem, 1.12rem + 0.65vw, 1.75rem); }
+h4, .h4 { font-size: clamp(1.125rem, 1.05rem + 0.38vw, 1.5rem); }
+h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
+
+.display-1 { font-size: clamp(2.5rem, 1.6rem + 4.5vw, 5rem); }
+.display-2 { font-size: clamp(2.25rem, 1.5rem + 3.8vw, 4.5rem); }
+.display-3 { font-size: clamp(2rem, 1.4rem + 3vw, 4rem); }
+.display-4 { font-size: clamp(1.875rem, 1.35rem + 2.6vw, 3.5rem); }
+.display-5 { font-size: clamp(1.625rem, 1.2rem + 2.1vw, 3rem); }
+.display-6 { font-size: clamp(1.5rem, 1.15rem + 1.7vw, 2.5rem); }
+
+.lead { font-size: clamp(1rem, 0.96rem + 0.2vw, 1.25rem); }
+
+/* The `fs-*` utilities are mostly worn by icons, where the jump from phone to
+   desktop should be gentler than the heading scale. */
+.fs-1 { font-size: clamp(1.75rem, 1.45rem + 1.5vw, 2.5rem) !important; }
+.fs-2 { font-size: clamp(1.5rem, 1.3rem + 1vw, 2rem) !important; }
+.fs-3 { font-size: clamp(1.35rem, 1.2rem + 0.7vw, 1.75rem) !important; }
+
+/* --------------------------------------------------------------------------
+   3. Spacing rhythm
+   The templates lean on p-4 / p-5 for card padding. At 320px that leaves under
+   200px of usable width inside a card, so the two largest steps are pulled in
+   on phones. Only padding *inside* surfaces is touched — margins and the grid
+   gutters keep their values, so vertical rhythm is unchanged.
+   -------------------------------------------------------------------------- */
+@media (max-width: 575.98px) {
+    /* The gutter is the container's own left/right padding (half of it per
+       side); 1.5rem is Bootstrap's default and leaves cards touching the
+       screen edge on a phone. */
+    .container,
+    .container-fluid {
+        --bs-gutter-x: 2rem;
+    }
+
+    .card-body.p-4,
+    .card-body.p-md-4,
+    .offcanvas-body.p-4 {
+        padding: 1.25rem !important;
+    }
+
+    .card-body.p-5,
+    .card.p-5,
+    .card.p-4 {
+        padding: 1.25rem !important;
+    }
+
+    .py-md-7 { padding-top: 3rem; padding-bottom: 3rem; }
+}
+
+@media (min-width: 768px) {
+    .py-md-7 { padding-top: 6rem; padding-bottom: 6rem; }
+}
+
+/* --------------------------------------------------------------------------
+   4. Touch targets
+   The previous version of this rule set `display: flex` on every `.btn` below
+   768px. That promotes an inline button to a block-level box, which left every
+   full-width button's label hard against its left edge and stretched every
+   32px round icon button into a 32×44 oval. `inline-flex` keeps the button in
+   the inline flow and centres its label the way a normal button does.
+   -------------------------------------------------------------------------- */
+@media (max-width: 991.98px), (pointer: coarse) {
+    .btn:not(.btn-close):not(.page-link):not(.rounded-circle) {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* A 38px field is the default; it is under the tap minimum and cramped
+       next to a 44px button beside it in an input group. */
+    .form-control,
+    .form-select {
+        min-height: 44px;
+    }
+    textarea.form-control {
+        min-height: 5rem;
+    }
+
+    .nav-link,
+    .dropdown-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-check-input {
+        width: 1.25em;
+        height: 1.25em;
+        margin-top: 0.15em;
+    }
+    .form-check-label {
+        padding-top: 0.1rem;
+        padding-bottom: 0.1rem;
+    }
+
+    /* Round icon buttons keep their drawn size and gain an invisible 44px hit
+       area centred on them, so the tap target passes without the button
+       visibly growing. */
+    .btn.rounded-circle,
+    .favorite-btn {
+        position: relative;
+    }
+    .btn.rounded-circle::after,
+    .favorite-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 44px;
+        height: 44px;
+        transform: translate(-50%, -50%);
+    }
+
+    /* iOS zooms the page in when a focused field's text is under 16px, and
+       never zooms back out. `max()` keeps larger fields at their own size. */
+    .form-control,
+    .form-select {
+        font-size: max(16px, 1rem);
+    }
+    .form-control-sm,
+    .form-select-sm {
+        font-size: max(16px, 0.875rem);
+    }
+}
+
+/* The last strip of the page has to clear the iOS home indicator. */
+.site-footer .footer-bottom {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)) !important;
+}
+
+/* Footer link lists are 24px-tall text rows. The padding turns each into a
+   comfortable target without changing where the text sits. */
+.footer-links a,
+.contact-info a {
+    display: inline-block;
+    padding-block: 0.35rem;
+}
+
+/* Icon-only round buttons are drawn from their content, so give the common
+   ones a fixed square footprint instead of letting padding decide. */
+.social-icons .btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   5. Header
+   Two rows on desktop (brand + search + account, then categories) collapsing
+   to a compact bar plus a swipeable category rail on phones.
+   -------------------------------------------------------------------------- */
+
+/* Measured by main.js on load and on resize. Anything that has to sit clear of
+   the sticky header reads it instead of guessing a pixel value. */
+:root {
+    --cyp-header-h: 128px;
+}
+
+.site-header {
+    padding-top: env(safe-area-inset-top);
+}
+
+/* On a phone the header is three rows — brand, search, categories — and eats
+   a fifth of the screen. It slides away as the member scrolls down a results
+   list and comes straight back on the first upward scroll, so the search bar
+   is never more than a flick away. Desktop keeps it pinned. */
+@media (max-width: 991.98px) {
+    .site-header {
+        transition: transform 0.25s ease;
+        will-change: transform;
+    }
+
+    .site-header.header-tucked {
+        transform: translateY(-100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-header {
+        transition: none;
+    }
+    .site-header.header-tucked {
+        transform: none;
+    }
+}
+
+.site-logo {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* The logo is the way back to the home page and its image is shorter than the
+   controls beside it, so the link — not the image — carries the tap height. */
+.site-brand {
+    min-height: 44px;
+}
+
+@media (max-width: 575.98px) {
+    .site-logo {
+        height: 34px;
+    }
+}
+
+/* The account button carries the member's name, which has no length limit and
+   was pushing the header past the viewport on a 320–375px phone. */
+.header-user-name {
+    max-width: 12ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+@media (min-width: 1200px) {
+    .header-user-name {
+        max-width: 20ch;
+    }
+}
+
+/* Category rail: a horizontal swipe on phone and tablet, a plain nav row once
+   there is room for every entry. */
+.category-nav .navbar-nav {
+    scroll-snap-type: x proximity;
+}
+
+@media (max-width: 991.98px) {
+    .category-nav .navbar-nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .category-nav .nav-item {
+        scroll-snap-align: start;
+    }
+
+    .category-nav .nav-link {
+        white-space: nowrap;
+    }
+}
+
+/* Sticky rails (filter sidebar, seller card) sit below the header rather than
+   under it. Disabled on phones, where a sticky column just steals screen. */
+.sticky-below-header {
+    position: static;
+}
+
+@media (min-width: 992px) {
+    .sticky-below-header {
+        position: sticky;
+        top: calc(var(--cyp-header-h) + 1rem);
+        z-index: 1;
+    }
+}
+
+/* In-page anchors (#reviews and friends) otherwise land under the header. */
+[id] {
+    scroll-margin-top: calc(var(--cyp-header-h) + 1rem);
+}
+
+/* --------------------------------------------------------------------------
+   6. Overlays: offcanvas, modal, toast
+   -------------------------------------------------------------------------- */
+/* Bootstrap's own 400px would cover a 375px phone edge to edge, leaving no
+   page visible to tap back to. Set through the component's variable because
+   its width rule is `.offcanvas.offcanvas-start`, which out-specifies a
+   single-class override. */
+.offcanvas {
+    --bs-offcanvas-width: min(88vw, 360px);
+}
+
+.offcanvas-body {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 575.98px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    /* 100dvh follows the mobile browser's collapsing address bar; 100vh does
+       not, and a modal sized against it ends up with its footer off-screen. */
+    .modal-content {
+        max-height: calc(100dvh - 1rem);
+        overflow-y: auto;
+    }
+
+    .modal-body {
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+}
+
+.toast-container {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
+    max-width: min(100vw - 1rem, 420px);
+}
+
+/* Bootstrap positions the dropdown against its toggle, which pushes the wider
+   menus off-screen next to a right-aligned header button on a phone. */
+@media (max-width: 575.98px) {
+    .site-header .dropdown-menu {
+        max-width: calc(100vw - 1.5rem);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   7. Content components
+   -------------------------------------------------------------------------- */
+
+/* Tables never fit a phone; the wrapper scrolls them. Momentum scrolling and a
+   sensible minimum keep columns from collapsing into unreadable slivers. */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767.98px) {
+    .table-responsive > .table {
+        min-width: 34rem;
+    }
+}
+
+/* A long page list is wider than a phone. The page window in the templates
+   caps how many links render; this keeps the row centred and wrapping if a
+   translation makes the prev/next labels long. */
+.pagination {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+}
+
+/* Round page buttons: one square footprint declared once, instead of the inline
+   width/height that was repeated on every link. */
+.page-circle {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+/* Breadcrumbs truncate their last item rather than wrapping mid-word. */
+.breadcrumb {
+    flex-wrap: wrap;
+}
+.breadcrumb-item.active {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The listing gallery: taller framing on a phone (portrait photos dominate),
+   widescreen once there is room beside it. */
+.listing-gallery {
+    aspect-ratio: 4 / 3;
+}
+
+@media (min-width: 768px) {
+    .listing-gallery {
+        aspect-ratio: 16 / 10;
+    }
+}
+
+/* Carousel arrows are 15% of the width each by default, which on a phone means
+   most of the photo is a dead zone that swallows taps. */
+@media (max-width: 767.98px) {
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 20%;
+    }
+}
+
+/* Message thread: a viewport-relative height so the composer stays reachable
+   without the list collapsing on a short screen. */
+.message-scroll {
+    height: clamp(260px, 52dvh, 620px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.message-bubble {
+    max-width: 85%;
+}
+
+@media (min-width: 576px) {
+    .message-bubble {
+        max-width: 75%;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   8. Motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .hover-lift:hover,
+    .hover-scale:hover,
+    .group:hover .group-hover-scale {
+        transform: none;
+    }
+}
+
+/* A pointer that cannot hover gets no lift or zoom — those transforms only
+   ever fire on a tap there, which reads as the page glitching. */
+@media (hover: none) {
+    .hover-lift:hover,
+    .hover-scale:hover {
+        transform: none;
+    }
+}
+
+/* Custom scrollbars are a desktop affordance; on touch they only ever show up
+   as a stripe over content. */
+@media (pointer: coarse) {
+    ::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
 }
