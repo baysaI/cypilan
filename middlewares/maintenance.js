@@ -79,6 +79,10 @@ const maintenanceMiddleware = (req, res, next) => {
   });
 
   return res.status(503).render('errors/maintenance', {
+    // Rendered without the site layout on purpose: its header and footer offer
+    // a search box and a full menu that all answer 503, and they read from the
+    // database — which may be mid-migration at exactly this moment.
+    layout: false,
     maintenanceMessage: message,
     maintenanceUntil: until,
     title: res.locals.t ? res.locals.t('maintenance.title') : 'Bakım'

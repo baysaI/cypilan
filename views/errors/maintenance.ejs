@@ -1,29 +1,119 @@
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6 text-center">
+<%
+    // A standalone document, rendered with layout: false.
+    //
+    // The site layout is deliberately not used here. Its header and footer carry
+    // the search box, the whole category menu and the account links — every one
+    // of which answers 503 while the site is shut, so offering them is an
+    // invitation to click into a dead end. They also read from the database
+    // (unread message counts, category lists), and the moment this page matters
+    // most is the moment a migration may be halfway through. A maintenance page
+    // that queries the database can fail exactly when it is the only thing left
+    // standing.
+    //
+    // Styles are inline for the same reason: no stylesheet, no font CDN, no
+    // script. This page renders from nothing but itself.
+    const dir = typeof lang !== 'undefined' && lang === 'fa' ? 'rtl' : 'ltr';
+    const pageLang = typeof lang !== 'undefined' ? lang : 'tr';
+%><!DOCTYPE html>
+<html lang="<%= pageLang %>" dir="<%= dir %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title><%= t('maintenance.title') %> | CYPILAN.COM</title>
+    <meta name="theme-color" content="#3A7CA5">
+    <link rel="icon" type="image/png" href="/img/logo.png">
+    <style>
+        :root { --brand: #3A7CA5; --ink: #1f2937; --muted: #6b7280; --bg: #f5f7fa; }
 
-            <div class="mb-4">
-                <i class="fa-solid fa-screwdriver-wrench text-primary" style="font-size: 4rem;"></i>
-            </div>
+        * { box-sizing: border-box; }
 
-            <h1 class="fs-2 fw-bold mb-3"><%= t('maintenance.title') %></h1>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            text-align: center;
+        }
 
-            <p class="text-muted lead fs-6 mb-4">
-                <%= maintenanceMessage || t('maintenance.default_message') %>
-            </p>
+        .card {
+            max-width: 520px;
+            width: 100%;
+            background: #fff;
+            border-radius: 18px;
+            padding: 48px 32px;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, .08);
+        }
 
-            <% if (maintenanceUntil) { %>
-                <div class="alert alert-light border rounded-4 d-inline-block px-4">
-                    <i class="fa-regular fa-clock text-primary me-2"></i>
-                    <%= t('maintenance.expected_back') %>
-                    <strong><%= helpers.formatDate(maintenanceUntil, lang) %></strong>
-                </div>
-            <% } %>
+        .logo { height: 44px; width: auto; margin-bottom: 28px; }
 
-            <p class="text-muted small mt-4 mb-0">
-                <%= t('maintenance.thanks') %>
-            </p>
+        .icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 24px;
+            border-radius: 50%;
+            background: rgba(58, 124, 165, .1);
+            color: var(--brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
+        .icon svg { width: 34px; height: 34px; }
+
+        h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 12px; }
+
+        p { margin: 0 0 16px; color: var(--muted); }
+
+        .until {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 10px 18px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: .95rem;
+            color: var(--ink);
+        }
+
+        .thanks { font-size: .875rem; margin: 24px 0 0; }
+
+        @media (prefers-color-scheme: dark) {
+            :root { --ink: #e5e7eb; --muted: #9ca3af; --bg: #15181b; }
+            .card { background: #1e2329; box-shadow: none; }
+            .until { border-color: #374151; }
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <img src="/img/logo.png" alt="CYPILAN.COM" class="logo">
+
+        <div class="icon" aria-hidden="true">
+            <!-- Inline so the page needs no icon font. -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
         </div>
-    </div>
-</div>
+
+        <h1><%= t('maintenance.title') %></h1>
+
+        <p><%= maintenanceMessage || t('maintenance.default_message') %></p>
+
+        <% if (maintenanceUntil) { %>
+            <div class="until">
+                <%= t('maintenance.expected_back') %>
+                <strong><%= helpers.formatDate(maintenanceUntil, pageLang) %></strong>
+            </div>
+        <% } %>
+
+        <p class="thanks"><%= t('maintenance.thanks') %></p>
+    </main>
+</body>
+</html>

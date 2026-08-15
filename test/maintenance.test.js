@@ -135,6 +135,18 @@ t.run('Bakım modu', async (db) => {
   });
   t.assert(pageHtml.includes('Sistemi güncelliyoruz.'), 'errors/maintenance.ejs mesajı basıyor');
 
+  // Bakim sayfasi kendi basina tam bir belge olmali: site sablonunu kullansaydi
+  // arama kutusu ve tum menu gorunur, hepsi 503 donerdi; ustelik header/footer
+  // veritabanina sorar ve bu sayfanin onemli oldugu an tam da goc yapilan andir.
+  t.assert(pageHtml.trim().startsWith('<!DOCTYPE html>'), 'Bakım sayfası kendi başına tam bir HTML belgesi');
+  t.assert(!pageHtml.includes('site-header'), 'Site menüsü bakım sayfasında yok');
+  t.assert(!pageHtml.includes('site-footer'), 'Footer bakım sayfasında yok');
+  t.assert(!pageHtml.includes('name="q"'), 'Arama kutusu bakım sayfasında yok');
+  t.assert(!pageHtml.includes('/listings'), 'Ölü bağlantı verilmiyor');
+  t.assert(!pageHtml.includes('cdn.jsdelivr') && !pageHtml.includes('cdnjs.'), 'Dış CDN bağımlılığı yok');
+  t.assert(!pageHtml.includes('/css/style.css'), 'Stil dosyasına bağımlı değil, kendi içinde');
+  t.assert(pageHtml.includes('<style>'), 'Stiller sayfanın içinde gömülü');
+
   const defaultHtml = await t.render('errors/maintenance.ejs', {
     maintenanceMessage: '', maintenanceUntil: '', title: 'test'
   });
