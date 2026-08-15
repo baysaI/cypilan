@@ -454,8 +454,11 @@
     "title_too_long": "İlan başlığı en fazla {max} karakter olabilir.",
     "user_activated": "Kullanıcı aktifleştirildi.",
     "user_already_reported": "Bu kullanıcıyı zaten şikayet ettiniz. Ekibimiz inceliyor.",
+    "user_blocked": "Kullanıcı engellendi.",
+    "user_is_blocked": "Engellenmiş kullanıcılarla mesajlaşılamaz.",
     "user_not_found": "Kullanıcı bulunamadı.",
     "user_suspended": "Kullanıcı askıya alındı.",
+    "user_unblocked": "Kullanıcının engeli kaldırıldı.",
     "warning_issued": "Uyarı gönderildi.",
     "warning_issued_suspended": "Uyarı gönderildi ve sınıra ulaşıldığı için hesap askıya alındı.",
     "warning_revoked": "Uyarı kaldırıldı.",
@@ -599,6 +602,13 @@
     "title": "Başlık",
     "total_found": "ilan bulundu",
     "views": "Görüntülenme"
+  },
+  "messages": {
+    "block_confirm": "Bu kullanıcıyı engellemek istediğinize emin misiniz? Birbirinize mesaj gönderemeyeceksiniz.",
+    "block_user": "Kullanıcıyı Engelle",
+    "cannot_message_blocked": "Bu kullanıcıya mesaj gönderemezsiniz.",
+    "unblock_user": "Engeli Kaldır",
+    "you_blocked_user": "Bu kullanıcıyı engellediniz. Mesajlaşmak için engeli kaldırın."
   },
   "nav": {
     "admin_panel": "Admin Paneli",

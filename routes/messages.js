@@ -21,5 +21,7 @@ router.use(isAuthenticated);
 router.get('/', messageController.inbox);
 router.post('/', sendLimiter, messageController.send);
 router.get('/:userId', messageController.conversation);
+router.post('/block/:userId', messageController.blockUser);
+router.post('/unblock/:userId', messageController.unblockUser);
 
 module.exports = router;

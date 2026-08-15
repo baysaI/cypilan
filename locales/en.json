@@ -454,8 +454,11 @@
     "title_too_long": "A listing title can be at most {max} characters.",
     "user_activated": "The user was reactivated.",
     "user_already_reported": "You have already reported this user. Our team is reviewing it.",
+    "user_blocked": "The user has been blocked.",
+    "user_is_blocked": "It is not possible to send messages to blocked users.",
     "user_not_found": "User not found.",
     "user_suspended": "The user was suspended.",
+    "user_unblocked": "The user has been unblocked.",
     "warning_issued": "The warning has been sent.",
     "warning_issued_suspended": "The warning was sent and the account was suspended on reaching the limit.",
     "warning_revoked": "The warning has been lifted.",
@@ -599,6 +602,13 @@
     "title": "Title",
     "total_found": "listings found",
     "views": "Views"
+  },
+  "messages": {
+    "block_confirm": "Are you sure you want to block this user? You won't be able to send messages to each other.",
+    "block_user": "Block User",
+    "cannot_message_blocked": "You cannot send messages to this user.",
+    "unblock_user": "Unblock",
+    "you_blocked_user": "You blocked this user. Unblock to message."
   },
   "nav": {
     "admin_panel": "Admin Panel",

@@ -312,3 +312,30 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_service_requests_open
 
 CREATE INDEX IF NOT EXISTS idx_service_requests_queue ON service_requests(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_service_requests_user ON service_requests(user_id, created_at DESC);
+
+-- User blocks table for blocking harassing users
+CREATE TABLE IF NOT EXISTS user_blocks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  blocker_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  blocked_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(blocker_id, blocked_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_blocks_blocker ON user_blocks(blocker_id);
+CREATE INDEX IF NOT EXISTS idx_user_blocks_blocked ON user_blocks(blocked_id);
+
+-- ---------------------------------------------------------------------------
+-- Settings
+--
+-- Runtime switches that an admin flips from the panel rather than from a file.
+-- Anything that lives in .env needs a redeploy to change, which is no use for
+-- something you reach for precisely when the site is misbehaving.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS settings (
+  setting_key TEXT PRIMARY KEY,
+  value TEXT,
+  updated_by INTEGER REFERENCES users(id),
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

@@ -30,6 +30,8 @@ const getDb = () => {
   dbInstance.pragma('journal_mode = WAL');
   dbInstance.pragma('foreign_keys = ON');
 
+  const schema = fs.readFileSync(schemaPath, 'utf8');
+  dbInstance.exec(schema);
   applyColumnMigrations(dbInstance);
 
   return dbInstance;

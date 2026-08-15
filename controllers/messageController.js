@@ -1,6 +1,7 @@
 const Message = require('../models/Message');
 const User = require('../models/User');
 const Listing = require('../models/Listing');
+const UserBlock = require('../models/UserBlock');
 const mailer = require('../config/mailer');
 
 const MAX_LENGTH = 2000;
@@ -51,11 +52,16 @@ const conversation = async (req, res) => {
 
         await Message.markAsRead(currentUserId, otherUserId, listing ? listing.id : null);
 
+        const isBlockedByMe = await UserBlock.isBlockedBy(currentUserId, otherUserId);
+        const isBlockedByOther = await UserBlock.isBlockedBy(otherUserId, currentUserId);
+
         res.locals.meta.title = `${otherUser.full_name} ile mesajlar | CYPILAN.COM`;
         res.render('messages/conversation', {
             messages,
             otherUser: { id: otherUser.id, full_name: otherUser.full_name, avatar_url: otherUser.avatar_url },
             listing,
+            isBlockedByMe,
+            isBlockedByOther,
             title: otherUser.full_name
         });
     } catch (error) {
@@ -83,6 +89,11 @@ const send = async (req, res) => {
         if (receiverId === senderId) {
             req.flash('error', 'flash.cannot_message_self');
             return res.redirect('/messages');
+        }
+
+        if (await UserBlock.hasBlockBetween(senderId, receiverId)) {
+            req.flash('error', 'flash.user_is_blocked');
+            return res.redirect(backTo(receiverId, listingId));
         }
 
         if (!content) {
@@ -137,8 +148,52 @@ const send = async (req, res) => {
     }
 };
 
+const blockUser = async (req, res) => {
+    try {
+        const blockerId = req.session.userId;
+        const blockedId = parseInt(req.params.userId, 10);
+        const listingId = req.query.listing || req.body.listing_id || null;
+
+        if (!Number.isInteger(blockedId) || blockedId === blockerId) {
+            req.flash('error', 'flash.invalid_action');
+            return res.redirect('/messages');
+        }
+
+        await UserBlock.block(blockerId, blockedId);
+        req.flash('success', 'flash.user_blocked');
+        res.redirect(`/messages/${blockedId}${listingId ? `?listing=${listingId}` : ''}`);
+    } catch (error) {
+        console.error('Block User Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/messages');
+    }
+};
+
+const unblockUser = async (req, res) => {
+    try {
+        const blockerId = req.session.userId;
+        const blockedId = parseInt(req.params.userId, 10);
+        const listingId = req.query.listing || req.body.listing_id || null;
+
+        if (!Number.isInteger(blockedId)) {
+            req.flash('error', 'flash.invalid_action');
+            return res.redirect('/messages');
+        }
+
+        await UserBlock.unblock(blockerId, blockedId);
+        req.flash('success', 'flash.user_unblocked');
+        res.redirect(`/messages/${blockedId}${listingId ? `?listing=${listingId}` : ''}`);
+    } catch (error) {
+        console.error('Unblock User Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/messages');
+    }
+};
+
 module.exports = {
     inbox,
     conversation,
-    send
+    send,
+    blockUser,
+    unblockUser
 };

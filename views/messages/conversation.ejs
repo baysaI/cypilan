@@ -17,6 +17,22 @@
                         data-bs-toggle="modal" data-bs-target="#reportUserModal" title="Kullanıcıyı şikayet et">
                     <i class="fa-regular fa-flag"></i>
                 </button>
+
+                <% if (isBlockedByMe) { %>
+                    <form action="/messages/unblock/<%= otherUser.id %><%= listing ? '?listing=' + listing.id : '' %>" method="POST" class="d-inline">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn btn-outline-success btn-sm text-nowrap">
+                            <i class="fa-solid fa-user-check me-1"></i> <%= t('messages.unblock_user') %>
+                        </button>
+                    </form>
+                <% } else { %>
+                    <form action="/messages/block/<%= otherUser.id %><%= listing ? '?listing=' + listing.id : '' %>" method="POST" class="d-inline" onsubmit="return confirm('<%= t('messages.block_confirm') %>')">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn btn-outline-danger btn-sm text-nowrap">
+                            <i class="fa-solid fa-user-slash me-1"></i> <%= t('messages.block_user') %>
+                        </button>
+                    </form>
+                <% } %>
             </div>
 
             <% if (listing) { %>
@@ -55,22 +71,32 @@
                 </div>
             </div>
 
-            <form action="/messages" method="POST" class="card border-0 shadow-sm">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <div class="card-body p-3">
-                    <input type="hidden" name="receiver_id" value="<%= otherUser.id %>">
-                    <% if (listing) { %>
-                        <input type="hidden" name="listing_id" value="<%= listing.id %>">
-                    <% } %>
-                    <div class="d-flex gap-2 align-items-end">
-                        <textarea name="content" class="form-control" rows="2" maxlength="2000"
-                                  placeholder="Mesajınızı yazın..." required autofocus></textarea>
-                        <button type="submit" class="btn btn-primary px-3 flex-shrink-0">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </div>
+            <% if (isBlockedByMe) { %>
+                <div class="alert alert-warning border-0 shadow-sm rounded-4 text-center py-3 mb-0">
+                    <i class="fa-solid fa-user-slash me-2"></i> <%= t('messages.you_blocked_user') %>
                 </div>
-            </form>
+            <% } else if (isBlockedByOther) { %>
+                <div class="alert alert-secondary border-0 shadow-sm rounded-4 text-center py-3 mb-0">
+                    <i class="fa-solid fa-lock me-2"></i> <%= t('messages.cannot_message_blocked') %>
+                </div>
+            <% } else { %>
+                <form action="/messages" method="POST" class="card border-0 shadow-sm">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <div class="card-body p-3">
+                        <input type="hidden" name="receiver_id" value="<%= otherUser.id %>">
+                        <% if (listing) { %>
+                            <input type="hidden" name="listing_id" value="<%= listing.id %>">
+                        <% } %>
+                        <div class="d-flex gap-2 align-items-end">
+                            <textarea name="content" class="form-control" rows="2" maxlength="2000"
+                                      placeholder="Mesajınızı yazın..." required autofocus></textarea>
+                            <button type="submit" class="btn btn-primary px-3 flex-shrink-0">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            <% } %>
 
         </div>
     </div>
