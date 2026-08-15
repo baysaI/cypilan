@@ -159,6 +159,9 @@ const show = async (req, res, next) => {
             sellerRating,
             bidSummary,
             openServiceRequests,
+            offeredServices: listingPolicy.PROMOTION_REQUESTS_LIVE
+                ? ['assurance', 'promotion']
+                : ['assurance'],
             title: listing.title
         });
     } catch (error) {

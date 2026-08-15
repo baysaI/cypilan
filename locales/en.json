@@ -426,6 +426,7 @@
     "select_valid_category": "Choose a valid category.",
     "select_valid_city": "Please choose a valid city from the list.",
     "service_already_open": "You already have an open request for this listing.",
+    "service_promotion_unavailable": "Featuring is currently unavailable. This option opens when the paid packages go live.",
     "service_request_failed": "The request could not be sent. Please try again.",
     "service_request_sent": "Your request has been received. Our team will be in touch shortly.",
     "service_status_updated": "The request status has been updated.",
@@ -835,7 +836,7 @@
           "title": "One-Click Applications"
         },
         "premium": {
-          "body": "Reach more buyers with featured membership options.",
+          "body": "Reach more buyers with featured membership options. Opens once the payment setup is complete.",
           "title": "Premium Visibility"
         },
         "pro_panel": {

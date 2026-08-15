@@ -1,6 +1,7 @@
 const ServiceRequest = require('../models/ServiceRequest');
 const Listing = require('../models/Listing');
 const Message = require('../models/Message');
+const listingPolicy = require('../config/listingPolicy');
 
 const MAX_NOTE = 800;
 
@@ -14,6 +15,13 @@ const request = async (req, res) => {
         const type = req.params.type;
         if (!ServiceRequest.TYPES.includes(type)) {
             req.flash('error', 'flash.service_unknown_type');
+            return res.redirect(backTo);
+        }
+
+        // The button is hidden while paid tiers are off, but a hidden button is a
+        // hint rather than a control, so the rule is enforced here too.
+        if (type === 'promotion' && !listingPolicy.PROMOTION_REQUESTS_LIVE) {
+            req.flash('info', 'flash.service_promotion_unavailable');
             return res.redirect(backTo);
         }
 

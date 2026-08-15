@@ -50,7 +50,7 @@ const ROADMAP_GROUPS = [
     items: [
       { key: 'pro_panel', icon: 'fa-table-columns', status: 'live', href: '/panel' },
       { key: 'pro_stats', icon: 'fa-chart-simple', status: 'live', href: '/panel' },
-      { key: 'premium', icon: 'fa-crown', status: 'live', href: '/profile/taleplerim' }
+      { key: 'premium', icon: 'fa-crown', status: 'soon' }
     ]
   },
   {

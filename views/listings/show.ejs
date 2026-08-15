@@ -160,7 +160,7 @@
                             <h6 class="fw-bold mb-2"><i class="fa-solid fa-headset text-primary me-1"></i><%= t('service.owner_box_title') %></h6>
                             <p class="text-muted small mb-3"><%= t('service.owner_box_body') %></p>
 
-                            <% ['assurance', 'promotion'].forEach(function (serviceType) { %>
+                            <% offeredServices.forEach(function (serviceType) { %>
                                 <% const open = openServiceRequests[serviceType]; %>
                                 <div class="mb-2">
                                     <% if (open) { %>

@@ -426,6 +426,7 @@
     "select_valid_category": "Geçerli bir kategori seçin.",
     "select_valid_city": "Lütfen listeden geçerli bir şehir seçin.",
     "service_already_open": "Bu ilan için zaten açık bir talebin var.",
+    "service_promotion_unavailable": "Öne çıkarma şu an kullanıma kapalı. Ücretli paketler yayına alındığında bu seçenek açılacak.",
     "service_request_failed": "Talep gönderilemedi. Lütfen tekrar dene.",
     "service_request_sent": "Talebin alındı. Ekibimiz en kısa sürede dönecek.",
     "service_status_updated": "Talep durumu güncellendi.",
@@ -835,7 +836,7 @@
           "title": "Tek Tık ile Başvuru"
         },
         "premium": {
-          "body": "Öne çıkan üyelik seçenekleriyle ilanların daha fazla müşteriye ulaşsın.",
+          "body": "Öne çıkan üyelik seçenekleriyle ilanların daha fazla müşteriye ulaşsın. Ödeme altyapısı tamamlandığında açılacak.",
           "title": "Premium Görünürlük"
         },
         "pro_panel": {

@@ -5,6 +5,12 @@ const ALWAYS_FREE_CATEGORIES = ['usta-hizmetler', 'is-ilanlari'];
 
 const PAID_TIERS_LIVE = false;
 
+// Featuring a listing is a paid tier, so it is offered only when the paid tiers
+// are. With no payment provider wired up, approving a promotion by hand would
+// mean granting for free what the pricing page says costs money — so the request
+// is not offered at all rather than being offered and quietly ignored.
+const PROMOTION_REQUESTS_LIVE = PAID_TIERS_LIVE;
+
 // Off by default, so behaviour does not change silently: listings go live at
 // once, as they do today. Turn it on to route new listings through the admin
 // queue that /admin/listings?status=pending already renders.
@@ -84,6 +90,7 @@ module.exports = {
   QUOTA_CATEGORIES,
   ALWAYS_FREE_CATEGORIES,
   PAID_TIERS_LIVE,
+  PROMOTION_REQUESTS_LIVE,
   REQUIRE_APPROVAL,
   LISTING_LIFETIME_DAYS,
   PACKAGES,
