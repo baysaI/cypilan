@@ -5,16 +5,31 @@
       if (query[k]) params.push(encodeURIComponent(k) + '=' + encodeURIComponent(query[k]));
     });
     const suffix = params.length ? '&' + params.join('&') : '';
+
+    // Only a window of pages renders, so the row stays inside a phone screen
+    // however many pages the filter matches.
+    const windowSize = 5;
+    let firstPage = Math.max(1, pagination.page - Math.floor(windowSize / 2));
+    const lastPage = Math.min(pagination.totalPages, firstPage + windowSize - 1);
+    firstPage = Math.max(1, lastPage - windowSize + 1);
     %>
     <nav class="mt-3">
         <ul class="pagination pagination-sm justify-content-center mb-0">
             <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
                 <a class="page-link" href="<%= baseUrl %>?page=<%= pagination.page - 1 %><%= suffix %>">Önceki</a>
             </li>
-            <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+            <% if (firstPage > 1) { %>
+                <li class="page-item"><a class="page-link" href="<%= baseUrl %>?page=1<%= suffix %>">1</a></li>
+                <% if (firstPage > 2) { %><li class="page-item disabled"><span class="page-link">…</span></li><% } %>
+            <% } %>
+            <% for (let p = firstPage; p <= lastPage; p++) { %>
                 <li class="page-item <%= pagination.page === p ? 'active' : '' %>">
                     <a class="page-link" href="<%= baseUrl %>?page=<%= p %><%= suffix %>"><%= p %></a>
                 </li>
+            <% } %>
+            <% if (lastPage < pagination.totalPages) { %>
+                <% if (lastPage < pagination.totalPages - 1) { %><li class="page-item disabled"><span class="page-link">…</span></li><% } %>
+                <li class="page-item"><a class="page-link" href="<%= baseUrl %>?page=<%= pagination.totalPages %><%= suffix %>"><%= pagination.totalPages %></a></li>
             <% } %>
             <li class="page-item <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>">
                 <a class="page-link" href="<%= baseUrl %>?page=<%= pagination.page + 1 %><%= suffix %>">Sonraki</a>

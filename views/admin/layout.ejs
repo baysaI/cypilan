@@ -2,7 +2,7 @@
 <html lang="<%= typeof lang !== 'undefined' ? lang : 'tr' %>" data-bs-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title><%= typeof title !== 'undefined' ? title : 'Admin' %> | CYPILAN.COM</title>
     <meta name="robots" content="noindex, nofollow">
     <% if (typeof csrfToken !== 'undefined' && csrfToken) { %><meta name="csrf-token" content="<%= csrfToken %>"><% } %>
@@ -15,26 +15,67 @@
     <link rel="icon" type="image/png" href="/img/logo.png">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: var(--bs-tertiary-bg); }
-        .admin-sidebar { width: 260px; }
-        .admin-main { margin-left: 260px; }
+        .admin-sidebar { width: 260px; overflow-y: auto; }
+        .admin-main { margin-left: 260px; min-width: 0; }
         .admin-sidebar .nav-link { color: rgba(255,255,255,0.75); }
         .admin-sidebar .nav-link:hover { background-color: rgba(255,255,255,0.08); color: #fff; }
         .admin-sidebar .nav-link.active { background-color: var(--cyp-primary); color: #fff; }
+
+        /* Below lg the sidebar becomes a drawer. It needs a backdrop of its own:
+           without one there is nothing to tap to dismiss it, and it sits over
+           the table the admin was reading. */
         @media (max-width: 991.98px) {
-            .admin-sidebar { position: fixed; transform: translateX(-100%); transition: transform .3s ease; z-index: 1045; }
+            .admin-sidebar {
+                position: fixed;
+                width: min(82vw, 300px);
+                transform: translateX(-100%);
+                transition: transform .3s ease;
+                z-index: 1045;
+                padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+            }
             .admin-sidebar.show { transform: translateX(0); }
             .admin-main { margin-left: 0; }
+
+            .admin-backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, .5);
+                z-index: 1040;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .3s ease;
+            }
+            .admin-backdrop.show { opacity: 1; pointer-events: auto; }
+            body.admin-drawer-open { overflow: hidden; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .admin-sidebar, .admin-backdrop { transition: none; }
+        }
+
+        /* RTL note: the admin panel is Turkish-only, so the drawer slides in
+           from the left in every locale. */
+        [dir="rtl"] .admin-main { margin-left: 0; margin-right: 260px; }
+        @media (max-width: 991.98px) {
+            [dir="rtl"] .admin-main { margin-right: 0; }
         }
     </style>
     <% if (typeof style !== 'undefined' && style) { %><%- style %><% } %>
 </head>
 <body>
 
-<aside class="admin-sidebar bg-dark text-white d-flex flex-column p-3 position-fixed top-0 start-0 h-100 shadow">
-    <a href="/admin" class="d-flex align-items-center mb-4 mt-2 text-white text-decoration-none px-2">
-        <i class="fa-solid fa-shield-halved fs-4 text-warning me-2"></i>
-        <span class="fs-5 fw-bold">CYPILAN<span class="text-white-50 fw-normal ms-1">Admin</span></span>
-    </a>
+<div class="admin-backdrop d-lg-none" id="adminBackdrop" hidden></div>
+
+<aside class="admin-sidebar bg-dark text-white d-flex flex-column p-3 position-fixed top-0 start-0 h-100 shadow" id="adminSidebar">
+    <div class="d-flex align-items-center mb-4 mt-2">
+        <a href="/admin" class="d-flex align-items-center text-white text-decoration-none px-2 flex-grow-1">
+            <i class="fa-solid fa-shield-halved fs-4 text-warning me-2"></i>
+            <span class="fs-5 fw-bold">CYPILAN<span class="text-white-50 fw-normal ms-1">Admin</span></span>
+        </a>
+        <button type="button" class="btn btn-sm btn-outline-light border-0 d-lg-none" id="adminSidebarClose" aria-label="Menüyü kapat">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
     <hr class="border-secondary mt-0 mb-3">
     <ul class="nav nav-pills flex-column mb-auto gap-1">
         <li class="nav-item">
@@ -89,7 +130,8 @@
 
 <main class="admin-main">
     <nav class="navbar bg-white px-3 py-2 shadow-sm d-lg-none sticky-top">
-        <button class="btn btn-light" type="button" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')">
+        <button class="btn btn-light" type="button" id="adminSidebarToggle"
+                aria-controls="adminSidebar" aria-expanded="false" aria-label="Menü">
             <i class="fa-solid fa-bars"></i>
         </button>
         <span class="fw-bold">CYPILAN Admin</span>
@@ -122,6 +164,45 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    var sidebar = document.getElementById('adminSidebar');
+    var backdrop = document.getElementById('adminBackdrop');
+    var toggle = document.getElementById('adminSidebarToggle');
+    var closeBtn = document.getElementById('adminSidebarClose');
+    if (!sidebar || !toggle) return;
+
+    function setOpen(open) {
+        sidebar.classList.toggle('show', open);
+        backdrop.hidden = false;
+        backdrop.classList.toggle('show', open);
+        document.body.classList.toggle('admin-drawer-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        if (open) {
+            var firstLink = sidebar.querySelector('.nav-link');
+            if (firstLink) firstLink.focus();
+        }
+    }
+
+    toggle.addEventListener('click', function () {
+        setOpen(!sidebar.classList.contains('show'));
+    });
+    backdrop.addEventListener('click', function () { setOpen(false); });
+    if (closeBtn) closeBtn.addEventListener('click', function () {
+        setOpen(false);
+        toggle.focus();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && sidebar.classList.contains('show')) setOpen(false);
+    });
+
+    // Crossing into the desktop layout leaves the drawer state behind.
+    window.matchMedia('(min-width: 992px)').addEventListener('change', function (e) {
+        if (e.matches) setOpen(false);
+    });
+})();
+</script>
 <% if (typeof script !== 'undefined' && script) { %><%- script %><% } %>
 </body>
 </html>

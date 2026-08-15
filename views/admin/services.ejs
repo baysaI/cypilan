@@ -120,7 +120,7 @@
                                             <% }); %>
                                         </select>
                                         <input type="text" name="admin_note" class="form-control form-control-sm"
-                                               style="max-width: 360px;" maxlength="800"
+                                               style="max-width: min(360px, 100%);" maxlength="800"
                                                placeholder="Talep edene iletilecek not (opsiyonel)"
                                                value="<%= r.admin_note || '' %>">
                                         <button class="btn btn-sm btn-primary fw-medium">Kaydet</button>
