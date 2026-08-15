@@ -2,6 +2,87 @@ document.addEventListener('DOMContentLoaded', () => {
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
     const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // The header is two rows on desktop, three on a phone with the search bar,
+    // and taller again when the admin maintenance banner is up. Anything that
+    // has to clear it — sticky filter rails, in-page anchors — reads this
+    // instead of a hardcoded offset that is wrong at half the breakpoints.
+    const siteHeader = document.querySelector('.site-header');
+    if (siteHeader) {
+        const publishHeaderHeight = () => {
+            document.documentElement.style.setProperty('--cyp-header-h', Math.round(siteHeader.offsetHeight) + 'px');
+        };
+
+        publishHeaderHeight();
+        window.addEventListener('load', publishHeaderHeight);
+
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(publishHeaderHeight).observe(siteHeader);
+        } else {
+            window.addEventListener('resize', publishHeaderHeight);
+        }
+
+        // Tuck the header away while scrolling down a long list on a phone and
+        // bring it back on the first upward scroll. It never tucks while a menu
+        // it owns is open, and never on desktop, where it stays pinned.
+        if (!prefersReducedMotion) {
+            let lastY = window.scrollY;
+            let ticking = false;
+
+            const updateHeaderTuck = () => {
+                ticking = false;
+                const y = Math.max(0, window.scrollY);
+                const delta = y - lastY;
+
+                if (Math.abs(delta) < 6) return;
+
+                const menuOpen = document.querySelector('.dropdown-menu.show, .offcanvas.show, .modal.show');
+                const headerHeight = siteHeader.offsetHeight;
+                const shouldTuck = delta > 0 && y > headerHeight * 1.5 && !menuOpen;
+
+                siteHeader.classList.toggle('header-tucked', shouldTuck);
+                lastY = y;
+            };
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    ticking = true;
+                    window.requestAnimationFrame(updateHeaderTuck);
+                }
+            }, { passive: true });
+        }
+    }
+
+    // The rail scrolls horizontally below lg, so the entry a member is looking
+    // at can start off-screen. Mark it and scroll it into view.
+    const categoryRail = document.querySelector('.category-nav .navbar-nav');
+    if (categoryRail) {
+        const here = new URL(window.location.href);
+        const currentCategory = here.searchParams.get('category');
+
+        const activeLink = Array.from(categoryRail.querySelectorAll('.nav-link')).find(link => {
+            const target = new URL(link.getAttribute('href'), window.location.origin);
+            if (target.pathname !== here.pathname) return false;
+
+            // /listings is shared by every category, so the category itself
+            // decides; the plain pages match on their path alone.
+            const targetCategory = target.searchParams.get('category');
+            return targetCategory ? targetCategory === currentCategory : !currentCategory;
+        });
+
+        if (activeLink) {
+            activeLink.classList.add('active', 'fw-bold');
+            activeLink.setAttribute('aria-current', 'page');
+
+            const railBox = categoryRail.getBoundingClientRect();
+            const linkBox = activeLink.getBoundingClientRect();
+            if (linkBox.right > railBox.right || linkBox.left < railBox.left) {
+                categoryRail.scrollLeft = activeLink.offsetLeft - 16;
+            }
+        }
+    }
+
     const langSwitches = document.querySelectorAll('.lang-switch');
     langSwitches.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -240,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Typewriter Search Placeholder Animation
     const searchInputs = document.querySelectorAll('.smart-search-input');
-    if (searchInputs.length > 0) {
+    if (searchInputs.length > 0 && !prefersReducedMotion) {
         searchInputs.forEach(input => {
             let rawPlaceholders = input.getAttribute('data-placeholders');
             let placeholders = [];
