@@ -6,6 +6,8 @@ node_modules/
 
 # Database
 database/*.db
+# Test kosumlari kendi gecici veritabanini olusturur ve siler; yine de izlenmesin.
+database/test-*.db
 database/*.db-journal
 database/*.db-wal
 database/*.db-shm
