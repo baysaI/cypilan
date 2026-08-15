@@ -155,6 +155,46 @@
                     <h5 class="fw-bold mb-1"><%= listing.seller_company || listing.seller_name || t('user.member') %></h5>
                     <p class="text-muted small mb-2"><%= listing.seller_role === 'business' ? t('user.business_member') : (listing.seller_role === 'agent' ? t('user.agent_member') : t('user.individual_member')) %></p>
 
+                    <% if (typeof user !== 'undefined' && user && user.id === listing.user_id) { %>
+                        <div class="border rounded-4 p-3 mb-3 text-start bg-light">
+                            <h6 class="fw-bold mb-2"><i class="fa-solid fa-headset text-primary me-1"></i><%= t('service.owner_box_title') %></h6>
+                            <p class="text-muted small mb-3"><%= t('service.owner_box_body') %></p>
+
+                            <% ['assurance', 'promotion'].forEach(function (serviceType) { %>
+                                <% const open = openServiceRequests[serviceType]; %>
+                                <div class="mb-2">
+                                    <% if (open) { %>
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                                                <%= t('service.type_' + serviceType) %>: <%= t('service.status_' + open.status) %>
+                                            </span>
+                                            <a href="/profile/taleplerim" class="small fw-semibold text-decoration-none"><%= t('service.my_requests') %></a>
+                                        </div>
+                                    <% } else { %>
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 w-100" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#svcForm<%= serviceType %>">
+                                            <i class="fa-solid <%= serviceType === 'assurance' ? 'fa-handshake' : 'fa-crown' %> me-1"></i>
+                                            <%= t('service.request_' + serviceType) %>
+                                        </button>
+
+                                        <div class="collapse mt-2" id="svcForm<%= serviceType %>">
+                                            <form action="/hizmet/<%= serviceType %>/<%= listing.id %>" method="POST">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <textarea name="note" class="form-control form-control-sm mb-2" rows="2" maxlength="800"
+                                                          placeholder="<%= t('service.note_placeholder') %>"></textarea>
+                                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 w-100">
+                                                    <%= t('service.send_request') %>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% }); %>
+
+                            <p class="text-muted small mb-0 mt-2"><%= t('service.manual_note') %></p>
+                        </div>
+                    <% } %>
+
                     <% if (listing.listing_type === 'bid_request') { %>
                         <div class="alert alert-primary py-2 px-3 small mb-3 text-start">
                             <i class="fa-solid fa-gavel me-1"></i>

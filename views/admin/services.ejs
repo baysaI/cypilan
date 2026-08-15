@@ -1,0 +1,145 @@
+<%
+    const statusStyles = {
+        pending: 'bg-primary bg-opacity-10 text-primary',
+        contacted: 'bg-info bg-opacity-10 text-info',
+        approved: 'bg-success bg-opacity-10 text-success',
+        completed: 'bg-success bg-opacity-10 text-success',
+        rejected: 'bg-danger bg-opacity-10 text-danger'
+    };
+    const list = typeof requests !== 'undefined' && requests ? requests : [];
+%>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <h1 class="h4 fw-bold mb-1">Hizmet Talepleri</h1>
+        <p class="text-muted small mb-0">Cypilan Güvencesi ve öne çıkarma talepleri.</p>
+    </div>
+
+    <form method="GET" action="/admin/hizmet-talepleri" class="d-flex flex-wrap gap-2">
+        <select name="type" class="form-select form-select-sm" style="width: auto;">
+            <option value="">Tüm hizmetler</option>
+            <% types.forEach(function (type) { %>
+                <option value="<%= type %>" <%= filters.type === type ? 'selected' : '' %>>
+                    <%= t('service.type_' + type) %>
+                </option>
+            <% }); %>
+        </select>
+        <select name="status" class="form-select form-select-sm" style="width: auto;">
+            <option value="">Tüm durumlar</option>
+            <% statuses.forEach(function (status) { %>
+                <option value="<%= status %>" <%= filters.status === status ? 'selected' : '' %>>
+                    <%= t('service.status_' + status) %>
+                </option>
+            <% }); %>
+        </select>
+        <button class="btn btn-sm btn-primary">Filtrele</button>
+    </form>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <% if (list.length === 0) { %>
+            <div class="text-center py-5">
+                <i class="fa-solid fa-inbox fs-1 text-muted opacity-50 d-block mb-3"></i>
+                <p class="text-muted mb-0">Bu filtreye uyan talep yok.</p>
+            </div>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th class="ps-3">Hizmet</th>
+                            <th>Talep Eden</th>
+                            <th class="d-none d-md-table-cell">İlan</th>
+                            <th>Durum</th>
+                            <th class="pe-3 text-end">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% list.forEach(function (r) { %>
+                            <tr>
+                                <td class="ps-3">
+                                    <i class="fa-solid <%= r.type === 'assurance' ? 'fa-handshake' : 'fa-crown' %> text-primary me-2"></i>
+                                    <span class="fw-medium"><%= t('service.type_' + r.type) %></span>
+                                    <div class="text-muted small"><%= helpers.timeAgo(r.created_at, lang) %></div>
+                                </td>
+                                <td>
+                                    <div class="fw-medium"><%= r.requester_name %></div>
+                                    <div class="text-muted small"><%= r.requester_email %></div>
+                                    <% if (r.requester_phone) { %>
+                                        <div class="text-muted small"><%= r.requester_phone %></div>
+                                    <% } %>
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    <% if (r.listing_slug) { %>
+                                        <a href="/listings/<%= r.listing_slug %>" target="_blank" rel="noopener"
+                                           class="text-decoration-none d-inline-block text-truncate" style="max-width: 220px;">
+                                            <%= r.listing_title %>
+                                        </a>
+                                        <% if (r.listing_price) { %>
+                                            <div class="text-muted small"><%= helpers.formatPrice(r.listing_price, r.listing_currency, currency) %></div>
+                                        <% } %>
+                                        <% if (Number(r.is_featured) === 1) { %>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2">öne çıkarılmış</span>
+                                        <% } %>
+                                    <% } else { %>
+                                        <span class="text-muted small">&mdash;</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <span class="badge <%= statusStyles[r.status] || statusStyles.pending %> rounded-pill px-2">
+                                        <%= t('service.status_' + r.status) %>
+                                    </span>
+                                </td>
+                                <td class="pe-3 text-end">
+                                    <button class="btn btn-sm btn-outline-primary" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#svc<%= r.id %>">
+                                        İşle
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <% if (r.note) { %>
+                                <tr>
+                                    <td colspan="5" class="ps-3 pt-0 border-0">
+                                        <p class="small text-muted fst-italic mb-2">"<%= r.note %>"</p>
+                                    </td>
+                                </tr>
+                            <% } %>
+
+                            <tr class="collapse" id="svc<%= r.id %>">
+                                <td colspan="5" class="bg-light">
+                                    <form action="/admin/hizmet-talepleri/<%= r.id %>/durum" method="POST"
+                                          class="d-flex flex-wrap gap-2 align-items-center py-2">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <select name="status" class="form-select form-select-sm" style="width: auto;" required>
+                                            <% statuses.forEach(function (status) { %>
+                                                <option value="<%= status %>" <%= r.status === status ? 'selected' : '' %>>
+                                                    <%= t('service.status_' + status) %>
+                                                </option>
+                                            <% }); %>
+                                        </select>
+                                        <input type="text" name="admin_note" class="form-control form-control-sm"
+                                               style="max-width: 360px;" maxlength="800"
+                                               placeholder="Talep edene iletilecek not (opsiyonel)"
+                                               value="<%= r.admin_note || '' %>">
+                                        <button class="btn btn-sm btn-primary fw-medium">Kaydet</button>
+                                        <% if (r.type === 'promotion') { %>
+                                            <span class="text-muted small">Onaylandığında ilan otomatik öne çıkarılır.</span>
+                                        <% } %>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('_pagination', {
+    pagination: pagination,
+    baseUrl: '/admin/hizmet-talepleri',
+    query: { type: filters.type, status: filters.status }
+}) %>

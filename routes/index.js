@@ -42,6 +42,10 @@ router.get('/profile/messages', isAuthenticated, (req, res) => res.redirect('/me
 const panelController = require('../controllers/panelController');
 router.get('/panel', isAuthenticated, panelController.index);
 
+const serviceController = require('../controllers/serviceController');
+router.get('/profile/taleplerim', isAuthenticated, serviceController.myRequests);
+router.post('/hizmet/:type/:listingId', isAuthenticated, serviceController.request);
+
 const bidController = require('../controllers/bidController');
 router.get('/profile/teklifler', isAuthenticated, bidController.received);
 router.post('/profile/teklifler/:id/kabul', isAuthenticated, bidController.accept);

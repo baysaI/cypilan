@@ -1,0 +1,69 @@
+<%
+    const statusStyles = {
+        pending: 'bg-primary-subtle text-primary-emphasis border-primary-subtle',
+        contacted: 'bg-info-subtle text-info-emphasis border-info-subtle',
+        approved: 'bg-success-subtle text-success-emphasis border-success-subtle',
+        completed: 'bg-success-subtle text-success-emphasis border-success-subtle',
+        rejected: 'bg-danger-subtle text-danger-emphasis border-danger-subtle'
+    };
+%>
+
+<div class="container py-4 py-md-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="fs-3 fw-bold mb-1"><%= t('service.my_requests') %></h1>
+            <p class="text-muted small mb-0"><%= t('service.my_requests_desc') %></p>
+        </div>
+        <a href="/profile/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium">
+            <i class="fa-solid fa-list me-2"></i><%= t('nav.my_listings') %>
+        </a>
+    </div>
+
+    <% if (requests.length > 0) { %>
+        <div class="d-flex flex-column gap-3">
+            <% requests.forEach(function (request) { %>
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <h2 class="fs-6 fw-bold mb-1">
+                                    <i class="fa-solid <%= request.type === 'assurance' ? 'fa-handshake' : 'fa-crown' %> text-primary me-2"></i>
+                                    <%= t('service.type_' + request.type) %>
+                                </h2>
+                                <% if (request.listing_slug) { %>
+                                    <a href="/listings/<%= request.listing_slug %>" class="text-muted small text-decoration-none">
+                                        <i class="fa-solid fa-tag me-1"></i><%= request.listing_title %>
+                                    </a>
+                                <% } %>
+                            </div>
+
+                            <span class="badge rounded-pill border <%= statusStyles[request.status] || statusStyles.pending %>">
+                                <%= t('service.status_' + request.status) %>
+                            </span>
+                        </div>
+
+                        <p class="text-muted small mb-2">
+                            <i class="fa-regular fa-clock me-1"></i><%= helpers.timeAgo(request.created_at, lang) %>
+                        </p>
+
+                        <% if (request.note) { %>
+                            <p class="small fst-italic text-muted mb-2">"<%= request.note %>"</p>
+                        <% } %>
+
+                        <% if (request.admin_note) { %>
+                            <div class="alert alert-light border small mb-0">
+                                <strong><%= t('service.team_reply') %>:</strong> <%= request.admin_note %>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="text-center py-5 bg-white rounded-4 border">
+            <i class="fa-solid fa-handshake fs-1 text-muted mb-3 opacity-50 d-block"></i>
+            <p class="text-muted mb-3"><%= t('service.no_requests') %></p>
+            <a href="/profile/listings" class="btn btn-primary rounded-pill px-4 fw-medium"><%= t('nav.my_listings') %></a>
+        </div>
+    <% } %>
+</div>

@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Review = require('../models/Review');
 const Bid = require('../models/Bid');
 const Career = require('../models/Career');
+const ServiceRequest = require('../models/ServiceRequest');
 const { generateSlug, maskPhone } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
 const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/upload');
@@ -139,11 +140,24 @@ const show = async (req, res, next) => {
             ? await Bid.summaryForListing(listing.id)
             : { total: 0, best_amount: null };
 
+        // Only the owner is shown the service box, so the lookup is skipped for
+        // everybody else rather than running on every public page view.
+        const openServiceRequests = {};
+        if (req.session && req.session.userId === listing.user_id) {
+            const [assurance, promotion] = await Promise.all([
+                ServiceRequest.findOpen(listing.id, 'assurance'),
+                ServiceRequest.findOpen(listing.id, 'promotion')
+            ]);
+            openServiceRequests.assurance = assurance;
+            openServiceRequests.promotion = promotion;
+        }
+
         res.render('listings/show', {
             listing,
             isFavorited,
             sellerRating,
             bidSummary,
+            openServiceRequests,
             title: listing.title
         });
     } catch (error) {
@@ -165,8 +179,21 @@ const showCreate = async (req, res, next) => {
             listingPolicy.QUOTA_CATEGORIES
         );
 
+        // The draft helper's per-category fields and their labels, resolved server
+        // side so the wording is translated rather than hard-coded in the script.
+        const draftFeatures = {};
+        const draftFeatureLabels = {};
+        Object.keys(listingDraft.FEATURE_LABELS).forEach((rootSlug) => {
+            draftFeatures[rootSlug] = listingDraft.featuresFor(rootSlug);
+            draftFeatures[rootSlug].forEach((feature) => {
+                draftFeatureLabels[feature] = res.locals.t(`draft.features.${feature}`);
+            });
+        });
+
         res.render('listings/create', {
             categories,
+            draftFeatures,
+            draftFeatureLabels,
             userPhone: (user && user.phone) || '',
             hidePhone: user ? Number(user.show_phone) === 0 : false,
             quota: {

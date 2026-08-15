@@ -101,8 +101,26 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted"><%= t('listing.description') %> <span class="text-danger">*</span></label>
-                            <textarea name="description" class="form-control bg-light border-0 shadow-none focus-ring-primary" rows="6" placeholder="<%= t('listing.description') %>" required></textarea>
+                            <label for="descriptionInput" class="form-label fw-bold small text-muted"><%= t('listing.description') %> <span class="text-danger">*</span></label>
+
+                            <div class="border rounded-4 p-3 mb-2 bg-light" id="draftBox">
+                                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
+                                    <span class="fw-semibold small"><%= t('draft.title') %></span>
+                                </div>
+                                <p class="text-muted small mb-2"><%= t('draft.help') %></p>
+
+                                <div class="row g-2 mb-2" id="draftFields"></div>
+
+                                <div class="d-flex flex-wrap gap-2 mb-2" id="draftFeatures"></div>
+
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" id="draftBtn">
+                                    <i class="fa-solid fa-pen-fancy me-1"></i><%= t('draft.generate') %>
+                                </button>
+                                <span class="text-muted small ms-2" id="draftStatus"></span>
+                            </div>
+
+                            <textarea name="description" id="descriptionInput" class="form-control bg-light border-0 shadow-none focus-ring-primary" rows="6" placeholder="<%= t('listing.description') %>" required></textarea>
                         </div>
                     </div>
                 </div>
@@ -391,6 +409,123 @@ document.addEventListener('DOMContentLoaded', function() {
 
         categorySelect.addEventListener('change', syncCategoryOptions);
         syncCategoryOptions();
+    }
+
+    // --- Description draft -------------------------------------------------
+    // The extra inputs are per-category, so they are drawn from the root slug
+    // rather than shipped as five hidden blocks in the markup.
+    const draftBox = document.getElementById('draftBox');
+    const draftFields = document.getElementById('draftFields');
+    const draftFeatures = document.getElementById('draftFeatures');
+    const draftBtn = document.getElementById('draftBtn');
+    const draftStatus = document.getElementById('draftStatus');
+    const descriptionInput = document.getElementById('descriptionInput');
+
+    if (draftBox && categorySelect && descriptionInput) {
+        const FIELDS = {
+            emlak: [
+                { name: 'rooms', label: '<%= t("draft.field_rooms") %>', placeholder: '3+1' },
+                { name: 'size', label: '<%= t("draft.field_size") %>', placeholder: '120' },
+                { name: 'floor', label: '<%= t("draft.field_floor") %>', placeholder: '2' },
+                { name: 'buildYear', label: '<%= t("draft.field_build_year") %>', placeholder: '2015' }
+            ],
+            vasita: [
+                { name: 'brand', label: '<%= t("draft.field_brand") %>', placeholder: '' },
+                { name: 'model', label: '<%= t("draft.field_model") %>', placeholder: '' },
+                { name: 'year', label: '<%= t("draft.field_year") %>', placeholder: '2019' },
+                { name: 'km', label: '<%= t("draft.field_km") %>', placeholder: '85000' }
+            ]
+        };
+
+        const FEATURES = <%- JSON.stringify(draftFeatures) %>;
+        const FEATURE_LABELS = <%- JSON.stringify(draftFeatureLabels) %>;
+
+        const currentRoot = function () {
+            const option = categorySelect.options[categorySelect.selectedIndex];
+            return option ? option.getAttribute('data-root') : null;
+        };
+
+        const renderDraftInputs = function () {
+            const root = currentRoot();
+            draftFields.innerHTML = '';
+            draftFeatures.innerHTML = '';
+
+            (FIELDS[root] || []).forEach(function (field) {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-3';
+                col.innerHTML = '<label class="form-label small mb-1">' + field.label + '</label>' +
+                    '<input type="text" class="form-control form-control-sm" data-draft="' + field.name +
+                    '" placeholder="' + field.placeholder + '">';
+                draftFields.appendChild(col);
+            });
+
+            (FEATURES[root] || []).forEach(function (feature) {
+                const id = 'feat_' + feature;
+                const wrap = document.createElement('div');
+                wrap.className = 'form-check form-check-inline';
+                wrap.innerHTML = '<input class="form-check-input" type="checkbox" value="' + feature +
+                    '" id="' + id + '" data-draft-feature="1">' +
+                    '<label class="form-check-label small" for="' + id + '">' +
+                    (FEATURE_LABELS[feature] || feature) + '</label>';
+                draftFeatures.appendChild(wrap);
+            });
+
+            draftBox.hidden = !root;
+        };
+
+        categorySelect.addEventListener('change', renderDraftInputs);
+        renderDraftInputs();
+
+        draftBtn.addEventListener('click', async function () {
+            const root = currentRoot();
+            if (!root) return;
+
+            const citySelect = document.querySelector('select[name="city"]');
+            const payload = {
+                rootSlug: root,
+                categoryName: categorySelect.options[categorySelect.selectedIndex].text.trim(),
+                cityName: citySelect && citySelect.value ? citySelect.selectedOptions[0].text.trim() : '',
+                district: (document.querySelector('input[name="district"]') || {}).value || '',
+                features: Array.from(document.querySelectorAll('[data-draft-feature]:checked')).map(function (el) { return el.value; })
+            };
+
+            document.querySelectorAll('[data-draft]').forEach(function (input) {
+                payload[input.getAttribute('data-draft')] = input.value;
+            });
+
+            draftBtn.disabled = true;
+            draftStatus.textContent = '<%= t("draft.working") %>';
+
+            try {
+                const res = await fetch('/api/listing-draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.draft) {
+                    // Appended rather than overwriting, so a seller who already
+                    // started typing does not lose what they wrote.
+                    descriptionInput.value = descriptionInput.value.trim()
+                        ? descriptionInput.value.trim() + '\n\n' + data.draft
+                        : data.draft;
+                    descriptionInput.focus();
+                    draftStatus.textContent = '<%= t("draft.done") %>';
+                } else {
+                    draftStatus.textContent = '<%= t("draft.failed") %>';
+                }
+            } catch (err) {
+                console.error('Draft error:', err);
+                draftStatus.textContent = '<%= t("draft.failed") %>';
+            } finally {
+                draftBtn.disabled = false;
+            }
+        });
     }
 });
 </script>

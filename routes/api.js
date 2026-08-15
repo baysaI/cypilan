@@ -5,6 +5,7 @@ const Category = require('../models/Category');
 const listingController = require('../controllers/listingController');
 const searchController = require('../controllers/searchController');
 const { isAuthenticated } = require('../middlewares/auth');
+const listingDraft = require('../utils/listingDraft');
 
 const MAX_LIMIT = 100;
 
@@ -61,6 +62,41 @@ router.get('/categories', async (req, res) => {
 });
 
 router.get('/search/suggestions', searchController.suggestions);
+
+// Composes a first draft of a listing description from the facts the seller has
+// already typed. It never adds a feature that was not supplied, so the draft can
+// be published as-is without describing something the item does not have.
+router.post('/listing-draft', isAuthenticated, async (req, res) => {
+    try {
+        const rootSlug = String(req.body.rootSlug || '');
+        const allowed = listingDraft.featuresFor(rootSlug);
+        const features = Array.isArray(req.body.features)
+            ? req.body.features.filter((feature) => allowed.includes(feature))
+            : [];
+
+        const text = listingDraft.build({
+            rootSlug,
+            categoryName: req.body.categoryName,
+            cityName: req.body.cityName,
+            district: req.body.district,
+            rooms: req.body.rooms,
+            size: req.body.size,
+            floor: req.body.floor,
+            buildYear: req.body.buildYear,
+            year: req.body.year,
+            brand: req.body.brand,
+            model: req.body.model,
+            km: req.body.km,
+            fuel: req.body.fuel,
+            features
+        }, res.locals.t);
+
+        res.json({ draft: text });
+    } catch (error) {
+        console.error('Listing Draft Error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 router.post('/listings/:id/favorite', isAuthenticated, listingController.toggleFavorite);
 

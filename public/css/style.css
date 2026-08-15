@@ -34,6 +34,11 @@
        the three — at #3A7CA5 the footer copy sits at 2.3:1. */
     --cyp-primary-fg: #33708F;
     --cyp-primary-panel: #24536E;
+
+    --cyp-primary-rgb: 58, 124, 165;
+    --cyp-secondary-rgb: 232, 152, 45;
+    --cyp-accent-rgb: 232, 152, 45;
+    --cyp-accent-fg: #C8781D;
 }
 
 /* ==========================================================================
@@ -77,6 +82,11 @@
     --cyp-surface-muted: #1E2328;
     --cyp-glass: rgba(38, 43, 49, 0.9);
     --cyp-glass-heavy: rgba(38, 43, 49, 0.95);
+
+    --cyp-primary-rgb: 47, 106, 140;
+    --cyp-secondary-rgb: 232, 152, 45;
+    --cyp-accent-rgb: 232, 152, 45;
+    --cyp-accent-fg: #F5A638;
 
     color-scheme: dark;
 }
@@ -244,11 +254,20 @@ body {
 [data-bs-theme="dark"] .site-logo-dark { display: inline-block; }
 
 .text-primary { color: var(--cyp-primary-fg) !important; }
-.bg-primary { background-color: var(--cyp-primary) !important; }
-.text-secondary { color: var(--cyp-secondary) !important; }
-.bg-secondary { background-color: var(--cyp-secondary) !important; }
-.text-accent { color: var(--cyp-accent) !important; }
-.bg-accent { background-color: var(--cyp-accent) !important; }
+.bg-primary {
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--cyp-primary-rgb), var(--bs-bg-opacity)) !important;
+}
+.text-secondary { color: var(--cyp-accent-fg) !important; }
+.bg-secondary {
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--cyp-secondary-rgb), var(--bs-bg-opacity)) !important;
+}
+.text-accent { color: var(--cyp-accent-fg) !important; }
+.bg-accent {
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--cyp-accent-rgb), var(--bs-bg-opacity)) !important;
+}
 
 .btn-primary {
     background-color: var(--cyp-primary);
