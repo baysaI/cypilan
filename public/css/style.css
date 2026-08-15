@@ -255,19 +255,23 @@ body {
 
 .text-primary { color: var(--cyp-primary-fg) !important; }
 .bg-primary {
-    --bs-bg-opacity: 1;
-    background-color: rgba(var(--cyp-primary-rgb), var(--bs-bg-opacity)) !important;
+    background-color: rgba(var(--cyp-primary-rgb), var(--bs-bg-opacity, 1)) !important;
 }
 .text-secondary { color: var(--cyp-accent-fg) !important; }
 .bg-secondary {
-    --bs-bg-opacity: 1;
-    background-color: rgba(var(--cyp-secondary-rgb), var(--bs-bg-opacity)) !important;
+    background-color: rgba(var(--cyp-secondary-rgb), var(--bs-bg-opacity, 1)) !important;
 }
 .text-accent { color: var(--cyp-accent-fg) !important; }
 .bg-accent {
-    --bs-bg-opacity: 1;
-    background-color: rgba(var(--cyp-accent-rgb), var(--bs-bg-opacity)) !important;
+    background-color: rgba(var(--cyp-accent-rgb), var(--bs-bg-opacity, 1)) !important;
 }
+
+/* Ensure background opacity utility classes override custom variables */
+.bg-opacity-10 { --bs-bg-opacity: 0.1 !important; }
+.bg-opacity-25 { --bs-bg-opacity: 0.25 !important; }
+.bg-opacity-50 { --bs-bg-opacity: 0.5 !important; }
+.bg-opacity-75 { --bs-bg-opacity: 0.75 !important; }
+.bg-opacity-100 { --bs-bg-opacity: 1 !important; }
 
 .btn-primary {
     background-color: var(--cyp-primary);
