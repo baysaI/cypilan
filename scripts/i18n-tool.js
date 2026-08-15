@@ -270,9 +270,16 @@ function scanCmd() {
   });
 
   const namespaces = ['nav', 'common', 'listing', 'auth', 'categories', 'home', 'footer', 'admin', 'pages', 'profile_edit', 'report_modal'];
+
+  // getAllKeys expands an array value into indexed leaves (smart.placeholders.0,
+  // .1, …) so parity can be checked element by element. That leaves the array's
+  // own name absent from the set, and a template that legitimately asks for the
+  // whole list would be reported as missing.
+  const isArrayKey = (key) => registeredKeys.has(`${key}.0`);
+
   const unregistered = [...usedKeys.entries()].filter(([key]) => {
-    if (registeredKeys.has(key)) return false;
-    return !namespaces.some(ns => registeredKeys.has(`${ns}.${key}`));
+    if (registeredKeys.has(key) || isArrayKey(key)) return false;
+    return !namespaces.some(ns => registeredKeys.has(`${ns}.${key}`) || isArrayKey(`${ns}.${key}`));
   });
 
   if (unregistered.length > 0) {

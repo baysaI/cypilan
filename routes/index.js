@@ -67,5 +67,6 @@ router.get('/kullanim-kosullari', pageController.terms);
 router.get('/cerez-politikasi', pageController.cookiePolicy);
 router.get('/yakinda', pageController.soon);
 router.get('/ogrenci', pageController.students);
+router.get('/yatirimci', pageController.investors);
 
 module.exports = router;

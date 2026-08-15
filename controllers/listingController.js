@@ -11,6 +11,7 @@ const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/up
 const listingPolicy = require('../config/listingPolicy');
 const smartSearch = require('../utils/smartSearch');
 const cities = require('../config/cities');
+const listingDraft = require('../utils/listingDraft');
 
 const ALLOWED_CURRENCIES = ['TRY', 'GBP'];
 const OWNER_EDITABLE_STATUSES = ['active', 'sold'];
@@ -181,18 +182,18 @@ const showCreate = async (req, res, next) => {
 
         // The draft helper's per-category fields and their labels, resolved server
         // side so the wording is translated rather than hard-coded in the script.
-        const draftFeatures = {};
+        const draftFeatureMap = {};
         const draftFeatureLabels = {};
         Object.keys(listingDraft.FEATURE_LABELS).forEach((rootSlug) => {
-            draftFeatures[rootSlug] = listingDraft.featuresFor(rootSlug);
-            draftFeatures[rootSlug].forEach((feature) => {
+            draftFeatureMap[rootSlug] = listingDraft.featuresFor(rootSlug);
+            draftFeatureMap[rootSlug].forEach((feature) => {
                 draftFeatureLabels[feature] = res.locals.t(`draft.features.${feature}`);
             });
         });
 
         res.render('listings/create', {
             categories,
-            draftFeatures,
+            draftFeatureMap,
             draftFeatureLabels,
             userPhone: (user && user.phone) || '',
             hidePhone: user ? Number(user.show_phone) === 0 : false,

@@ -18,7 +18,7 @@ const ROADMAP_GROUPS = [
     accent: 'primary',
     items: [
       { key: 'ai_search', icon: 'fa-magnifying-glass-chart', status: 'live', href: '/listings' },
-      { key: 'ai_listing', icon: 'fa-pen-fancy', status: 'soon' },
+      { key: 'ai_listing', icon: 'fa-pen-fancy', status: 'live', href: '/listings/create' },
       { key: 'ai_job_match', icon: 'fa-people-arrows', status: 'live', href: '/kariyer' }
     ]
   },
@@ -28,7 +28,7 @@ const ROADMAP_GROUPS = [
     accent: 'success',
     items: [
       { key: 'ratings', icon: 'fa-star', status: 'live', href: '/sss#puanlama' },
-      { key: 'guarantee', icon: 'fa-handshake', status: 'soon' },
+      { key: 'guarantee', icon: 'fa-handshake', status: 'live', href: '/profile/taleplerim' },
       { key: 'bidding', icon: 'fa-gavel', status: 'live', href: '/teklifler' },
       { key: 'violation', icon: 'fa-triangle-exclamation', status: 'live', href: '/guvenlik' }
     ]
@@ -50,7 +50,7 @@ const ROADMAP_GROUPS = [
     items: [
       { key: 'pro_panel', icon: 'fa-table-columns', status: 'live', href: '/panel' },
       { key: 'pro_stats', icon: 'fa-chart-simple', status: 'live', href: '/panel' },
-      { key: 'premium', icon: 'fa-crown', status: 'soon' }
+      { key: 'premium', icon: 'fa-crown', status: 'live', href: '/profile/taleplerim' }
     ]
   },
   {
@@ -59,7 +59,7 @@ const ROADMAP_GROUPS = [
     accent: 'danger',
     items: [
       { key: 'student', icon: 'fa-graduation-cap', status: 'live', href: '/ogrenci' },
-      { key: 'investor', icon: 'fa-chart-pie', status: 'soon' },
+      { key: 'investor', icon: 'fa-chart-pie', status: 'live', href: '/yatirimci' },
       { key: 'south_cyprus', icon: 'fa-map-location-dot', status: 'live', href: '/listings' }
     ]
   }

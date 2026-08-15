@@ -1,0 +1,138 @@
+<div class="bg-dark text-white py-4 py-md-5">
+    <div class="container text-center">
+        <span class="badge rounded-pill bg-warning text-dark px-3 py-2 mb-3 text-uppercase fw-bold" style="letter-spacing: 1px;">
+            <%= t('investors.badge') %>
+        </span>
+        <h1 class="fw-bold mb-2"><%= t('investors.title') %></h1>
+        <p class="text-white-50 mb-0"><%= t('investors.subtitle') %></p>
+    </div>
+</div>
+
+<div class="container py-4 py-md-5">
+    <form method="GET" action="/yatirimci" class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label for="investorCity" class="form-label small fw-semibold mb-1"><%= t('investors.filter_city') %></label>
+                <%- include('../partials/citySelect', { selectedCity: selectedCity, selectClass: 'form-select' }) %>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100 fw-medium">
+                    <i class="fa-solid fa-filter me-2"></i><%= t('common.filter') %>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="fs-4 fw-bold mb-1"><%= t('investors.yield_title') %></h2>
+            <p class="text-muted small mb-4"><%= t('investors.yield_intro') %></p>
+
+            <% if (yieldData.grossYield !== null) { %>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="border rounded-4 p-3 h-100 text-center">
+                            <div class="fs-3 fw-bold text-primary"><%= yieldData.grossYield %>%</div>
+                            <div class="text-muted small"><%= t('investors.gross_yield') %></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-4 p-3 h-100 text-center">
+                            <div class="fs-5 fw-bold"><%= helpers.formatPrice(yieldData.medianRent, 'TRY', currency) %></div>
+                            <div class="text-muted small"><%= t('investors.median_rent') %></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-4 p-3 h-100 text-center">
+                            <div class="fs-5 fw-bold"><%= helpers.formatPrice(yieldData.medianSale, 'TRY', currency) %></div>
+                            <div class="text-muted small"><%= t('investors.median_sale') %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning border-0 small mb-0">
+                    <i class="fa-solid fa-circle-exclamation me-1"></i>
+                    <%= t('investors.yield_caveat', { rentals: yieldData.rentalSample, sales: yieldData.saleSample }) %>
+                </div>
+            <% } else { %>
+                <div class="alert alert-light border small mb-0">
+                    <%= t('investors.yield_insufficient') %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <% sections.forEach(function (section) { %>
+        <section class="mb-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width: 48px; height: 48px;">
+                        <i class="fa-solid <%= section.icon %>"></i>
+                    </div>
+                    <div>
+                        <h2 class="fs-5 fw-bold mb-0"><%= t('investors.' + section.key + '_title') %></h2>
+                        <p class="text-muted small mb-0"><%= t('investors.' + section.key + '_body') %></p>
+                    </div>
+                </div>
+                <a href="/listings?category=<%= section.category %><%= selectedCity ? '&city=' + encodeURIComponent(selectedCity) : '' %>"
+                   class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
+                    <%= t('students.see_all', { count: section.total }) %>
+                </a>
+            </div>
+
+            <% if (section.listings.length > 0) { %>
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+                    <% section.listings.forEach(function (listing) { %>
+                        <div class="col"><%- include('../partials/listingCard', { listing: listing }) %></div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="text-center py-4 bg-white rounded-4 border">
+                    <p class="text-muted small mb-0"><%= t('investors.empty_section') %></p>
+                </div>
+            <% } %>
+        </section>
+    <% }); %>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="fs-4 fw-bold mb-2"><%= t('investors.guide_title') %></h2>
+            <p class="text-muted mb-4"><%= t('investors.guide_intro') %></p>
+
+            <div class="row g-3">
+                <% ['company', 'residency', 'title_deed', 'tax', 'legal', 'currency'].forEach(function (step, index) { %>
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-3 h-100">
+                            <div class="d-flex gap-3">
+                                <span class="badge rounded-circle bg-dark d-flex align-items-center justify-content-center flex-shrink-0"
+                                      style="width: 32px; height: 32px;"><%= index + 1 %></span>
+                                <div>
+                                    <h6 class="fw-bold mb-1"><%= t('investors.step_' + step + '_title') %></h6>
+                                    <p class="text-muted small mb-0"><%= t('investors.step_' + step + '_body') %></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+
+            <div class="alert alert-light border small mt-4 mb-0">
+                <i class="fa-solid fa-circle-info text-primary me-1"></i><%= t('investors.legal_disclaimer') %>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 bg-dark text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
+        <h3 class="fw-bold mb-2"><%= t('investors.cta_title') %></h3>
+        <p class="text-white-50 mb-4"><%= t('investors.cta_body') %></p>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <a href="/listings?category=emlak" class="btn btn-warning btn-lg rounded-pill px-5 fw-bold">
+                <%= t('investors.browse_property') %>
+            </a>
+            <a href="/kurumsal" class="btn btn-outline-light btn-lg rounded-pill px-5 fw-bold">
+                <%= t('footer.corporate_membership') %>
+            </a>
+        </div>
+    </div>
+</div>
