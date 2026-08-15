@@ -1,6 +1,7 @@
 const Message = require('../models/Message');
 const User = require('../models/User');
 const Listing = require('../models/Listing');
+const mailer = require('../config/mailer');
 
 const MAX_LENGTH = 2000;
 
@@ -112,6 +113,21 @@ const send = async (req, res) => {
             listing_id: validListingId,
             content
         });
+
+        const senderName = req.session.userName || 'Bir kullanıcı';
+        let listingTitle = 'İlanınız';
+        if (validListingId) {
+            const l = await Listing.findById(validListingId);
+            if (l) listingTitle = l.title;
+        }
+
+        const conversationUrl = `${mailer.APP_URL}/messages/${senderId}${validListingId ? `?listing=${validListingId}` : ''}`;
+        mailer.sendMessageNotificationEmail({
+            to: receiver.email,
+            senderName,
+            listingTitle,
+            conversationUrl
+        }).catch(err => console.error('Message notification email error:', err));
 
         res.redirect(backTo(receiverId, validListingId));
     } catch (error) {

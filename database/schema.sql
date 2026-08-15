@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
   is_active INTEGER DEFAULT 1,
   show_phone INTEGER DEFAULT 1,
   has_password INTEGER DEFAULT 1,
+  password_reset_token TEXT,
+  password_reset_expires DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

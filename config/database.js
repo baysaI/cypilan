@@ -30,6 +30,8 @@ const getDb = () => {
   dbInstance.pragma('journal_mode = WAL');
   dbInstance.pragma('foreign_keys = ON');
 
+  applyColumnMigrations(dbInstance);
+
   return dbInstance;
 };
 
@@ -43,6 +45,8 @@ const closeDb = () => {
 const COLUMN_MIGRATIONS = [
   { table: 'users', column: 'show_phone', ddl: 'ALTER TABLE users ADD COLUMN show_phone INTEGER DEFAULT 1' },
   { table: 'users', column: 'has_password', ddl: 'ALTER TABLE users ADD COLUMN has_password INTEGER DEFAULT 1' },
+  { table: 'users', column: 'password_reset_token', ddl: 'ALTER TABLE users ADD COLUMN password_reset_token TEXT' },
+  { table: 'users', column: 'password_reset_expires', ddl: 'ALTER TABLE users ADD COLUMN password_reset_expires DATETIME' },
   { table: 'reports', column: 'type', ddl: "ALTER TABLE reports ADD COLUMN type TEXT DEFAULT 'listing'" }
 ];
 

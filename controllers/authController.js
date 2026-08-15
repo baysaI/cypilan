@@ -1,5 +1,7 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const mailer = require('../config/mailer');
 const { isValidEmail, isValidPassword, isValidPhone } = require('../utils/validators');
 
 const BCRYPT_ROUNDS = 10;
@@ -159,6 +161,9 @@ const register = async (req, res) => {
 
         const user = await User.findById(userId);
 
+        // Send welcome email asynchronously
+        mailer.sendWelcomeEmail({ to: user.email, name: user.full_name }).catch(err => console.error('Welcome email error:', err));
+
         startAuthenticatedSession(
             req,
             user,
@@ -170,6 +175,98 @@ const register = async (req, res) => {
         console.error('Register Error:', error);
         req.flash('error', 'flash.register_failed');
         res.redirect('/auth/register');
+    }
+};
+
+const showForgotPassword = (req, res) => {
+    if (req.session && req.session.userId) {
+        return res.redirect('/');
+    }
+    res.locals.meta.title = 'Şifremi Unuttum';
+    res.render('auth/forgot-password', { title: 'Şifremi Unuttum' });
+};
+
+const forgotPassword = async (req, res) => {
+    try {
+        const email = String(req.body.email || '').trim().toLowerCase();
+        if (!email || !isValidEmail(email)) {
+            req.flash('error', 'flash.invalid_email');
+            return res.redirect('/auth/forgot-password');
+        }
+
+        const user = await User.findByEmail(email);
+        if (user && Number(user.is_active) !== 0) {
+            const token = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+
+            await User.setResetToken(user.id, token, expiresAt);
+
+            const resetUrl = `${mailer.APP_URL}/auth/reset-password?token=${token}`;
+            await mailer.sendPasswordResetEmail({
+                to: user.email,
+                name: user.full_name,
+                resetUrl
+            });
+        }
+
+        req.flash('success', 'flash.reset_email_sent');
+        res.redirect('/auth/forgot-password');
+    } catch (error) {
+        console.error('Forgot Password Error:', error);
+        req.flash('error', 'flash.reset_email_failed');
+        res.redirect('/auth/forgot-password');
+    }
+};
+
+const showResetPassword = async (req, res) => {
+    const token = String(req.query.token || '').trim();
+    if (!token) {
+        req.flash('error', 'flash.invalid_reset_token');
+        return res.redirect('/auth/login');
+    }
+
+    const user = await User.findByResetToken(token);
+    if (!user) {
+        req.flash('error', 'flash.invalid_or_expired_reset_token');
+        return res.redirect('/auth/forgot-password');
+    }
+
+    res.locals.meta.title = 'Yeni Şifre Belirle';
+    res.render('auth/reset-password', { title: 'Yeni Şifre Belirle', token });
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const { token, password, passwordConfirm } = req.body;
+        if (!token) {
+            req.flash('error', 'flash.invalid_reset_token');
+            return res.redirect('/auth/login');
+        }
+
+        const user = await User.findByResetToken(token);
+        if (!user) {
+            req.flash('error', 'flash.invalid_or_expired_reset_token');
+            return res.redirect('/auth/forgot-password');
+        }
+
+        if (!isValidPassword(password)) {
+            req.flash('error', 'flash.weak_password');
+            return res.redirect(`/auth/reset-password?token=${encodeURIComponent(token)}`);
+        }
+
+        if (password !== passwordConfirm) {
+            req.flash('error', 'flash.passwords_do_not_match');
+            return res.redirect(`/auth/reset-password?token=${encodeURIComponent(token)}`);
+        }
+
+        await User.setPassword(user.id, password);
+
+        req.flash('success', 'flash.password_reset_success');
+        res.redirect('/auth/login');
+    } catch (error) {
+        console.error('Reset Password Error:', error);
+        req.flash('error', 'flash.password_reset_failed');
+        res.redirect('/auth/login');
     }
 };
 
@@ -186,5 +283,9 @@ module.exports = {
     login,
     showRegister,
     register,
+    showForgotPassword,
+    forgotPassword,
+    showResetPassword,
+    resetPassword,
     logout
 };

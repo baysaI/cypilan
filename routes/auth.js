@@ -32,6 +32,23 @@ router.post('/login', loginLimiter, authController.login);
 router.get('/register', authController.showRegister);
 router.post('/register', registerLimiter, authController.register);
 
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    req.flash('error', 'flash.rate_limit_login');
+    res.redirect('/auth/forgot-password');
+  }
+});
+
+router.get('/forgot-password', authController.showForgotPassword);
+router.post('/forgot-password', passwordResetLimiter, authController.forgotPassword);
+
+router.get('/reset-password', authController.showResetPassword);
+router.post('/reset-password', passwordResetLimiter, authController.resetPassword);
+
 // POST only: a GET logout can be triggered by any third-party page embedding
 // the URL, signing the visitor out without their intent.
 router.post('/logout', authController.logout);

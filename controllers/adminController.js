@@ -6,6 +6,7 @@ const Report = require('../models/Report');
 const Message = require('../models/Message');
 const Warning = require('../models/Warning');
 const ServiceRequest = require('../models/ServiceRequest');
+const mailer = require('../config/mailer');
 
 const PAGE_SIZE = 20;
 
@@ -181,6 +182,22 @@ const toggleListingStatus = async (req, res) => {
             if (wantsJson(req)) return res.status(404).json({ error: res.locals.t('flash.listing_not_found') });
             req.flash('error', 'flash.listing_not_found');
             return res.redirect('/admin/listings');
+        }
+
+        const listingObj = await Listing.findById(id);
+        if (listingObj && listingObj.user_id) {
+            const owner = await User.findById(listingObj.user_id);
+            if (owner && owner.email) {
+                const reason = req.body.reason || req.body.rejection_reason || null;
+                const listingUrl = `${mailer.APP_URL}/listings/${id}`;
+                mailer.sendListingStatusEmail({
+                    to: owner.email,
+                    listingTitle: listingObj.title,
+                    status,
+                    reason,
+                    listingUrl
+                }).catch(err => console.error('Listing status email error:', err));
+            }
         }
 
         if (wantsJson(req)) return res.json({ success: true, status });

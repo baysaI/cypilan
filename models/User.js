@@ -67,7 +67,28 @@ class User {
 
   static async setPassword(id, plainPassword) {
     const password_hash = await bcrypt.hash(plainPassword, SALT_ROUNDS);
-    return this.update(id, { password_hash, has_password: 1 });
+    return this.update(id, { password_hash, has_password: 1, password_reset_token: null, password_reset_expires: null });
+  }
+
+  static async setResetToken(userId, token, expiresAt) {
+    return this.update(userId, {
+      password_reset_token: token,
+      password_reset_expires: expiresAt
+    });
+  }
+
+  static async findByResetToken(token) {
+    if (!token) return null;
+    const db = getDb();
+    const nowISO = new Date().toISOString();
+    return db.prepare('SELECT * FROM users WHERE password_reset_token = ? AND password_reset_expires > ? AND is_active = 1').get([token, nowISO]) || null;
+  }
+
+  static async clearResetToken(userId) {
+    return this.update(userId, {
+      password_reset_token: null,
+      password_reset_expires: null
+    });
   }
 
   static async isEmailTaken(email, exceptUserId = null) {
