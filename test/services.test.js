@@ -83,13 +83,28 @@ t.run('Hizmet talepleri ve açıklama taslağı', async (db) => {
     'Vasıta taslağı marka, kilometre ve özellikleri kullanıyor'
   );
 
+  const vehicleManual = listingDraft.build({
+    rootSlug: 'vasita', categoryName: 'Otomobil', cityName: 'Girne',
+    brand: 'Honda', model: 'Civic', year: '2018', km: '60000',
+    features: ['manuel', 'klima']
+  }, translate);
+  t.assert(
+    vehicleManual.includes('Honda') && vehicleManual.includes('Manuel vites'),
+    'Vasıta manuel seçeneği taslakta görünüyor'
+  );
+
   const generic = listingDraft.build(
     { rootSlug: 'ikinci-el', categoryName: 'Mobilya', cityName: 'İskele' }, translate
   );
   t.assert(generic.includes('Mobilya'), 'Şablonu olmayan kategoride genel taslak üretiliyor');
 
   t.assert(
-    !listingDraft.featuresFor('emlak').includes('otomatik'),
+    listingDraft.featuresFor('vasita').includes('manuel') && listingDraft.featuresFor('vasita').includes('otomatik'),
+    'Vasıta özellikleri hem manuel hem otomatik vites içeriyor'
+  );
+
+  t.assert(
+    !listingDraft.featuresFor('emlak').includes('otomatik') && !listingDraft.featuresFor('emlak').includes('manuel'),
     'Özellik listesi kategoriye göre ayrışıyor'
   );
 
@@ -110,7 +125,7 @@ t.run('Hizmet talepleri ve açıklama taslağı', async (db) => {
   t.assert(adminHtml.includes('Hizmet Talepleri'), 'admin/services.ejs render ediliyor');
 
   const allLangs = ['tr', 'en', 'el', 'ru', 'fa'].every((lang) =>
-    ['service.type_assurance', 'service.notify_approved', 'draft.generate', 'investors.title', 'draft.features.havuz']
+    ['service.type_assurance', 'service.notify_approved', 'draft.generate', 'investors.title', 'draft.features.havuz', 'draft.features.manuel']
       .every((key) => t.translate(key, lang) !== key)
   );
   t.assert(allLangs, 'service.* / draft.* / investors.* 5 dilde çözülüyor');

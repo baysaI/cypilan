@@ -24,6 +24,9 @@ const MAX_TITLE_LENGTH = 150;
 // processImagesWithWatermark already wrote, otherwise they leak onto disk forever.
 const abort = async (req, res, message, redirectTo, params) => {
     await discardProcessedImages(req);
+    if (req.session && req.body && typeof req.body === 'object') {
+        req.session.listingFormData = { ...req.body };
+    }
     req.flash('error', message, params);
     return res.redirect(redirectTo);
 };
@@ -194,10 +197,16 @@ const showCreate = async (req, res, next) => {
             });
         });
 
+        const formData = (req.session && req.session.listingFormData) || {};
+        if (req.session && req.session.listingFormData) {
+            delete req.session.listingFormData;
+        }
+
         res.render('listings/create', {
             categories,
             draftFeatureMap,
             draftFeatureLabels,
+            formData,
             userPhone: (user && user.phone) || '',
             hidePhone: user ? Number(user.show_phone) === 0 : false,
             quota: {
@@ -315,11 +324,18 @@ const create = async (req, res, next) => {
             await Career.saveJobDetails(listing.id, req.body);
         }
 
+        if (req.session && req.session.listingFormData) {
+            delete req.session.listingFormData;
+        }
+
         req.flash('success', status === 'pending' ? 'flash.listing_pending_review' : 'flash.listing_published');
         res.redirect(status === 'pending' ? '/profile/listings' : `/listings/${listing.slug}`);
     } catch (error) {
         console.error('Listing Create Error:', error);
         await discardProcessedImages(req);
+        if (req.session && req.body && typeof req.body === 'object') {
+            req.session.listingFormData = { ...req.body };
+        }
         req.flash('error', 'flash.listing_create_failed');
         res.redirect(backToForm);
     }
