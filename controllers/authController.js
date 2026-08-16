@@ -321,6 +321,36 @@ const verifyEmail = async (req, res) => {
     }
 };
 
+const showVerifyEmailPending = async (req, res) => {
+    try {
+        if (!req.session || !req.session.userId) {
+            req.flash('error', 'flash.login_required');
+            return res.redirect('/auth/login');
+        }
+
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/auth/login');
+        }
+
+        if (user.is_verified) {
+            req.session.userIsVerified = true;
+            req.flash('success', 'flash.email_verified_success');
+            return res.redirect('/profile');
+        }
+
+        res.locals.meta.title = 'E-posta Doğrulama';
+        res.render('auth/verify-email-pending', {
+            title: 'E-posta Doğrulama',
+            email: user.email
+        });
+    } catch (error) {
+        console.error('Verify Email Pending Page Error:', error);
+        res.redirect('/profile');
+    }
+};
+
 const resendVerification = async (req, res) => {
     try {
         if (!req.session || !req.session.userId) {
@@ -335,8 +365,9 @@ const resendVerification = async (req, res) => {
         }
 
         if (user.is_verified) {
+            req.session.userIsVerified = true;
             req.flash('info', 'flash.email_already_verified');
-            return res.redirect(req.get('referer') || '/profile');
+            return res.redirect('/profile');
         }
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -361,11 +392,11 @@ const resendVerification = async (req, res) => {
             req.flash('info', 'flash.verification_email_sent');
         }
 
-        res.redirect(req.get('referer') || '/profile');
+        res.redirect('/auth/verify-email-pending');
     } catch (error) {
         console.error('Resend Verification Error:', error);
         req.flash('error', 'flash.action_failed');
-        res.redirect('/profile');
+        res.redirect('/auth/verify-email-pending');
     }
 };
 
@@ -387,6 +418,7 @@ module.exports = {
     showResetPassword,
     resetPassword,
     verifyEmail,
+    showVerifyEmailPending,
     resendVerification,
     logout
 };

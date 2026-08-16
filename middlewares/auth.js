@@ -77,7 +77,7 @@ const requireVerifiedEmail = async (req, res, next) => {
     }
 
     req.flash('error', 'flash.email_verification_required_action');
-    return res.redirect(req.get('referer') || '/profile');
+    return res.redirect('/auth/verify-email-pending');
 };
 
 const setUserLocal = async (req, res, next) => {

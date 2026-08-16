@@ -41,6 +41,7 @@
   "auth": {
     "account_type": "Account Type",
     "back_to_login": "Return to Home Page",
+    "back_to_profile": "Return to My Profile",
     "business": "Business",
     "confirm_password": "Confirm Password",
     "email": "Email Address",
@@ -71,7 +72,12 @@
     "rule_uppercase": "At least 1 uppercase letter (A-Z)",
     "save_new_password": "Save New Password",
     "send_reset_link": "Send Reset Link",
-    "terms_agree": "I agree to the Terms & Conditions"
+    "terms_agree": "I agree to the Terms & Conditions",
+    "verify_pending_desc": "We have sent a confirmation link to your email address to verify your account.",
+    "verify_pending_instructions": "After clicking the verification link in your e-mail box, you can press the 'I Verified My E-mail, Refresh Page' button below.",
+    "verify_pending_refresh_btn": "I Verified My Email, Refresh the Page",
+    "verify_pending_spam_notice": "If you do not see the email in your inbox, please also check your Spam folder.",
+    "verify_pending_title": "Check Your Email Address"
   },
   "bids": {
     "accept": "Accept",

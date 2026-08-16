@@ -41,6 +41,7 @@
   "auth": {
     "account_type": "Hesap Türü",
     "back_to_login": "Giriş Sayfasına Dön",
+    "back_to_profile": "Profilime Dön",
     "business": "Kurumsal",
     "confirm_password": "Şifre Tekrar",
     "email": "E-posta",
@@ -71,7 +72,12 @@
     "rule_uppercase": "En az 1 büyük harf (A-Z)",
     "save_new_password": "Yeni Şifreyi Kaydet",
     "send_reset_link": "Sıfırlama Bağlantısı Gönder",
-    "terms_agree": "Kullanım koşullarını kabul ediyorum"
+    "terms_agree": "Kullanım koşullarını kabul ediyorum",
+    "verify_pending_desc": "Hesabınızı doğrulamak için e-posta adresinize bir onay bağlantısı gönderdik.",
+    "verify_pending_instructions": "E-posta kutunuzdaki doğrulama bağlantısına tıkladıktan sonra aşağıdaki 'E-postamı Doğruladım, Sayfayı Yenile' butonuna basabilirsiniz.",
+    "verify_pending_refresh_btn": "E-postamı Doğruladım, Sayfayı Yenile",
+    "verify_pending_spam_notice": "E-postayı gelen kutunuzda göremiyorsanız lütfen Spam (Gereksiz) klasörünüzü de kontrol edin.",
+    "verify_pending_title": "E-posta Adresinizi Kontrol Edin"
   },
   "bids": {
     "accept": "Kabul Et",

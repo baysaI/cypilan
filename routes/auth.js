@@ -94,6 +94,7 @@ const resendVerificationLimiter = rateLimit({
   }
 });
 
+router.get('/verify-email-pending', authController.showVerifyEmailPending);
 router.get('/verify-email/:token', authController.verifyEmail);
 router.post('/resend-verification', resendVerificationLimiter, authController.resendVerification);
 
