@@ -63,7 +63,7 @@
                         <div class="carousel-inner bg-dark listing-gallery">
                             <% imgs.forEach(function(img, i) { %>
                                 <div class="carousel-item h-100 <%= i === 0 ? 'active' : '' %>">
-                                    <img src="<%= img %>" class="d-block w-100 h-100 object-fit-contain" alt="<%= listing.title %>">
+                                    <img src="<%= img %>" class="d-block w-100 h-100 object-fit-contain" alt="<%= listing.title %>" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800';">
                                 </div>
                             <% }); %>
                         </div>
