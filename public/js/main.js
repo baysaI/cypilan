@@ -83,22 +83,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // A rail that simply stops at the screen edge reads as a cut-off list.
-        // The attribute drives a soft fade on whichever side has more to show,
-        // so it reads as "there is more this way" instead.
+        // Three signals together say "this moves": a fade on whichever side has
+        // more, a thumb showing where you are in the strip, and — once per
+        // visit — a short nudge, because nothing states "scrollable" as plainly
+        // as seeing it move.
+        const railProgress = categoryRail.parentElement
+            && categoryRail.parentElement.querySelector('.category-rail-progress span');
+
         const publishRailEdges = () => {
             const max = categoryRail.scrollWidth - categoryRail.clientWidth;
             if (max <= 1) {
                 categoryRail.removeAttribute('data-overflowing');
                 return;
             }
+
             const start = categoryRail.scrollLeft > 1;
             const end = categoryRail.scrollLeft < max - 1;
             categoryRail.setAttribute('data-overflowing', start && end ? 'both' : (start ? 'start' : 'end'));
+
+            if (railProgress) {
+                const visibleShare = categoryRail.clientWidth / categoryRail.scrollWidth;
+                const scrolledShare = categoryRail.scrollLeft / max;
+                railProgress.style.setProperty('--rail-thumb-width', (visibleShare * 100).toFixed(2) + '%');
+                // The thumb travels the track's remaining width, expressed
+                // against its own width so a percentage translate works.
+                railProgress.style.setProperty(
+                    '--rail-thumb-offset',
+                    (scrolledShare * (1 - visibleShare) / visibleShare * 100).toFixed(2) + '%'
+                );
+            }
         };
 
         publishRailEdges();
         categoryRail.addEventListener('scroll', publishRailEdges, { passive: true });
         window.addEventListener('resize', publishRailEdges);
+        // The web font lands after DOMContentLoaded and changes how wide the
+        // labels are, which moves the proportion the thumb is drawn from.
+        window.addEventListener('load', publishRailEdges);
+
+        const nudgeRail = () => {
+            if (prefersReducedMotion) return;
+            if (categoryRail.scrollLeft > 0) return; // already moved to the active category
+            if (categoryRail.scrollWidth - categoryRail.clientWidth < 24) return;
+
+            try {
+                if (sessionStorage.getItem('cyp.railNudged')) return;
+                sessionStorage.setItem('cyp.railNudged', '1');
+            } catch (err) {
+                // Private mode: nudge every time rather than not at all.
+            }
+
+            window.setTimeout(() => {
+                categoryRail.scrollTo({ left: 36, behavior: 'smooth' });
+                window.setTimeout(() => categoryRail.scrollTo({ left: 0, behavior: 'smooth' }), 600);
+            }, 700);
+        };
+
+        nudgeRail();
     }
 
     const langSwitches = document.querySelectorAll('.lang-switch');

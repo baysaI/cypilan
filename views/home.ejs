@@ -54,7 +54,10 @@
                     </h2>
                     <p class="text-muted mb-0"><%= t('home.featured_subtitle') %></p>
                 </div>
-                <a href="/listings?premium=true" class="btn btn-outline-primary rounded-pill px-4 fw-medium d-none d-md-inline-block hover-lift"><%= t('home.show_all') %></a>
+                <%# The label now says "all listings", so it goes to all listings.
+                    It used to carry ?premium=true, which was already wrong when
+                    the section falls back to recent listings. %>
+                <a href="/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium d-none d-md-inline-block hover-lift"><%= t('home.show_all') %></a>
             </div>
 
             <%# Two to a row on a phone. One full-width card is 356px tall, so a

@@ -835,6 +835,38 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     }
 }
 
+/* Scroll position indicator. Hidden until main.js reports the rail actually
+   overflows, so a short category list shows nothing. */
+.category-rail-progress {
+    display: none;
+}
+
+.navbar-nav[data-overflowing] ~ .category-rail-progress {
+    display: block;
+    height: 3px;
+    margin: 0 auto 0.3rem;
+    width: 46%;
+    border-radius: 999px;
+    background: rgba(var(--cyp-primary-rgb), 0.14);
+    overflow: hidden;
+}
+
+.category-rail-progress span {
+    display: block;
+    height: 100%;
+    width: var(--rail-thumb-width, 40%);
+    border-radius: inherit;
+    background: rgba(var(--cyp-primary-rgb), 0.75);
+    transform: translateX(var(--rail-thumb-offset, 0));
+}
+
+@media (min-width: 992px) {
+    .category-rail-progress,
+    .navbar-nav[data-overflowing] ~ .category-rail-progress {
+        display: none;
+    }
+}
+
 /* Sticky rails (filter sidebar, seller card) sit below the header rather than
    under it. Disabled on phones, where a sticky column just steals screen. */
 .sticky-below-header {
