@@ -14,6 +14,7 @@ const reviewsRoutes = require('./reviews');
 const bidsRoutes = require('./bids');
 const careerRoutes = require('./career');
 const notificationsRoutes = require('./notifications');
+const supportRoutes = require('./support');
 
 router.get('/', homeController.index);
 
@@ -22,6 +23,7 @@ router.get('/search', searchController.search);
 router.use('/auth', authRoutes);
 router.use('/listings', listingsRoutes);
 router.use('/api', apiRoutes);
+router.use('/api/support', supportRoutes);
 router.use('/admin', adminRoutes);
 router.use('/messages', messagesRoutes);
 router.use('/notifications', notificationsRoutes);

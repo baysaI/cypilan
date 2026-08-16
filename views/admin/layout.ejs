@@ -115,6 +115,14 @@
             </a>
         </li>
         <li>
+            <a href="/admin/canli-destek" class="nav-link rounded-3 d-flex justify-content-between align-items-center <%= activePage === 'support' ? 'active' : '' %>">
+                <span><i class="fa-solid fa-headset fa-fw me-2"></i> Canlı Destek</span>
+                <% if (typeof pendingSupport !== 'undefined' && pendingSupport > 0) { %>
+                    <span class="badge bg-danger rounded-pill"><%= pendingSupport %></span>
+                <% } %>
+            </a>
+        </li>
+        <li>
             <a href="/admin/bakim" class="nav-link rounded-3 d-flex justify-content-between align-items-center <%= activePage === 'maintenance' ? 'active' : '' %>">
                 <span><i class="fa-solid fa-sliders fa-fw me-2"></i> Sistem &amp; Ayarlar</span>
                 <div class="d-flex gap-1">

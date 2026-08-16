@@ -1222,5 +1222,26 @@
     "warning_suspended_title": "Your Account Has Been Suspended",
     "warning_title": "Your Content / Account Received a Warning",
     "browse_listings": "Explore Listings"
+  },
+  "support": {
+    "launcher_title": "Live Support",
+    "live_support": "Live Support",
+    "header_title": "CYPILAN Live Support",
+    "online_status": "Online • Replies in 1 min",
+    "end_chat": "End Chat",
+    "quick_topics": "Quick Topics:",
+    "chip_how_to_post": "How to Post Listing?",
+    "chip_featured": "Featured Listing",
+    "chip_cv": "Career & Resume",
+    "chip_corporate": "Corporate Membership",
+    "rate_title": "Rate Your Experience",
+    "rate_desc": "You can rate your support experience between 1-5 stars.",
+    "rate_comment_placeholder": "Your feedback or suggestions (optional)...",
+    "submit_rating": "Submit Rating",
+    "start_new_chat": "Start New Chat",
+    "input_placeholder": "Type your message...",
+    "confirm_close_chat": "Do you want to end the live support conversation?",
+    "thank_you_rating": "Thank You!",
+    "rating_saved": "Your feedback has been saved successfully."
   }
 }

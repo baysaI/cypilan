@@ -1,0 +1,671 @@
+<!-- CYPILAN Canlı Destek Floating Widget -->
+<div id="cypilanSupportWidget" class="cypilan-support-container" style="display: none;">
+    <!-- Launcher Button -->
+    <button type="button" id="cypSupportLauncher" class="cyp-support-launcher shadow-lg" aria-label="<%= t('support.launcher_title') || 'Canlı Destek' %>">
+        <div class="cyp-support-launcher-pulse"></div>
+        <div class="cyp-support-launcher-icon">
+            <i class="fa-solid fa-headset fs-5"></i>
+        </div>
+        <span class="cyp-support-launcher-text d-none d-sm-inline ms-2 fw-bold"><%= t('support.live_support') || 'Canlı Destek' %></span>
+        <span id="cypSupportUnreadBadge" class="cyp-support-unread-badge badge bg-danger rounded-pill" style="display: none;">0</span>
+    </button>
+
+    <!-- Chat Window Card -->
+    <div id="cypSupportWindow" class="cyp-support-window card border-0 shadow-lg" style="display: none;">
+        <!-- Header -->
+        <div class="cyp-support-header d-flex align-items-center justify-content-between text-white p-3">
+            <div class="d-flex align-items-center gap-2 min-w-0">
+                <div class="position-relative flex-shrink-0">
+                    <div class="cyp-support-avatar rounded-circle d-flex align-items-center justify-content-center bg-white text-primary fw-bold">
+                        <i class="fa-solid fa-headset text-primary"></i>
+                    </div>
+                    <span class="cyp-online-dot"></span>
+                </div>
+                <div class="text-truncate">
+                    <h6 class="mb-0 fw-bold fs-6 text-truncate"><%= t('support.header_title') || 'CYPILAN Canlı Destek' %></h6>
+                    <small class="text-white-50 d-block" style="font-size: 0.72rem;">
+                        <span class="cyp-status-text"><%= t('support.online_status') || 'Çevrimiçi • 1 dk içinde yanıt' %></span>
+                    </small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <button type="button" id="cypSupportEndChatBtn" class="btn btn-sm btn-link text-white-50 p-1 text-decoration-none hover-text-white" title="<%= t('support.end_chat') || 'Görüşmeyi Sonlandır' %>">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+                <button type="button" id="cypSupportMinimizeBtn" class="btn btn-sm btn-link text-white p-1 text-decoration-none" title="<%= t('common.close') || 'Kapat' %>">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Body / Message Thread -->
+        <div id="cypSupportBody" class="cyp-support-body p-3">
+            <!-- Quick Action Chips -->
+            <div id="cypSupportFaqChips" class="cyp-faq-chips mb-3">
+                <div class="small fw-semibold text-muted mb-2" style="font-size: 0.75rem;">
+                    <i class="fa-regular fa-lightbulb text-warning me-1"></i><%= t('support.quick_topics') || 'Hızlı Konular:' %>
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-sm btn-light border rounded-pill cyp-chip-btn" data-faq="faq_post_listing">
+                        💡 <%= t('support.chip_how_to_post') || 'İlan Nasıl Verilir?' %>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light border rounded-pill cyp-chip-btn" data-faq="faq_featured">
+                        🚀 <%= t('support.chip_featured') || 'Öne Çıkarma' %>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light border rounded-pill cyp-chip-btn" data-faq="faq_cv">
+                        💼 <%= t('support.chip_cv') || 'Kariyer & CV' %>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light border rounded-pill cyp-chip-btn" data-faq="faq_corporate">
+                        🏢 <%= t('support.chip_corporate') || 'Kurumsal Üyelik' %>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages List -->
+            <div id="cypSupportMessages" class="cyp-messages-list d-flex flex-column gap-2">
+                <!-- Messages populated via JS -->
+            </div>
+
+            <!-- Typing Indicator -->
+            <div id="cypSupportTyping" class="cyp-typing-indicator" style="display: none;">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+        </div>
+
+        <!-- Rating Screen (Hidden by default) -->
+        <div id="cypSupportRatingScreen" class="p-4 text-center" style="display: none;">
+            <div class="mb-3 text-warning fs-3">
+                <i class="fa-solid fa-star-half-stroke"></i>
+            </div>
+            <h6 class="fw-bold mb-1"><%= t('support.rate_title') || 'Görüşmeyi Değerlendirin' %></h6>
+            <p class="text-muted small mb-3"><%= t('support.rate_desc') || 'Destek deneyiminizi 1-5 yıldız arasında puanlayabilirsiniz.' %></p>
+            
+            <div class="cyp-star-rating mb-3 d-flex justify-content-center gap-2 fs-4">
+                <i class="fa-regular fa-star cyp-star text-warning" data-val="1" style="cursor: pointer;"></i>
+                <i class="fa-regular fa-star cyp-star text-warning" data-val="2" style="cursor: pointer;"></i>
+                <i class="fa-regular fa-star cyp-star text-warning" data-val="3" style="cursor: pointer;"></i>
+                <i class="fa-regular fa-star cyp-star text-warning" data-val="4" style="cursor: pointer;"></i>
+                <i class="fa-solid fa-star cyp-star text-warning" data-val="5" style="cursor: pointer;"></i>
+            </div>
+
+            <textarea id="cypSupportRatingComment" class="form-control form-control-sm mb-3 rounded-3" rows="2" placeholder="<%= t('support.rate_comment_placeholder') || 'Görüş veya öneriniz (opsiyonel)...' %>"></textarea>
+
+            <div class="d-grid gap-2">
+                <button type="button" id="cypSupportSubmitRatingBtn" class="btn btn-primary btn-sm rounded-pill fw-bold">
+                    <%= t('support.submit_rating') || 'Değerlendirmeyi Gönder' %>
+                </button>
+                <button type="button" id="cypSupportNewChatBtn" class="btn btn-link btn-sm text-decoration-none text-muted">
+                    <%= t('support.start_new_chat') || 'Yeni Sohbet Başlat' %>
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer / Input Form -->
+        <div id="cypSupportFooter" class="cyp-support-footer p-2 bg-white border-top">
+            <form id="cypSupportForm" class="d-flex align-items-center gap-2 m-0">
+                <input type="text" id="cypSupportInput" class="form-control form-control-sm border-0 rounded-pill bg-light px-3 py-2"
+                       placeholder="<%= t('support.input_placeholder') || 'Mesajınızı yazın...' %>" autocomplete="off" maxlength="1500" required>
+                <button type="submit" id="cypSupportSendBtn" class="btn btn-primary btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 34px; height: 34px;">
+                    <i class="fa-solid fa-paper-plane" style="font-size: 0.8rem; margin-left: 2px;"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Canlı Destek Container & Launcher */
+.cypilan-support-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1045;
+    font-family: inherit;
+}
+
+[dir="rtl"] .cypilan-support-container {
+    right: auto;
+    left: 24px;
+}
+
+.cyp-support-launcher {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
+}
+
+.cyp-support-launcher:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(2, 132, 199, 0.45);
+    color: #ffffff;
+}
+
+.cyp-support-launcher-pulse {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 12px;
+    height: 12px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    animation: cypPulse 2s infinite;
+}
+
+@keyframes cypPulse {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.cyp-support-unread-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 0.7rem;
+    padding: 4px 7px;
+    border: 2px solid #ffffff;
+}
+
+/* Chat Window Box */
+.cyp-support-window {
+    position: fixed;
+    bottom: 85px;
+    right: 24px;
+    width: 375px;
+    max-width: calc(100vw - 32px);
+    height: 520px;
+    max-height: calc(100vh - 120px);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+    box-shadow: 0 16px 45px rgba(15, 23, 42, 0.22);
+    animation: cypSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: #ffffff;
+}
+
+[dir="rtl"] .cyp-support-window {
+    right: auto;
+    left: 24px;
+}
+
+@keyframes cypSlideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cyp-support-header {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+}
+
+.cyp-support-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+}
+
+.cyp-online-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background: #22c55e;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+}
+
+.cyp-support-body {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #f8fafc;
+    scroll-behavior: smooth;
+}
+
+/* Message Bubbles */
+.cyp-msg-bubble {
+    max-width: 82%;
+    padding: 9px 13px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    word-break: break-word;
+    position: relative;
+}
+
+.cyp-msg-user {
+    align-self: flex-end;
+    background: #0284c7;
+    color: #ffffff;
+    border-bottom-right-radius: 3px;
+}
+
+.cyp-msg-admin {
+    align-self: flex-start;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.cyp-msg-system {
+    align-self: center;
+    max-width: 92%;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+}
+
+.cyp-msg-time {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-top: 3px;
+    display: block;
+}
+
+.cyp-msg-user .cyp-msg-time {
+    text-align: right;
+    color: #e0f2fe;
+}
+
+.cyp-chip-btn {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    background: #ffffff;
+    color: #334155;
+    transition: all 0.2s;
+}
+
+.cyp-chip-btn:hover {
+    background: #e0f2fe;
+    border-color: #7dd3fc;
+    color: #0284c7;
+}
+
+/* Typing Dots */
+.cyp-typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    width: fit-content;
+    margin-top: 4px;
+}
+
+.cyp-typing-indicator .dot {
+    width: 6px;
+    height: 6px;
+    background: #94a3b8;
+    border-radius: 50%;
+    animation: cypTyping 1.4s infinite ease-in-out both;
+}
+
+.cyp-typing-indicator .dot:nth-child(1) { animation-delay: -0.32s; }
+.cyp-typing-indicator .dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes cypTyping {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+@media (max-width: 575.98px) {
+    .cypilan-support-container {
+        bottom: 16px;
+        right: 16px;
+    }
+    .cyp-support-window {
+        bottom: 75px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+        height: 480px;
+    }
+}
+</style>
+
+<script>
+(function() {
+    // Only run if support widget is present
+    const container = document.getElementById('cypilanSupportWidget');
+    if (!container) return;
+
+    // Show container once loaded
+    container.style.display = 'block';
+
+    const launcher = document.getElementById('cypSupportLauncher');
+    const win = document.getElementById('cypSupportWindow');
+    const minimizeBtn = document.getElementById('cypSupportMinimizeBtn');
+    const endChatBtn = document.getElementById('cypSupportEndChatBtn');
+    const body = document.getElementById('cypSupportBody');
+    const messagesList = document.getElementById('cypSupportMessages');
+    const form = document.getElementById('cypSupportForm');
+    const input = document.getElementById('cypSupportInput');
+    const unreadBadge = document.getElementById('cypSupportUnreadBadge');
+    const typingInd = document.getElementById('cypSupportTyping');
+    const ratingScreen = document.getElementById('cypSupportRatingScreen');
+    const footer = document.getElementById('cypSupportFooter');
+    const submitRatingBtn = document.getElementById('cypSupportSubmitRatingBtn');
+    const newChatBtn = document.getElementById('cypSupportNewChatBtn');
+    const ratingComment = document.getElementById('cypSupportRatingComment');
+    const starEls = document.querySelectorAll('.cyp-star');
+
+    let isOpen = false;
+    let sessionToken = localStorage.getItem('cyp_support_token') || '';
+    let lastMessageId = 0;
+    let pollInterval = null;
+    let selectedRating = 5;
+    let currentStatus = 'waiting';
+
+    // Get CSRF Token
+    function getCsrf() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    // Toggle Chat Window
+    function toggleWindow(open) {
+        isOpen = (typeof open === 'boolean') ? open : !isOpen;
+        win.style.display = isOpen ? 'flex' : 'none';
+        if (isOpen) {
+            unreadBadge.style.display = 'none';
+            unreadBadge.textContent = '0';
+            scrollToBottom();
+            setTimeout(() => input.focus(), 150);
+            if (!sessionToken || lastMessageId === 0) {
+                initConversation();
+            }
+        }
+    }
+
+    launcher.addEventListener('click', () => toggleWindow());
+    minimizeBtn.addEventListener('click', () => toggleWindow(false));
+
+    // Star Rating click handling
+    starEls.forEach(star => {
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.getAttribute('data-val'), 10);
+            starEls.forEach(s => {
+                const val = parseInt(s.getAttribute('data-val'), 10);
+                if (val <= selectedRating) {
+                    s.classList.remove('fa-regular');
+                    s.classList.add('fa-solid');
+                } else {
+                    s.classList.remove('fa-solid');
+                    s.classList.add('fa-regular');
+                }
+            });
+        });
+    });
+
+    // Scroll to bottom helper
+    function scrollToBottom() {
+        body.scrollTop = body.scrollHeight;
+    }
+
+    // Format time
+    function formatTime(dateStr) {
+        try {
+            const d = new Date(dateStr);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch(e) {
+            return '';
+        }
+    }
+
+    // Render single message
+    function renderMessage(msg) {
+        const bubble = document.createElement('div');
+        const timeStr = formatTime(msg.created_at || new Date());
+
+        if (msg.sender_type === 'user') {
+            bubble.className = 'cyp-msg-bubble cyp-msg-user';
+            bubble.innerHTML = `<div>${escapeHtml(msg.message)}</div><span class="cyp-msg-time"><i class="fa-solid fa-check me-1" style="font-size: 0.6rem;"></i>${timeStr}</span>`;
+        } else if (msg.sender_type === 'admin') {
+            bubble.className = 'cyp-msg-bubble cyp-msg-admin';
+            bubble.innerHTML = `<div class="fw-bold text-primary mb-1" style="font-size: 0.72rem;"><i class="fa-solid fa-headset me-1"></i>${escapeHtml(msg.sender_name || 'Destek')}</div><div>${escapeHtml(msg.message)}</div><span class="cyp-msg-time text-muted">${timeStr}</span>`;
+        } else {
+            bubble.className = 'cyp-msg-bubble cyp-msg-system';
+            bubble.innerHTML = `<div>${escapeHtml(msg.message)}</div>`;
+        }
+
+        messagesList.appendChild(bubble);
+        if (msg.id > lastMessageId) lastMessageId = msg.id;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML.replace(/\n/g, '<br>');
+    }
+
+    // Initialize Conversation
+    async function initConversation() {
+        try {
+            const res = await fetch('/api/support/init', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCsrf(),
+                    'x-support-token': sessionToken
+                },
+                body: JSON.stringify({ session_token: sessionToken })
+            });
+            const data = await res.json();
+            if (data.success) {
+                sessionToken = data.sessionToken;
+                localStorage.setItem('cyp_support_token', sessionToken);
+                currentStatus = data.conversation.status;
+
+                messagesList.innerHTML = '';
+                if (Array.isArray(data.messages)) {
+                    data.messages.forEach(renderMessage);
+                }
+
+                if (currentStatus === 'closed') {
+                    showRatingScreen(true);
+                } else {
+                    showRatingScreen(false);
+                }
+
+                scrollToBottom();
+                startPolling();
+            }
+        } catch (err) {
+            console.error('Support init error:', err);
+        }
+    }
+
+    // Send Message
+    async function sendUserMessage(text, faqKey = null) {
+        if (!text && !faqKey) return;
+
+        // Render optimistic bubble
+        const tempMsg = {
+            sender_type: 'user',
+            message: text,
+            created_at: new Date()
+        };
+        renderMessage(tempMsg);
+        scrollToBottom();
+        input.value = '';
+
+        try {
+            const res = await fetch('/api/support/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCsrf(),
+                    'x-support-token': sessionToken
+                },
+                body: JSON.stringify({
+                    session_token: sessionToken,
+                    message: text,
+                    faq_key: faqKey
+                })
+            });
+            const data = await res.json();
+            if (data.success && data.message) {
+                if (data.message.id > lastMessageId) lastMessageId = data.message.id;
+            }
+        } catch (err) {
+            console.error('Support send error:', err);
+        }
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const txt = input.value.trim();
+        if (txt) sendUserMessage(txt);
+    });
+
+    // Quick FAQ chip clicks
+    document.querySelectorAll('.cyp-chip-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const faqKey = this.getAttribute('data-faq');
+            const label = this.textContent.trim();
+            sendUserMessage(label, faqKey);
+        });
+    });
+
+    // Polling for incoming messages
+    async function poll() {
+        if (!sessionToken) return;
+        try {
+            const res = await fetch(`/api/support/poll?token=${encodeURIComponent(sessionToken)}&after=${lastMessageId}`, {
+                headers: { 'x-support-token': sessionToken }
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (Array.isArray(data.messages) && data.messages.length > 0) {
+                    data.messages.forEach(renderMessage);
+                    scrollToBottom();
+
+                    // If window is closed, increment unread badge
+                    if (!isOpen) {
+                        const count = parseInt(unreadBadge.textContent, 10) + data.messages.length;
+                        unreadBadge.textContent = count;
+                        unreadBadge.style.display = 'inline-block';
+                    }
+                }
+
+                if (data.status === 'closed' && currentStatus !== 'closed') {
+                    currentStatus = 'closed';
+                    showRatingScreen(true);
+                }
+            }
+        } catch (err) {
+            // silent polling error
+        }
+    }
+
+    function startPolling() {
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(poll, 3500);
+    }
+
+    function showRatingScreen(show) {
+        if (show) {
+            ratingScreen.style.display = 'block';
+            footer.style.display = 'none';
+        } else {
+            ratingScreen.style.display = 'none';
+            footer.style.display = 'block';
+        }
+    }
+
+    // End Chat Button
+    endChatBtn.addEventListener('click', async () => {
+        if (!confirm('<%= t('support.confirm_close_chat') || 'Canlı destek görüşmesini sonlandırmak istiyor musunuz?' %>')) return;
+        try {
+            await fetch('/api/support/close', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCsrf(),
+                    'x-support-token': sessionToken
+                },
+                body: JSON.stringify({ session_token: sessionToken })
+            });
+            currentStatus = 'closed';
+            showRatingScreen(true);
+        } catch(err) {
+            console.error('End chat error:', err);
+        }
+    });
+
+    // Submit Rating
+    submitRatingBtn.addEventListener('click', async () => {
+        const comment = ratingComment.value.trim();
+        submitRatingBtn.disabled = true;
+        submitRatingBtn.textContent = '<%= t('common.loading') || 'Gönderiliyor...' %>';
+
+        try {
+            await fetch('/api/support/rate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCsrf(),
+                    'x-support-token': sessionToken
+                },
+                body: JSON.stringify({
+                    session_token: sessionToken,
+                    rating: selectedRating,
+                    comment
+                })
+            });
+
+            ratingScreen.innerHTML = `
+                <div class="py-4 text-center">
+                    <div class="text-success fs-1 mb-2"><i class="fa-solid fa-circle-check"></i></div>
+                    <h6 class="fw-bold"><%= t('support.thank_you_rating') || 'Teşekkür Ederiz!' %></h6>
+                    <p class="text-muted small mb-3"><%= t('support.rating_saved') || 'Geri bildiriminiz başarıyla kaydedildi.' %></p>
+                    <button type="button" id="cypRestartChatBtn" class="btn btn-outline-primary btn-sm rounded-pill px-4">
+                        <%= t('support.start_new_chat') || 'Yeni Sohbet Başlat' %>
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('cypRestartChatBtn').addEventListener('click', startNewChat);
+        } catch(err) {
+            console.error('Rating error:', err);
+            submitRatingBtn.disabled = false;
+            submitRatingBtn.textContent = '<%= t('support.submit_rating') || 'Değerlendirmeyi Gönder' %>';
+        }
+    });
+
+    function startNewChat() {
+        localStorage.removeItem('cyp_support_token');
+        sessionToken = '';
+        lastMessageId = 0;
+        messagesList.innerHTML = '';
+        showRatingScreen(false);
+        initConversation();
+    }
+
+    newChatBtn.addEventListener('click', startNewChat);
+
+    // Initial check for unread messages if user already has a token
+    if (sessionToken) {
+        poll();
+        startPolling();
+    }
+})();
+</script>

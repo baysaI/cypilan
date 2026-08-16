@@ -1,0 +1,658 @@
+<div class="container-fluid p-0">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1"><i class="fa-solid fa-headset text-primary me-2"></i>Canlı Destek Yönetimi</h1>
+            <p class="text-muted small mb-0">Ziyaretçiler ve kullanıcılarla anlık gerçek zamanlı mesajlaşma ve destek paneli.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+                <i class="fa-solid fa-circle text-success me-1 fa-fade" style="font-size: 0.6rem;"></i> Canlı Sistem Aktif
+            </span>
+        </div>
+    </div>
+
+    <!-- Top KPI Counters -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100 border-start border-4 border-danger">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Bekleyen Yanıt</span>
+                        <h3 class="fw-bold mb-0 text-danger" id="statWaiting"><%= stats.waiting %></h3>
+                    </div>
+                    <div class="rounded-circle bg-danger-subtle text-danger d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="fa-solid fa-clock-rotate-left fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100 border-start border-4 border-success">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Aktif Görüşmeler</span>
+                        <h3 class="fw-bold mb-0 text-success" id="statActive"><%= stats.active %></h3>
+                    </div>
+                    <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="fa-solid fa-comments fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100 border-start border-4 border-secondary">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Tamamlananlar</span>
+                        <h3 class="fw-bold mb-0 text-secondary" id="statClosed"><%= stats.closed %></h3>
+                    </div>
+                    <div class="rounded-circle bg-secondary-subtle text-secondary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="fa-solid fa-circle-check fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100 border-start border-4 border-warning">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Memnuniyet Puanı</span>
+                        <h3 class="fw-bold mb-0 text-warning" id="statRating"><%= stats.avgRating %> <small class="text-muted fs-6">/ 5</small></h3>
+                    </div>
+                    <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="fa-solid fa-star fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2-Column Live Console -->
+    <div class="row g-3">
+        <!-- Left Column: Conversations List -->
+        <div class="col-12 col-lg-5 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 d-flex flex-column" style="min-height: 600px; max-height: 750px;">
+                <div class="p-3 border-bottom">
+                    <!-- Search Input -->
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="adminSearchInput" class="form-control bg-light border-start-0" placeholder="İsim, e-posta veya mesaj ara..." value="<%= searchQuery %>">
+                    </div>
+
+                    <!-- Status Filter Tabs -->
+                    <ul class="nav nav-pills nav-fill gap-1 small" id="supportStatusTabs">
+                        <li class="nav-item">
+                            <button class="nav-link rounded-pill py-1 px-2 <%= currentStatus === 'all' ? 'active' : '' %>" data-status="all">Tümü</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-pill py-1 px-2 <%= currentStatus === 'waiting' ? 'active' : '' %>" data-status="waiting">
+                                Bekleyen <% if (stats.waiting > 0) { %><span class="badge bg-danger rounded-pill ms-1"><%= stats.waiting %></span><% } %>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-pill py-1 px-2 <%= currentStatus === 'active' ? 'active' : '' %>" data-status="active">Aktif</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-pill py-1 px-2 <%= currentStatus === 'closed' ? 'active' : '' %>" data-status="closed">Kapalı</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- List Items Container -->
+                <div class="flex-grow-1 overflow-y-auto p-2" id="adminConversationsList">
+                    <% if (conversations && conversations.length > 0) { %>
+                        <% conversations.forEach(function(conv) { %>
+                            <div class="admin-conv-card p-3 rounded-3 mb-2 border transition-all" data-id="<%= conv.id %>" style="cursor: pointer;">
+                                <div class="d-flex align-items-start gap-2">
+                                    <div class="position-relative flex-shrink-0">
+                                        <% if (conv.registered_user_avatar) { %>
+                                            <img src="<%= conv.registered_user_avatar %>" class="rounded-circle object-fit-cover border" width="40" height="40" alt="Avatar">
+                                        <% } else { %>
+                                            <div class="rounded-circle bg-light text-primary border d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                                <%= (conv.user_name || 'Z')[0].toUpperCase() %>
+                                            </div>
+                                        <% } %>
+                                        <% if (conv.status === 'active') { %>
+                                            <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-white rounded-circle"></span>
+                                        <% } else if (conv.status === 'waiting') { %>
+                                            <span class="position-absolute bottom-0 end-0 p-1 bg-danger border border-white rounded-circle"></span>
+                                        <% } %>
+                                    </div>
+
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                            <span class="fw-bold text-truncate small text-dark"><%= conv.user_name || 'Ziyaretçi' %></span>
+                                            <span class="text-muted" style="font-size: 0.68rem;"><%= helpers.formatRelativeTime(conv.last_message_at) %></span>
+                                        </div>
+
+                                        <p class="text-muted small text-truncate mb-1" style="font-size: 0.78rem;">
+                                            <%= conv.last_message || 'Yeni görüşme başlatıldı' %>
+                                        </p>
+
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <% if (conv.user_id) { %>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">Üye</span>
+                                            <% } else { %>
+                                                <span class="badge bg-light text-muted border" style="font-size: 0.65rem;">Misafir</span>
+                                            <% } %>
+
+                                            <% if (conv.unread_admin_count > 0) { %>
+                                                <span class="badge bg-danger rounded-pill"><%= conv.unread_admin_count %> Yeni</span>
+                                            <% } else { %>
+                                                <% if (conv.status === 'waiting') { %>
+                                                    <span class="badge bg-danger-subtle text-danger">Bekliyor</span>
+                                                <% } else if (conv.status === 'active') { %>
+                                                    <span class="badge bg-success-subtle text-success">Aktif</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-secondary-subtle text-secondary">Kapalı</span>
+                                                <% } %>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-regular fa-comments fs-2 mb-2 opacity-50"></i>
+                            <p class="small mb-0">Henüz görüşme bulunmuyor.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Active Conversation Pane -->
+        <div class="col-12 col-lg-7 col-xl-8">
+            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 d-flex flex-column" style="min-height: 600px; max-height: 750px;">
+                <!-- Empty State when no conversation selected -->
+                <div id="adminChatEmptyState" class="d-flex flex-column align-items-center justify-content-center flex-grow-1 p-5 text-center text-muted">
+                    <div class="rounded-circle bg-light p-4 mb-3">
+                        <i class="fa-solid fa-headset fs-1 text-primary opacity-50"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">Görüşme Seçin</h5>
+                    <p class="small text-muted mb-0" style="max-width: 320px;">
+                        Detayları görüntülemek ve ziyaretçiye anında yanıt vermek için soldaki listeden bir sohbet seçin.
+                    </p>
+                </div>
+
+                <!-- Active Chat Pane -->
+                <div id="adminChatActivePane" class="d-flex flex-column h-100" style="display: none !important;">
+                    <!-- Active Chat Header -->
+                    <div class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2 bg-light rounded-top-4">
+                        <div class="d-flex align-items-center gap-2 min-w-0">
+                            <div id="adminActiveAvatar" class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                Z
+                            </div>
+                            <div class="text-truncate">
+                                <div class="d-flex align-items-center gap-2">
+                                    <h6 class="mb-0 fw-bold text-truncate" id="adminActiveName">Ziyaretçi</h6>
+                                    <span id="adminActiveUserBadge" class="badge bg-light text-muted border">Misafir</span>
+                                </div>
+                                <small class="text-muted d-block" id="adminActiveEmail">-</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Status Dropdown -->
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill px-3" type="button" id="adminStatusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span id="adminStatusLabel">Durum</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                    <li><a class="dropdown-item small" href="#" data-set-status="waiting"><i class="fa-solid fa-clock text-danger me-2"></i>Beklemede Yap</a></li>
+                                    <li><a class="dropdown-item small" href="#" data-set-status="active"><i class="fa-solid fa-circle-play text-success me-2"></i>Aktif Yap</a></li>
+                                    <li><a class="dropdown-item small" href="#" data-set-status="closed"><i class="fa-solid fa-circle-check text-secondary me-2"></i>Görüşmeyi Sonlandır</a></li>
+                                </ul>
+                            </div>
+
+                            <button type="button" id="adminDeleteChatBtn" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Görüşmeyi Sil">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Messages Log Area -->
+                    <div id="adminMessagesLog" class="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-2 bg-light-subtle" style="background-color: #f8fafc;">
+                        <!-- Messages loaded dynamically -->
+                    </div>
+
+                    <!-- Canned Responses (Hazır Şablonlar) -->
+                    <div class="px-3 pt-2 pb-1 border-top bg-white">
+                        <div class="d-flex align-items-center gap-1 overflow-x-auto py-1" style="white-space: nowrap;">
+                            <span class="text-muted small me-1" style="font-size: 0.72rem;"><i class="fa-regular fa-bookmark me-1"></i>Şablonlar:</span>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill canned-btn" style="font-size: 0.72rem;" data-text="Merhaba, CYPILAN Canlı Destek ekibine hoş geldiniz! Size nasıl yardımcı olabilirim?">
+                                👋 Karşılama
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill canned-btn" style="font-size: 0.72rem;" data-text="Talebinizi aldık, ilgili departmanımız konuyu incelemektedir. En kısa sürede geri dönüş yapacağız.">
+                                ⏳ İncelemede
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill canned-btn" style="font-size: 0.72rem;" data-text="İlanınızı kontrol ettik; onay kriterlerine uygun olarak yayına alınmıştır.">
+                                ✅ İlan Onaylandı
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill canned-btn" style="font-size: 0.72rem;" data-text="Bizimle iletişime geçtiğiniz için teşekkür eder, iyi günler dileriz!">
+                                🙏 Kapanış
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Reply Form -->
+                    <div class="p-3 border-top bg-white rounded-bottom-4">
+                        <form id="adminReplyForm" class="d-flex align-items-end gap-2 m-0">
+                            <textarea id="adminReplyInput" class="form-control rounded-3" rows="2" placeholder="Yanıtınızı yazın (Göndermek için Enter, yeni satır için Shift+Enter)..." required></textarea>
+                            <button type="submit" id="adminSendBtn" class="btn btn-primary rounded-3 px-4 h-100 d-flex align-items-center justify-content-center fw-bold">
+                                <i class="fa-solid fa-paper-plane me-2"></i>Gönder
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-conv-card {
+    border-color: #e2e8f0 !important;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+}
+.admin-conv-card:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1 !important;
+}
+.admin-conv-card.active-chat {
+    background-color: #e0f2fe !important;
+    border-color: #0284c7 !important;
+}
+
+.admin-msg-bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+.admin-msg-user {
+    align-self: flex-start;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.admin-msg-admin {
+    align-self: flex-end;
+    background: #0284c7;
+    color: #ffffff;
+    border-bottom-right-radius: 3px;
+}
+.admin-msg-system {
+    align-self: center;
+    max-width: 85%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.78rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+    padding: 6px 12px;
+}
+.admin-msg-time {
+    font-size: 0.68rem;
+    margin-top: 4px;
+    display: block;
+}
+.admin-msg-admin .admin-msg-time {
+    color: #e0f2fe;
+    text-align: right;
+}
+.btn-xs {
+    padding: 2px 8px;
+    font-size: 0.72rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let activeConversationId = null;
+    let lastAdminMsgId = 0;
+    let pollInterval = null;
+    let listPollInterval = null;
+    let currentFilterStatus = '<%= currentStatus %>';
+
+    const searchInput = document.getElementById('adminSearchInput');
+    const statusTabs = document.getElementById('supportStatusTabs');
+    const conversationsList = document.getElementById('adminConversationsList');
+    const emptyState = document.getElementById('adminChatEmptyState');
+    const activePane = document.getElementById('adminChatActivePane');
+    const messagesLog = document.getElementById('adminMessagesLog');
+    const replyForm = document.getElementById('adminReplyForm');
+    const replyInput = document.getElementById('adminReplyInput');
+    const activeName = document.getElementById('adminActiveName');
+    const activeEmail = document.getElementById('adminActiveEmail');
+    const activeAvatar = document.getElementById('adminActiveAvatar');
+    const activeUserBadge = document.getElementById('adminActiveUserBadge');
+    const statusLabel = document.getElementById('adminStatusLabel');
+    const deleteBtn = document.getElementById('adminDeleteChatBtn');
+
+    function getCsrf() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    // Tab clicks
+    statusTabs.querySelectorAll('.nav-link').forEach(btn => {
+        btn.addEventListener('click', function() {
+            statusTabs.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilterStatus = this.getAttribute('data-status');
+            fetchConversationsList();
+        });
+    });
+
+    // Search input
+    let searchDebounce = null;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(fetchConversationsList, 300);
+    });
+
+    // Canned responses
+    document.querySelectorAll('.canned-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const txt = this.getAttribute('data-text');
+            replyInput.value = txt;
+            replyInput.focus();
+        });
+    });
+
+    // Enter to submit in textarea
+    replyInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            replyForm.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    // Fetch conversations list via AJAX
+    async function fetchConversationsList() {
+        try {
+            const q = searchInput.value.trim();
+            const res = await fetch(`/admin/canli-destek/conversations?status=${currentFilterStatus}&search=${encodeURIComponent(q)}`);
+            const data = await res.json();
+            if (data.success && Array.isArray(data.data)) {
+                renderConversationsList(data.data);
+            }
+        } catch (err) {
+            console.error('List error:', err);
+        }
+    }
+
+    function renderConversationsList(items) {
+        if (items.length === 0) {
+            conversationsList.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-regular fa-comments fs-2 mb-2 opacity-50"></i>
+                    <p class="small mb-0">Eşleşen görüşme bulunamadı.</p>
+                </div>
+            `;
+            return;
+        }
+
+        conversationsList.innerHTML = items.map(conv => {
+            const isSelected = activeConversationId === conv.id ? 'active-chat' : '';
+            const initial = (conv.user_name || 'Z')[0].toUpperCase();
+            let statusBadge = '';
+            if (conv.unread_admin_count > 0) {
+                statusBadge = `<span class="badge bg-danger rounded-pill">${conv.unread_admin_count} Yeni</span>`;
+            } else if (conv.status === 'waiting') {
+                statusBadge = `<span class="badge bg-danger-subtle text-danger">Bekliyor</span>`;
+            } else if (conv.status === 'active') {
+                statusBadge = `<span class="badge bg-success-subtle text-success">Aktif</span>`;
+            } else {
+                statusBadge = `<span class="badge bg-secondary-subtle text-secondary">Kapalı</span>`;
+            }
+
+            const avatarHtml = conv.registered_user_avatar
+                ? `<img src="${conv.registered_user_avatar}" class="rounded-circle object-fit-cover border" width="40" height="40">`
+                : `<div class="rounded-circle bg-light text-primary border d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">${initial}</div>`;
+
+            return `
+                <div class="admin-conv-card p-3 rounded-3 mb-2 border transition-all ${isSelected}" data-id="${conv.id}" style="cursor: pointer;">
+                    <div class="d-flex align-items-start gap-2">
+                        <div class="position-relative flex-shrink-0">
+                            ${avatarHtml}
+                            <span class="position-absolute bottom-0 end-0 p-1 ${conv.status === 'active' ? 'bg-success' : (conv.status === 'waiting' ? 'bg-danger' : 'bg-secondary')} border border-white rounded-circle"></span>
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                <span class="fw-bold text-truncate small text-dark">${escapeHtml(conv.user_name || 'Ziyaretçi')}</span>
+                                <span class="text-muted" style="font-size: 0.68rem;">${formatTime(conv.last_message_at)}</span>
+                            </div>
+                            <p class="text-muted small text-truncate mb-1" style="font-size: 0.78rem;">
+                                ${escapeHtml(conv.last_message || 'Yeni görüşme')}
+                            </p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="badge ${conv.user_id ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border'}" style="font-size: 0.65rem;">
+                                    ${conv.user_id ? 'Üye' : 'Misafir'}
+                                </span>
+                                ${statusBadge}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        bindCardClicks();
+    }
+
+    function bindCardClicks() {
+        document.querySelectorAll('.admin-conv-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const id = parseInt(this.getAttribute('data-id'), 10);
+                selectConversation(id);
+            });
+        });
+    }
+    bindCardClicks();
+
+    // Select Conversation
+    async function selectConversation(id) {
+        activeConversationId = id;
+        lastAdminMsgId = 0;
+
+        document.querySelectorAll('.admin-conv-card').forEach(c => {
+            if (parseInt(c.getAttribute('data-id'), 10) === id) {
+                c.classList.add('active-chat');
+            } else {
+                c.classList.remove('active-chat');
+            }
+        });
+
+        emptyState.style.setProperty('display', 'none', 'important');
+        activePane.style.setProperty('display', 'flex', 'important');
+
+        try {
+            const res = await fetch(`/admin/canli-destek/messages/${id}`);
+            const data = await res.json();
+            if (data.success && data.conversation) {
+                const conv = data.conversation;
+                activeName.textContent = conv.user_name || 'Ziyaretçi';
+                activeEmail.textContent = conv.user_email || (conv.user_id ? 'Kayıtlı Kullanıcı' : 'Misafir Ziyaretçi');
+                activeAvatar.textContent = (conv.user_name || 'Z')[0].toUpperCase();
+                activeUserBadge.textContent = conv.user_id ? 'Kayıtlı Üye' : 'Misafir';
+                activeUserBadge.className = conv.user_id ? 'badge bg-primary-subtle text-primary border' : 'badge bg-light text-muted border';
+
+                updateStatusBadgeUI(conv.status);
+
+                messagesLog.innerHTML = '';
+                if (Array.isArray(data.messages)) {
+                    data.messages.forEach(renderAdminMessage);
+                }
+                scrollChatBottom();
+                setTimeout(() => replyInput.focus(), 100);
+            }
+        } catch (err) {
+            console.error('Fetch chat error:', err);
+        }
+    }
+
+    function updateStatusBadgeUI(status) {
+        if (status === 'waiting') {
+            statusLabel.innerHTML = '<i class="fa-solid fa-clock text-danger me-1"></i>Beklemede';
+        } else if (status === 'active') {
+            statusLabel.innerHTML = '<i class="fa-solid fa-circle-play text-success me-1"></i>Aktif';
+        } else {
+            statusLabel.innerHTML = '<i class="fa-solid fa-circle-check text-secondary me-1"></i>Tamamlandı';
+        }
+    }
+
+    function renderAdminMessage(msg) {
+        const bubble = document.createElement('div');
+        const timeStr = formatTime(msg.created_at || new Date());
+
+        if (msg.sender_type === 'user') {
+            bubble.className = 'admin-msg-bubble admin-msg-user';
+            bubble.innerHTML = `
+                <div class="fw-bold text-secondary mb-1" style="font-size: 0.72rem;">${escapeHtml(msg.sender_name || 'Ziyaretçi')}</div>
+                <div>${escapeHtml(msg.message)}</div>
+                <span class="admin-msg-time text-muted">${timeStr}</span>
+            `;
+        } else if (msg.sender_type === 'admin') {
+            bubble.className = 'admin-msg-bubble admin-msg-admin';
+            bubble.innerHTML = `
+                <div class="fw-bold mb-1" style="font-size: 0.72rem; color: #bae6fd;">${escapeHtml(msg.sender_name || 'Destek')}</div>
+                <div>${escapeHtml(msg.message)}</div>
+                <span class="admin-msg-time">${timeStr}</span>
+            `;
+        } else {
+            bubble.className = 'admin-msg-bubble admin-msg-system';
+            bubble.innerHTML = `<div>${escapeHtml(msg.message)}</div>`;
+        }
+
+        messagesLog.appendChild(bubble);
+        if (msg.id > lastAdminMsgId) lastAdminMsgId = msg.id;
+    }
+
+    function scrollChatBottom() {
+        messagesLog.scrollTop = messagesLog.scrollHeight;
+    }
+
+    function formatTime(dStr) {
+        try {
+            return new Date(dStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch(e) { return ''; }
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML.replace(/\n/g, '<br>');
+    }
+
+    // Submit Reply
+    replyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!activeConversationId) return;
+
+        const text = replyInput.value.trim();
+        if (!text) return;
+
+        replyInput.value = '';
+
+        try {
+            const res = await fetch(`/admin/canli-destek/reply/${activeConversationId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-csrf-token': getCsrf()
+                },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await res.json();
+            if (data.success && data.message) {
+                renderAdminMessage(data.message);
+                scrollChatBottom();
+                updateStatusBadgeUI('active');
+            }
+        } catch (err) {
+            console.error('Send error:', err);
+        }
+    });
+
+    // Set Status dropdown
+    document.querySelectorAll('[data-set-status]').forEach(item => {
+        item.addEventListener('click', async function(e) {
+            e.preventDefault();
+            if (!activeConversationId) return;
+            const newStatus = this.getAttribute('data-set-status');
+
+            try {
+                const res = await fetch(`/admin/canli-destek/status/${activeConversationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-csrf-token': getCsrf()
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    updateStatusBadgeUI(newStatus);
+                    fetchConversationsList();
+                }
+            } catch(err) {
+                console.error('Status error:', err);
+            }
+        });
+    });
+
+    // Delete Conversation
+    deleteBtn.addEventListener('click', async () => {
+        if (!activeConversationId) return;
+        if (!confirm('Bu görüşmeyi ve tüm mesajlarını kalıcı olarak silmek istediğinize emin misiniz?')) return;
+
+        try {
+            const res = await fetch(`/admin/canli-destek/${activeConversationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'x-csrf-token': getCsrf()
+                }
+            });
+            const data = await res.json();
+            if (data.success) {
+                activeConversationId = null;
+                activePane.style.setProperty('display', 'none', 'important');
+                emptyState.style.setProperty('display', 'flex', 'important');
+                fetchConversationsList();
+            }
+        } catch(err) {
+            console.error('Delete error:', err);
+        }
+    });
+
+    // Real-time Chat Poll
+    async function pollActiveChat() {
+        if (!activeConversationId) return;
+        try {
+            const res = await fetch(`/admin/canli-destek/messages/${activeConversationId}?after=${lastAdminMsgId}`);
+            const data = await res.json();
+            if (data.success && Array.isArray(data.messages) && data.messages.length > 0) {
+                data.messages.forEach(renderAdminMessage);
+                scrollChatBottom();
+            }
+        } catch (err) {}
+    }
+
+    // Auto poll intervals
+    setInterval(pollActiveChat, 3000);
+    setInterval(fetchConversationsList, 6000);
+});
+</script>

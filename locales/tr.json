@@ -1222,5 +1222,26 @@
     "warning_suspended_title": "Hesabınız Askıya Alındı",
     "warning_title": "İçeriğiniz / Hesabınız Uyarı Aldı",
     "browse_listings": "İlanları Keşfet"
+  },
+  "support": {
+    "launcher_title": "Canlı Destek",
+    "live_support": "Canlı Destek",
+    "header_title": "CYPILAN Canlı Destek",
+    "online_status": "Çevrimiçi • 1 dk içinde yanıt",
+    "end_chat": "Görüşmeyi Sonlandır",
+    "quick_topics": "Hızlı Konular:",
+    "chip_how_to_post": "İlan Nasıl Verilir?",
+    "chip_featured": "Öne Çıkarma",
+    "chip_cv": "Kariyer & CV",
+    "chip_corporate": "Kurumsal Üyelik",
+    "rate_title": "Görüşmeyi Değerlendirin",
+    "rate_desc": "Destek deneyiminizi 1-5 yıldız arasında puanlayabilirsiniz.",
+    "rate_comment_placeholder": "Görüş veya öneriniz (opsiyonel)...",
+    "submit_rating": "Değerlendirmeyi Gönder",
+    "start_new_chat": "Yeni Sohbet Başlat",
+    "input_placeholder": "Mesajınızı yazın...",
+    "confirm_close_chat": "Canlı destek görüşmesini sonlandırmak istiyor musunuz?",
+    "thank_you_rating": "Teşekkür Ederiz!",
+    "rating_saved": "Geri bildiriminiz başarıyla kaydedildi."
   }
 }

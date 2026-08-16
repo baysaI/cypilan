@@ -1222,5 +1222,26 @@
     "warning_suspended_title": "حساب شما به حالت تعلیق درآمد",
     "warning_title": "محتوا / حساب شما اخطار دریافت کرد",
     "browse_listings": "مشاهده آگهی‌ها"
+  },
+  "support": {
+    "launcher_title": "پشتیبانی زنده",
+    "live_support": "پشتیبانی زنده",
+    "header_title": "پشتیبانی زنده سیپلان",
+    "online_status": "آنلاین • پاسخ در ۱ دقیقه",
+    "end_chat": "پایان گفتگو",
+    "quick_topics": "موضوعات سریع:",
+    "chip_how_to_post": "چگونه آگهی ثبت کنیم؟",
+    "chip_featured": "آگهی ویژه",
+    "chip_cv": "کاریابی و رزومه",
+    "chip_corporate": "عضویت سازمانی",
+    "rate_title": "ارزیابی گفتگو",
+    "rate_desc": "می‌توانید به تجربه پشتیبانی خود بین ۱ تا ۵ ستاره امتیاز دهید.",
+    "rate_comment_placeholder": "نظرات یا پیشنهادات شما (اختیاری)...",
+    "submit_rating": "ارسال امتیاز",
+    "start_new_chat": "شروع گفتگوی جدید",
+    "input_placeholder": "پیام خود را بنویسید...",
+    "confirm_close_chat": "آیا می‌خواهید گفتگوی پشتیبانی زنده را پایان دهید؟",
+    "thank_you_rating": "متشکریم!",
+    "rating_saved": "بازخورد شما با موفقیت ثبت شد."
   }
 }

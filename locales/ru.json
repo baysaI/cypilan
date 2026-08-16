@@ -1222,5 +1222,26 @@
     "warning_suspended_title": "Ваш аккаунт заблокирован",
     "warning_title": "Ваш контент / аккаунт получил предупреждение",
     "browse_listings": "Смотреть объявления"
+  },
+  "support": {
+    "launcher_title": "Живая поддержка",
+    "live_support": "Живая поддержка",
+    "header_title": "CYPILAN Живая поддержка",
+    "online_status": "В сети • Ответ в течение 1 мин",
+    "end_chat": "Завершить чат",
+    "quick_topics": "Быстрые темы:",
+    "chip_how_to_post": "Как подать объявление?",
+    "chip_featured": "Выделение",
+    "chip_cv": "Карьера и резюме",
+    "chip_corporate": "Корпоративное членство",
+    "rate_title": "Оцените консультацию",
+    "rate_desc": "Вы можете оценить качество поддержки от 1 до 5 звезд.",
+    "rate_comment_placeholder": "Ваш отзыв или предложения (необязательно)...",
+    "submit_rating": "Отправить оценку",
+    "start_new_chat": "Начать новый чат",
+    "input_placeholder": "Введите ваше сообщение...",
+    "confirm_close_chat": "Вы действительно хотите завершить сеанс поддержки?",
+    "thank_you_rating": "Спасибо!",
+    "rating_saved": "Ваш отзыв успешно сохранен."
   }
 }

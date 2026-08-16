@@ -3,6 +3,7 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const serviceController = require('../controllers/serviceController');
 const maintenanceController = require('../controllers/maintenanceController');
+const supportController = require('../controllers/supportController');
 const { isAuthenticated, isAdmin } = require('../middlewares/auth');
 
 router.use(isAuthenticated, isAdmin);
@@ -12,13 +13,20 @@ router.use(isAuthenticated, isAdmin);
 router.use(async (req, res, next) => {
     try {
         const ServiceRequest = require('../models/ServiceRequest');
+        const Support = require('../models/Support');
         const Setting = require('../models/Setting');
-        res.locals.pendingServices = await ServiceRequest.countPending();
+        const [pendingServices, pendingSupport] = await Promise.all([
+            ServiceRequest.countPending(),
+            Support.countWaiting()
+        ]);
+        res.locals.pendingServices = pendingServices;
+        res.locals.pendingSupport = pendingSupport;
         res.locals.maintenanceOn = Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false);
         res.locals.unlimitedOn = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
     } catch (error) {
-        console.error('Pending service count error:', error);
+        console.error('Pending admin badge error:', error);
         res.locals.pendingServices = 0;
+        res.locals.pendingSupport = 0;
     }
     next();
 });
@@ -46,5 +54,13 @@ router.post('/sinirsiz-ilan', maintenanceController.updateUnlimited);
 
 router.get('/hizmet-talepleri', serviceController.adminQueue);
 router.post('/hizmet-talepleri/:id/durum', serviceController.adminSetStatus);
+
+router.get('/canli-destek', supportController.adminPanel);
+router.get('/canli-destek/conversations', supportController.adminListConversations);
+router.get('/canli-destek/messages/:id', supportController.adminGetMessages);
+router.post('/canli-destek/reply/:id', supportController.adminReply);
+router.post('/canli-destek/status/:id', supportController.adminSetStatus);
+router.delete('/canli-destek/:id', supportController.adminDeleteConversation);
+router.post('/canli-destek/sil/:id', supportController.adminDeleteConversation);
 
 module.exports = router;

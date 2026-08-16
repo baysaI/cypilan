@@ -61,6 +61,42 @@ const COLUMN_MIGRATIONS = [
 const columnsOf = (db, table) => db.pragma(`table_info(${table})`).map((column) => column.name);
 
 const applyColumnMigrations = (db) => {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS support_conversations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_token TEXT NOT NULL UNIQUE,
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      user_name TEXT,
+      user_email TEXT,
+      status TEXT DEFAULT 'waiting',
+      assigned_admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      rating INTEGER,
+      rating_comment TEXT,
+      unread_user_count INTEGER DEFAULT 0,
+      unread_admin_count INTEGER DEFAULT 0,
+      last_message TEXT,
+      last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_support_conversations_token ON support_conversations(session_token);
+    CREATE INDEX IF NOT EXISTS idx_support_conversations_status ON support_conversations(status, updated_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_support_conversations_user ON support_conversations(user_id);
+
+    CREATE TABLE IF NOT EXISTS support_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      conversation_id INTEGER NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+      sender_type TEXT NOT NULL,
+      sender_id INTEGER,
+      sender_name TEXT NOT NULL,
+      message TEXT NOT NULL,
+      is_read INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_support_messages_conv ON support_messages(conversation_id, created_at ASC);
+    CREATE INDEX IF NOT EXISTS idx_support_messages_read ON support_messages(conversation_id, is_read);
+  `);
+
   COLUMN_MIGRATIONS.forEach(({ table, column, ddl }) => {
     const existing = columnsOf(db, table);
     if (existing.length > 0 && !existing.includes(column)) {
