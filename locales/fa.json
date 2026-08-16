@@ -470,6 +470,7 @@
     "user_not_found": "کاربر پیدا نشد.",
     "user_suspended": "کاربر تعلیق شد.",
     "user_unblocked": "کاربر رفع انسداد شده است.",
+    "user_updated": "اطلاعات کاربر با موفقیت به روز شد.",
     "warning_issued": "اخطار ارسال شد.",
     "warning_issued_suspended": "اخطار ارسال شد و با رسیدن به سقف، حساب معلق شد.",
     "warning_revoked": "اخطار برداشته شد.",

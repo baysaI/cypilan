@@ -80,10 +80,20 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                     <% } %>
                                 </td>
                                 <td class="pe-3 text-end text-nowrap">
+                                    <button class="btn btn-sm btn-outline-primary btn-edit-user me-1" type="button"
+                                            data-id="<%= u.id %>"
+                                            data-name="<%= u.full_name || '' %>"
+                                            data-email="<%= u.email || '' %>"
+                                            data-phone="<%= u.phone || '' %>"
+                                            data-role="<%= u.role || 'user' %>"
+                                            data-company="<%= u.company_name || '' %>"
+                                            title="Düzenle">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
                                     <% if (u.id === activeAdminUser.id) { %>
-                                        <span class="text-muted small">siz</span>
+                                        <span class="text-muted small ms-1">(Siz)</span>
                                     <% } else { %>
-                                        <button class="btn btn-sm btn-outline-warning" type="button"
+                                        <button class="btn btn-sm btn-outline-warning me-1" type="button"
                                                 data-bs-toggle="collapse" data-bs-target="#warnForm<%= u.id %>">
                                             Uyar
                                         </button>
@@ -128,3 +138,88 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
 </div>
 
 <%- include('_pagination', { pagination: pag, baseUrl: '/admin/users', query: f }) %>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="editUserForm" action="" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="_method" value="PUT">
+                <div class="modal-header">
+                    <h5 class="modal-title fs-6 fw-bold" id="editUserModalLabel"><i class="fa-solid fa-user-gear me-2 text-primary"></i>Kullanıcı Bilgilerini Düzenle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">Ad Soyad</label>
+                        <input type="text" name="fullName" id="editFullName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">E-posta Adresi</label>
+                        <input type="email" name="email" id="editEmail" class="form-control" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-medium">Telefon</label>
+                            <input type="text" name="phone" id="editPhone" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-medium">Hesap Rolü</label>
+                            <select name="role" id="editRole" class="form-select" required>
+                                <option value="user">Bireysel Kullanıcı</option>
+                                <option value="business">Kurumsal Hesabı</option>
+                                <option value="agent">Emlak / Acente Danışmanı</option>
+                                <option value="admin">Yönetici (Admin)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">Firma Adı (Kurumsal/Acente ise)</label>
+                        <input type="text" name="companyName" id="editCompanyName" class="form-control">
+                    </div>
+                    <hr class="my-3">
+                    <div class="mb-2">
+                        <label class="form-label small fw-medium text-danger"><i class="fa-solid fa-key me-1"></i>Yeni Şifre Belirle (Opsiyonel)</label>
+                        <input type="password" name="password" id="editPassword" class="form-control" placeholder="Değiştirmek istemiyorsanız boş bırakın">
+                        <div class="form-text small">Admin müdahalesi ile kullanıcının şifresini sıfırlamak için buraya yeni şifre yazın.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary fw-medium">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const editModalEl = document.getElementById('editUserModal');
+    if (!editModalEl) return;
+    const editModal = new bootstrap.Modal(editModalEl);
+    const editForm = document.getElementById('editUserForm');
+
+    document.querySelectorAll('.btn-edit-user').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            const email = this.getAttribute('data-email');
+            const phone = this.getAttribute('data-phone');
+            const role = this.getAttribute('data-role');
+            const company = this.getAttribute('data-company');
+
+            editForm.action = '/admin/users/' + id;
+            document.getElementById('editFullName').value = name;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editPhone').value = phone;
+            document.getElementById('editRole').value = role;
+            document.getElementById('editCompanyName').value = company;
+            document.getElementById('editPassword').value = '';
+
+            editModal.show();
+        });
+    });
+});
+</script>

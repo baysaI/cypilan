@@ -202,7 +202,7 @@ const toggleListingStatus = async (req, res) => {
             const owner = await User.findById(listingObj.user_id);
             if (owner && owner.email) {
                 const reason = req.body.reason || req.body.rejection_reason || null;
-                const listingUrl = `${mailer.APP_URL}/listings/${id}`;
+                const listingUrl = `${mailer.baseUrlFor(req)}/listings/${id}`;
                 mailer.sendListingStatusEmail({
                     to: owner.email,
                     listingTitle: listingObj.title,
@@ -392,6 +392,62 @@ const revokeWarning = async (req, res) => {
     }
 };
 
+const updateUser = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const { fullName, phone, role, companyName, password } = req.body;
+        const email = String(req.body.email || '').trim().toLowerCase();
+
+        const user = await User.findById(id);
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        const { isValidEmail, isValidPassword } = require('../utils/validators');
+
+        if (!email || !isValidEmail(email)) {
+            req.flash('error', 'flash.invalid_email');
+            return res.redirect('/admin/users');
+        }
+
+        const emailTaken = await User.isEmailTaken(email, id);
+        if (emailTaken) {
+            req.flash('error', 'flash.email_taken');
+            return res.redirect('/admin/users');
+        }
+
+        const allowedRoles = ['user', 'business', 'agent', 'admin'];
+        const targetRole = allowedRoles.includes(role) ? role : user.role;
+
+        const updateData = {
+            full_name: String(fullName || user.full_name).trim(),
+            email,
+            phone: phone ? String(phone).trim() : null,
+            role: targetRole,
+            company_name: companyName ? String(companyName).trim() : null
+        };
+
+        await User.update(id, updateData);
+
+        if (password && String(password).trim().length > 0) {
+            const cleanPass = String(password).trim();
+            if (!isValidPassword(cleanPass)) {
+                req.flash('error', 'flash.weak_password');
+                return res.redirect('/admin/users');
+            }
+            await User.setPassword(id, cleanPass);
+        }
+
+        req.flash('success', 'flash.user_updated');
+        res.redirect(req.get('referer') || '/admin/users');
+    } catch (error) {
+        console.error('Admin Update User Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/users');
+    }
+};
+
 const analytics = async (req, res) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
@@ -429,6 +485,7 @@ module.exports = {
     toggleListingStatus,
     deleteListing,
     toggleUserStatus,
+    updateUser,
     resolveReport,
     issueWarning,
     revokeWarning,

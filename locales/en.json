@@ -470,6 +470,7 @@
     "user_not_found": "User not found.",
     "user_suspended": "The user was suspended.",
     "user_unblocked": "The user has been unblocked.",
+    "user_updated": "User information has been updated successfully.",
     "warning_issued": "The warning has been sent.",
     "warning_issued_suspended": "The warning was sent and the account was suspended on reaching the limit.",
     "warning_revoked": "The warning has been lifted.",

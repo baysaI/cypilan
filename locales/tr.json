@@ -470,6 +470,7 @@
     "user_not_found": "Kullanıcı bulunamadı.",
     "user_suspended": "Kullanıcı askıya alındı.",
     "user_unblocked": "Kullanıcının engeli kaldırıldı.",
+    "user_updated": "Kullanıcı bilgileri başarıyla güncellendi.",
     "warning_issued": "Uyarı gönderildi.",
     "warning_issued_suspended": "Uyarı gönderildi ve sınıra ulaşıldığı için hesap askıya alındı.",
     "warning_revoked": "Uyarı kaldırıldı.",

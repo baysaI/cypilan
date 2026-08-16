@@ -25,6 +25,25 @@ if (isSmtpConfigured) {
 const DEFAULT_FROM = process.env.MAIL_FROM || 'CYPILAN.COM <noreply@cypilan.com>';
 const APP_URL = (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, '');
 
+/**
+ * Base address for links that leave the site — password resets, notification
+ * e-mails.
+ *
+ * The configured APP_URL is authoritative in production. In development the
+ * same server answers to several names: localhost on the machine it runs on,
+ * a LAN address from a phone on the same network. A reset link built from the
+ * configured name is a dead end for everyone reading it somewhere else, so
+ * there the host the request actually came in on wins.
+ */
+function baseUrlFor(req) {
+  if (process.env.NODE_ENV === 'production' || !req || typeof req.get !== 'function') {
+    return APP_URL;
+  }
+
+  const host = req.get('host');
+  return host ? `${req.protocol}://${host}` : APP_URL;
+}
+
 async function sendMail({ to, subject, html, text }) {
   if (!to) return false;
 
@@ -169,5 +188,6 @@ module.exports = {
   sendWelcomeEmail,
   sendMessageNotificationEmail,
   sendListingStatusEmail,
+  baseUrlFor,
   APP_URL
 };

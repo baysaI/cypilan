@@ -32,6 +32,8 @@ router.get('/reports/:id/conversation', adminController.reportConversation);
 router.put('/listings/:id/status', adminController.toggleListingStatus);
 router.delete('/listings/:id', adminController.deleteListing);
 router.put('/users/:id/status', adminController.toggleUserStatus);
+router.put('/users/:id', adminController.updateUser);
+router.post('/users/:id/duzenle', adminController.updateUser);
 router.put('/reports/:id', adminController.resolveReport);
 
 router.post('/users/:id/uyari', adminController.issueWarning);

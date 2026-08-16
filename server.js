@@ -157,7 +157,13 @@ app.use((req, res, next) => {
   res.locals.helpers = helpers;
   res.locals.cities = cities;
   res.locals.currentPath = req.path;
-  res.locals.siteUrl = process.env.SITE_URL || `http://localhost:${PORT}`;
+  // Absolute URLs in the page (canonical, og:image, structured data) follow the
+  // configured site address in production. In development they follow the host
+  // the request came in on, so a phone testing over the LAN does not read a
+  // page full of links to its own localhost.
+  res.locals.siteUrl = IS_PRODUCTION
+    ? (process.env.SITE_URL || `http://localhost:${PORT}`)
+    : `${req.protocol}://${req.get('host')}`;
   next();
 });
 

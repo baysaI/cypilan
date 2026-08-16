@@ -53,16 +53,38 @@ router.post('/reset-password', passwordResetLimiter, authController.resetPasswor
 // the URL, signing the visitor out without their intent.
 router.post('/logout', authController.logout);
 
+// Google is told where to send the visitor back to, and that address is baked
+// into the strategy from GOOGLE_CALLBACK_URL — which points at localhost. A
+// phone opening the site over the LAN therefore finished the sign-in at
+// http://localhost:3000, meaning *the phone itself*, and got a connection
+// error. In development the address is taken from the request instead, so the
+// visitor comes back to the host they started on. Production keeps the
+// configured value, which is the one registered with Google.
+//
+// Note that Google only accepts redirect URIs registered in the project's
+// credentials, so a LAN address has to be added there before Google sign-in
+// works from a phone. E-mail registration needs none of this.
+const googleCallbackUrl = (req) => {
+  if (process.env.NODE_ENV === 'production') return undefined;
+
+  const host = req.get('host');
+  return host ? `${req.protocol}://${host}/auth/google/callback` : undefined;
+};
+
 router.get('/google', (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     req.flash('error', 'flash.google_not_configured');
     return res.redirect('/auth/login');
   }
-  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    callbackURL: googleCallbackUrl(req)
+  })(req, res, next);
 });
 
 router.get('/google/callback', (req, res, next) => {
-  passport.authenticate('google', (err, user, info) => {
+  // The same address has to be presented again when the code is exchanged.
+  passport.authenticate('google', { callbackURL: googleCallbackUrl(req) }, (err, user, info) => {
     if (err || !user) {
       console.error('Google OAuth callback error:', err || info);
       req.flash('error', (info && info.message) || 'flash.google_login_failed');

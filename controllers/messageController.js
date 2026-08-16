@@ -132,7 +132,7 @@ const send = async (req, res) => {
             if (l) listingTitle = l.title;
         }
 
-        const conversationUrl = `${mailer.APP_URL}/messages/${senderId}${validListingId ? `?listing=${validListingId}` : ''}`;
+        const conversationUrl = `${mailer.baseUrlFor(req)}/messages/${senderId}${validListingId ? `?listing=${validListingId}` : ''}`;
         mailer.sendMessageNotificationEmail({
             to: receiver.email,
             senderName,

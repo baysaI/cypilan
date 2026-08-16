@@ -207,7 +207,7 @@ const forgotPassword = async (req, res) => {
 
             await User.setResetToken(user.id, token, expiresAt);
 
-            const resetUrl = `${mailer.APP_URL}/auth/reset-password?token=${token}`;
+            const resetUrl = `${mailer.baseUrlFor(req)}/auth/reset-password?token=${token}`;
             await mailer.sendPasswordResetEmail({
                 to: user.email,
                 name: user.full_name,
