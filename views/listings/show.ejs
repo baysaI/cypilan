@@ -321,6 +321,25 @@
                 </button>
             </div>
 
+            <% if (authUser && authUser.role === 'admin') { %>
+                <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-warning" style="background: #fffbeb;">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="fw-bold small text-dark d-flex align-items-center gap-1">
+                                <i class="fa-solid fa-shield-halved text-warning"></i> Yönetici Denetimi
+                            </span>
+                            <span class="badge bg-warning text-dark fw-bold font-monospace" style="font-size: 0.65rem;">ADMIN</span>
+                        </div>
+                        <p class="small text-muted mb-2" style="font-size: 0.78rem;">
+                            Bu ilanda tespit ettiğiniz hatalar için ilan sahibine düzeltme uyarısı gönderebilirsiniz.
+                        </p>
+                        <button type="button" class="btn btn-warning btn-sm rounded-pill fw-bold w-100 shadow-sm text-dark d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#adminListingNoticeModal">
+                            <i class="fa-solid fa-triangle-exclamation"></i> İlan Sahibine Düzeltme Bildirimi Gönder
+                        </button>
+                    </div>
+                </div>
+            <% } %>
+
             <div class="card border-0 shadow-sm rounded-4 sticky-below-header">
                 <div class="card-body p-4 text-center">
                     <div class="position-relative d-inline-block mb-3">
@@ -600,3 +619,115 @@
     </div>
   </div>
 </div>
+
+<% if (authUser && authUser.role === 'admin') { %>
+<div class="modal fade" id="adminListingNoticeModal" tabindex="-1" aria-labelledby="adminListingNoticeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <form action="/admin/listings/<%= listing.id %>/ikaz" method="POST" id="adminListingNoticeForm">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="modal-header border-bottom px-4 py-3 bg-light rounded-top-4">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="adminListingNoticeModalLabel">
+                        <i class="fa-solid fa-triangle-exclamation text-warning fs-5"></i>
+                        <span>İlan Sahibine Düzeltme Bildirimi Gönder</span>
+                    </h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-light border rounded-3 d-flex align-items-center justify-content-between p-3 mb-3">
+                        <div class="min-w-0">
+                            <span class="text-muted small d-block mb-1">Hedef İlan:</span>
+                            <strong class="text-dark d-block text-truncate"><%= listing.title %></strong>
+                            <small class="text-muted">İlan No: #<%= listing.id %></small>
+                        </div>
+                        <div class="text-end ps-3">
+                            <span class="text-muted small d-block mb-1">İlan Sahibi:</span>
+                            <strong class="text-primary d-block"><%= listing.seller_name || listing.seller_company || 'Kullanıcı #' + listing.user_id %></strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">
+                            <i class="fa-regular fa-lightbulb text-warning me-1"></i>Hızlı Şablon Seçin (Opsiyonel):
+                        </label>
+                        <div class="d-flex flex-wrap gap-1" id="adminNoticePresets">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill cyp-notice-preset-btn"
+                                    data-title="Hatalı Fiyat / Para Birimi Bildirimi"
+                                    data-msg="İlanınızda belirtilen fiyat veya para birimi hatalı görünmektedir. Lütfen ilanınızı düzenleyerek doğru fiyatı güncelleyiniz.">
+                                💰 Hatalı Fiyat
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill cyp-notice-preset-btn"
+                                    data-title="Fotoğraf Yetersizliği Bildirimi"
+                                    data-msg="İlanınızdaki fotoğraflar net değil veya yetersizdir. İlanınızın daha çok ilgi görmesi ve kurallara uyması için en az 3 adet net fotoğraf yüklemeniz önerilir.">
+                                📸 Fotoğraf Eksik
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill cyp-notice-preset-btn"
+                                    data-title="Hatalı Kategori / Başlık Bildirimi"
+                                    data-msg="İlanınızın kategorisi veya başlığı içeriğe tam olarak uygun değildir. Lütfen ilanınızı doğru kategori ve açıklayıcı başlık ile güncelleyiniz.">
+                                🏷️ Yanlış Kategori
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill cyp-notice-preset-btn"
+                                    data-title="Açıklamada Kurallara Aykırı Bilgi"
+                                    data-msg="İlan açıklamasında yer alan bazı ifadeler veya iletişim bilgileri topluluk kurallarımıza uymamaktadır. Lütfen açıklamanızı güncelleyiniz.">
+                                📝 Açıklama Düzeltmesi
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill cyp-notice-preset-btn"
+                                    data-title="Konum ve Özellik Uyuşmazlığı"
+                                    data-msg="İlanın belirtilen konumu ile seçilen özellikler arasında uyuşmazlık bulunmaktadır. Lütfen şehir, ilçe ve özellikleri kontrol ederek düzeltiniz.">
+                                📍 Konum / Özellik Hatası
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="adminNoticeTitle" class="form-label fw-semibold small text-dark">Uyarı Başlığı <span class="text-danger">*</span></label>
+                        <input type="text" id="adminNoticeTitle" name="title" class="form-control rounded-3" required
+                               placeholder="Örn: İlanınızda Fiyat ve Açıklama Düzeltmesi Gerekiyor" maxlength="200"
+                               value="İlanınız Hakkında Yönetici Uyarısı">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="adminNoticeMessage" class="form-label fw-semibold small text-dark">Kullanıcıya İletilecek Uyarı / Düzeltme Notu <span class="text-danger">*</span></label>
+                        <textarea id="adminNoticeMessage" name="message" class="form-control rounded-3" rows="4" required maxlength="1500"
+                                  placeholder="Kullanıcının ilanında neyi düzeltmesi gerektiğini detaylıca yazınız..."></textarea>
+                        <div class="form-text small text-muted">
+                            Bu mesaj kullanıcıya hem site içi bildirim (çan simgesi) olarak gidecek hem de bildirime tıkladığında ilan düzenleme sayfasına yönlendirecektir.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3 bg-light rounded-bottom-4">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" id="adminNoticeSubmitBtn" class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Bildirimi Gönder
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const presetBtns = document.querySelectorAll('.cyp-notice-preset-btn');
+    const titleInput = document.getElementById('adminNoticeTitle');
+    const msgInput = document.getElementById('adminNoticeMessage');
+
+    presetBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            presetBtns.forEach(b => {
+                b.classList.remove('btn-warning', 'text-dark', 'fw-bold');
+                b.classList.add('btn-outline-secondary');
+            });
+            this.classList.remove('btn-outline-secondary');
+            this.classList.add('btn-warning', 'text-dark', 'fw-bold');
+
+            if (titleInput) titleInput.value = this.getAttribute('data-title') || '';
+            if (msgInput) {
+                msgInput.value = this.getAttribute('data-msg') || '';
+                msgInput.focus();
+            }
+        });
+    });
+});
+</script>
+<% } %>

@@ -5,6 +5,7 @@ const Listing = require('../models/Listing');
 const Report = require('../models/Report');
 const Message = require('../models/Message');
 const Warning = require('../models/Warning');
+const Notification = require('../models/Notification');
 const ServiceRequest = require('../models/ServiceRequest');
 const Analytics = require('../models/Analytics');
 const mailer = require('../config/mailer');
@@ -532,6 +533,59 @@ const analytics = async (req, res) => {
     }
 };
 
+const sendListingNotice = async (req, res) => {
+    try {
+        const listingId = parseInt(req.params.id, 10);
+        const { title, message } = req.body;
+
+        if (!listingId || !message || String(message).trim().length === 0) {
+            if (wantsJson(req)) {
+                return res.status(400).json({ success: false, error: 'Uyarı mesajı boş bırakılamaz.' });
+            }
+            req.flash('error', 'flash.action_failed');
+            return res.redirect(req.get('referer') || '/');
+        }
+
+        const listing = await Listing.findById(listingId);
+        if (!listing) {
+            if (wantsJson(req)) {
+                return res.status(404).json({ success: false, error: 'İlan bulunamadı.' });
+            }
+            req.flash('error', 'flash.listing_not_found');
+            return res.redirect(req.get('referer') || '/');
+        }
+
+        const cleanTitle = String(title || 'İlanınız Hakkında Yönetici Uyarısı').trim().slice(0, 200);
+        const cleanMessage = String(message).trim().slice(0, 1500);
+
+        await Notification.create({
+            user_id: listing.user_id,
+            actor_id: req.session.userId,
+            type: 'warning',
+            title: cleanTitle,
+            message: `"${listing.title}" başlıklı ilanınız için yönetici uyarısı: ${cleanMessage}`,
+            link_url: `/listings/${listing.slug}/edit`
+        });
+
+        if (wantsJson(req)) {
+            return res.json({
+                success: true,
+                message: 'İlan sahibine düzeltme bildirimi başarıyla iletildi.'
+            });
+        }
+
+        req.flash('success', 'İlan sahibine düzeltme bildirimi başarıyla iletildi.');
+        res.redirect(req.get('referer') || `/listings/${listing.slug}`);
+    } catch (error) {
+        console.error('Send Listing Notice Error:', error);
+        if (wantsJson(req)) {
+            return res.status(500).json({ success: false, error: error.message });
+        }
+        req.flash('error', 'flash.action_failed');
+        res.redirect(req.get('referer') || '/');
+    }
+};
+
 module.exports = {
     dashboard,
     users,
@@ -545,5 +599,6 @@ module.exports = {
     resolveReport,
     issueWarning,
     revokeWarning,
-    analytics
+    analytics,
+    sendListingNotice
 };

@@ -45,7 +45,7 @@ class Notification {
       FROM notifications n
       LEFT JOIN users u ON n.actor_id = u.id
       ${whereClause}
-      ORDER BY n.created_at DESC
+      ORDER BY n.created_at DESC, n.id DESC
       LIMIT ? OFFSET ?
     `).all([...params, limit, offset]);
 

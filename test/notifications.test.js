@@ -139,16 +139,38 @@ t.run('Bildirim Sistemi & Favori/Uyarı Bildirimleri', async (db) => {
   const sellerRemaining = await Notification.getByUserId(seller);
   t.assertEqual(sellerRemaining.length, 2, '1 bildirim silindikten sonra 2 bildirim kaldı');
 
-  // 6. View Rendering
+  // 6. İlan Sayfası Üzerinden Doğrudan İlan Uyarısı / Düzeltme Bildirimi
+  const listingNoticeReq = makeReq({
+    session: { userId: admin },
+    params: { id: String(listing.id) },
+    body: {
+      title: 'Hatalı Fiyat Bildirimi',
+      message: 'Fiyat bilgisi yıllık olarak girilmiş, lütfen aylık olarak güncelleyiniz.'
+    },
+    headers: { accept: 'application/json' },
+    xhr: true
+  });
+  const listingNoticeRes = makeRes();
+
+  await adminController.sendListingNotice(listingNoticeReq, listingNoticeRes);
+  t.assertEqual(listingNoticeRes._json.success, true, 'İlan düzeltme bildirimi isteği başarılı');
+
+  const sellerLatestNotifs = await Notification.getByUserId(seller);
+  const directNotice = sellerLatestNotifs[0];
+  t.assertEqual(directNotice.title, 'Hatalı Fiyat Bildirimi', 'Bildirim başlığı doğru');
+  t.assert(directNotice.message.includes('yıllık olarak girilmiş'), 'Bildirimde yönetici düzeltme notu yer alıyor');
+  t.assertEqual(directNotice.link_url, `/listings/${listing.slug}/edit`, 'Bildirim ilan düzenleme sayfasına yönlendiriyor');
+
+  // 7. View Rendering
   const renderedHtml = await t.render('notifications/index.ejs', {
-    notifications: sellerRemaining,
+    notifications: sellerLatestNotifs,
     filter: 'all',
-    unreadCount: 0,
-    pagination: { page: 1, totalItems: 2, totalPages: 1 },
+    unreadCount: 1,
+    pagination: { page: 1, totalItems: sellerLatestNotifs.length, totalPages: 1 },
     title: 'Bildirimler'
   });
 
   t.assert(renderedHtml.includes('Bildirimler'), 'notifications/index.ejs başlığı render ediyor');
-  t.assert(renderedHtml.includes('Sistem Duyurusu'), 'Bildirim listesi kartları render ediyor');
+  t.assert(renderedHtml.includes('Hatalı Fiyat Bildirimi'), 'Bildirim listesi kartları render ediyor');
   t.assert(renderedHtml.includes('Tümü'), 'Tümü sekmesi render ediliyor');
 });

@@ -39,6 +39,7 @@ router.get('/reports', adminController.reports);
 router.get('/reports/:id/conversation', adminController.reportConversation);
 
 router.put('/listings/:id/status', adminController.toggleListingStatus);
+router.post('/listings/:id/ikaz', adminController.sendListingNotice);
 router.delete('/listings/:id', adminController.deleteListing);
 router.put('/users/:id/status', adminController.toggleUserStatus);
 router.put('/users/:id', adminController.updateUser);
