@@ -49,10 +49,14 @@ async function sendMail({ to, subject, html, text }) {
 
   const mailOptions = {
     from: DEFAULT_FROM,
+    replyTo: 'info@cypilan.com',
     to,
     subject,
-    text: text || html.replace(/<[^>]*>?/gm, ''),
-    html
+    text: text || html.replace(/<[^>]*>?/gm, '').trim(),
+    html,
+    headers: {
+      'X-Entity-Ref-ID': `cypilan-${Date.now()}`
+    }
   };
 
   try {
