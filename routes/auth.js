@@ -82,9 +82,12 @@ router.get('/google', (req, res, next) => {
   })(req, res, next);
 });
 
+router.get('/verify-email/:token', authController.verifyEmail);
+router.post('/resend-verification', authController.resendVerification);
+
 router.get('/google/callback', (req, res, next) => {
   // The same address has to be presented again when the code is exchanged.
-  passport.authenticate('google', { callbackURL: googleCallbackUrl(req) }, (err, user, info) => {
+  passport.authenticate('google', { callbackURL: googleCallbackUrl(req) }, async (err, user, info) => {
     if (err || !user) {
       console.error('Google OAuth callback error:', err || info);
       req.flash('error', (info && info.message) || 'flash.google_login_failed');
@@ -95,6 +98,11 @@ router.get('/google/callback', (req, res, next) => {
     if (Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false) && user.role !== 'admin') {
       req.flash('error', 'flash.maintenance_no_user_login');
       return res.redirect('/auth/login');
+    }
+
+    const User = require('../models/User');
+    if (!user.is_verified) {
+      await User.verifyEmail(user.id);
     }
 
     req.logIn(user, (loginErr) => {
@@ -108,6 +116,7 @@ router.get('/google/callback', (req, res, next) => {
       req.session.userRole = user.role;
       req.session.userEmail = user.email;
       req.session.userName = user.full_name;
+      req.session.userIsVerified = true;
 
       req.session.save((saveErr) => {
         if (saveErr) {

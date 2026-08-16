@@ -20,6 +20,7 @@ const startAuthenticatedSession = (req, user, redirectTo, successMessage, res) =
         req.session.userRole = user.role;
         req.session.userEmail = user.email;
         req.session.userName = user.full_name;
+        req.session.userIsVerified = Boolean(user.is_verified);
 
         req.session.save((saveErr) => {
             if (saveErr) console.error('Session Save Error:', saveErr);
@@ -167,6 +168,18 @@ const register = async (req, res) => {
 
         const user = await User.findById(userId);
 
+        // Generate email verification token (valid for 24h)
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        await User.setVerificationToken(userId, verificationToken, expiresAt);
+
+        const verificationUrl = `${mailer.baseUrlFor(req)}/auth/verify-email/${verificationToken}`;
+        mailer.sendEmailVerificationEmail({
+            to: user.email,
+            name: user.full_name,
+            verificationUrl
+        }).catch(err => console.error('Verification email error:', err));
+
         // Send welcome email asynchronously
         mailer.sendWelcomeEmail({ to: user.email, name: user.full_name, baseUrl: mailer.baseUrlFor(req) }).catch(err => console.error('Welcome email error:', err));
 
@@ -174,7 +187,7 @@ const register = async (req, res) => {
             req,
             user,
             '/',
-            'flash.register_success',
+            'flash.register_success_verify_notice',
             res
         );
     } catch (error) {
@@ -276,6 +289,69 @@ const resetPassword = async (req, res) => {
     }
 };
 
+const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const user = await User.findByVerificationToken(token);
+
+        if (!user) {
+            req.flash('error', 'flash.invalid_verification_token');
+            return res.redirect('/');
+        }
+
+        await User.verifyEmail(user.id);
+
+        if (req.session && req.session.userId === user.id) {
+            req.session.userIsVerified = true;
+        }
+
+        req.flash('success', 'flash.email_verified_success');
+        res.redirect('/profile');
+    } catch (error) {
+        console.error('Verify Email Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/');
+    }
+};
+
+const resendVerification = async (req, res) => {
+    try {
+        if (!req.session || !req.session.userId) {
+            req.flash('error', 'flash.login_required');
+            return res.redirect('/auth/login');
+        }
+
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/auth/login');
+        }
+
+        if (user.is_verified) {
+            req.flash('info', 'flash.email_already_verified');
+            return res.redirect(req.get('referer') || '/profile');
+        }
+
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        await User.setVerificationToken(user.id, verificationToken, expiresAt);
+
+        const verificationUrl = `${mailer.baseUrlFor(req)}/auth/verify-email/${verificationToken}`;
+        await mailer.sendEmailVerificationEmail({
+            to: user.email,
+            name: user.full_name,
+            verificationUrl
+        });
+
+        req.flash('success', 'flash.verification_email_sent');
+        res.redirect(req.get('referer') || '/profile');
+    } catch (error) {
+        console.error('Resend Verification Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/profile');
+    }
+};
+
 const logout = (req, res) => {
     req.session.destroy((err) => {
         if (err) console.error('Logout Error:', err);
@@ -293,5 +369,7 @@ module.exports = {
     forgotPassword,
     showResetPassword,
     resetPassword,
+    verifyEmail,
+    resendVerification,
     logout
 };

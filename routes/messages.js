@@ -2,7 +2,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const messageController = require('../controllers/messageController');
-const { isAuthenticated } = require('../middlewares/auth');
+const { isAuthenticated, requireVerifiedEmail } = require('../middlewares/auth');
 
 const sendLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
@@ -19,7 +19,7 @@ const sendLimiter = rateLimit({
 router.use(isAuthenticated);
 
 router.get('/', messageController.inbox);
-router.post('/', sendLimiter, messageController.send);
+router.post('/', sendLimiter, requireVerifiedEmail, messageController.send);
 router.get('/:userId', messageController.conversation);
 router.post('/block/:userId', messageController.blockUser);
 router.post('/unblock/:userId', messageController.unblockUser);

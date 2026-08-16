@@ -182,9 +182,30 @@ async function sendListingStatusEmail({ to, listingTitle, status, reason, listin
   });
 }
 
+async function sendEmailVerificationEmail({ to, name, verificationUrl }) {
+  const title = 'E-posta Adresinizi Doğrulayın';
+  const content = `
+    <p>Merhaba ${name || 'Kullanıcımız'},</p>
+    <p>CYPILAN.COM üzerinde ilan verebilmek ve mesaj gönderebilmek için e-posta adresinizi doğrulamanız gerekmektedir.</p>
+    <p>E-posta adresinizi onaylamak için lütfen aşağıdaki doğrulama butonuna tıklayın:</p>
+    <p style="font-size: 13px; color: #64748b;">Bu doğrulama bağlantısı 24 saat boyunca geçerlidir.</p>
+  `;
+  return sendMail({
+    to,
+    subject: 'CYPILAN.COM - E-posta Doğrulama Bağlantısı',
+    html: getBaseTemplate({
+      title,
+      content,
+      ctaUrl: verificationUrl,
+      ctaText: 'E-postamı Doğrula'
+    })
+  });
+}
+
 module.exports = {
   sendMail,
   sendPasswordResetEmail,
+  sendEmailVerificationEmail,
   sendWelcomeEmail,
   sendMessageNotificationEmail,
   sendListingStatusEmail,

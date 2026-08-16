@@ -91,6 +91,28 @@ class User {
     });
   }
 
+  static async setVerificationToken(userId, token, expiresAt) {
+    return this.update(userId, {
+      email_verification_token: token,
+      email_verification_expires: expiresAt
+    });
+  }
+
+  static async findByVerificationToken(token) {
+    if (!token) return null;
+    const db = getDb();
+    const nowISO = new Date().toISOString();
+    return db.prepare('SELECT * FROM users WHERE email_verification_token = ? AND email_verification_expires > ?').get([token, nowISO]) || null;
+  }
+
+  static async verifyEmail(userId) {
+    return this.update(userId, {
+      is_verified: 1,
+      email_verification_token: null,
+      email_verification_expires: null
+    });
+  }
+
   static async isEmailTaken(email, exceptUserId = null) {
     const existing = await this.findByEmail(email);
     if (!existing) return false;

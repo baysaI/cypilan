@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
   has_password INTEGER DEFAULT 1,
   password_reset_token TEXT,
   password_reset_expires DATETIME,
+  email_verification_token TEXT,
+  email_verification_expires DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

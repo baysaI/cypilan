@@ -36,13 +36,14 @@ const phoneRevealLimiter = rateLimit({
 
 router.get('/', listingController.index);
 
-router.get('/create', isAuthenticated, listingController.showCreate);
+router.get('/create', isAuthenticated, requireVerifiedEmail, listingController.showCreate);
 
 // Multipart bodies are parsed by multer, so the CSRF token is only readable
 // after uploadListingImages has run — and images hit the disk only after it passes.
 router.post(
     '/',
     isAuthenticated,
+    requireVerifiedEmail,
     uploadListingImages,
     verifyCsrf,
     processImagesWithWatermark,

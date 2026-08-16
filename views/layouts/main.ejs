@@ -91,6 +91,23 @@
         </div>
     <% } %>
 
+    <% if (typeof isEmailUnverified !== 'undefined' && isEmailUnverified) { %>
+        <div class="bg-warning text-dark py-2">
+            <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2 small">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-envelope-circle-check fs-6 text-dark"></i>
+                    <span><%= t('common.unverified_email_banner') %></span>
+                </div>
+                <form action="/auth/resend-verification" method="POST" class="m-0">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn btn-sm btn-dark py-0 px-2" style="font-size: 0.8rem;">
+                        <%= t('common.resend_verification_btn') %>
+                    </button>
+                </form>
+            </div>
+        </div>
+    <% } %>
+
     <% if (typeof flash !== 'undefined' && flash && (flash.success || flash.error || flash.info)) { %>
         <div class="container mt-3">
             <% if (flash.error) { %>
