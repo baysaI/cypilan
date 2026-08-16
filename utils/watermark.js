@@ -19,56 +19,106 @@ const WATERMARK_FILE = path.join(__dirname, '..', 'public', 'img', 'watermark.pn
 
 let watermarkSource = null;
 
-const loadWatermark = () => {
+const generateWatermarkBuffer = async () => {
+    try {
+        const WIDTH = 1600;
+        const HEIGHT = 640;
+        const ANGLE = -20;
+        const titleSize = Math.round(WIDTH * 0.095);
+        const subtitleSize = Math.round(titleSize * 0.4);
+
+        const svg = `
+        <svg width="${WIDTH}" height="${HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .mark { font-family: Arial, Helvetica, sans-serif; font-weight: 800; font-size: ${titleSize}px; fill: rgba(255, 255, 255, 0.35); letter-spacing: 6px; text-anchor: middle; }
+            .sub { font-family: Arial, Helvetica, sans-serif; font-weight: 600; font-size: ${subtitleSize}px; fill: rgba(255, 255, 255, 0.25); letter-spacing: 3px; text-anchor: middle; }
+          </style>
+          <g transform="rotate(${ANGLE}, ${WIDTH / 2}, ${HEIGHT / 2})">
+            <text x="${WIDTH / 2}" y="${HEIGHT / 2}" class="mark">CYPILAN.COM</text>
+            <text x="${WIDTH / 2}" y="${HEIGHT / 2 + subtitleSize * 2}" class="sub">KIBRIS'IN İLAN PLATFORMU</text>
+          </g>
+        </svg>`;
+
+        const png = await sharp(Buffer.from(svg)).png().toBuffer();
+        // Try to save to disk for future uses
+        try {
+            const dir = path.dirname(WATERMARK_FILE);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            await sharp(png).trim({ threshold: 1 }).toFile(WATERMARK_FILE);
+        } catch (_) {}
+
+        return png;
+    } catch (err) {
+        console.warn('Watermark generation fallback failed:', err.message);
+        return null;
+    }
+};
+
+const loadWatermark = async () => {
     if (watermarkSource) return watermarkSource;
 
-    if (!fs.existsSync(WATERMARK_FILE)) {
-        throw new Error(
-            `Filigran görseli bulunamadı: ${WATERMARK_FILE}. ` +
-            'Yeniden üretmek için: node scripts/build-watermark.js'
-        );
+    if (fs.existsSync(WATERMARK_FILE)) {
+        try {
+            watermarkSource = fs.readFileSync(WATERMARK_FILE);
+            return watermarkSource;
+        } catch (err) {
+            console.warn('Could not read existing watermark file:', err.message);
+        }
     }
 
-    watermarkSource = fs.readFileSync(WATERMARK_FILE);
+    watermarkSource = await generateWatermarkBuffer();
     return watermarkSource;
 };
 
-// `input` may be a Buffer or a file path. Throws if the image cannot be processed,
-// so callers never record an image URL for a file that was not written.
+// `input` may be a Buffer or a file path. Resizes image and applies watermark.
+// If watermark fails, image is still cleanly resized and saved so uploads never fail.
 const addWatermark = async (input, outputPath) => {
-    const source = loadWatermark();
+    try {
+        // Resize first, then read the real output dimensions
+        const resized = await sharp(input)
+            .rotate()
+            .resize({
+                width: MAX_DIMENSION,
+                height: MAX_DIMENSION,
+                fit: 'inside',
+                withoutEnlargement: true
+            })
+            .toBuffer({ resolveWithObject: true });
 
-    // Resize first, then read the real output dimensions so the mark can be
-    // sized against the image it actually lands on.
-    const resized = await sharp(input)
-        .rotate()
-        .resize({
-            width: MAX_DIMENSION,
-            height: MAX_DIMENSION,
-            fit: 'inside',
-            withoutEnlargement: true
-        })
-        .toBuffer({ resolveWithObject: true });
+        const { width, height } = resized.info;
+        const source = await loadWatermark();
 
-    const { width, height } = resized.info;
+        if (source) {
+            try {
+                const mark = await sharp(source)
+                    .resize({
+                        width: Math.max(1, Math.round(width * MARK_SCALE)),
+                        height: Math.max(1, Math.round(height * MARK_SCALE)),
+                        fit: 'inside'
+                    })
+                    .toBuffer();
 
-    // `fit: inside` keeps the mark within its share of both axes, so a wide
-    // panorama or a tall portrait shot never gets an overlay larger than
-    // itself — which sharp rejects outright.
-    const mark = await sharp(source)
-        .resize({
-            width: Math.max(1, Math.round(width * MARK_SCALE)),
-            height: Math.max(1, Math.round(height * MARK_SCALE)),
-            fit: 'inside'
-        })
-        .toBuffer();
+                await sharp(resized.data)
+                    .composite([{ input: mark, gravity: 'center' }])
+                    .jpeg({ quality: 85, progressive: true })
+                    .toFile(outputPath);
 
-    await sharp(resized.data)
-        .composite([{ input: mark, gravity: 'center' }])
-        .jpeg({ quality: 85, progressive: true })
-        .toFile(outputPath);
+                return true;
+            } catch (compositeErr) {
+                console.warn('Watermark composite failed, falling back to clean image save:', compositeErr.message);
+            }
+        }
 
-    return true;
+        // Direct save without watermark if watermark was unavailable or composite errored
+        await sharp(resized.data)
+            .jpeg({ quality: 85, progressive: true })
+            .toFile(outputPath);
+
+        return true;
+    } catch (err) {
+        console.error('addWatermark failed to process image:', err);
+        throw err;
+    }
 };
 
 module.exports = {

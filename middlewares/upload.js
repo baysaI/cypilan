@@ -8,24 +8,37 @@ const appConfig = require('../config/app');
 const sharp = require('sharp');
 sharp.cache(false);
 
+const uploadDirs = [
+    path.join(__dirname, '../public/uploads'),
+    path.join(__dirname, '../public/uploads/listings'),
+    path.join(__dirname, '../public/uploads/avatars'),
+    path.join(__dirname, '../public/uploads/cvs')
+];
+
+uploadDirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+});
+
 const uploadDir = path.join(__dirname, '../public/uploads/listings');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
 const avatarUploadDir = path.join(__dirname, '../public/uploads/avatars');
-if (!fs.existsSync(avatarUploadDir)) {
-    fs.mkdirSync(avatarUploadDir, { recursive: true });
-}
+const cvUploadDir = path.join(__dirname, '../public/uploads/cvs');
 
-const MAX_FILES = appConfig.uploads.maxImagesPerListing;
-const MAX_FILE_SIZE = appConfig.uploads.maxFileSize;
-const ALLOWED_TYPES = appConfig.uploads.allowedImageTypes;
+const MAX_FILES = appConfig.uploads.maxImagesPerListing || 20;
+const MAX_FILE_SIZE = appConfig.uploads.maxFileSize || (15 * 1024 * 1024);
+const ALLOWED_TYPES = appConfig.uploads.allowedImageTypes || [
+    'image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/pjpeg', 'image/x-png'
+];
 
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-    if (ALLOWED_TYPES.includes(file.mimetype)) {
+    const rawMime = (file.mimetype || '').toLowerCase().split(';')[0].trim();
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    if (ALLOWED_TYPES.includes(rawMime) || allowedExts.includes(ext)) {
         cb(null, true);
     } else {
         cb(new Error('Desteklenmeyen dosya formatı. Sadece JPG, PNG ve WEBP kabul edilir.'), false);
@@ -41,8 +54,33 @@ const upload = multer({
     }
 });
 
-const uploadListingImages = upload.array('images', MAX_FILES);
-const uploadAvatar = upload.single('avatar');
+const handleMulterError = (multerMiddleware) => (req, res, next) => {
+    multerMiddleware(req, res, (err) => {
+        if (!err) return next();
+
+        console.warn('Upload error intercepted:', err.message);
+        const isXhr = req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1);
+        
+        let errorMessage = 'Dosya yükleme hatası oluştu.';
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            errorMessage = 'Yüklenen görsel boyutu çok büyük (Maksimum 15 MB).';
+        } else if (err.code === 'LIMIT_FILE_COUNT') {
+            errorMessage = `En fazla ${MAX_FILES} adet fotoğraf yükleyebilirsiniz.`;
+        } else if (err.message) {
+            errorMessage = err.message;
+        }
+
+        if (isXhr) {
+            return res.status(400).json({ error: errorMessage });
+        }
+
+        req.flash('error', errorMessage);
+        return res.redirect(req.get('referer') || '/listings/create');
+    });
+};
+
+const uploadListingImages = handleMulterError(upload.array('images', MAX_FILES));
+const uploadAvatar = handleMulterError(upload.single('avatar'));
 
 const processImagesWithWatermark = async (req, res, next) => {
     if (!req.files || req.files.length === 0) {
@@ -121,10 +159,6 @@ const removeImagesByUrl = async (imageUrls = []) => {
     }));
 };
 
-const cvUploadDir = path.join(__dirname, '../public/uploads/cvs');
-if (!fs.existsSync(cvUploadDir)) {
-    fs.mkdirSync(cvUploadDir, { recursive: true });
-}
 
 // Multer instance for CV photo & PDF uploads
 const cvMulter = multer({

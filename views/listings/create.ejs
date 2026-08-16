@@ -313,9 +313,9 @@
                         <label for="fileInput" class="w-100 border-2 border-dashed border-primary rounded-4 p-5 text-center bg-light cursor-pointer hover-bg-primary-light transition-all d-block position-relative mb-0" id="dropArea">
                             <i class="fa-solid fa-cloud-arrow-up display-4 text-primary mb-3 pointer-events-none"></i>
                             <h5 class="fw-bold text-dark pointer-events-none"><%= t('listing.drag_images') %></h5>
-                            <p class="text-muted small mb-4 pointer-events-none"><%= t('listing.max_images') %></p>
+                            <p class="text-muted small mb-4 pointer-events-none"><%= t('listing.max_images') %> (Maks. 15 MB)</p>
                             <span class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm pointer-events-none"><%= t('nav.post_ad') %></span>
-                            <input type="file" name="images" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+                            <input type="file" name="images" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="position-absolute" style="opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden; z-index: -1;">
                         </label>
 
                         <div class="row g-3 mt-3" id="imagePreviewContainer"></div>
@@ -384,24 +384,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, false);
 
+    dropArea.addEventListener('click', function() {
+        fileInput.value = '';
+    });
+
     fileInput.addEventListener('change', function() {
-        if (this.files) {
+        if (this.files && this.files.length > 0) {
             handleNewFiles(this.files);
         }
     });
 
     function handleNewFiles(files) {
         const fileList = Array.from(files);
+        const MAX_BYTES = 15 * 1024 * 1024;
+
         for (let i = 0; i < fileList.length; i++) {
-            if (selectedFiles.length >= 10) {
+            if (selectedFiles.length >= 20) {
                 alert('<%= t("listing.max_images") %>');
                 break;
             }
             const file = fileList[i];
-            if (file.type && file.type.startsWith('image/')) {
-                if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-                    selectedFiles.push(file);
-                }
+            const isImage = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp)$/i.test(file.name);
+            
+            if (!isImage) {
+                alert('Desteklenmeyen dosya formatı: ' + file.name + '. Sadece JPG, PNG ve WEBP kabul edilir.');
+                continue;
+            }
+
+            if (file.size > MAX_BYTES) {
+                alert('Dosya boyutu 15 MB sınırını aşıyor: ' + file.name);
+                continue;
+            }
+
+            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                selectedFiles.push(file);
             }
         }
         syncInputAndRender();
@@ -409,11 +425,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function syncInputAndRender() {
         try {
-            const dt = new DataTransfer();
-            selectedFiles.forEach(file => dt.items.add(file));
-            fileInput.files = dt.files;
+            if (window.DataTransfer) {
+                const dt = new DataTransfer();
+                selectedFiles.forEach(file => dt.items.add(file));
+                fileInput.files = dt.files;
+            }
         } catch (err) {
-            console.error('DataTransfer sync error:', err);
+            console.warn('DataTransfer sync notice:', err);
         }
 
         renderPreviews();
@@ -448,11 +466,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form) {
         form.addEventListener('submit', function() {
             try {
-                const dt = new DataTransfer();
-                selectedFiles.forEach(file => dt.items.add(file));
-                fileInput.files = dt.files;
+                if (window.DataTransfer && selectedFiles.length > 0) {
+                    const dt = new DataTransfer();
+                    selectedFiles.forEach(file => dt.items.add(file));
+                    fileInput.files = dt.files;
+                }
             } catch (err) {
-                console.error('Submit sync error:', err);
+                console.warn('Submit sync notice:', err);
             }
         });
     }
