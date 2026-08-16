@@ -63,6 +63,57 @@ const columnsOf = (db, table) => db.pragma(`table_info(${table})`).map((column) 
 
 const applyColumnMigrations = (db) => {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      link_url TEXT,
+      is_read INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS user_warnings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      issued_by INTEGER REFERENCES users(id),
+      report_id INTEGER REFERENCES reports(id),
+      reason TEXT NOT NULL CHECK(reason IN ('wrong_category', 'misleading_price', 'missing_photos', 'spam', 'fraud', 'inappropriate', 'harassment', 'other')),
+      note TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_warnings_user ON user_warnings(user_id, is_active, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS service_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      listing_id INTEGER REFERENCES listings(id) ON DELETE CASCADE,
+      type TEXT NOT NULL CHECK(type IN ('assurance', 'promotion')),
+      status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'contacted', 'approved', 'rejected', 'completed')),
+      note TEXT,
+      admin_note TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_service_requests_queue ON service_requests(status, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_service_requests_user ON service_requests(user_id, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS page_views (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id TEXT,
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      path TEXT NOT NULL,
+      ip_hash TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_page_views_session ON page_views(session_id);
+
     CREATE TABLE IF NOT EXISTS support_conversations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_token TEXT NOT NULL UNIQUE,

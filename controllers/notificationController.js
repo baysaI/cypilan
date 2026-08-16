@@ -22,25 +22,31 @@ const index = async (req, res, next) => {
             Notification.getUnreadCount(userId)
         ]);
 
-        const totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1;
+        const totalPages = Math.ceil((totalItems || 0) / PAGE_SIZE) || 1;
 
         res.locals.meta = res.locals.meta || {};
-        res.locals.meta.title = res.locals.t('notifications.title') || 'Bildirimler';
+        res.locals.meta.title = (res.locals.t && res.locals.t('notifications.title')) || 'Bildirimler';
 
         res.render('notifications/index', {
-            notifications,
+            notifications: Array.isArray(notifications) ? notifications : [],
             filter,
-            unreadCount,
+            unreadCount: typeof unreadCount === 'number' ? unreadCount : 0,
             pagination: {
                 page,
-                totalItems,
+                totalItems: totalItems || 0,
                 totalPages
             },
-            title: res.locals.t('notifications.title') || 'Bildirimler'
+            title: (res.locals.t && res.locals.t('notifications.title')) || 'Bildirimler'
         });
     } catch (error) {
         console.error('Notification Index Error:', error);
-        next(error);
+        res.render('notifications/index', {
+            notifications: [],
+            filter: 'all',
+            unreadCount: 0,
+            pagination: { page: 1, totalItems: 0, totalPages: 1 },
+            title: (res.locals.t && res.locals.t('notifications.title')) || 'Bildirimler'
+        });
     }
 };
 
