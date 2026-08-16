@@ -216,7 +216,11 @@
     "replace_custom_cv": "آپلود PDF جدید",
     "remove_custom_cv": "حذف PDF",
     "cypilan_cv_pdf": "CYPILAN CV (PDF)",
-    "applicant_custom_pdf": "فایل PDF متقاضی"
+    "applicant_custom_pdf": "فایل PDF متقاضی",
+    "reset_cv": "بازنشانی رزومه",
+    "reset_cv_title": "بازنشانی رزومه",
+    "reset_cv_confirm": "آیا مطمئن هستید که می‌خواهید اطلاعات رزومه، عکس آپلود شده و فایل PDF خود را کاملاً حذف کنید؟ این عمل غیرقابل بازگشت است.",
+    "confirm_reset_cv": "بله، بازنشانی شود"
   },
   "categories": {
     "jobs": "استخدام",
@@ -516,7 +520,8 @@
     "notification_deleted": "اعلان حذف شد.",
     "custom_cv_removed": "رزومه آپلود شده PDF حذف شد.",
     "cv_photo_removed": "عکس سفارشی رزومه حذف شد.",
-    "custom_cv_not_found": "هیچ سند PDF آپلود شده‌ای یافت نشد."
+    "custom_cv_not_found": "هیچ سند PDF آپلود شده‌ای یافت نشد.",
+    "cv_reset_success": "رزومه و فایل‌های آپلود شده شما با موفقیت بازنشانی شدند."
   },
   "footer": {
     "about": "درباره ما",

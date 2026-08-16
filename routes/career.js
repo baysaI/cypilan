@@ -16,6 +16,7 @@ router.get('/cv/custom', isAuthenticated, careerController.downloadCustomCv);
 router.get('/cv/custom/:userId', isAuthenticated, careerController.downloadCustomCv);
 router.post('/cv/custom/delete', isAuthenticated, careerController.removeCustomCv);
 router.post('/cv/photo/delete', isAuthenticated, careerController.removePhoto);
+router.post('/cv/sifirla', isAuthenticated, careerController.resetProfile);
 
 router.get('/basvurularim', isAuthenticated, careerController.myApplications);
 router.post('/basvuru/:listingId', isAuthenticated, careerController.apply);

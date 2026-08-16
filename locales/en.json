@@ -216,7 +216,11 @@
     "replace_custom_cv": "Upload New PDF",
     "remove_custom_cv": "Remove PDF",
     "cypilan_cv_pdf": "CYPILAN CV (PDF)",
-    "applicant_custom_pdf": "Applicant's PDF File"
+    "applicant_custom_pdf": "Applicant's PDF File",
+    "reset_cv": "Reset CV",
+    "reset_cv_title": "Reset Resume",
+    "reset_cv_confirm": "Are you sure you want to completely delete your resume details, uploaded photo, and PDF file? This action cannot be undone.",
+    "confirm_reset_cv": "Yes, Reset"
   },
   "categories": {
     "jobs": "Jobs",
@@ -516,7 +520,8 @@
     "notification_deleted": "Notification deleted.",
     "custom_cv_removed": "Uploaded PDF resume removed.",
     "cv_photo_removed": "Custom CV photo removed.",
-    "custom_cv_not_found": "No uploaded PDF document found."
+    "custom_cv_not_found": "No uploaded PDF document found.",
+    "cv_reset_success": "Your resume and uploaded files have been successfully reset."
   },
   "footer": {
     "about": "About Us",

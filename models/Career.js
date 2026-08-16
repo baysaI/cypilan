@@ -100,6 +100,12 @@ class Career {
     return this.getProfile(userId);
   }
 
+  static async deleteProfile(userId) {
+    const db = getDb();
+    db.prepare('DELETE FROM candidate_profiles WHERE user_id = ?').run([userId]);
+    return true;
+  }
+
   // A CV is only useful to an employer once it says something. This is what the
   // "one-click apply" button checks before it offers itself.
   static isProfileReady(profile) {

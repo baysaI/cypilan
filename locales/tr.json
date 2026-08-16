@@ -216,7 +216,11 @@
     "replace_custom_cv": "Yeni PDF Yükle",
     "remove_custom_cv": "PDF'i Kaldır",
     "cypilan_cv_pdf": "CYPILAN CV (PDF)",
-    "applicant_custom_pdf": "Adayın PDF Dosyası"
+    "applicant_custom_pdf": "Adayın PDF Dosyası",
+    "reset_cv": "CV'yi Sıfırla",
+    "reset_cv_title": "Özgeçmişi Sıfırla",
+    "reset_cv_confirm": "Özgeçmiş bilgilerinizi, yüklediğiniz CV fotoğrafını ve hazır PDF belgenizi tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+    "confirm_reset_cv": "Evet, Sıfırla"
   },
   "categories": {
     "jobs": "İş İlanları",
@@ -516,7 +520,8 @@
     "notification_deleted": "Bildirim silindi.",
     "custom_cv_removed": "Yüklenen PDF özgeçmiş kaldırıldı.",
     "cv_photo_removed": "Özel CV fotoğrafı kaldırıldı.",
-    "custom_cv_not_found": "Yüklenmiş bir PDF belgesi bulunamadı."
+    "custom_cv_not_found": "Yüklenmiş bir PDF belgesi bulunamadı.",
+    "cv_reset_success": "Özgeçmişiniz ve yüklü dosyalarınız başarıyla sıfırlandı."
   },
   "footer": {
     "about": "Hakkımızda",

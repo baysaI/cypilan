@@ -124,6 +124,11 @@ t.run('İş ilanları modülü', async (db) => {
   const noCvProfile = await Career.getProfile(seeker);
   t.assertEqual(noCvProfile.custom_cv_url, null, 'Özel PDF veritabanından kaldırıldı');
 
+  // --- CV Sıfırlama Testi
+  await Career.deleteProfile(seeker);
+  const resetProfile = await Career.getProfile(seeker);
+  t.assertEqual(resetProfile, null, 'CV profili tamamen sıfırlandı');
+
   // --- Sablonlar
   const cvHtml = await t.render('career/profile.ejs', {
     profile: updatedProfile, candidateUser: seekerUser, completeness: Career.profileCompleteness(updatedProfile),
@@ -131,7 +136,8 @@ t.run('İş ilanları modülü', async (db) => {
     title: 'test', user: { id: seeker, name: 'Ayşe Aday' }
   });
   t.assert(cvHtml.includes('CYPILAN PDF Çıktısı'), 'career/profile.ejs PDF indirme butonunu basıyor');
-  t.assert(cvHtml.includes('Fotoğraf ve Hazır PDF Dosyası'), 'career/profile.ejs fotoğraf ve PDF yükleme alanını basıyor');
+  t.assert(cvHtml.includes('/kariyer/cv/sifirla'), 'career/profile.ejs CV sıfırlama formunu basıyor');
+  t.assert(cvHtml.includes('resetCvModal'), 'career/profile.ejs CV sıfırlama onay modalını içeriyor');
 
   const openHtml = await t.render('career/openings.ejs', {
     openings: ranked, pagination: { currentPage: 1, totalPages: 1, totalItems: 1 },

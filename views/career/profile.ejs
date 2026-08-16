@@ -243,8 +243,45 @@
                     <a href="/kariyer/basvurularim" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
                         <%= t('career.my_applications') %>
                     </a>
+                    <% if (profile && (profile.headline || profile.custom_cv_url || profile.summary || profile.photo_url)) { %>
+                        <button type="button" class="btn btn-outline-danger btn-lg rounded-pill px-4 ms-md-auto" data-bs-toggle="modal" data-bs-target="#resetCvModal">
+                            <i class="fa-solid fa-trash-can me-2"></i><%= t('career.reset_cv') || 'CV\'yi Sıfırla' %>
+                        </button>
+                    <% } %>
                 </div>
             </form>
+
+            <% if (profile && (profile.headline || profile.custom_cv_url || profile.summary || profile.photo_url)) { %>
+                <!-- Reset CV Confirmation Modal -->
+                <div class="modal fade" id="resetCvModal" tabindex="-1" aria-labelledby="resetCvModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow rounded-4">
+                            <div class="modal-header border-bottom-0 pb-0">
+                                <h5 class="modal-title fw-bold text-danger" id="resetCvModalLabel">
+                                    <i class="fa-solid fa-triangle-exclamation me-2"></i><%= t('career.reset_cv_title') || 'Özgeçmişi Sıfırla' %>
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body py-3">
+                                <p class="text-muted mb-0">
+                                    <%= t('career.reset_cv_confirm') || 'Özgeçmiş bilgilerinizi, yüklediğiniz CV fotoğrafını ve hazır PDF belgenizi tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz.' %>
+                                </p>
+                            </div>
+                            <div class="modal-footer border-top-0 pt-0">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">
+                                    <%= t('common.cancel') || 'Vazgeç' %>
+                                </button>
+                                <form action="/kariyer/cv/sifirla" method="POST">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
+                                        <i class="fa-solid fa-trash-can me-1"></i><%= t('career.confirm_reset_cv') || 'Evet, Sıfırla' %>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
         </div>
     </div>
 </div>

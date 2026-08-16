@@ -185,6 +185,28 @@ const removePhoto = async (req, res) => {
     }
 };
 
+const resetProfile = async (req, res) => {
+    try {
+        const profile = await Career.getProfile(req.session.userId);
+        if (profile) {
+            if (profile.custom_cv_url) {
+                await removeCvFileByUrl(profile.custom_cv_url);
+            }
+            if (profile.photo_url) {
+                await removeCvFileByUrl(profile.photo_url);
+            }
+            await Career.deleteProfile(req.session.userId);
+        }
+
+        req.flash('success', 'flash.cv_reset_success');
+        res.redirect('/kariyer/cv');
+    } catch (error) {
+        console.error('Reset Profile Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/kariyer/cv');
+    }
+};
+
 // Openings ordered by how well they fit the visitor's CV. Without a CV the page
 // still works — it just falls back to newest first and says why.
 const openings = async (req, res, next) => {
@@ -380,6 +402,7 @@ module.exports = {
     downloadCustomCv,
     removeCustomCv,
     removePhoto,
+    resetProfile,
     openings,
     apply,
     myApplications,

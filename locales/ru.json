@@ -216,7 +216,11 @@
     "replace_custom_cv": "Загрузить новый PDF",
     "remove_custom_cv": "Удалить PDF",
     "cypilan_cv_pdf": "CYPILAN CV (PDF)",
-    "applicant_custom_pdf": "PDF-файл кандидата"
+    "applicant_custom_pdf": "PDF-файл кандидата",
+    "reset_cv": "Сбросить резюме",
+    "reset_cv_title": "Сброс резюме",
+    "reset_cv_confirm": "Вы уверены, что хотите полностью удалить данные резюме, загруженное фото и PDF-файл? Это действие нельзя отменить.",
+    "confirm_reset_cv": "Да, сбросить"
   },
   "categories": {
     "jobs": "Вакансии",
@@ -516,7 +520,8 @@
     "notification_deleted": "Уведомление удалено.",
     "custom_cv_removed": "Загруженное резюме в формате PDF удалено.",
     "cv_photo_removed": "Фотография из резюме удалена.",
-    "custom_cv_not_found": "Загруженный PDF-документ не найден."
+    "custom_cv_not_found": "Загруженный PDF-документ не найден.",
+    "cv_reset_success": "Ваше резюме и загруженные файлы успешно сброшены."
   },
   "footer": {
     "about": "О нас",
