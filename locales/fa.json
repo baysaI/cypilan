@@ -57,6 +57,7 @@
     "no_account": "حساب کاربری ندارید؟",
     "password": "رمز عبور",
     "password_hint": "باید حداقل 8 کاراکتر، 1 حرف بزرگ و 1 عدد داشته باشد.",
+    "password_requirements": "قوانین رمز عبور",
     "phone": "شماره تلفن",
     "register_error": "خطایی هنگام ثبت نام رخ داد",
     "register_success": "حساب کاربری با موفقیت ساخته شد",
@@ -64,6 +65,10 @@
     "remember_me": "مرا به خاطر بسپار",
     "reset_password_desc": "لطفا یک رمز عبور جدید برای حساب خود تعیین کنید.",
     "reset_password_title": "بازنشانی رمز عبور",
+    "rule_digit": "حداقل 1 رقم (0-9)",
+    "rule_match": "گذرواژه ها مطابقت دارند",
+    "rule_min_length": "حداقل 8 کاراکتر",
+    "rule_uppercase": "حداقل 1 حرف بزرگ (A-Z)",
     "save_new_password": "رمز عبور جدید را ذخیره کنید",
     "send_reset_link": "ارسال لینک بازنشانی",
     "terms_agree": "شرایط و قوانین را می‌پذیرم"

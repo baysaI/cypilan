@@ -57,6 +57,7 @@
     "no_account": "Don't have an account?",
     "password": "Password",
     "password_hint": "It must contain at least 8 characters, 1 uppercase letter and 1 number.",
+    "password_requirements": "Password rules",
     "phone": "Phone Number",
     "register_error": "An error occurred during registration",
     "register_success": "Account successfully created",
@@ -64,6 +65,10 @@
     "remember_me": "Remember Me",
     "reset_password_desc": "Please set a new password for your account.",
     "reset_password_title": "Password Reset",
+    "rule_digit": "At least 1 digit (0-9)",
+    "rule_match": "Passwords match",
+    "rule_min_length": "At least 8 characters",
+    "rule_uppercase": "At least 1 uppercase letter (A-Z)",
     "save_new_password": "Save New Password",
     "send_reset_link": "Send Reset Link",
     "terms_agree": "I agree to the Terms & Conditions"

@@ -57,6 +57,7 @@
     "no_account": "Hesabınız yok mu?",
     "password": "Şifre",
     "password_hint": "En az 8 karakter, 1 büyük harf ve 1 rakam içermelidir.",
+    "password_requirements": "Şifre kuralları",
     "phone": "Telefon",
     "register_error": "Kayıt sırasında bir hata oluştu",
     "register_success": "Hesabınız başarıyla oluşturuldu",
@@ -64,6 +65,10 @@
     "remember_me": "Beni Hatırla",
     "reset_password_desc": "Lütfen hesabınız için yeni bir şifre belirleyin.",
     "reset_password_title": "Şifre Yenileme",
+    "rule_digit": "En az 1 rakam (0-9)",
+    "rule_match": "Şifreler uyuşuyor",
+    "rule_min_length": "En az 8 karakter",
+    "rule_uppercase": "En az 1 büyük harf (A-Z)",
     "save_new_password": "Yeni Şifreyi Kaydet",
     "send_reset_link": "Sıfırlama Bağlantısı Gönder",
     "terms_agree": "Kullanım koşullarını kabul ediyorum"

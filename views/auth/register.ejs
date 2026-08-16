@@ -1,3 +1,7 @@
+<%
+const fData = (typeof formData !== 'undefined' && formData) ? formData : {};
+%>
+
 <div class="container py-5 py-md-7">
     <div class="row justify-content-center">
         <div class="col-12 col-sm-10 col-md-8 col-lg-6">
@@ -23,13 +27,13 @@
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <div class="mb-4 d-flex gap-3">
                             <div class="form-check bg-light rounded-3 p-3 flex-fill text-center border cursor-pointer hover-bg-primary-light transition-all">
-                                <input class="form-check-input float-none mx-auto d-block mb-2 shadow-none cursor-pointer" type="radio" name="accountType" id="typeIndividual" value="individual" checked>
+                                <input class="form-check-input float-none mx-auto d-block mb-2 shadow-none cursor-pointer" type="radio" name="accountType" id="typeIndividual" value="individual" <%= fData.accountType !== 'corporate' ? 'checked' : '' %>>
                                 <label class="form-check-label fw-bold d-block cursor-pointer" for="typeIndividual">
                                     <%= t('auth.individual') %>
                                 </label>
                             </div>
                             <div class="form-check bg-light rounded-3 p-3 flex-fill text-center border cursor-pointer hover-bg-primary-light transition-all">
-                                <input class="form-check-input float-none mx-auto d-block mb-2 shadow-none cursor-pointer" type="radio" name="accountType" id="typeCorporate" value="corporate">
+                                <input class="form-check-input float-none mx-auto d-block mb-2 shadow-none cursor-pointer" type="radio" name="accountType" id="typeCorporate" value="corporate" <%= fData.accountType === 'corporate' ? 'checked' : '' %>>
                                 <label class="form-check-label fw-bold d-block cursor-pointer" for="typeCorporate">
                                     <%= t('auth.business') %>
                                 </label>
@@ -38,20 +42,20 @@
 
                         <div class="mb-3">
                             <label for="fullName" class="form-label fw-medium small"><%= t('auth.full_name') %></label>
-                            <input type="text" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="fullName" name="fullName" required>
+                            <input type="text" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="fullName" name="fullName" value="<%= fData.fullName || '' %>" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="email" class="form-label fw-medium small"><%= t('auth.email') %></label>
-                            <input type="email" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="email" name="email" required>
+                            <input type="email" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="email" name="email" value="<%= fData.email || '' %>" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="phone" class="form-label fw-medium small"><%= t('auth.phone') %></label>
-                            <input type="tel" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="phone" name="phone" placeholder="0533 123 4567" required>
+                            <input type="tel" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="phone" name="phone" placeholder="0533 123 4567" value="<%= fData.phone || '' %>" required>
                         </div>
                         
-                        <div class="row g-3 mb-4">
+                        <div class="row g-3 mb-3">
                             <div class="col-sm-6">
                                 <label for="password" class="form-label fw-medium small"><%= t('auth.password') %></label>
                                 <input type="password" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="password" name="password" required>
@@ -59,6 +63,25 @@
                             <div class="col-sm-6">
                                 <label for="passwordConfirm" class="form-label fw-medium small"><%= t('auth.confirm_password') %></label>
                                 <input type="password" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="passwordConfirm" name="passwordConfirm" required>
+                            </div>
+                        </div>
+
+                        <!-- Live Password Rules Checklist -->
+                        <div class="p-3 bg-light rounded-3 mb-4 border">
+                            <div class="small fw-bold mb-2 text-dark"><i class="fa-solid fa-shield-halved me-1 text-primary"></i><%= t('auth.password_requirements') %>:</div>
+                            <div class="row g-2 small">
+                                <div class="col-6 text-muted" id="ruleLength">
+                                    <i class="fa-solid fa-circle-xmark text-danger me-1"></i><span><%= t('auth.rule_min_length') %></span>
+                                </div>
+                                <div class="col-6 text-muted" id="ruleUpper">
+                                    <i class="fa-solid fa-circle-xmark text-danger me-1"></i><span><%= t('auth.rule_uppercase') %></span>
+                                </div>
+                                <div class="col-6 text-muted" id="ruleDigit">
+                                    <i class="fa-solid fa-circle-xmark text-danger me-1"></i><span><%= t('auth.rule_digit') %></span>
+                                </div>
+                                <div class="col-6 text-muted" id="ruleMatch">
+                                    <i class="fa-solid fa-circle-xmark text-danger me-1"></i><span><%= t('auth.rule_match') %></span>
+                                </div>
                             </div>
                         </div>
 
@@ -82,3 +105,46 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('passwordConfirm');
+    if (!passwordInput || !confirmInput) return;
+
+    const ruleLength = document.getElementById('ruleLength');
+    const ruleUpper = document.getElementById('ruleUpper');
+    const ruleDigit = document.getElementById('ruleDigit');
+    const ruleMatch = document.getElementById('ruleMatch');
+
+    function updateRule(el, valid) {
+        if (!el) return;
+        const icon = el.querySelector('i');
+        if (valid) {
+            el.className = 'col-6 text-success fw-medium';
+            icon.className = 'fa-solid fa-circle-check text-success me-1';
+        } else {
+            el.className = 'col-6 text-muted';
+            icon.className = 'fa-solid fa-circle-xmark text-danger me-1';
+        }
+    }
+
+    function validatePassword() {
+        const val = passwordInput.value || '';
+        const confirmVal = confirmInput.value || '';
+
+        const hasMin = val.length >= 8;
+        const hasUpper = /[A-Z]/.test(val);
+        const hasDigit = /[0-9]/.test(val);
+        const matches = val.length > 0 && val === confirmVal;
+
+        updateRule(ruleLength, hasMin);
+        updateRule(ruleUpper, hasUpper);
+        updateRule(ruleDigit, hasDigit);
+        updateRule(ruleMatch, matches);
+    }
+
+    passwordInput.addEventListener('input', validatePassword);
+    confirmInput.addEventListener('input', validatePassword);
+});
+</script>

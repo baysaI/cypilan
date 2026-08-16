@@ -109,11 +109,25 @@ const showRegister = (req, res) => {
     if (req.session && req.session.userId) {
         return res.redirect('/');
     }
+    const formData = req.session.registerFormData || {};
+    delete req.session.registerFormData;
+
     res.locals.meta.title = 'Kayıt Ol';
-    res.render('auth/register', { title: 'Kayıt Ol' });
+    res.render('auth/register', { title: 'Kayıt Ol', formData });
 };
 
 const register = async (req, res) => {
+    const saveFormAndRedirect = (errorKey) => {
+        req.session.registerFormData = {
+            email: String(req.body.email || '').trim(),
+            fullName: String(req.body.fullName || '').trim(),
+            phone: String(req.body.phone || '').trim(),
+            accountType: req.body.accountType || 'individual'
+        };
+        req.flash('error', errorKey);
+        return res.redirect('/auth/register');
+    };
+
     try {
         const { password, passwordConfirm, accountType } = req.body;
         const email = String(req.body.email || '').trim().toLowerCase();
@@ -121,39 +135,32 @@ const register = async (req, res) => {
         const phone = String(req.body.phone || '').trim();
 
         if (!email || !password || !fullName) {
-            req.flash('error', 'flash.fill_required_fields');
-            return res.redirect('/auth/register');
+            return saveFormAndRedirect('flash.fill_required_fields');
         }
 
         if (!isValidEmail(email)) {
-            req.flash('error', 'flash.invalid_email');
-            return res.redirect('/auth/register');
+            return saveFormAndRedirect('flash.invalid_email');
         }
 
         if (fullName.length < 2) {
-            req.flash('error', 'flash.name_too_short');
-            return res.redirect('/auth/register');
+            return saveFormAndRedirect('flash.name_too_short');
         }
 
         if (!isValidPassword(password)) {
-            req.flash('error', 'flash.weak_password');
-            return res.redirect('/auth/register');
+            return saveFormAndRedirect('flash.weak_password');
         }
 
         if (password !== passwordConfirm) {
-            req.flash('error', 'flash.passwords_do_not_match');
-            return res.redirect('/auth/register');
+            return saveFormAndRedirect('flash.passwords_do_not_match');
         }
 
         if (phone && !isValidPhone(phone)) {
-            req.flash('error', 'flash.invalid_phone');
-            return res.redirect('/auth/register');
+            return saveFormAndRedirect('flash.invalid_phone');
         }
 
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
-            req.flash('error', 'flash.email_taken');
-            return res.redirect('/auth/register');
+            return saveFormAndRedirect('flash.email_taken');
         }
 
         const password_hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
