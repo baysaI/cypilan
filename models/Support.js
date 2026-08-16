@@ -1,6 +1,33 @@
 const { getDb } = require('../config/database');
+const Notification = require('./Notification');
+
+const REPRESENTATIVE_PERSONAS = [
+  { name: 'Cansu (Müşteri Temsilcisi)', shortName: 'Cansu', gender: 'female' },
+  { name: 'Deniz (Müşteri Temsilcisi)', shortName: 'Deniz', gender: 'female' },
+  { name: 'Emre (Müşteri Temsilcisi)', shortName: 'Emre', gender: 'male' },
+  { name: 'Zeynep (Müşteri Temsilcisi)', shortName: 'Zeynep', gender: 'female' },
+  { name: 'Burak (Müşteri Temsilcisi)', shortName: 'Burak', gender: 'male' },
+  { name: 'Ece (Müşteri Temsilcisi)', shortName: 'Ece', gender: 'female' },
+  { name: 'Murat (Müşteri Temsilcisi)', shortName: 'Murat', gender: 'male' },
+  { name: 'Selin (Müşteri Temsilcisi)', shortName: 'Selin', gender: 'female' },
+  { name: 'Kaan (Müşteri Temsilcisi)', shortName: 'Kaan', gender: 'male' },
+  { name: 'Elif (Müşteri Temsilcisi)', shortName: 'Elif', gender: 'female' },
+  { name: 'Mert (Müşteri Temsilcisi)', shortName: 'Mert', gender: 'male' },
+  { name: 'Büşra (Müşteri Temsilcisi)', shortName: 'Büşra', gender: 'female' },
+  { name: 'Tolga (Müşteri Temsilcisi)', shortName: 'Tolga', gender: 'male' },
+  { name: 'Damla (Müşteri Temsilcisi)', shortName: 'Damla', gender: 'female' }
+];
+
+function pickRandomPersona() {
+  const idx = Math.floor(Math.random() * REPRESENTATIVE_PERSONAS.length);
+  return REPRESENTATIVE_PERSONAS[idx];
+}
 
 class Support {
+  static getPersonas() {
+    return REPRESENTATIVE_PERSONAS;
+  }
+
   static async getOrCreateConversation(sessionToken, userDetails = {}) {
     if (!sessionToken || typeof sessionToken !== 'string') {
       throw new Error('Geçersiz oturum belirteci.');
@@ -14,38 +41,60 @@ class Support {
     const userId = userDetails.userId || null;
 
     if (!conv) {
+      const persona = pickRandomPersona();
+      const agentName = persona.name;
+      const initialGreeting = `Merhaba! Ben ${persona.shortName}, CYPILAN Canlı Destek ekibindenim. Size nasıl yardımcı olabilirim? İlanlar, üyelik veya diğer konular için bana yazabilir ya da aşağıdaki hızlı başlıklardan birini seçebilirsiniz.`;
+
       const info = db.prepare(`
         INSERT INTO support_conversations (
-          session_token, user_id, user_name, user_email, status,
+          session_token, user_id, user_name, user_email, agent_name, status,
           unread_user_count, unread_admin_count, last_message, last_message_at
-        ) VALUES (?, ?, ?, ?, 'waiting', 1, 0, ?, CURRENT_TIMESTAMP)
+        ) VALUES (?, ?, ?, ?, ?, 'waiting', 1, 0, ?, CURRENT_TIMESTAMP)
       `).run([
         sessionToken,
         userId,
         userName,
         userEmail,
-        'Merhaba! CYPILAN Canlı Destek ekibine hoş geldiniz. Size nasıl yardımcı olabiliriz?'
+        agentName,
+        initialGreeting
       ]);
 
       const conversationId = info.lastInsertRowid;
 
-      // Add system greeting message
+      // Add warm greeting message from representative
       db.prepare(`
         INSERT INTO support_messages (conversation_id, sender_type, sender_name, message, is_read)
-        VALUES (?, 'system', 'CYPILAN Destek', ?, 0)
+        VALUES (?, 'system', ?, ?, 0)
       `).run([
         conversationId,
-        'Merhaba! CYPILAN Canlı Destek ekibine hoş geldiniz. İlanlar, üyelik veya genel sorularınız için bize yazabilir ya da aşağıdaki hızlı seçeneklerden birini seçebilirsiniz.'
+        agentName,
+        initialGreeting
       ]);
 
       conv = db.prepare('SELECT * FROM support_conversations WHERE id = ?').get([conversationId]);
-    } else if (userId && !conv.user_id) {
-      db.prepare(`
-        UPDATE support_conversations
-        SET user_id = ?, user_name = COALESCE(?, user_name), user_email = COALESCE(?, user_email), updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run([userId, userName, userEmail, conv.id]);
-      conv = db.prepare('SELECT * FROM support_conversations WHERE id = ?').get([conv.id]);
+    } else {
+      let needsUpdate = false;
+      let newAgentName = conv.agent_name;
+      if (!newAgentName) {
+        newAgentName = pickRandomPersona().name;
+        needsUpdate = true;
+      }
+      if (userId && !conv.user_id) {
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        db.prepare(`
+          UPDATE support_conversations
+          SET user_id = COALESCE(?, user_id),
+              user_name = COALESCE(?, user_name),
+              user_email = COALESCE(?, user_email),
+              agent_name = COALESCE(?, agent_name),
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).run([userId, userName, userEmail, newAgentName, conv.id]);
+        conv = db.prepare('SELECT * FROM support_conversations WHERE id = ?').get([conv.id]);
+      }
     }
 
     return conv;
@@ -69,19 +118,30 @@ class Support {
     return db.prepare('SELECT * FROM support_conversations WHERE session_token = ?').get([sessionToken]) || null;
   }
 
-  static async sendMessage({ conversationId, senderType, senderId = null, senderName, message }) {
+  static async sendMessage({ conversationId, senderType, senderId = null, senderName = null, message }) {
     const cleanMessage = String(message || '').trim().slice(0, 2000);
     if (!cleanMessage) {
       throw new Error('Mesaj boş olamaz.');
     }
 
-    const cleanSenderName = String(senderName || 'Kullanıcı').slice(0, 80);
     const db = getDb();
+    const conv = db.prepare('SELECT * FROM support_conversations WHERE id = ?').get([conversationId]);
+    if (!conv) {
+      throw new Error('Görüşme bulunamadı.');
+    }
+
+    // Resolve representative persona name for admin/system
+    let finalSenderName = senderName;
+    if (senderType === 'admin' || senderType === 'system') {
+      finalSenderName = conv.agent_name || pickRandomPersona().name;
+    } else if (!finalSenderName) {
+      finalSenderName = conv.user_name || 'Ziyaretçi';
+    }
 
     const info = db.prepare(`
       INSERT INTO support_messages (conversation_id, sender_type, sender_id, sender_name, message, is_read)
       VALUES (?, ?, ?, ?, ?, 0)
-    `).run([conversationId, senderType, senderId, cleanSenderName, cleanMessage]);
+    `).run([conversationId, senderType, senderId, finalSenderName, cleanMessage]);
 
     const messageId = info.lastInsertRowid;
 
@@ -95,6 +155,19 @@ class Support {
             status = CASE WHEN status = 'closed' THEN 'waiting' ELSE status END
         WHERE id = ?
       `).run([cleanMessage, conversationId]);
+
+      // Notify all active site admins about incoming live support message
+      try {
+        await Notification.notifyAdmins({
+          actor_id: conv.user_id || null,
+          type: 'support',
+          title: 'Canlı Destek Bildirimi',
+          message: `${conv.user_name || 'Bir ziyaretçi'} canlı destek üzerinden mesaj gönderdi: "${cleanMessage.slice(0, 60)}${cleanMessage.length > 60 ? '...' : ''}"`,
+          link_url: '/admin/canli-destek'
+        });
+      } catch (notifErr) {
+        console.error('Support admin notification error:', notifErr);
+      }
     } else if (senderType === 'admin') {
       db.prepare(`
         UPDATE support_conversations
@@ -107,7 +180,7 @@ class Support {
         WHERE id = ?
       `).run([cleanMessage, senderId, conversationId]);
     } else {
-      // System
+      // System / Assistant
       db.prepare(`
         UPDATE support_conversations
         SET last_message = ?,
@@ -173,9 +246,9 @@ class Support {
     }
 
     if (search && search.trim()) {
-      whereClause += ' AND (c.user_name LIKE ? OR c.user_email LIKE ? OR c.last_message LIKE ?)';
+      whereClause += ' AND (c.user_name LIKE ? OR c.user_email LIKE ? OR c.last_message LIKE ? OR c.agent_name LIKE ?)';
       const term = `%${search.trim()}%`;
-      params.push(term, term, term);
+      params.push(term, term, term, term);
     }
 
     const countRow = db.prepare(`
@@ -238,7 +311,7 @@ class Support {
     if (status === 'closed') {
       db.prepare(`
         INSERT INTO support_messages (conversation_id, sender_type, sender_name, message, is_read)
-        VALUES (?, 'system', 'CYPILAN Destek', 'Bu canlı destek görüşmesi tamamlanmıştır. Bizi değerlendirmeyi unutmayın!', 0)
+        VALUES (?, 'system_notice', 'CYPILAN Destek', 'Bu canlı destek görüşmesi sonlandırılmıştır. Deneyiminizi değerlendirmeyi unutmayın!', 0)
       `).run([conversationId]);
     }
 

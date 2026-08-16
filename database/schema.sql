@@ -388,6 +388,7 @@ CREATE TABLE IF NOT EXISTS support_conversations (
   user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   user_name TEXT,
   user_email TEXT,
+  agent_name TEXT,
   status TEXT DEFAULT 'waiting', -- 'waiting', 'active', 'closed'
   assigned_admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   rating INTEGER, -- 1 to 5

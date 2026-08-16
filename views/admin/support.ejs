@@ -192,7 +192,13 @@
                                     <h6 class="mb-0 fw-bold text-truncate" id="adminActiveName">Ziyaretçi</h6>
                                     <span id="adminActiveUserBadge" class="badge bg-light text-muted border">Misafir</span>
                                 </div>
-                                <small class="text-muted d-block" id="adminActiveEmail">-</small>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <small class="text-muted" id="adminActiveEmail">-</small>
+                                    <span class="text-muted small">•</span>
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size: 0.68rem;" id="adminActiveAgentBadge">
+                                        <i class="fa-solid fa-headset me-1"></i>Temsilci: Cansu
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -489,6 +495,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeUserBadge.textContent = conv.user_id ? 'Kayıtlı Üye' : 'Misafir';
                 activeUserBadge.className = conv.user_id ? 'badge bg-primary-subtle text-primary border' : 'badge bg-light text-muted border';
 
+                const agentBadge = document.getElementById('adminActiveAgentBadge');
+                if (agentBadge) {
+                    agentBadge.innerHTML = `<i class="fa-solid fa-headset me-1"></i>Görünen Temsilci: ${escapeHtml(conv.agent_name || 'Müşteri Temsilcisi')}`;
+                }
+
                 updateStatusBadgeUI(conv.status);
 
                 messagesLog.innerHTML = '';
@@ -527,13 +538,27 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (msg.sender_type === 'admin') {
             bubble.className = 'admin-msg-bubble admin-msg-admin';
             bubble.innerHTML = `
-                <div class="fw-bold mb-1" style="font-size: 0.72rem; color: #bae6fd;">${escapeHtml(msg.sender_name || 'Destek')}</div>
+                <div class="fw-bold mb-1 d-flex align-items-center justify-content-between gap-2" style="font-size: 0.72rem; color: #bae6fd;">
+                    <span><i class="fa-solid fa-headset me-1"></i>${escapeHtml(msg.sender_name || 'Temsilci')}</span>
+                    <span class="badge bg-white text-primary px-1 py-0" style="font-size: 0.62rem;">Siz / Temsilci</span>
+                </div>
                 <div>${escapeHtml(msg.message)}</div>
                 <span class="admin-msg-time">${timeStr}</span>
             `;
-        } else {
+        } else if (msg.sender_type === 'system_notice') {
             bubble.className = 'admin-msg-bubble admin-msg-system';
             bubble.innerHTML = `<div>${escapeHtml(msg.message)}</div>`;
+        } else {
+            // System assistant automated response
+            bubble.className = 'admin-msg-bubble admin-msg-admin';
+            bubble.innerHTML = `
+                <div class="fw-bold mb-1 d-flex align-items-center justify-content-between gap-2" style="font-size: 0.72rem; color: #bae6fd;">
+                    <span><i class="fa-solid fa-robot me-1"></i>${escapeHtml(msg.sender_name || 'CYPILAN Destek')}</span>
+                    <span class="badge bg-info-subtle text-info px-1 py-0" style="font-size: 0.62rem;">Otomatik Asistan</span>
+                </div>
+                <div>${escapeHtml(msg.message)}</div>
+                <span class="admin-msg-time">${timeStr}</span>
+            `;
         }
 
         messagesLog.appendChild(bubble);

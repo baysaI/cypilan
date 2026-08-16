@@ -14,11 +14,13 @@ t.run('Canlı Destek Sistemi', async (db) => {
   t.assert(guestConv && guestConv.id, 'Misafir için yeni canlı destek görüşmesi oluşturuldu');
   t.assertEqual(guestConv.status, 'waiting', 'Yeni görüşme waiting (beklemede) durumunda açıldı');
   t.assertEqual(guestConv.session_token, guestToken, 'Oturum belirteci eşleşiyor');
+  t.assert(guestConv.agent_name && guestConv.agent_name.includes('Müşteri Temsilcisi'), 'Temsilci persona adı atandı (kadın/erkek)');
 
   // İlk sistem karşılama mesajı kontrolü
   let messages = await Support.getMessages(guestConv.id, 0);
   t.assertEqual(messages.length, 1, 'Başlangıçta 1 adet sistem karşılama mesajı mevcut');
   t.assertEqual(messages[0].sender_type, 'system', 'İlk mesaj sistem tarafından atıldı');
+  t.assertEqual(messages[0].sender_name, guestConv.agent_name, 'İlk karşılama temsilci adı ile gönderildi');
 
   // 2. Kullanıcı Mesaj Gönderme
   const userMsg = await Support.sendMessage({
@@ -35,6 +37,11 @@ t.run('Canlı Destek Sistemi', async (db) => {
   t.assertEqual(afterUserConv.unread_admin_count, 1, 'Yönetici için 1 okunmamış mesaj sayısı arttı');
   t.assertEqual(afterUserConv.last_message, 'Merhaba, ilan vermek istiyorum ama hata alıyorum.', 'Son mesaj güncellendi');
 
+  // Adminlere canlı destek bildirimi gitmiş mi kontrolü
+  const Notification = require(t.rootDir + '/models/Notification');
+  const adminNotifs = await Notification.getByUserId(adminId, { unreadOnly: true });
+  t.assert(adminNotifs.some(n => n.type === 'support' && n.title === 'Canlı Destek Bildirimi'), 'Admin kullanıcısına canlı destek bildirimi ulaştı');
+
   // 3. Mesajları Polling & Okundu İşaretleme
   const newMsgs = await Support.getMessages(guestConv.id, messages[0].id);
   t.assertEqual(newMsgs.length, 1, 'afterId filtresi ile sadece yeni mesajlar çekildi');
@@ -46,16 +53,17 @@ t.run('Canlı Destek Sistemi', async (db) => {
   // Kullanıcı karşılama mesajını okuyor
   await Support.markMessagesRead(guestConv.id, 'user');
 
-  // 4. Yönetici / Destek Temsilcisi Yanıtı
+  // 4. Yönetici / Destek Temsilcisi Yanıtı (Gerçek admin adı değil, temsilci adı kullanılır)
   const adminMsg = await Support.sendMessage({
     conversationId: guestConv.id,
     senderType: 'admin',
     senderId: adminId,
-    senderName: 'Destek Uzmanı',
+    senderName: null, // Model otomatik olarak conv.agent_name kullanır
     message: 'Merhaba Ahmet Bey, aldığınız hatanın ekran görüntüsünü veya metnini iletebilir misiniz?'
   });
 
   t.assert(adminMsg && adminMsg.id, 'Destek temsilcisi yanıtı kaydedildi');
+  t.assertEqual(adminMsg.sender_name, guestConv.agent_name, 'Admin yanıtında adminin gerçek adı değil, atanan temsilci adı görünüyor');
 
   const afterAdminConv = await Support.getConversationById(guestConv.id);
   t.assertEqual(afterAdminConv.status, 'active', 'Destek yanıt verince görüşme aktif duruma geçti');

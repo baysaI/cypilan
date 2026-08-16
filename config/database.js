@@ -55,7 +55,8 @@ const COLUMN_MIGRATIONS = [
   { table: 'candidate_profiles', column: 'photo_url', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN photo_url TEXT' },
   { table: 'candidate_profiles', column: 'custom_cv_url', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_url TEXT' },
   { table: 'candidate_profiles', column: 'custom_cv_name', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_name TEXT' },
-  { table: 'candidate_profiles', column: 'custom_cv_size', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_size INTEGER' }
+  { table: 'candidate_profiles', column: 'custom_cv_size', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_size INTEGER' },
+  { table: 'support_conversations', column: 'agent_name', ddl: 'ALTER TABLE support_conversations ADD COLUMN agent_name TEXT' }
 ];
 
 const columnsOf = (db, table) => db.pragma(`table_info(${table})`).map((column) => column.name);
@@ -68,6 +69,7 @@ const applyColumnMigrations = (db) => {
       user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
       user_name TEXT,
       user_email TEXT,
+      agent_name TEXT,
       status TEXT DEFAULT 'waiting',
       assigned_admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
       rating INTEGER,

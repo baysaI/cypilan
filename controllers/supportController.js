@@ -100,14 +100,13 @@ const sendMessage = async (req, res) => {
     });
 
     // Check if user clicked a quick FAQ topic
-    const faqKey = req.body.faq_key;
     if (faqKey && FAQ_KNOWLEDGE_BASE[faqKey]) {
       const faq = FAQ_KNOWLEDGE_BASE[faqKey];
       await Support.sendMessage({
         conversationId: conversation.id,
         senderType: 'system',
-        senderName: 'CYPILAN Asistan',
-        message: `ℹ️ ${faq.title}:\n${faq.answer}`
+        senderName: conversation.agent_name || 'CYPILAN Destek',
+        message: `${faq.title}\n\n${faq.answer}\n\nBaşka bir konuda bilgi almak ister misiniz? Canlı destek ekibimize dilediğiniz zaman yazabilirsiniz.`
       });
     }
 
@@ -293,14 +292,11 @@ const adminReply = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Görüşme ID ve mesaj zorunludur.' });
     }
 
-    const adminUser = await User.findById(req.session.userId);
-    const adminName = adminUser ? adminUser.full_name : 'Destek Yetkilisi';
-
     const savedMessage = await Support.sendMessage({
       conversationId,
       senderType: 'admin',
       senderId: req.session.userId,
-      senderName: adminName,
+      senderName: null, // Resolves to representative persona e.g. "Cansu (Müşteri Temsilcisi)"
       message: messageText
     });
 

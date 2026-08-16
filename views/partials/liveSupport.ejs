@@ -22,7 +22,7 @@
                     <span class="cyp-online-dot"></span>
                 </div>
                 <div class="text-truncate">
-                    <h6 class="mb-0 fw-bold fs-6 text-truncate"><%= t('support.header_title') || 'CYPILAN Canlı Destek' %></h6>
+                    <h6 class="mb-0 fw-bold fs-6 text-truncate" id="cypSupportHeaderTitle"><%= t('support.header_title') || 'CYPILAN Canlı Destek' %></h6>
                     <small class="text-white-50 d-block" style="font-size: 0.72rem;">
                         <span class="cyp-status-text"><%= t('support.online_status') || 'Çevrimiçi • 1 dk içinde yanıt' %></span>
                     </small>
@@ -235,13 +235,14 @@
 
 /* Message Bubbles */
 .cyp-msg-bubble {
-    max-width: 82%;
-    padding: 9px 13px;
-    border-radius: 14px;
-    font-size: 0.85rem;
-    line-height: 1.4;
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 0.86rem;
+    line-height: 1.45;
     word-break: break-word;
     position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .cyp-msg-user {
@@ -257,24 +258,18 @@
     color: #1e293b;
     border: 1px solid #e2e8f0;
     border-bottom-left-radius: 3px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.cyp-msg-system {
+.cyp-msg-notice {
     align-self: center;
-    max-width: 92%;
-    background: #f1f5f9;
-    color: #475569;
-    border-radius: 10px;
-    font-size: 0.78rem;
-    text-align: center;
-    border: 1px dashed #cbd5e1;
+    max-width: 90%;
+    margin: 4px 0;
 }
 
 .cyp-msg-time {
     font-size: 0.65rem;
-    opacity: 0.7;
-    margin-top: 3px;
+    opacity: 0.75;
+    margin-top: 4px;
     display: block;
 }
 
@@ -343,11 +338,9 @@
 
 <script>
 (function() {
-    // Only run if support widget is present
     const container = document.getElementById('cypilanSupportWidget');
     if (!container) return;
 
-    // Show container once loaded
     container.style.display = 'block';
 
     const launcher = document.getElementById('cypSupportLauncher');
@@ -365,6 +358,7 @@
     const submitRatingBtn = document.getElementById('cypSupportSubmitRatingBtn');
     const newChatBtn = document.getElementById('cypSupportNewChatBtn');
     const ratingComment = document.getElementById('cypSupportRatingComment');
+    const headerTitle = document.getElementById('cypSupportHeaderTitle');
     const starEls = document.querySelectorAll('.cyp-star');
 
     let isOpen = false;
@@ -374,13 +368,11 @@
     let selectedRating = 5;
     let currentStatus = 'waiting';
 
-    // Get CSRF Token
     function getCsrf() {
         const meta = document.querySelector('meta[name="csrf-token"]');
         return meta ? meta.getAttribute('content') : '';
     }
 
-    // Toggle Chat Window
     function toggleWindow(open) {
         isOpen = (typeof open === 'boolean') ? open : !isOpen;
         win.style.display = isOpen ? 'flex' : 'none';
@@ -398,7 +390,6 @@
     launcher.addEventListener('click', () => toggleWindow());
     minimizeBtn.addEventListener('click', () => toggleWindow(false));
 
-    // Star Rating click handling
     starEls.forEach(star => {
         star.addEventListener('click', function() {
             selectedRating = parseInt(this.getAttribute('data-val'), 10);
@@ -415,12 +406,10 @@
         });
     });
 
-    // Scroll to bottom helper
     function scrollToBottom() {
         body.scrollTop = body.scrollHeight;
     }
 
-    // Format time
     function formatTime(dateStr) {
         try {
             const d = new Date(dateStr);
@@ -430,23 +419,35 @@
         }
     }
 
-    // Render single message
     function renderMessage(msg) {
-        const bubble = document.createElement('div');
         const timeStr = formatTime(msg.created_at || new Date());
 
         if (msg.sender_type === 'user') {
+            const bubble = document.createElement('div');
             bubble.className = 'cyp-msg-bubble cyp-msg-user';
             bubble.innerHTML = `<div>${escapeHtml(msg.message)}</div><span class="cyp-msg-time"><i class="fa-solid fa-check me-1" style="font-size: 0.6rem;"></i>${timeStr}</span>`;
-        } else if (msg.sender_type === 'admin') {
-            bubble.className = 'cyp-msg-bubble cyp-msg-admin';
-            bubble.innerHTML = `<div class="fw-bold text-primary mb-1" style="font-size: 0.72rem;"><i class="fa-solid fa-headset me-1"></i>${escapeHtml(msg.sender_name || 'Destek')}</div><div>${escapeHtml(msg.message)}</div><span class="cyp-msg-time text-muted">${timeStr}</span>`;
+            messagesList.appendChild(bubble);
+        } else if (msg.sender_type === 'system_notice') {
+            const notice = document.createElement('div');
+            notice.className = 'cyp-msg-notice text-center';
+            notice.innerHTML = `<span class="badge bg-light text-secondary border px-3 py-1 rounded-pill small">${escapeHtml(msg.message)}</span>`;
+            messagesList.appendChild(notice);
         } else {
-            bubble.className = 'cyp-msg-bubble cyp-msg-system';
-            bubble.innerHTML = `<div>${escapeHtml(msg.message)}</div>`;
+            // Admin or system assistant message: rendered as beautiful left-aligned incoming chat bubble
+            const bubble = document.createElement('div');
+            bubble.className = 'cyp-msg-bubble cyp-msg-admin';
+            const senderName = msg.sender_name || 'CYPILAN Destek';
+            bubble.innerHTML = `
+                <div class="d-flex align-items-center gap-1 fw-bold text-primary mb-1" style="font-size: 0.74rem;">
+                    <i class="fa-solid fa-headset"></i>
+                    <span>${escapeHtml(senderName)}</span>
+                </div>
+                <div style="font-size: 0.85rem; color: #1e293b;">${escapeHtml(msg.message)}</div>
+                <span class="cyp-msg-time text-muted">${timeStr}</span>
+            `;
+            messagesList.appendChild(bubble);
         }
 
-        messagesList.appendChild(bubble);
         if (msg.id > lastMessageId) lastMessageId = msg.id;
     }
 
@@ -456,7 +457,6 @@
         return div.innerHTML.replace(/\n/g, '<br>');
     }
 
-    // Initialize Conversation
     async function initConversation() {
         try {
             const res = await fetch('/api/support/init', {
@@ -473,6 +473,10 @@
                 sessionToken = data.sessionToken;
                 localStorage.setItem('cyp_support_token', sessionToken);
                 currentStatus = data.conversation.status;
+
+                if (data.conversation.agent_name && headerTitle) {
+                    headerTitle.textContent = data.conversation.agent_name;
+                }
 
                 messagesList.innerHTML = '';
                 if (Array.isArray(data.messages)) {
@@ -493,11 +497,9 @@
         }
     }
 
-    // Send Message
     async function sendUserMessage(text, faqKey = null) {
         if (!text && !faqKey) return;
 
-        // Render optimistic bubble
         const tempMsg = {
             sender_type: 'user',
             message: text,
@@ -536,7 +538,6 @@
         if (txt) sendUserMessage(txt);
     });
 
-    // Quick FAQ chip clicks
     document.querySelectorAll('.cyp-chip-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const faqKey = this.getAttribute('data-faq');
@@ -545,7 +546,6 @@
         });
     });
 
-    // Polling for incoming messages
     async function poll() {
         if (!sessionToken) return;
         try {
@@ -558,7 +558,6 @@
                     data.messages.forEach(renderMessage);
                     scrollToBottom();
 
-                    // If window is closed, increment unread badge
                     if (!isOpen) {
                         const count = parseInt(unreadBadge.textContent, 10) + data.messages.length;
                         unreadBadge.textContent = count;
@@ -571,14 +570,12 @@
                     showRatingScreen(true);
                 }
             }
-        } catch (err) {
-            // silent polling error
-        }
+        } catch (err) {}
     }
 
     function startPolling() {
         if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(poll, 3500);
+        pollInterval = setInterval(poll, 3000);
     }
 
     function showRatingScreen(show) {
@@ -591,7 +588,6 @@
         }
     }
 
-    // End Chat Button
     endChatBtn.addEventListener('click', async () => {
         if (!confirm('<%= t('support.confirm_close_chat') || 'Canlı destek görüşmesini sonlandırmak istiyor musunuz?' %>')) return;
         try {
@@ -611,7 +607,6 @@
         }
     });
 
-    // Submit Rating
     submitRatingBtn.addEventListener('click', async () => {
         const comment = ratingComment.value.trim();
         submitRatingBtn.disabled = true;
@@ -662,7 +657,6 @@
 
     newChatBtn.addEventListener('click', startNewChat);
 
-    // Initial check for unread messages if user already has a token
     if (sessionToken) {
         poll();
         startPolling();

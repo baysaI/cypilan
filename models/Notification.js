@@ -114,6 +114,21 @@ class Notification {
     ).run([userId]);
     return result.changes > 0;
   }
+
+  static async notifyAdmins({ actor_id = null, type = 'support', title, message, link_url = '/admin/canli-destek' }) {
+    if (!title || !message) return [];
+    const db = getDb();
+    const adminRows = db.prepare("SELECT id FROM users WHERE role = 'admin' AND is_active = 1").all();
+    const notifications = [];
+    for (const admin of adminRows) {
+      const info = db.prepare(`
+        INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
+      `).run([admin.id, actor_id, type, title, message, link_url]);
+      notifications.push(info.lastInsertRowid);
+    }
+    return notifications;
+  }
 }
 
 module.exports = Notification;
