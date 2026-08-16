@@ -1,50 +1,45 @@
+const fs = require('fs');
+const path = require('path');
 const sharp = require('sharp');
 
 const MAX_DIMENSION = 1600;
 
-const escapeXml = (value) => String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+// Share of the image the mark is allowed to span.
+const MARK_SCALE = 0.6;
 
-const buildOverlay = (width, height) => {
-    const fontSize = Math.max(Math.round(width * 0.06), 24);
-    const subFontSize = Math.max(Math.round(fontSize * 0.4), 12);
+// The wordmark is a bitmap built ahead of time by scripts/build-watermark.js.
+//
+// It used to be an SVG composited at upload time, which is where the watermark
+// quietly went missing in production: rendering SVG *text* needs a font, and a
+// server without one draws no glyphs and reports no error. Uploads succeeded,
+// the photo was resized and re-encoded as usual, and the mark simply was not
+// there. A bitmap needs no font, so the result no longer depends on what is
+// installed on the machine.
+const WATERMARK_FILE = path.join(__dirname, '..', 'public', 'img', 'watermark.png');
 
-    return `
-    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-        <style>
-            .watermark-text {
-                font-family: Arial, Helvetica, sans-serif;
-                font-weight: 800;
-                font-size: ${fontSize}px;
-                fill: rgba(255, 255, 255, 0.35);
-                letter-spacing: 4px;
-                text-anchor: middle;
-            }
-            .watermark-subtext {
-                font-family: Arial, Helvetica, sans-serif;
-                font-weight: 600;
-                font-size: ${subFontSize}px;
-                fill: rgba(255, 255, 255, 0.25);
-                letter-spacing: 2px;
-                text-anchor: middle;
-            }
-        </style>
-        <g transform="rotate(-20, ${width / 2}, ${height / 2})">
-            <text x="${width / 2}" y="${height / 2}" class="watermark-text">CYPILAN.COM</text>
-            <text x="${width / 2}" y="${height / 2 + subFontSize * 1.5}" class="watermark-subtext">${escapeXml("KIBRIS'IN İLAN PLATFORMU")}</text>
-        </g>
-    </svg>`;
+let watermarkSource = null;
+
+const loadWatermark = () => {
+    if (watermarkSource) return watermarkSource;
+
+    if (!fs.existsSync(WATERMARK_FILE)) {
+        throw new Error(
+            `Filigran görseli bulunamadı: ${WATERMARK_FILE}. ` +
+            'Yeniden üretmek için: node scripts/build-watermark.js'
+        );
+    }
+
+    watermarkSource = fs.readFileSync(WATERMARK_FILE);
+    return watermarkSource;
 };
 
 // `input` may be a Buffer or a file path. Throws if the image cannot be processed,
 // so callers never record an image URL for a file that was not written.
 const addWatermark = async (input, outputPath) => {
-    // Resize first, then read the real output dimensions so the SVG overlay always
-    // matches the base image exactly.
+    const source = loadWatermark();
+
+    // Resize first, then read the real output dimensions so the mark can be
+    // sized against the image it actually lands on.
     const resized = await sharp(input)
         .rotate()
         .resize({
@@ -57,8 +52,19 @@ const addWatermark = async (input, outputPath) => {
 
     const { width, height } = resized.info;
 
+    // `fit: inside` keeps the mark within its share of both axes, so a wide
+    // panorama or a tall portrait shot never gets an overlay larger than
+    // itself — which sharp rejects outright.
+    const mark = await sharp(source)
+        .resize({
+            width: Math.max(1, Math.round(width * MARK_SCALE)),
+            height: Math.max(1, Math.round(height * MARK_SCALE)),
+            fit: 'inside'
+        })
+        .toBuffer();
+
     await sharp(resized.data)
-        .composite([{ input: Buffer.from(buildOverlay(width, height)), gravity: 'center' }])
+        .composite([{ input: mark, gravity: 'center' }])
         .jpeg({ quality: 85, progressive: true })
         .toFile(outputPath);
 
