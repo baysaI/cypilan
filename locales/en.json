@@ -177,7 +177,9 @@
     "salary": "Salary",
     "salary_max": "Salary (to)",
     "salary_min": "Salary (from)",
+    "salary_optional": "Salary / Wage (Optional)",
     "salary_period": "Period",
+    "salary_unspecified": "Unspecified",
     "save_cv": "Save My CV",
     "section_background": "Education and Skills",
     "section_basics": "Basics",
@@ -484,6 +486,8 @@
     "set_password_before_email": "Set a password before changing your e-mail address.",
     "title_required": "A listing title is required.",
     "title_too_long": "A listing title can be at most {max} characters.",
+    "unlimited_mode_off": "Unlimited listings mode disabled. The 3 free listings quota is back in effect.",
+    "unlimited_mode_on": "Unlimited listings mode enabled. All users now have unlimited free listings.",
     "user_activated": "The user was reactivated.",
     "user_already_reported": "You have already reported this user. Our team is reviewing it.",
     "user_blocked": "The user has been blocked.",
@@ -617,7 +621,9 @@
     "price": "Price",
     "price_asc": "Price (Low to High)",
     "price_desc": "Price (High to Low)",
+    "price_optional": "Price (Optional)",
     "price_range": "Price Range",
+    "price_unspecified": "Price Unspecified",
     "remove_favorite": "Remove from Favorites",
     "rent": "For Rent",
     "sale": "For Sale",
@@ -635,6 +641,8 @@
     "status_sold": "Sold",
     "title": "Title",
     "total_found": "listings found",
+    "unlimited_mode_desc": "You can post unlimited free listings across all categories.",
+    "unlimited_mode_title": "Unlimited Listings Mode Active",
     "views": "Views"
   },
   "maintenance": {
@@ -813,7 +821,10 @@
       "table_title": "Who pays, and when?",
       "title": "Standard, Plus & Premium Placement",
       "trades_body": "Always free, no commission. Posting a service listing costs nothing, because labour deserves support.",
-      "trades_title": "Trades & Services Listings"
+      "trades_title": "Trades & Services Listings",
+      "unlimited_banner_body": "All individual and corporate listings can be published for free with no limits. Create as many listings as you want.",
+      "unlimited_banner_title": "All Listings Are Currently Unlimited & Free!",
+      "unlimited_free": "Completely Free (Unlimited Listings)"
     },
     "privacy": {
       "intro": "As CYPILAN.COM, we attach great importance to the security and privacy of your personal data. This Privacy Policy explains how your personal data is collected, used and protected when you visit our website and use our services.",

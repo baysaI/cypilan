@@ -1,14 +1,127 @@
+<%
+const isUnlimitedOn = typeof unlimitedEnabled !== 'undefined' && Boolean(unlimitedEnabled);
+const isMaintOn = typeof enabled !== 'undefined' && Boolean(enabled);
+const maintMsg = typeof message !== 'undefined' ? message : '';
+const maintUntil = typeof until !== 'undefined' ? until : '';
+const maintLast = typeof lastChange !== 'undefined' ? lastChange : null;
+const unlimLast = typeof unlimitedLastChange !== 'undefined' ? unlimitedLastChange : null;
+%>
+
 <div class="mb-4">
-    <h1 class="h4 fw-bold mb-1">Bakım Modu</h1>
-    <p class="text-muted small mb-0">Siteyi ziyaretçilere geçici olarak kapatın.</p>
+    <h1 class="h4 fw-bold mb-1">Sistem &amp; İlan Ayarları</h1>
+    <p class="text-muted small mb-0">Platform genelindeki ilan kotalarını ve bakım modunu yönetin.</p>
 </div>
 
+<!-- Unlimited Listings Mode Card -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fa-solid fa-infinity fs-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="fs-6 fw-bold mb-0">Sınırsız İlan Modu (3 İlan Kotası)</h2>
+                        <span class="text-muted small">Tüm kullanıcılara sınırsız ve ücretsiz ilan hakkı tanıma</span>
+                    </div>
+                </div>
+
+                <% if (isUnlimitedOn) { %>
+                    <div class="alert alert-success border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="fa-solid fa-circle-check fs-4 mt-1 text-success"></i>
+                        <div>
+                            <strong class="d-block">Sınırsız İlan Modu AÇIK</strong>
+                            <span class="small">
+                                Şu an sitede 3 ilan sınırı <strong>devre dışıdır</strong>. Tüm kullanıcılar diledikleri kadar ücretsiz ilan verebilir. Fiyatlandırma ve ilan formlarında sınırsız ilan politikası gösterilmektedir.
+                            </span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-info border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="fa-solid fa-shield-halved fs-4 mt-1 text-primary"></i>
+                        <div>
+                            <strong class="d-block">Standart Kota Aktif (3 Ücretsiz İlan)</strong>
+                            <span class="small">
+                                Bireysel kullanıcılar Emlak, Vasıta ve İkinci El kategorilerinde toplamda en fazla <strong>3 ücretsiz ilan</strong> yayınlayabilir.
+                            </span>
+                        </div>
+                    </div>
+                <% } %>
+
+                <form action="/admin/sinirsiz-ilan" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                    <div class="form-check form-switch mb-4 p-3 bg-light rounded-4 border">
+                        <input class="form-check-input ms-0 me-3 cursor-pointer" type="checkbox" role="switch"
+                               name="enabled" value="1" id="unlimitedEnabledSwitch"
+                               style="width: 3.2rem; height: 1.6rem;"
+                               <%= isUnlimitedOn ? 'checked' : '' %>>
+                        <label class="form-check-label fw-bold cursor-pointer" for="unlimitedEnabledSwitch">
+                            <%= isUnlimitedOn ? 'Sınırsız İlan Modunu Kapat (3 İlan Kotasına Dön)' : 'Sınırsız İlan Modunu Aç (Kotaları Kaldır)' %>
+                        </label>
+                        <div class="form-text small mt-1 ms-0">
+                            Açıldığında: Tüm sitede 3 ilan kuralı kaldırılır, paket sayfaları ve formlar sınırsız mod bilgisiyle güncellenir.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn <%= isUnlimitedOn ? 'btn-outline-danger' : 'btn-success' %> fw-medium px-4">
+                        <i class="fa-solid fa-arrows-rotate me-2"></i><%= isUnlimitedOn ? 'Kotayı Geri Getir' : 'Sınırsız İlanı Etkinleştir' %>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h3 class="fs-6 fw-bold mb-3"><i class="fa-solid fa-circle-info text-primary me-2"></i>Sınırsız Mod Neleri Değiştirir?</h3>
+                <ul class="small text-muted mb-0 ps-3">
+                    <li class="mb-2"><strong>İlan Oluşturma:</strong> Kullanıcılar 3 ilanı geçse dahi engellenmez.</li>
+                    <li class="mb-2"><strong>İlan Verme Sayfası:</strong> Kalan hak sayacı yerine <em>"🎉 Sınırsız İlan Modu Aktif"</em> rozeti gösterilir.</li>
+                    <li class="mb-2"><strong>İlan Paketleri:</strong> Fiyatlandırma tablosunda bireysel üyelik <em>"Tamamen Ücretsiz (Sınırsız İlan)"</em> olarak görünür.</li>
+                    <li class="mb-0"><strong>Geri Alınabilirlik:</strong> Dilediğiniz an bu ayarı kapatarak standart 3 ilan kotasına geri dönebilirsiniz.</li>
+                </ul>
+            </div>
+        </div>
+
+        <% if (unlimLast) { %>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="fs-6 fw-bold mb-2">Kota Ayarı Son Değişiklik</h3>
+                    <p class="small text-muted mb-0">
+                        Durum: <strong><%= unlimLast.value === '1' ? 'Sınırsız Mod Açık' : '3 İlan Kotası Devrede' %></strong>
+                        <% if (unlimLast.updated_by_name) { %>
+                            &middot; <%= unlimLast.updated_by_name %>
+                        <% } %>
+                        <br>
+                        <span class="text-muted"><%= helpers.timeAgo(unlimLast.updated_at, lang) %></span>
+                    </p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<hr class="border-secondary my-4">
+
+<!-- Maintenance Mode Card -->
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fa-solid fa-screwdriver-wrench fs-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="fs-6 fw-bold mb-0">Bakım Modu</h2>
+                        <span class="text-muted small">Siteyi ziyaretçilere geçici olarak kapatma</span>
+                    </div>
+                </div>
 
-                <% if (enabled) { %>
+                <% if (isMaintOn) { %>
                     <div class="alert alert-danger border-0 d-flex gap-3 align-items-start">
                         <i class="fa-solid fa-triangle-exclamation fs-4 mt-1"></i>
                         <div>
@@ -35,7 +148,7 @@
                         <input class="form-check-input" type="checkbox" role="switch"
                                name="enabled" value="1" id="maintenanceEnabled"
                                style="width: 3rem; height: 1.5rem;"
-                               <%= enabled ? 'checked' : '' %>>
+                               <%= isMaintOn ? 'checked' : '' %>>
                         <label class="form-check-label fw-semibold ms-2" for="maintenanceEnabled">
                             Bakım modunu aç
                         </label>
@@ -47,7 +160,7 @@
                         </label>
                         <textarea class="form-control" id="maintenanceMessage" name="message"
                                   rows="3" maxlength="500"
-                                  placeholder="Örn: Sistemimizi güncelliyoruz, kısa süre içinde geri döneceğiz."><%= message || '' %></textarea>
+                                  placeholder="Örn: Sistemimizi güncelliyoruz, kısa süre içinde geri döneceğiz."><%= maintMsg %></textarea>
                         <div class="form-text small">Boş bırakırsanız varsayılan metin gösterilir. Beş dilde de aynı metin görünür.</div>
                     </div>
 
@@ -56,14 +169,14 @@
                             Tahmini bitiş (opsiyonel)
                         </label>
                         <input type="datetime-local" class="form-control" id="maintenanceUntil"
-                               name="until" value="<%= until || '' %>">
+                               name="until" value="<%= maintUntil %>">
                         <div class="form-text small">
                             Girilirse ziyaretçiye gösterilir ve arama motorlarına "ne zaman tekrar denesin" bilgisi olarak iletilir.
                         </div>
                     </div>
 
-                    <button type="submit" class="btn <%= enabled ? 'btn-success' : 'btn-danger' %> fw-medium px-4">
-                        <% if (enabled) { %>
+                    <button type="submit" class="btn <%= isMaintOn ? 'btn-success' : 'btn-danger' %> fw-medium px-4">
+                        <% if (isMaintOn) { %>
                             <i class="fa-solid fa-play me-2"></i>Kaydet
                         <% } else { %>
                             <i class="fa-solid fa-power-off me-2"></i>Kaydet
@@ -77,7 +190,7 @@
     <div class="col-lg-5">
         <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body p-4">
-                <h2 class="fs-6 fw-bold mb-3">Bakım modu açıkken</h2>
+                <h3 class="fs-6 fw-bold mb-3">Bakım modu açıkken</h3>
                 <ul class="small text-muted mb-0 ps-3">
                     <li class="mb-2">Ziyaretçiler bakım sayfasını görür, siteye giremez.</li>
                     <li class="mb-2"><strong>Admin hesapları normal gezinir</strong> — kendinizi dışarıda bırakmazsınız.</li>
@@ -88,17 +201,17 @@
             </div>
         </div>
 
-        <% if (lastChange) { %>
+        <% if (maintLast) { %>
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <h2 class="fs-6 fw-bold mb-2">Son değişiklik</h2>
+                    <h3 class="fs-6 fw-bold mb-2">Bakım Modu Son Değişiklik</h3>
                     <p class="small text-muted mb-0">
-                        <%= lastChange.value === '1' ? 'Açıldı' : 'Kapatıldı' %>
-                        <% if (lastChange.updated_by_name) { %>
-                            &middot; <%= lastChange.updated_by_name %>
+                        <%= maintLast.value === '1' ? 'Açıldı' : 'Kapatıldı' %>
+                        <% if (maintLast.updated_by_name) { %>
+                            &middot; <%= maintLast.updated_by_name %>
                         <% } %>
                         <br>
-                        <span class="text-muted"><%= helpers.timeAgo(lastChange.updated_at, lang) %></span>
+                        <span class="text-muted"><%= helpers.timeAgo(maintLast.updated_at, lang) %></span>
                     </p>
                 </div>
             </div>

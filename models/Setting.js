@@ -80,7 +80,8 @@ class Setting {
 Setting.KEYS = {
   MAINTENANCE_ENABLED: 'maintenance.enabled',
   MAINTENANCE_MESSAGE: 'maintenance.message',
-  MAINTENANCE_UNTIL: 'maintenance.until'
+  MAINTENANCE_UNTIL: 'maintenance.until',
+  UNLIMITED_LISTINGS_MODE: 'listings.unlimited_mode'
 };
 
 Setting.CACHE_TTL_MS = CACHE_TTL_MS;

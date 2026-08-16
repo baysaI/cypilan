@@ -9,32 +9,48 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-9 col-xl-8">
             
-            <% if (typeof quota !== 'undefined') { %>
-                <div class="card border-0 shadow-sm rounded-4 mb-4">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-start gap-3">
-                            <i class="fa-solid fa-circle-info fs-4 text-primary mt-1"></i>
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-1">İlan Hakkınız</h6>
-                                <p class="text-muted small mb-2">
-                                    <strong>Emlak, Vasıta ve İkinci El</strong> kategorilerinde ilk
-                                    <strong><%= quota.limit %> ilan ücretsizdir.</strong>
-                                    <% if (quota.remaining > 0) { %>
-                                        Kalan ücretsiz hakkınız:
-                                        <span class="badge bg-success rounded-pill"><%= quota.remaining %></span>
-                                    <% } else { %>
-                                        <span class="text-danger fw-medium">Ücretsiz hakkınızı doldurdunuz.</span>
-                                        <a href="/ilan-paketleri">İlan paketlerine göz atın.</a>
-                                    <% } %>
-                                </p>
-                                <p class="text-muted small mb-0">
-                                    <i class="fa-solid fa-check text-success me-1"></i>
-                                    <strong>Usta &amp; Hizmet</strong> ve <strong>İş İlanları</strong> kategorileri her zaman ücretsiz, sınırsız.
-                                </p>
+            <% if (typeof quota !== 'undefined' && quota) { %>
+                <% if (quota.isUnlimited) { %>
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-success">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fa-solid fa-gift fs-4 text-success mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold text-success mb-1">Sınırsız İlan Modu Aktif</h6>
+                                    <p class="text-muted small mb-0">
+                                        Şu an sistemde tüm kategorilerde dilediğiniz kadar ücretsiz ilan yayınlayabilirsiniz. Herhangi bir kota sınırı bulunmamaktadır.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                <% } else if (quota.limit !== null) { %>
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fa-solid fa-circle-info fs-4 text-primary mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-1">İlan Hakkınız</h6>
+                                    <p class="text-muted small mb-2">
+                                        <strong>Emlak, Vasıta ve İkinci El</strong> kategorilerinde ilk
+                                        <strong><%= quota.limit %> ilan ücretsizdir.</strong>
+                                        <% if (quota.remaining > 0) { %>
+                                            Kalan ücretsiz hakkınız:
+                                            <span class="badge bg-success rounded-pill"><%= quota.remaining %></span>
+                                        <% } else { %>
+                                            <span class="text-danger fw-medium">Ücretsiz hakkınızı doldurdunuz.</span>
+                                            <a href="/ilan-paketleri">İlan paketlerine göz atın.</a>
+                                        <% } %>
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fa-solid fa-check text-success me-1"></i>
+                                        <strong>Usta &amp; Hizmet</strong> ve <strong>İş İlanları</strong> kategorileri her zaman ücretsiz, sınırsız.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
             <% } %>
 
             <form action="/listings" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate id="createListingForm">
@@ -89,11 +105,11 @@
                             <div class="form-text small text-end" id="titleCount">0/70</div>
                         </div>
 
-                        <div class="row g-3 mb-4">
+                        <div class="row g-3 mb-4" id="priceRow">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold small text-muted"><%= t('listing.price') %> <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold small text-muted" id="priceLabel"><%= t('listing.price') %> <span class="text-danger" id="priceRequiredStar">*</span></label>
                                 <div class="input-group has-validation">
-                                    <input type="number" name="price" class="form-control form-control-lg bg-light border-0 shadow-none focus-ring-primary" placeholder="0" value="<%= typeof formData !== 'undefined' && typeof formData.price !== 'undefined' ? formData.price : '' %>" required min="0" step="any">
+                                    <input type="number" name="price" id="priceInput" class="form-control form-control-lg bg-light border-0 shadow-none focus-ring-primary" placeholder="0" value="<%= typeof formData !== 'undefined' && typeof formData.price !== 'undefined' ? formData.price : '' %>" required min="0" step="any">
                                     <select name="currency" class="form-select bg-light border-0 shadow-none" style="max-width: 100px;">
                                         <option value="TRY" <%= (typeof formData !== 'undefined' && formData.currency === 'TRY') ? 'selected' : '' %>>₺ TRY</option>
                                         <option value="GBP" <%= (typeof formData !== 'undefined' && formData.currency === 'GBP') ? 'selected' : '' %>>£ GBP</option>
@@ -415,6 +431,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Pay and requirements only make sense on a job advert.
             if (jobFieldsBox) jobFieldsBox.hidden = root !== 'is-ilanlari';
+
+            const priceInput = document.getElementById('priceInput');
+            const priceRequiredStar = document.getElementById('priceRequiredStar');
+            const priceLabel = document.getElementById('priceLabel');
+
+            if (root === 'is-ilanlari' || root === 'usta-hizmetler') {
+                if (priceInput) {
+                    priceInput.required = false;
+                    priceInput.classList.remove('is-invalid');
+                }
+                if (priceRequiredStar) priceRequiredStar.hidden = true;
+                if (priceLabel) priceLabel.innerHTML = (root === 'is-ilanlari' ? '<%= t("career.salary_optional") %>' : '<%= t("listing.price_optional") %>');
+            } else {
+                if (priceInput) priceInput.required = true;
+                if (priceRequiredStar) priceRequiredStar.hidden = false;
+                if (priceLabel) priceLabel.innerHTML = '<%= t("listing.price") %> <span class="text-danger" id="priceRequiredStar">*</span>';
+            }
         };
 
         categorySelect.addEventListener('change', syncCategoryOptions);

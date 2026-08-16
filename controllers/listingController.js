@@ -8,6 +8,7 @@ const ServiceRequest = require('../models/ServiceRequest');
 const { generateSlug, maskPhone } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
 const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/upload');
+const Setting = require('../models/Setting');
 const listingPolicy = require('../config/listingPolicy');
 const smartSearch = require('../utils/smartSearch');
 const cities = require('../config/cities');
@@ -181,6 +182,7 @@ const showCreate = async (req, res, next) => {
         const categories = await Category.getAll();
         const user = await User.findById(req.session.userId);
 
+        const isUnlimited = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
         const usedQuota = await Listing.countByUserInRootCategories(
             req.session.userId,
             listingPolicy.QUOTA_CATEGORIES
@@ -210,9 +212,10 @@ const showCreate = async (req, res, next) => {
             userPhone: (user && user.phone) || '',
             hidePhone: user ? Number(user.show_phone) === 0 : false,
             quota: {
-                limit: listingPolicy.FREE_LISTING_QUOTA,
+                limit: isUnlimited ? null : listingPolicy.FREE_LISTING_QUOTA,
                 used: usedQuota,
-                remaining: Math.max(0, listingPolicy.FREE_LISTING_QUOTA - usedQuota),
+                remaining: isUnlimited ? null : Math.max(0, listingPolicy.FREE_LISTING_QUOTA - usedQuota),
+                isUnlimited: isUnlimited,
                 categories: listingPolicy.QUOTA_CATEGORIES,
                 freeCategories: listingPolicy.ALWAYS_FREE_CATEGORIES
             },
@@ -255,7 +258,7 @@ const create = async (req, res, next) => {
         }
 
         const images = (req.processedImages || []).map(f => f.path);
-        const parsedPrice = parseFloat(price);
+        const parsedPrice = (price !== '' && price !== null && price !== undefined) ? parseFloat(price) : null;
 
         if (listingPolicy.requiresPhotos(rootSlug) && images.length === 0) {
             return abort(req, res, 'flash.photo_required', backToForm);
@@ -274,10 +277,12 @@ const create = async (req, res, next) => {
             listingPolicy.QUOTA_CATEGORIES
         );
 
+        const isUnlimited = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
         const decision = listingPolicy.evaluate({
             role: req.session.userRole,
             rootSlug,
-            usedCount: usedQuota
+            usedCount: usedQuota,
+            isUnlimited
         });
 
         if (!decision.allowed) {

@@ -160,9 +160,9 @@ const pricing = async (req, res, next) => {
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = res.locals.t('footer.pricing');
 
-        // Users are sent here when they run out of free listings, so the page has
-        // to know whether that is why they arrived — otherwise its call to action
-        // sends them straight back to the form that rejected them.
+        const Setting = require('../models/Setting');
+        const isUnlimited = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
+
         let quota = null;
         if (req.session && req.session.userId) {
             const used = await Listing.countByUserInRootCategories(
@@ -170,15 +170,17 @@ const pricing = async (req, res, next) => {
                 listingPolicy.QUOTA_CATEGORIES
             );
             quota = {
-                limit: listingPolicy.FREE_LISTING_QUOTA,
+                limit: isUnlimited ? null : listingPolicy.FREE_LISTING_QUOTA,
                 used,
-                remaining: Math.max(0, listingPolicy.FREE_LISTING_QUOTA - used)
+                remaining: isUnlimited ? null : Math.max(0, listingPolicy.FREE_LISTING_QUOTA - used),
+                isUnlimited
             };
         }
 
         res.render('pages/pricing', {
             packages: listingPolicy.PACKAGES,
-            freeQuota: listingPolicy.FREE_LISTING_QUOTA,
+            freeQuota: isUnlimited ? null : listingPolicy.FREE_LISTING_QUOTA,
+            isUnlimited,
             paidTiersLive: listingPolicy.PAID_TIERS_LIVE,
             supportEmail: appConfig.app.supportEmail,
             quota,

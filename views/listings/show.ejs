@@ -31,13 +31,21 @@
                     </div>
                 </div>
                 <div class="text-end d-none d-md-block flex-shrink-0">
-                    <h2 class="text-primary fw-bolder mb-0"><%= fmt(listing.price, listing.currency) %></h2>
+                    <% if (listing.price && Number(listing.price) > 0) { %>
+                        <h2 class="text-primary fw-bolder mb-0"><%= fmt(listing.price, listing.currency) %></h2>
+                    <% } else { %>
+                        <h2 class="text-primary fw-bolder mb-0 fs-4"><%= (listing.listing_type === 'job' || listing.category_slug === 'is-ilanlari') ? t('career.salary_unspecified') : t('listing.price_unspecified') %></h2>
+                    <% } %>
                 </div>
             </div>
 
             <% const isFav = typeof isFavorited !== 'undefined' && isFavorited; %>
             <div class="d-md-none mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h2 class="text-primary fw-bolder mb-0 fs-1"><%= fmt(listing.price, listing.currency) %></h2>
+                <% if (listing.price && Number(listing.price) > 0) { %>
+                    <h2 class="text-primary fw-bolder mb-0 fs-1"><%= fmt(listing.price, listing.currency) %></h2>
+                <% } else { %>
+                    <h2 class="text-primary fw-bolder mb-0 fs-4"><%= (listing.listing_type === 'job' || listing.category_slug === 'is-ilanlari') ? t('career.salary_unspecified') : t('listing.price_unspecified') %></h2>
+                <% } %>
                 <div class="d-flex gap-2">
                     <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 favorite-btn" data-id="<%= listing.id %>">
                         <i class="<%= isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i> <%= t('listing.add_favorite') %>

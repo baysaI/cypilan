@@ -77,7 +77,7 @@
                         <tr>
                             <td class="fw-medium"><%= t('pages.pricing.row_individual') %></td>
                             <td><%= t('pages.pricing.row_individual_cats') %></td>
-                            <td><%- t('pages.pricing.row_individual_price', { quota: freeQuota }) %></td>
+                            <td><%- isUnlimited ? ('<span class="text-success fw-bold">' + t('pages.pricing.unlimited_free') + '</span>') : t('pages.pricing.row_individual_price', { quota: freeQuota }) %></td>
                         </tr>
                         <tr>
                             <td class="fw-medium"><%= t('pages.pricing.row_jobseeker') %></td>
@@ -107,9 +107,21 @@
         </div>
     </div>
 
-    <% const quotaExhausted = quota && quota.remaining === 0; %>
+    <% const quotaExhausted = !isUnlimited && quota && quota.remaining === 0; %>
 
-    <% if (quotaExhausted && !paidTiersLive) { %>
+    <% if (isUnlimited) { %>
+        <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 text-center shadow-lg">
+            <h3 class="fw-bold mb-2"><i class="fa-solid fa-gift me-2 text-warning"></i><%= t('pages.pricing.unlimited_banner_title') %></h3>
+            <p class="text-white-50 mb-4">
+                <%= t('pages.pricing.unlimited_banner_body') %>
+            </p>
+            <div>
+                <a href="/listings/create" class="btn btn-accent btn-lg rounded-pill px-5 fw-bold shadow">
+                    <i class="fa-solid fa-plus me-2"></i><%= t('listing.post_ad') %>
+                </a>
+            </div>
+        </div>
+    <% } else if (quotaExhausted && !paidTiersLive) { %>
         <div class="card border-0 bg-primary text-white rounded-4 p-4 p-md-5 shadow-lg">
             <h3 class="fw-bold mb-2 text-center"><%= t('pages.pricing.quota_done_title') %></h3>
             <p class="text-white-50 mb-4 text-center"><%= t('pages.pricing.quota_done_body', { limit: quota.limit }) %></p>

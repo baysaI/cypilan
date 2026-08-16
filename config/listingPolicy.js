@@ -59,30 +59,30 @@ const isAlwaysFree = (rootSlug) => ALWAYS_FREE_CATEGORIES.includes(rootSlug);
 
 const usesQuota = (rootSlug) => QUOTA_CATEGORIES.includes(rootSlug);
 
-const evaluate = ({ role, rootSlug, usedCount }) => {
-  if (role === 'admin') {
-    return { allowed: true, free: true, remaining: null, reason: null };
+const evaluate = ({ role, rootSlug, usedCount, isUnlimited = false }) => {
+  if (role === 'admin' || isUnlimited) {
+    return { allowed: true, free: true, remaining: null, isUnlimited: Boolean(isUnlimited), reason: null };
   }
 
   if (isAlwaysFree(rootSlug)) {
-    return { allowed: true, free: true, remaining: null, reason: null };
+    return { allowed: true, free: true, remaining: null, isUnlimited: false, reason: null };
   }
 
   if (!usesQuota(rootSlug)) {
-    return { allowed: true, free: true, remaining: null, reason: null };
+    return { allowed: true, free: true, remaining: null, isUnlimited: false, reason: null };
   }
 
   const remaining = Math.max(0, FREE_LISTING_QUOTA - usedCount);
 
   if (remaining > 0) {
-    return { allowed: true, free: true, remaining, reason: null };
+    return { allowed: true, free: true, remaining, isUnlimited: false, reason: null };
   }
 
   if (PAID_TIERS_LIVE) {
-    return { allowed: false, free: false, remaining: 0, reason: 'package_required' };
+    return { allowed: false, free: false, remaining: 0, isUnlimited: false, reason: 'package_required' };
   }
 
-  return { allowed: false, free: false, remaining: 0, reason: 'packages_coming_soon' };
+  return { allowed: false, free: false, remaining: 0, isUnlimited: false, reason: 'packages_coming_soon' };
 };
 
 module.exports = {

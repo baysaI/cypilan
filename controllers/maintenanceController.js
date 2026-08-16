@@ -7,16 +7,18 @@ const show = async (req, res) => {
         const Report = require('../models/Report');
         const pendingReports = await Report.countPending();
 
-        res.locals.meta.title = 'Bakım Modu | Admin Paneli';
+        res.locals.meta.title = 'Sistem Ayarları | Admin Paneli';
         res.render('admin/maintenance', {
             layout: 'admin/layout',
             enabled: Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false),
             message: Setting.get(Setting.KEYS.MAINTENANCE_MESSAGE, ''),
             until: Setting.get(Setting.KEYS.MAINTENANCE_UNTIL, ''),
             lastChange: Setting.describe(Setting.KEYS.MAINTENANCE_ENABLED),
+            unlimitedEnabled: Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false),
+            unlimitedLastChange: Setting.describe(Setting.KEYS.UNLIMITED_LISTINGS_MODE),
             pendingReports,
             activePage: 'maintenance',
-            title: 'Bakım Modu'
+            title: 'Sistem Ayarları'
         });
     } catch (error) {
         console.error('Maintenance Page Error:', error);
@@ -58,8 +60,27 @@ const update = async (req, res) => {
     }
 };
 
+const updateUnlimited = async (req, res) => {
+    try {
+        const enabled = Boolean(req.body.enabled);
+        Setting.setBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, enabled, req.session.userId);
+
+        console.log(
+            `[UnlimitedListings] ${enabled ? 'AÇILDI' : 'kapatıldı'} — kullanıcı #${req.session.userId}`
+        );
+
+        req.flash('success', enabled ? 'flash.unlimited_mode_on' : 'flash.unlimited_mode_off');
+        res.redirect('/admin/bakim');
+    } catch (error) {
+        console.error('Unlimited Mode Update Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/bakim');
+    }
+};
+
 module.exports = {
     show,
     update,
+    updateUnlimited,
     MAX_MESSAGE
 };

@@ -177,7 +177,9 @@
     "salary": "Maaş",
     "salary_max": "Maaş (üst sınır)",
     "salary_min": "Maaş (alt sınır)",
+    "salary_optional": "Maaş / Ücret (Opsiyonel)",
     "salary_period": "Periyot",
+    "salary_unspecified": "Belirtilmemiş",
     "save_cv": "CV'mi Kaydet",
     "section_background": "Eğitim ve Yetkinlik",
     "section_basics": "Temel Bilgiler",
@@ -484,6 +486,8 @@
     "set_password_before_email": "E-posta adresinizi değiştirmeden önce bir şifre belirlemelisiniz.",
     "title_required": "İlan başlığı zorunludur.",
     "title_too_long": "İlan başlığı en fazla {max} karakter olabilir.",
+    "unlimited_mode_off": "Sınırsız ilan modu kapatıldı. 3 ücretsiz ilan kotası tekrar devrede.",
+    "unlimited_mode_on": "Sınırsız ilan modu açıldı. Tüm kullanıcılara sınırsız ücretsiz ilan hakkı tanındı.",
     "user_activated": "Kullanıcı aktifleştirildi.",
     "user_already_reported": "Bu kullanıcıyı zaten şikayet ettiniz. Ekibimiz inceliyor.",
     "user_blocked": "Kullanıcı engellendi.",
@@ -617,7 +621,9 @@
     "price": "Fiyat",
     "price_asc": "Fiyat (Düşükten Yükseğe)",
     "price_desc": "Fiyat (Yüksekten Düşüğe)",
+    "price_optional": "Fiyat (Opsiyonel)",
     "price_range": "Fiyat Aralığı",
+    "price_unspecified": "Fiyat Belirtilmemiş",
     "remove_favorite": "Favorilerden Çıkar",
     "rent": "Kiralık",
     "sale": "Satılık",
@@ -635,6 +641,8 @@
     "status_sold": "Satıldı",
     "title": "Başlık",
     "total_found": "ilan bulundu",
+    "unlimited_mode_desc": "Şu an tüm kategorilerde dilediğiniz kadar ücretsiz ilan verebilirsiniz.",
+    "unlimited_mode_title": "Sınırsız İlan Modu Aktif",
     "views": "Görüntülenme"
   },
   "maintenance": {
@@ -813,7 +821,10 @@
       "table_title": "Kimden ne zaman ücret alınır?",
       "title": "Standart, Plus & Premium Paylaşım",
       "trades_body": "Her zaman ücretsiz, komisyonsuz. Emeği desteklemek için hizmet ilanı oluşturmak tamamen bedava.",
-      "trades_title": "Usta & Hizmet İlanları"
+      "trades_title": "Usta & Hizmet İlanları",
+      "unlimited_banner_body": "Platformumuzda tüm bireysel ve kurumsal ilanlar sınırsız olarak ücretsiz yayınlanabilir. Dilediğiniz kadar ilan oluşturabilirsiniz.",
+      "unlimited_banner_title": "Tüm İlanlar Şu An Sınırsız & Ücretsiz!",
+      "unlimited_free": "Tamamen Ücretsiz (Sınırsız İlan)"
     },
     "privacy": {
       "intro": "CYPILAN.COM olarak kişisel verilerinizin güvenliği ve gizliliği konusuna büyük önem vermekteyiz. Bu Gizlilik Politikası, web sitemizi ziyaret ettiğinizde ve hizmetlerimizden yararlandığınızda kişisel verilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.",
