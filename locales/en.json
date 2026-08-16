@@ -1243,6 +1243,7 @@
     "confirm_close_chat": "Do you want to end the live support conversation?",
     "thank_you_rating": "Thank You!",
     "rating_saved": "Your feedback has been saved successfully.",
-    "chip_connect_agent": "Connect to Live Agent"
+    "chip_connect_agent": "Connect to Live Agent",
+    "status_closed_header": "Conversation Ended"
   }
 }

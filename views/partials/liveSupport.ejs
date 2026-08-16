@@ -543,6 +543,11 @@
                 })
             });
             const data = await res.json();
+            if (data.isClosed || (!data.success && data.error && data.error.includes('sonlandırılmıştır'))) {
+                currentStatus = 'closed';
+                showRatingScreen(true);
+                return;
+            }
             if (data.success && data.message) {
                 // Find temporary optimistic bubble and stamp it with real ID to prevent duplicate
                 const tempEl = messagesList.querySelector('[data-temp-msg="true"]');
@@ -601,7 +606,7 @@
                     }
                 }
 
-                if (data.status === 'closed' && currentStatus !== 'closed') {
+                if (data.status === 'closed') {
                     currentStatus = 'closed';
                     showRatingScreen(true);
                 }
@@ -616,11 +621,20 @@
 
     function showRatingScreen(show) {
         if (show) {
-            ratingScreen.style.display = 'block';
-            footer.style.display = 'none';
+            body.style.setProperty('display', 'none', 'important');
+            footer.style.setProperty('display', 'none', 'important');
+            ratingScreen.style.setProperty('display', 'flex', 'important');
+            ratingScreen.style.setProperty('flex-direction', 'column', 'important');
+            ratingScreen.style.setProperty('justify-content', 'center', 'important');
+            ratingScreen.style.setProperty('flex', '1', 'important');
+            const statusText = document.querySelector('.cyp-status-text');
+            if (statusText) statusText.textContent = '<%= t('support.status_closed_header') || 'Görüşme Sonlandırıldı' %>';
         } else {
-            ratingScreen.style.display = 'none';
-            footer.style.display = 'block';
+            body.style.removeProperty('display');
+            footer.style.removeProperty('display');
+            ratingScreen.style.setProperty('display', 'none', 'important');
+            const statusText = document.querySelector('.cyp-status-text');
+            if (statusText) statusText.textContent = '<%= t('support.online_status') || 'Çevrimiçi • 1 dk içinde yanıt' %>';
         }
     }
 

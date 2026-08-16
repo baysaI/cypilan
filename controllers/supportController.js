@@ -75,6 +75,14 @@ const sendMessage = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Görüşme bulunamadı.' });
     }
 
+    if (conversation.status === 'closed') {
+      return res.status(400).json({
+        success: false,
+        error: 'Bu görüşme sonlandırılmıştır. Lütfen değerlendirme yapın veya yeni bir sohbet başlatın.',
+        isClosed: true
+      });
+    }
+
     const messageText = String(req.body.message || '').trim();
     if (!messageText) {
       return res.status(400).json({ success: false, error: 'Mesaj boş olamaz.' });

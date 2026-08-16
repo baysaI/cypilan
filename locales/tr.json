@@ -1243,6 +1243,7 @@
     "confirm_close_chat": "Canlı destek görüşmesini sonlandırmak istiyor musunuz?",
     "thank_you_rating": "Teşekkür Ederiz!",
     "rating_saved": "Geri bildiriminiz başarıyla kaydedildi.",
-    "chip_connect_agent": "Canlı Desteğe Bağlan"
+    "chip_connect_agent": "Canlı Desteğe Bağlan",
+    "status_closed_header": "Görüşme Sonlandırıldı"
   }
 }

@@ -468,6 +468,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     bindCardClicks();
 
+    let currentActiveConvAgentName = '';
+
+    // Bind canned responses with dynamic representative name for greeting
+    document.querySelectorAll('.canned-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const rawText = this.getAttribute('data-text') || '';
+            const isGreeting = this.textContent.includes('Karşılama');
+            if (isGreeting && currentActiveConvAgentName) {
+                const shortName = currentActiveConvAgentName.split(' ')[0].replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ]/g, '') || 'Temsilciniz';
+                replyInput.value = `Merhaba! Ben ${shortName}, CYPILAN Canlı Destek ekibindenim. Size nasıl yardımcı olabilirim?`;
+            } else {
+                replyInput.value = rawText;
+            }
+            replyInput.focus();
+        });
+    });
+
     // Select Conversation
     async function selectConversation(id) {
         activeConversationId = id;
@@ -489,6 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (data.success && data.conversation) {
                 const conv = data.conversation;
+                currentActiveConvAgentName = conv.agent_name || 'Müşteri Temsilcisi';
                 activeName.textContent = conv.user_name || 'Ziyaretçi';
                 activeEmail.textContent = conv.user_email || (conv.user_id ? 'Kayıtlı Kullanıcı' : 'Misafir Ziyaretçi');
                 activeAvatar.textContent = (conv.user_name || 'Z')[0].toUpperCase();

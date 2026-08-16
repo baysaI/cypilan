@@ -1243,6 +1243,7 @@
     "confirm_close_chat": "آیا می‌خواهید گفتگوی پشتیبانی زنده را پایان دهید؟",
     "thank_you_rating": "متشکریم!",
     "rating_saved": "بازخورد شما با موفقیت ثبت شد.",
-    "chip_connect_agent": "اتصال به پشتیبانی زنده"
+    "chip_connect_agent": "اتصال به پشتیبانی زنده",
+    "status_closed_header": "گفتگو به پایان رسید"
   }
 }
