@@ -116,11 +116,12 @@ const sendMessage = async (req, res) => {
     // Check if user requested direct live support agent connection
     if (isConnect) {
       await Support.updateStatus(conversation.id, 'waiting');
+      const shortAgentName = (conversation.agent_name || 'Canlı Destek').split(' ')[0].replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ]/g, '') || 'Müşteri Temsilcisi';
       await Support.sendMessage({
         conversationId: conversation.id,
         senderType: 'system',
         senderName: conversation.agent_name || 'CYPILAN Destek',
-        message: `🔔 Talebinizi aldım! Sizi hemen müşteri temsilcimize (${conversation.agent_name || 'Canlı Destek'}) aktarıyorum. Temsilcimiz bildirim aldı ve sohbete bağlanıyor, lütfen hattan ayrılmayınız.`
+        message: `🔔 Talebinizi aldım! Sizi hemen müşteri temsilcimize (${shortAgentName}) aktarıyorum. Temsilcimiz bildirim aldı ve sohbete bağlanıyor, lütfen hattan ayrılmayınız.`
       });
     } else if (isFaq) {
       const faq = FAQ_KNOWLEDGE_BASE[faqKey];

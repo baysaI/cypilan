@@ -447,7 +447,7 @@
         } else if (msg.sender_type === 'system_notice') {
             bubble.className = 'cyp-msg-notice text-center';
             bubble.innerHTML = `<span class="badge bg-light text-secondary border px-3 py-1 rounded-pill small">${escapeHtml(msg.message)}</span>`;
-            messagesList.appendChild(notice);
+            messagesList.appendChild(bubble);
         } else {
             // Admin or system assistant message
             bubble.className = 'cyp-msg-bubble cyp-msg-admin';
