@@ -82,14 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // A rail that simply stops at the screen edge reads as a cut-off list.
-        // Three signals together say "this moves": a fade on whichever side has
-        // more, a thumb showing where you are in the strip, and — once per
-        // visit — a short nudge, because nothing states "scrollable" as plainly
-        // as seeing it move.
-        const railProgress = categoryRail.parentElement
-            && categoryRail.parentElement.querySelector('.category-rail-progress span');
-
+        // Two signals that add no furniture to the bar: a fade on whichever
+        // side still has entries, and — once per visit — a short nudge, because
+        // nothing says "this moves" as plainly as seeing it move.
         const publishRailEdges = () => {
             const max = categoryRail.scrollWidth - categoryRail.clientWidth;
             if (max <= 1) {
@@ -100,18 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const start = categoryRail.scrollLeft > 1;
             const end = categoryRail.scrollLeft < max - 1;
             categoryRail.setAttribute('data-overflowing', start && end ? 'both' : (start ? 'start' : 'end'));
-
-            if (railProgress) {
-                const visibleShare = categoryRail.clientWidth / categoryRail.scrollWidth;
-                const scrolledShare = categoryRail.scrollLeft / max;
-                railProgress.style.setProperty('--rail-thumb-width', (visibleShare * 100).toFixed(2) + '%');
-                // The thumb travels the track's remaining width, expressed
-                // against its own width so a percentage translate works.
-                railProgress.style.setProperty(
-                    '--rail-thumb-offset',
-                    (scrolledShare * (1 - visibleShare) / visibleShare * 100).toFixed(2) + '%'
-                );
-            }
         };
 
         publishRailEdges();
@@ -121,6 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // labels are, which moves the proportion the thumb is drawn from.
         window.addEventListener('load', publishRailEdges);
 
+        // The nudge shifts the entries visually rather than actually scrolling
+        // the rail: a smooth scroll that gets interrupted leaves the strip
+        // parked a few pixels in, with the left fade stuck on and the first
+        // category no longer lined up with the page gutter.
         const nudgeRail = () => {
             if (prefersReducedMotion) return;
             if (categoryRail.scrollLeft > 0) return; // already moved to the active category
@@ -134,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             window.setTimeout(() => {
-                categoryRail.scrollTo({ left: 36, behavior: 'smooth' });
-                window.setTimeout(() => categoryRail.scrollTo({ left: 0, behavior: 'smooth' }), 600);
+                categoryRail.classList.add('rail-nudge');
+                window.setTimeout(() => categoryRail.classList.remove('rail-nudge'), 1000);
             }, 700);
         };
 

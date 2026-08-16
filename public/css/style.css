@@ -794,10 +794,12 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
 }
 
 /* Category rail: a horizontal swipe on phone and tablet, a plain nav row once
-   there is room for every entry. */
-.category-nav .navbar-nav {
-    scroll-snap-type: x proximity;
-}
+   there is room for every entry.
+
+   Deliberately no scroll snapping: `scroll-snap-align: start` measures against
+   the scrollport edge rather than the rail's padding, so it pulled the strip
+   16px in on load and left the first category flush against the screen edge,
+   out of line with everything else on the page. */
 
 @media (max-width: 991.98px) {
     .category-nav .navbar-nav {
@@ -806,10 +808,6 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
         overflow-x: auto;
         overscroll-behavior-x: contain;
         -webkit-overflow-scrolling: touch;
-    }
-
-    .category-nav .nav-item {
-        scroll-snap-align: start;
     }
 
     .category-nav .nav-link {
@@ -835,36 +833,31 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     }
 }
 
-/* Scroll position indicator. Hidden until main.js reports the rail actually
-   overflows, so a short category list shows nothing. */
-.category-rail-progress {
-    display: none;
-}
-
-.navbar-nav[data-overflowing] ~ .category-rail-progress {
-    display: block;
-    height: 3px;
-    margin: 0 auto 0.3rem;
-    width: 46%;
-    border-radius: 999px;
-    background: rgba(var(--cyp-primary-rgb), 0.14);
-    overflow: hidden;
-}
-
-.category-rail-progress span {
-    display: block;
-    height: 100%;
-    width: var(--rail-thumb-width, 40%);
-    border-radius: inherit;
-    background: rgba(var(--cyp-primary-rgb), 0.75);
-    transform: translateX(var(--rail-thumb-offset, 0));
-}
-
-@media (min-width: 992px) {
-    .category-rail-progress,
-    .navbar-nav[data-overflowing] ~ .category-rail-progress {
-        display: none;
+/* The rail runs edge to edge below lg rather than stopping at the container
+   gutter. A strip that ends 16px short of the screen reads as a finished list;
+   one that runs off the edge, with an entry cut by it, reads as continuing.
+   The first entry still lines up with the page gutter. */
+@media (max-width: 991.98px) {
+    .category-nav > .container {
+        --bs-gutter-x: 0;
     }
+
+    .category-rail .navbar-nav {
+        padding-inline: 1rem 2rem;
+    }
+
+    /* Shown once per visit: the entries slide and settle back, which says the
+       strip moves without adding anything to the bar. The scroll position is
+       untouched, so the rail stays lined up with the page gutter. */
+    .category-rail .navbar-nav.rail-nudge > .nav-item {
+        animation: cyp-rail-nudge 0.9s ease-in-out;
+    }
+}
+
+@keyframes cyp-rail-nudge {
+    0%   { transform: translateX(0); }
+    40%  { transform: translateX(-28px); }
+    100% { transform: translateX(0); }
 }
 
 /* Sticky rails (filter sidebar, seller card) sit below the header rather than
