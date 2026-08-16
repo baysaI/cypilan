@@ -32,27 +32,24 @@ function generateCvPdf({ user, profile }) {
     try {
       const doc = new PDFDocument({
         size: 'A4',
-        margins: { top: 36, bottom: 40, left: 40, right: 40 },
+        margins: { top: 25, bottom: 15, left: 36, right: 36 },
+        bufferPages: true,
         autoFirstPage: true,
         info: {
-          Title: `CYPILAN CV - ${user.full_name || 'Aday'}`,
+          Title: `CYPILAN CV - ${user ? user.full_name || 'Aday' : 'Aday'}`,
           Author: 'CYPILAN.COM',
           Subject: 'Özgeçmiş Belgesi',
           Keywords: 'CYPILAN, CV, Özgeçmiş, Kıbrıs Kariyer'
         }
       });
 
-      // Register Unicode-compliant fonts for full Turkish character support
+      const fontR = fs.existsSync(fontRegularPath) ? 'CustomRegular' : 'Helvetica';
+      const fontB = fs.existsSync(fontBoldPath) ? 'CustomBold' : 'Helvetica-Bold';
+
       if (fs.existsSync(fontRegularPath)) {
         doc.registerFont('CustomRegular', fontRegularPath);
         doc.registerFont('CustomBold', fontBoldPath);
-        doc.font('CustomRegular');
-      } else {
-        doc.font('Helvetica');
       }
-
-      const fontR = fs.existsSync(fontRegularPath) ? 'CustomRegular' : 'Helvetica';
-      const fontB = fs.existsSync(fontBoldPath) ? 'CustomBold' : 'Helvetica-Bold';
 
       const buffers = [];
       doc.on('data', (chunk) => buffers.push(chunk));
@@ -61,68 +58,59 @@ function generateCvPdf({ user, profile }) {
 
       const pageWidth = doc.page.width;
       const pageHeight = doc.page.height;
-      const margin = 40;
+      const margin = 36;
       const contentWidth = pageWidth - (margin * 2);
 
-      // Function to draw watermark on background
-      const drawWatermark = () => {
-        doc.save();
-        doc.opacity(0.045);
-        doc.font(fontB).fontSize(54).fillColor('#0f172a');
-        doc.rotate(-35, { origin: [pageWidth / 2, pageHeight / 2] });
-        doc.text('CYPILAN.COM', pageWidth / 2 - 200, pageHeight / 2 - 25, {
-          align: 'center',
-          width: 400
-        });
-        doc.restore();
-      };
+      const candidateUser = user || {};
+      const candidateProfile = profile || {};
 
-      // Draw watermark on first page
-      drawWatermark();
+      // ==========================================
+      // 1. TOP HEADER BRAND
+      // ==========================================
+      // Top colored bar
+      doc.rect(0, 0, pageWidth, 4).fill('#0284c7');
 
-      // Top Accent Line
-      doc.rect(0, 0, pageWidth, 5).fill('#0284c7');
-
-      // Top Header Brand Area
-      let currentY = 24;
+      let currentY = 18;
 
       // Brand Logo on Left
-      doc.font(fontB).fontSize(20).fillColor('#0284c7');
-      doc.text('CYP', margin, currentY, { continued: true });
-      doc.fillColor('#0f172a').text('ILAN', { continued: true });
-      doc.fillColor('#0284c7').text('.COM');
+      doc.font(fontB).fontSize(19).fillColor('#0284c7').text('CYP', margin, currentY, { lineBreak: false });
+      const cypWidth = doc.widthOfString('CYP');
+      doc.fillColor('#0f172a').text('ILAN', margin + cypWidth, currentY, { lineBreak: false });
+      const ilanWidth = doc.widthOfString('ILAN');
+      doc.fillColor('#0284c7').text('.COM', margin + cypWidth + ilanWidth, currentY, { lineBreak: false });
 
-      doc.font(fontR).fontSize(8).fillColor('#64748b');
-      doc.text('Kıbrıs Dijital Kariyer & İlan Ekosistemi', margin, currentY + 22);
+      doc.font(fontR).fontSize(7.5).fillColor('#64748b').text('Kıbrıs Dijital Kariyer & İlan Ekosistemi', margin, currentY + 22, { lineBreak: false });
 
       // Official CV Badge on Right
-      const badgeWidth = 160;
+      const badgeWidth = 145;
       const badgeHeight = 22;
       const badgeX = pageWidth - margin - badgeWidth;
       doc.roundedRect(badgeX, currentY + 2, badgeWidth, badgeHeight, 4).fillAndStroke('#f8fafc', '#cbd5e1');
-      doc.font(fontB).fontSize(7.5).fillColor('#0369a1');
-      doc.text('RESMİ CYPILAN ÖZGEÇMİŞİ', badgeX, currentY + 8, {
+      doc.font(fontB).fontSize(7.5).fillColor('#0369a1').text('RESMİ CYPILAN ÖZGEÇMİŞİ', badgeX, currentY + 8, {
         width: badgeWidth,
-        align: 'center'
+        align: 'center',
+        lineBreak: false
       });
 
-      currentY += 42;
+      currentY += 40;
 
-      // Divider below brand header
+      // Header border line
       doc.strokeColor('#e2e8f0').lineWidth(0.8).moveTo(margin, currentY).lineTo(pageWidth - margin, currentY).stroke();
-      currentY += 14;
+      currentY += 12;
 
-      // Candidate Hero Card
-      const heroHeight = 105;
+      // ==========================================
+      // 2. CANDIDATE HERO CARD
+      // ==========================================
+      const heroHeight = 100;
       doc.roundedRect(margin, currentY, contentWidth, heroHeight, 8).fillAndStroke('#f8fafc', '#e2e8f0');
 
       // Profile Photo on left
-      const photoSize = 75;
+      const photoSize = 72;
       const photoX = margin + 14;
-      const photoY = currentY + 15;
+      const photoY = currentY + 14;
 
       let photoDrawn = false;
-      const candidatePhoto = (profile && profile.photo_url) || (user && user.avatar_url);
+      const candidatePhoto = candidateProfile.photo_url || candidateUser.avatar_url;
 
       if (candidatePhoto && typeof candidatePhoto === 'string' && candidatePhoto.startsWith('/uploads/')) {
         const photoDiskPath = path.join(__dirname, '..', 'public', candidatePhoto.replace(/^\//, ''));
@@ -132,8 +120,7 @@ function generateCvPdf({ user, profile }) {
             doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).clip();
             doc.image(photoDiskPath, photoX, photoY, { width: photoSize, height: photoSize, fit: [photoSize, photoSize] });
             doc.restore();
-            // Photo border
-            doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).lineWidth(1.5).stroke('#0284c7');
+            doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).lineWidth(1.2).stroke('#0284c7');
             photoDrawn = true;
           } catch (imgErr) {
             console.error('PDF photo render error:', imgErr.message);
@@ -142,199 +129,220 @@ function generateCvPdf({ user, profile }) {
       }
 
       if (!photoDrawn) {
-        // Fallback stylized avatar
         doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).fillAndStroke('#e0f2fe', '#bae6fd');
-        const initials = (user.full_name || 'A')
+        const initials = (candidateUser.full_name || 'Aday')
           .split(' ')
           .filter(Boolean)
           .map(p => p[0])
           .slice(0, 2)
           .join('')
           .toUpperCase();
-        doc.font(fontB).fontSize(24).fillColor('#0369a1');
-        doc.text(initials, photoX, photoY + 24, { width: photoSize, align: 'center' });
+        doc.font(fontB).fontSize(22).fillColor('#0369a1');
+        doc.text(initials, photoX, photoY + 24, { width: photoSize, align: 'center', lineBreak: false });
       }
 
-      // Candidate Information (Name, Headline, Contacts)
+      // Candidate Text Details (Name, Headline, Contacts)
       const textX = photoX + photoSize + 16;
-      const textWidth = contentWidth - (photoSize + 40);
+      const textWidth = contentWidth - (photoSize + 36);
 
-      doc.font(fontB).fontSize(16).fillColor('#0f172a');
-      doc.text(user.full_name || 'İsimsiz Aday', textX, photoY - 2, { width: textWidth });
+      doc.font(fontB).fontSize(15).fillColor('#0f172a');
+      doc.text(candidateUser.full_name || 'İsimsiz Aday', textX, photoY - 2, { width: textWidth, lineBreak: false });
 
-      doc.font(fontB).fontSize(10.5).fillColor('#0284c7');
-      doc.text(profile && profile.headline ? profile.headline : 'Aday', textX, doc.y + 2, { width: textWidth });
+      doc.font(fontB).fontSize(10).fillColor('#0284c7');
+      doc.text(candidateProfile.headline || 'Aday', textX, photoY + 18, { width: textWidth, lineBreak: false });
 
-      // Contact details grid
-      const metaY = doc.y + 6;
+      // Contact details 2-column grid
+      const metaY = photoY + 36;
       const col1X = textX;
-      const col2X = textX + (textWidth / 2) + 5;
+      const col2X = textX + (textWidth / 2) + 6;
       const colWidth = (textWidth / 2) - 10;
 
-      doc.font(fontR).fontSize(8.5).fillColor('#475569');
+      // Row 1: Email & Phone
+      doc.font(fontB).fontSize(8).fillColor('#475569').text('E-posta: ', col1X, metaY, { lineBreak: false });
+      doc.font(fontR).fontSize(8).fillColor('#0f172a').text(candidateUser.email || '-', col1X + 40, metaY, { width: colWidth - 40, lineBreak: false });
 
-      // Email & Phone
-      doc.font(fontB).fillColor('#334155').text('E-posta: ', col1X, metaY, { continued: true });
-      doc.font(fontR).fillColor('#64748b').text(user.email || '-');
+      doc.font(fontB).fontSize(8).fillColor('#475569').text('Telefon: ', col2X, metaY, { lineBreak: false });
+      doc.font(fontR).fontSize(8).fillColor('#0f172a').text(candidateUser.phone || 'Belirtilmedi', col2X + 40, metaY, { width: colWidth - 40, lineBreak: false });
 
-      doc.font(fontB).fillColor('#334155').text('Telefon: ', col2X, metaY, { continued: true });
-      doc.font(fontR).fillColor('#64748b').text(user.phone || 'Belirtilmedi');
-
-      // City & Work Type
-      const cityKey = (profile && profile.preferred_city) ? String(profile.preferred_city).toLowerCase() : '';
-      const cityName = CITY_LABELS[cityKey] || (profile && profile.preferred_city ? profile.preferred_city : 'Tüm Kıbrıs');
-      const workTypeName = (profile && profile.preferred_work_type && WORK_TYPE_LABELS[profile.preferred_work_type])
-        ? WORK_TYPE_LABELS[profile.preferred_work_type]
+      // Row 2: City & Work Type
+      const cityKey = candidateProfile.preferred_city ? String(candidateProfile.preferred_city).toLowerCase() : '';
+      const cityName = CITY_LABELS[cityKey] || candidateProfile.preferred_city || 'Tüm Kıbrıs';
+      const workTypeName = (candidateProfile.preferred_work_type && WORK_TYPE_LABELS[candidateProfile.preferred_work_type])
+        ? WORK_TYPE_LABELS[candidateProfile.preferred_work_type]
         : 'Belirtilmedi';
 
       const line2Y = metaY + 14;
-      doc.font(fontB).fillColor('#334155').text('Konum: ', col1X, line2Y, { continued: true });
-      doc.font(fontR).fillColor('#64748b').text(cityName);
+      doc.font(fontB).fontSize(8).fillColor('#475569').text('Konum: ', col1X, line2Y, { lineBreak: false });
+      doc.font(fontR).fontSize(8).fillColor('#0f172a').text(cityName, col1X + 40, line2Y, { width: colWidth - 40, lineBreak: false });
 
-      doc.font(fontB).fillColor('#334155').text('Çalışma Şekli: ', col2X, line2Y, { continued: true });
-      doc.font(fontR).fillColor('#64748b').text(workTypeName);
+      doc.font(fontB).fontSize(8).fillColor('#475569').text('Çalışma: ', col2X, line2Y, { lineBreak: false });
+      doc.font(fontR).fontSize(8).fillColor('#0f172a').text(workTypeName, col2X + 40, line2Y, { width: colWidth - 40, lineBreak: false });
 
-      // Experience
+      // Row 3: Experience
       const line3Y = line2Y + 14;
-      const expText = profile && Number(profile.experience_years) > 0
-        ? `${profile.experience_years} Yıl Deneyim`
+      const expText = candidateProfile.experience_years && Number(candidateProfile.experience_years) > 0
+        ? `${candidateProfile.experience_years} Yıl Deneyim`
         : 'Yeni Başlayan / Giriş Seviyesi';
 
-      doc.font(fontB).fillColor('#334155').text('Deneyim: ', col1X, line3Y, { continued: true });
-      doc.font(fontR).fillColor('#64748b').text(expText);
+      doc.font(fontB).fontSize(8).fillColor('#475569').text('Deneyim: ', col1X, line3Y, { lineBreak: false });
+      doc.font(fontR).fontSize(8).fillColor('#0f172a').text(expText, col1X + 40, line3Y, { width: colWidth - 40, lineBreak: false });
 
       currentY += heroHeight + 16;
 
-      // Section helper
-      const drawSectionTitle = (title, iconText = '') => {
-        // Check for page overflow
-        if (currentY > pageHeight - 110) {
+      // ==========================================
+      // 3. SECTIONS
+      // ==========================================
+      const drawSectionHeader = (title) => {
+        if (currentY > pageHeight - 90) {
           doc.addPage();
-          drawWatermark();
-          currentY = 40;
+          currentY = 32;
         }
 
-        doc.rect(margin, currentY, 4, 14).fill('#0284c7');
-        doc.font(fontB).fontSize(11).fillColor('#0f172a');
-        doc.text(title, margin + 10, currentY + 1);
+        doc.rect(margin, currentY, 3.5, 13).fill('#0284c7');
+        doc.font(fontB).fontSize(10).fillColor('#0f172a');
+        doc.text(title, margin + 8, currentY + 1, { lineBreak: false });
 
-        currentY += 18;
-        doc.strokeColor('#f1f5f9').lineWidth(1).moveTo(margin, currentY).lineTo(pageWidth - margin, currentY).stroke();
-        currentY += 8;
+        currentY += 16;
+        doc.strokeColor('#e2e8f0').lineWidth(0.6).moveTo(margin, currentY).lineTo(pageWidth - margin, currentY).stroke();
+        currentY += 6;
       };
 
-      // 1. Summary / About
-      if (profile && profile.summary && profile.summary.trim()) {
-        drawSectionTitle('PROFESYONEL ÖZET');
-        doc.font(fontR).fontSize(9.5).fillColor('#334155');
-        doc.text(profile.summary.trim(), margin, currentY, {
+      // 1. Profesyonel Özet
+      if (candidateProfile.summary && candidateProfile.summary.trim()) {
+        drawSectionHeader('PROFESYONEL ÖZET');
+        doc.font(fontR).fontSize(9).fillColor('#334155');
+        doc.text(candidateProfile.summary.trim(), margin, currentY, {
           width: contentWidth,
-          lineGap: 3.5,
+          lineGap: 3,
           align: 'left'
         });
-        currentY = doc.y + 14;
+        currentY = doc.y + 12;
       }
 
-      // 2. Education
-      if (profile && profile.education && profile.education.trim()) {
-        drawSectionTitle('EĞİTİM BİLGİLERİ');
-        doc.font(fontR).fontSize(9.5).fillColor('#334155');
-        doc.text(profile.education.trim(), margin, currentY, {
+      // 2. Eğitim Bilgileri
+      if (candidateProfile.education && candidateProfile.education.trim()) {
+        drawSectionHeader('EĞİTİM BİLGİLERİ');
+        doc.font(fontR).fontSize(9).fillColor('#334155');
+        doc.text(candidateProfile.education.trim(), margin, currentY, {
           width: contentWidth,
-          lineGap: 3.5,
+          lineGap: 3,
           align: 'left'
         });
-        currentY = doc.y + 14;
+        currentY = doc.y + 12;
       }
 
-      // 3. Skills
-      if (profile && profile.skills && profile.skills.trim()) {
-        const skillList = profile.skills
+      // 3. Yetenekler & Uzmanlıklar
+      if (candidateProfile.skills && candidateProfile.skills.trim()) {
+        const skillList = candidateProfile.skills
           .split(/[,;\n]/)
           .map(s => s.trim())
           .filter(Boolean);
 
         if (skillList.length > 0) {
-          drawSectionTitle('YETENEKLER & UZMANLIK ALANLARI');
+          drawSectionHeader('YETENEKLER & UZMANLIK ALANLARI');
 
           let pillX = margin;
           let pillY = currentY;
-          const pillHeight = 20;
+          const pillHeight = 18;
 
           skillList.forEach(skill => {
-            const textWidth = doc.font(fontB).fontSize(8.5).widthOfString(skill);
-            const pillWidth = textWidth + 16;
+            const textWidth = doc.font(fontB).fontSize(8).widthOfString(skill);
+            const pillWidth = textWidth + 14;
 
             if (pillX + pillWidth > pageWidth - margin) {
               pillX = margin;
-              pillY += pillHeight + 6;
+              pillY += pillHeight + 5;
             }
 
-            doc.roundedRect(pillX, pillY, pillWidth, pillHeight, 4).fillAndStroke('#f0fdf4', '#bbf7d0');
-            doc.font(fontB).fontSize(8.5).fillColor('#166534');
-            doc.text(skill, pillX, pillY + 5.5, { width: pillWidth, align: 'center' });
+            doc.roundedRect(pillX, pillY, pillWidth, pillHeight, 3).fillAndStroke('#f0fdf4', '#bbf7d0');
+            doc.font(fontB).fontSize(8).fillColor('#166534');
+            doc.text(skill, pillX, pillY + 4.5, { width: pillWidth, align: 'center', lineBreak: false });
 
-            pillX += pillWidth + 8;
+            pillX += pillWidth + 6;
           });
 
-          currentY = pillY + pillHeight + 14;
+          currentY = pillY + pillHeight + 12;
         }
       }
 
-      // 4. Languages
-      if (profile && profile.languages && profile.languages.trim()) {
-        const langList = profile.languages
+      // 4. Yabancı Diller
+      if (candidateProfile.languages && candidateProfile.languages.trim()) {
+        const langList = candidateProfile.languages
           .split(/[,;\n]/)
           .map(l => l.trim())
           .filter(Boolean);
 
         if (langList.length > 0) {
-          drawSectionTitle('YABANCI DİLLER');
+          drawSectionHeader('YABANCI DİLLER');
 
           let pillX = margin;
           let pillY = currentY;
-          const pillHeight = 20;
+          const pillHeight = 18;
 
           langList.forEach(langItem => {
-            const textWidth = doc.font(fontB).fontSize(8.5).widthOfString(langItem);
-            const pillWidth = textWidth + 16;
+            const textWidth = doc.font(fontB).fontSize(8).widthOfString(langItem);
+            const pillWidth = textWidth + 14;
 
             if (pillX + pillWidth > pageWidth - margin) {
               pillX = margin;
-              pillY += pillHeight + 6;
+              pillY += pillHeight + 5;
             }
 
-            doc.roundedRect(pillX, pillY, pillWidth, pillHeight, 4).fillAndStroke('#f0f9ff', '#bae6fd');
-            doc.font(fontB).fontSize(8.5).fillColor('#0369a1');
-            doc.text(langItem, pillX, pillY + 5.5, { width: pillWidth, align: 'center' });
+            doc.roundedRect(pillX, pillY, pillWidth, pillHeight, 3).fillAndStroke('#f0f9ff', '#bae6fd');
+            doc.font(fontB).fontSize(8).fillColor('#0369a1');
+            doc.text(langItem, pillX, pillY + 4.5, { width: pillWidth, align: 'center', lineBreak: false });
 
-            pillX += pillWidth + 8;
+            pillX += pillWidth + 6;
           });
 
-          currentY = pillY + pillHeight + 14;
+          currentY = pillY + pillHeight + 12;
         }
       }
 
-      // 5. Certificates & Courses
-      if (profile && profile.certificates && profile.certificates.trim()) {
-        drawSectionTitle('SERTİFİKALAR & BELGELER');
-        doc.font(fontR).fontSize(9.5).fillColor('#334155');
-        doc.text(profile.certificates.trim(), margin, currentY, {
+      // 5. Sertifikalar
+      if (candidateProfile.certificates && candidateProfile.certificates.trim()) {
+        drawSectionHeader('SERTİFİKALAR & BELGELER');
+        doc.font(fontR).fontSize(9).fillColor('#334155');
+        doc.text(candidateProfile.certificates.trim(), margin, currentY, {
           width: contentWidth,
-          lineGap: 3.5,
+          lineGap: 3,
           align: 'left'
         });
-        currentY = doc.y + 14;
+        currentY = doc.y + 12;
       }
 
-      // Footer
-      const footerY = pageHeight - 32;
-      doc.strokeColor('#e2e8f0').lineWidth(0.8).moveTo(margin, footerY - 8).lineTo(pageWidth - margin, footerY - 8).stroke();
+      // ==========================================
+      // 4. WATERMARK & FOOTER (Applied to all pages)
+      // ==========================================
+      const range = doc.bufferedPageRange();
+      const totalPages = range.count;
 
-      const todayStr = new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      doc.font(fontR).fontSize(7.5).fillColor('#94a3b8');
-      doc.text('Bu özgeçmiş CYPILAN.COM Kariyer Portalı üzerinden dijital ve güvenli olarak oluşturulmuştur.', margin, footerY);
-      doc.text(`Tarih: ${todayStr}`, pageWidth - margin - 120, footerY, { width: 120, align: 'right' });
+      for (let i = range.start; i < range.start + totalPages; i++) {
+        doc.switchToPage(i);
+        doc.page.margins.bottom = 0;
+
+        // Watermark (Under text / background)
+        doc.save();
+        doc.opacity(0.045);
+        doc.font(fontB).fontSize(52).fillColor('#0f172a');
+        doc.rotate(-35, { origin: [pageWidth / 2, pageHeight / 2] });
+        const wmText = 'CYPILAN.COM';
+        const wmW = doc.widthOfString(wmText);
+        doc.text(wmText, (pageWidth - wmW) / 2, (pageHeight - 50) / 2, { lineBreak: false });
+        doc.restore();
+
+        // Footer at bottom
+        const footerY = pageHeight - 20;
+        doc.strokeColor('#e2e8f0').lineWidth(0.6).moveTo(margin, footerY - 5).lineTo(pageWidth - margin, footerY - 5).stroke();
+
+        const todayStr = new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        doc.font(fontR).fontSize(7).fillColor('#94a3b8');
+        doc.text('Bu özgeçmiş CYPILAN.COM Kariyer Portalı üzerinden dijital olarak oluşturulmuştur.', margin, footerY, { lineBreak: false });
+
+        const pageStr = `Tarih: ${todayStr}  •  Sayfa ${i + 1} / ${totalPages}`;
+        const pageStrW = doc.widthOfString(pageStr);
+        doc.text(pageStr, pageWidth - margin - pageStrW, footerY, { lineBreak: false });
+      }
 
       doc.end();
     } catch (err) {
