@@ -91,19 +91,22 @@ const sendMessage = async (req, res) => {
       }
     }
 
+    const faqKey = req.body.faq_key;
+    const action = req.body.action;
+    const isFaq = Boolean(faqKey && FAQ_KNOWLEDGE_BASE[faqKey]);
+    const isConnect = action === 'connect_agent' || faqKey === 'connect_agent' || messageText.toLowerCase().includes('temsilci') || messageText.toLowerCase().includes('canlı destek');
+
     const savedMessage = await Support.sendMessage({
       conversationId: conversation.id,
       senderType: 'user',
       senderId,
       senderName,
-      message: messageText
+      message: messageText,
+      notifyAdmin: isConnect || !isFaq
     });
 
-    const faqKey = req.body.faq_key;
-    const action = req.body.action;
-
     // Check if user requested direct live support agent connection
-    if (action === 'connect_agent' || faqKey === 'connect_agent' || messageText.toLowerCase().includes('temsilci') || messageText.toLowerCase().includes('canlı destek')) {
+    if (isConnect) {
       await Support.updateStatus(conversation.id, 'waiting');
       await Support.sendMessage({
         conversationId: conversation.id,
@@ -111,7 +114,7 @@ const sendMessage = async (req, res) => {
         senderName: conversation.agent_name || 'CYPILAN Destek',
         message: `🔔 Talebinizi aldım! Sizi hemen müşteri temsilcimize (${conversation.agent_name || 'Canlı Destek'}) aktarıyorum. Temsilcimiz bildirim aldı ve sohbete bağlanıyor, lütfen hattan ayrılmayınız.`
       });
-    } else if (faqKey && FAQ_KNOWLEDGE_BASE[faqKey]) {
+    } else if (isFaq) {
       const faq = FAQ_KNOWLEDGE_BASE[faqKey];
       await Support.sendMessage({
         conversationId: conversation.id,

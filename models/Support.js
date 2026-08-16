@@ -118,7 +118,7 @@ class Support {
     return db.prepare('SELECT * FROM support_conversations WHERE session_token = ?').get([sessionToken]) || null;
   }
 
-  static async sendMessage({ conversationId, senderType, senderId = null, senderName = null, message }) {
+  static async sendMessage({ conversationId, senderType, senderId = null, senderName = null, message, notifyAdmin = true }) {
     const cleanMessage = String(message || '').trim().slice(0, 2000);
     if (!cleanMessage) {
       throw new Error('Mesaj boş olamaz.');
@@ -156,17 +156,19 @@ class Support {
         WHERE id = ?
       `).run([cleanMessage, conversationId]);
 
-      // Notify all active site admins about incoming live support message
-      try {
-        await Notification.notifyAdmins({
-          actor_id: conv.user_id || null,
-          type: 'support',
-          title: 'Canlı Destek Bildirimi',
-          message: `${conv.user_name || 'Bir ziyaretçi'} canlı destek üzerinden mesaj gönderdi: "${cleanMessage.slice(0, 60)}${cleanMessage.length > 60 ? '...' : ''}"`,
-          link_url: '/admin/canli-destek'
-        });
-      } catch (notifErr) {
-        console.error('Support admin notification error:', notifErr);
+      // Notify all active site admins only if notifyAdmin is true (skip for automated FAQ chips)
+      if (notifyAdmin) {
+        try {
+          await Notification.notifyAdmins({
+            actor_id: conv.user_id || null,
+            type: 'support',
+            title: 'Canlı Destek Bildirimi',
+            message: `${conv.user_name || 'Bir ziyaretçi'} canlı destek üzerinden mesaj gönderdi: "${cleanMessage.slice(0, 60)}${cleanMessage.length > 60 ? '...' : ''}"`,
+            link_url: '/admin/canli-destek'
+          });
+        } catch (notifErr) {
+          console.error('Support admin notification error:', notifErr);
+        }
       }
     } else if (senderType === 'admin') {
       db.prepare(`

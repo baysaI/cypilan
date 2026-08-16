@@ -427,21 +427,29 @@
     }
 
     function renderMessage(msg) {
+        // Prevent duplicate rendering if message ID is already in the list
+        if (msg.id && messagesList.querySelector(`[data-msg-id="${msg.id}"]`)) {
+            return;
+        }
+
         const timeStr = formatTime(msg.created_at || new Date());
+        const bubble = document.createElement('div');
+        if (msg.id) {
+            bubble.setAttribute('data-msg-id', msg.id);
+        } else {
+            bubble.setAttribute('data-temp-msg', 'true');
+        }
 
         if (msg.sender_type === 'user') {
-            const bubble = document.createElement('div');
             bubble.className = 'cyp-msg-bubble cyp-msg-user';
             bubble.innerHTML = `<div>${escapeHtml(msg.message)}</div><span class="cyp-msg-time"><i class="fa-solid fa-check me-1" style="font-size: 0.6rem;"></i>${timeStr}</span>`;
             messagesList.appendChild(bubble);
         } else if (msg.sender_type === 'system_notice') {
-            const notice = document.createElement('div');
-            notice.className = 'cyp-msg-notice text-center';
-            notice.innerHTML = `<span class="badge bg-light text-secondary border px-3 py-1 rounded-pill small">${escapeHtml(msg.message)}</span>`;
+            bubble.className = 'cyp-msg-notice text-center';
+            bubble.innerHTML = `<span class="badge bg-light text-secondary border px-3 py-1 rounded-pill small">${escapeHtml(msg.message)}</span>`;
             messagesList.appendChild(notice);
         } else {
             // Admin or system assistant message
-            const bubble = document.createElement('div');
             bubble.className = 'cyp-msg-bubble cyp-msg-admin';
             const senderName = msg.sender_name || 'CYPILAN Destek';
             bubble.innerHTML = `
@@ -455,7 +463,9 @@
             messagesList.appendChild(bubble);
         }
 
-        if (msg.id > lastMessageId) lastMessageId = msg.id;
+        if (msg.id && msg.id > lastMessageId) {
+            lastMessageId = msg.id;
+        }
     }
 
     function escapeHtml(str) {
@@ -534,9 +544,15 @@
             });
             const data = await res.json();
             if (data.success && data.message) {
+                // Find temporary optimistic bubble and stamp it with real ID to prevent duplicate
+                const tempEl = messagesList.querySelector('[data-temp-msg="true"]');
+                if (tempEl) {
+                    tempEl.removeAttribute('data-temp-msg');
+                    tempEl.setAttribute('data-msg-id', data.message.id);
+                }
                 if (data.message.id > lastMessageId) lastMessageId = data.message.id;
-                // Trigger immediate poll to fetch assistant/agent response
-                setTimeout(poll, 600);
+                // Immediate poll for assistant/agent response
+                setTimeout(poll, 400);
             }
         } catch (err) {
             console.error('Support send error:', err);
@@ -567,13 +583,21 @@
             const data = await res.json();
             if (data.success) {
                 if (Array.isArray(data.messages) && data.messages.length > 0) {
-                    data.messages.forEach(renderMessage);
-                    scrollToBottom();
-
-                    if (!isOpen) {
-                        const count = parseInt(unreadBadge.textContent, 10) + data.messages.length;
-                        unreadBadge.textContent = count;
-                        unreadBadge.style.display = 'inline-block';
+                    let hasNew = false;
+                    data.messages.forEach(m => {
+                        if (!messagesList.querySelector(`[data-msg-id="${m.id}"]`)) {
+                            renderMessage(m);
+                            hasNew = true;
+                        }
+                        if (m.id > lastMessageId) lastMessageId = m.id;
+                    });
+                    if (hasNew) {
+                        scrollToBottom();
+                        if (!isOpen) {
+                            const count = parseInt(unreadBadge.textContent, 10) + data.messages.length;
+                            unreadBadge.textContent = count;
+                            unreadBadge.style.display = 'inline-block';
+                        }
                     }
                 }
 
