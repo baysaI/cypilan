@@ -66,9 +66,13 @@
                         <div class="dropdown">
                             <%# The member's name has no length limit, so below md it is dropped
                                 entirely and the button falls back to the avatar icon. %>
-                            <button class="btn btn-outline-primary dropdown-toggle position-relative px-2 px-md-3" type="button"
+                            <button class="btn btn-outline-primary dropdown-toggle position-relative px-2 px-md-3 d-inline-flex align-items-center" type="button"
                                     data-bs-toggle="dropdown" aria-label="<%= t('common.account') %>">
-                                <i class="fa-regular fa-user me-md-2"></i>
+                                <% if (activeUser.avatar_url) { %>
+                                    <img src="<%= activeUser.avatar_url %>" class="rounded-circle object-fit-cover me-md-2 border" width="22" height="22" alt="" style="aspect-ratio: 1/1;">
+                                <% } else { %>
+                                    <i class="fa-regular fa-user me-md-2"></i>
+                                <% } %>
                                 <span class="header-user-name d-none d-md-inline-block"><%= activeUser.name %></span>
                                 <% if (typeof unreadMessages !== 'undefined' && unreadMessages > 0) { %>
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><%= unreadMessages %></span>

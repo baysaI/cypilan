@@ -4,6 +4,7 @@ const Review = require('../models/Review');
 const Warning = require('../models/Warning');
 const reviewController = require('./reviewController');
 const { isValidPhone, isValidPassword, isValidEmail } = require('../utils/validators');
+const { removeAvatarByUrl } = require('../middlewares/upload');
 
 const index = async (req, res) => {
     if (req.session && req.session.userId) {
@@ -95,7 +96,14 @@ const edit = async (req, res, next) => {
 
 const update = async (req, res) => {
     try {
-        const { full_name, phone, bio } = req.body;
+        const { full_name, phone, bio, remove_avatar } = req.body;
+        const user = await User.findById(req.session.userId);
+
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/');
+        }
+
         const updates = {};
 
         if (full_name && full_name.trim()) {
@@ -117,10 +125,26 @@ const update = async (req, res) => {
 
         updates.show_phone = req.body.hide_phone ? 0 : 1;
 
+        if (req.processedAvatar) {
+            if (user.avatar_url) {
+                await removeAvatarByUrl(user.avatar_url);
+            }
+            updates.avatar_url = req.processedAvatar;
+        } else if (remove_avatar === '1' || remove_avatar === 'true') {
+            if (user.avatar_url) {
+                await removeAvatarByUrl(user.avatar_url);
+            }
+            updates.avatar_url = null;
+        }
+
         await User.update(req.session.userId, updates);
 
         if (updates.full_name) {
             req.session.userName = updates.full_name;
+        }
+
+        if (updates.avatar_url !== undefined) {
+            req.session.userAvatar = updates.avatar_url;
         }
 
         req.flash('success', 'flash.profile_updated');

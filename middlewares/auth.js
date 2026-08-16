@@ -99,11 +99,20 @@ const setUserLocal = async (req, res, next) => {
         let isVerified = req.session && typeof req.session.userIsVerified !== 'undefined'
             ? req.session.userIsVerified
             : null;
+        let userAvatar = req.session && typeof req.session.userAvatar !== 'undefined'
+            ? req.session.userAvatar
+            : undefined;
 
-        if (isVerified === null) {
+        if (isVerified === null || userAvatar === undefined) {
             const uData = await User.findById(userId);
-            isVerified = Boolean(uData && uData.is_verified);
-            if (req.session) req.session.userIsVerified = isVerified;
+            if (isVerified === null) {
+                isVerified = Boolean(uData && uData.is_verified);
+                if (req.session) req.session.userIsVerified = isVerified;
+            }
+            if (userAvatar === undefined) {
+                userAvatar = (uData && uData.avatar_url) || null;
+                if (req.session) req.session.userAvatar = userAvatar;
+            }
         }
 
         const userData = {
@@ -111,6 +120,7 @@ const setUserLocal = async (req, res, next) => {
             email: (req.session && req.session.userEmail) || (user && user.email),
             name: (req.session && req.session.userName) || (user && user.full_name),
             role: (req.session && req.session.userRole) || (user && user.role),
+            avatar_url: userAvatar || (user && user.avatar_url) || null,
             is_verified: isVerified
         };
         res.locals.user = userData;

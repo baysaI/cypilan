@@ -28,11 +28,14 @@ router.use('/reviews', reviewsRoutes);
 router.use('/teklifler', bidsRoutes);
 router.use('/kariyer', careerRoutes);
 
+const { uploadAvatar, processAvatarImage } = require('../middlewares/upload');
+const { verifyCsrf } = require('../middlewares/csrf');
 const profileController = require('../controllers/profileController');
 router.get('/profile', isAuthenticated, profileController.index);
 router.get('/favorites', isAuthenticated, (req, res) => res.redirect('/profile/favorites'));
 router.get('/profile/edit', isAuthenticated, profileController.edit);
-router.put('/profile', isAuthenticated, profileController.update);
+router.post('/profile', isAuthenticated, uploadAvatar, verifyCsrf, processAvatarImage, profileController.update);
+router.put('/profile', isAuthenticated, uploadAvatar, verifyCsrf, processAvatarImage, profileController.update);
 router.post('/profile/password', isAuthenticated, profileController.changePassword);
 router.post('/profile/email', isAuthenticated, profileController.changeEmail);
 router.get('/profile/listings', isAuthenticated, profileController.myListings);

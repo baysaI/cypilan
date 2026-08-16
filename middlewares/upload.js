@@ -5,9 +5,17 @@ const fs = require('fs');
 const { addWatermark } = require('../utils/watermark');
 const appConfig = require('../config/app');
 
+const sharp = require('sharp');
+sharp.cache(false);
+
 const uploadDir = path.join(__dirname, '../public/uploads/listings');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const avatarUploadDir = path.join(__dirname, '../public/uploads/avatars');
+if (!fs.existsSync(avatarUploadDir)) {
+    fs.mkdirSync(avatarUploadDir, { recursive: true });
 }
 
 const MAX_FILES = appConfig.uploads.maxImagesPerListing;
@@ -34,6 +42,7 @@ const upload = multer({
 });
 
 const uploadListingImages = upload.array('images', MAX_FILES);
+const uploadAvatar = upload.single('avatar');
 
 const processImagesWithWatermark = async (req, res, next) => {
     if (!req.files || req.files.length === 0) {
@@ -63,6 +72,33 @@ const processImagesWithWatermark = async (req, res, next) => {
     }
 };
 
+const processAvatarImage = async (req, res, next) => {
+    if (!req.file) {
+        return next();
+    }
+
+    try {
+        const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+        const filename = `avatar-${uniqueSuffix}.webp`;
+        const outputPath = path.join(avatarUploadDir, filename);
+
+        await sharp(req.file.buffer)
+            .rotate()
+            .resize(300, 300, {
+                fit: 'cover',
+                position: 'center'
+            })
+            .webp({ quality: 85 })
+            .toFile(outputPath);
+
+        req.processedAvatar = `/uploads/avatars/${filename}`;
+        next();
+    } catch (error) {
+        console.error('Error in processAvatarImage:', error);
+        next(error);
+    }
+};
+
 // Called when a request fails validation after the images have already been written,
 // so rejected submissions do not leave orphaned files behind.
 const discardProcessedImages = async (req) => {
@@ -85,9 +121,21 @@ const removeImagesByUrl = async (imageUrls = []) => {
     }));
 };
 
+// Removes an avatar referenced by its public URL (/uploads/avatars/<name>).
+const removeAvatarByUrl = async (avatarUrl) => {
+    if (typeof avatarUrl !== 'string' || !avatarUrl.startsWith('/uploads/avatars/')) {
+        return Promise.resolve();
+    }
+    const filename = path.basename(avatarUrl);
+    return fs.promises.unlink(path.join(avatarUploadDir, filename)).catch(() => {});
+};
+
 module.exports = {
     uploadListingImages,
+    uploadAvatar,
     processImagesWithWatermark,
+    processAvatarImage,
     discardProcessedImages,
-    removeImagesByUrl
+    removeImagesByUrl,
+    removeAvatarByUrl
 };

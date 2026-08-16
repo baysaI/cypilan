@@ -7,9 +7,44 @@
                 <a href="/profile/<%= user.id %>" class="btn btn-light border btn-sm"><%= t('profile_edit.view_profile') %></a>
             </div>
 
-            <form action="/profile" method="POST">
+            <form action="/profile" method="POST" enctype="multipart/form-data" id="profileEditForm">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <input type="hidden" name="_method" value="PUT">
+                <input type="hidden" name="remove_avatar" id="removeAvatarInput" value="0">
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h2 class="fs-6 fw-bold mb-0"><%= t('profile_edit.avatar_title') %></h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-sm-row align-items-center gap-4">
+                            <div class="position-relative flex-shrink-0">
+                                <img src="<%= user.avatar_url || '/img/logo.png' %>"
+                                     id="avatarPreview"
+                                     class="rounded-circle border bg-light object-fit-cover shadow-sm"
+                                     width="100" height="100"
+                                     alt="<%= user.full_name %>"
+                                     style="aspect-ratio: 1/1;">
+                                <span id="avatarBadge" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-1 d-flex align-items-center justify-content-center shadow-sm" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                                    <i class="fa-solid fa-camera"></i>
+                                </span>
+                            </div>
+                            <div class="text-center text-sm-start flex-grow-1">
+                                <div class="d-flex flex-wrap justify-content-center justify-content-sm-start gap-2 mb-2">
+                                    <label for="avatarInput" class="btn btn-sm btn-outline-primary rounded-pill px-3 cursor-pointer mb-0">
+                                        <i class="fa-solid fa-cloud-arrow-up me-1"></i><span id="avatarBtnText"><%= user.avatar_url ? t('profile_edit.change_avatar') : t('profile_edit.upload_avatar') %></span>
+                                    </label>
+                                    <input type="file" name="avatar" id="avatarInput" class="d-none" accept="image/jpeg,image/png,image/webp">
+
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 <%= user.avatar_url ? '' : 'd-none' %>" id="removeAvatarBtn">
+                                        <i class="fa-regular fa-trash-can me-1"></i><%= t('profile_edit.remove_avatar') %>
+                                    </button>
+                                </div>
+                                <div class="form-text small mb-0"><%= t('profile_edit.avatar_help') %></div>
+                                <div id="avatarFileName" class="small text-success fw-medium mt-1 d-none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
@@ -145,3 +180,61 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarFileName = document.getElementById('avatarFileName');
+    const removeAvatarBtn = document.getElementById('removeAvatarBtn');
+    const removeAvatarInput = document.getElementById('removeAvatarInput');
+    const avatarBtnText = document.getElementById('avatarBtnText');
+    const defaultAvatar = '/img/logo.png';
+
+    if (avatarInput && avatarPreview) {
+        avatarInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('<%= t("profile_edit.avatar_help") %>');
+                    this.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                if (avatarFileName) {
+                    avatarFileName.textContent = file.name;
+                    avatarFileName.classList.remove('d-none');
+                }
+                if (removeAvatarInput) {
+                    removeAvatarInput.value = '0';
+                }
+                if (removeAvatarBtn) {
+                    removeAvatarBtn.classList.remove('d-none');
+                }
+                if (avatarBtnText) {
+                    avatarBtnText.textContent = '<%= t("profile_edit.change_avatar") %>';
+                }
+            }
+        });
+    }
+
+    if (removeAvatarBtn && removeAvatarInput && avatarPreview) {
+        removeAvatarBtn.addEventListener('click', function() {
+            removeAvatarInput.value = '1';
+            if (avatarInput) avatarInput.value = '';
+            avatarPreview.src = defaultAvatar;
+            if (avatarFileName) {
+                avatarFileName.classList.add('d-none');
+            }
+            removeAvatarBtn.classList.add('d-none');
+            if (avatarBtnText) {
+                avatarBtnText.textContent = '<%= t("profile_edit.upload_avatar") %>';
+            }
+        });
+    }
+});
+</script>
