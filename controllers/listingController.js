@@ -121,6 +121,13 @@ const show = async (req, res, next) => {
             return res.redirect('/listings');
         }
 
+        const Career = require('../models/Career');
+        const rootSlug = await Category.getRootSlug(listing.category_id);
+        listing.root_slug = rootSlug;
+        if (rootSlug === 'is-ilanlari') {
+            listing.job_details = await Career.getJobDetails(listing.id);
+        }
+
         listing.phone_hidden = Number(listing.seller_show_phone) === 0;
         listing.has_phone = Boolean(listing.seller_phone) && !listing.phone_hidden;
         listing.seller_phone_masked = listing.has_phone ? maskPhone(listing.seller_phone) : '';
@@ -179,8 +186,11 @@ const showCreate = async (req, res, next) => {
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = 'İlan Ver';
 
-        const categories = await Category.getAll();
-        const user = await User.findById(req.session.userId);
+        const [categories, categoryTree, user] = await Promise.all([
+            Category.getAll(),
+            Category.getTree(),
+            User.findById(req.session.userId)
+        ]);
 
         const isUnlimitedSetting = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
         const isCorporate = listingPolicy.isCorporateRole(req.session.userRole);
@@ -209,6 +219,7 @@ const showCreate = async (req, res, next) => {
 
         res.render('listings/create', {
             categories,
+            categoryTree,
             draftFeatureMap,
             draftFeatureLabels,
             formData,
@@ -327,6 +338,30 @@ const create = async (req, res, next) => {
             images
         });
 
+        // Collect and save structured listing attributes (rooms, size, build_year, brand, km, features etc.)
+        const attributes = {};
+        const directKeys = ['rooms', 'size', 'floor', 'build_year', 'buildYear', 'brand', 'model', 'year', 'km', 'fuel', 'gear', 'condition'];
+        directKeys.forEach(k => {
+            const v = req.body[k] || (req.body.attributes && req.body.attributes[k]);
+            if (v !== undefined && v !== null && String(v).trim() !== '') {
+                const canonicalKey = (k === 'buildYear') ? 'build_year' : k;
+                attributes[canonicalKey] = String(v).trim();
+            }
+        });
+
+        const rawFeatures = req.body.features || (req.body.attributes && req.body.attributes.features);
+        if (rawFeatures) {
+            const list = Array.isArray(rawFeatures) ? rawFeatures : [rawFeatures];
+            const cleaned = list.filter(f => f && String(f).trim() !== '');
+            if (cleaned.length > 0) {
+                attributes.features = cleaned.join(',');
+            }
+        }
+
+        if (Object.keys(attributes).length > 0) {
+            await Listing.setAttributes(listing.id, attributes);
+        }
+
         // Pay, contract shape and requirements live beside the listing rather than
         // inside it, and only exist for adverts under the jobs tree.
         if (rootSlug === 'is-ilanlari') {
@@ -353,11 +388,31 @@ const create = async (req, res, next) => {
 const showEdit = async (req, res, next) => {
     try {
         const listing = req.listing;
-        const [categories, images, rootSlug] = await Promise.all([
+        const [categories, categoryTree, images, rootSlug, rawAttrs] = await Promise.all([
             Category.getAll(),
+            Category.getTree(),
             Listing.getImages(listing.id),
-            Category.getRootSlug(listing.category_id)
+            Category.getRootSlug(listing.category_id),
+            Listing.getAttributes(listing.id)
         ]);
+
+        const attrMap = {};
+        if (Array.isArray(rawAttrs)) {
+            rawAttrs.forEach(a => {
+                attrMap[a.attribute_key] = a.attribute_value;
+            });
+        }
+        listing.attributes = attrMap;
+
+        // The draft helper's per-category fields and their labels
+        const draftFeatureMap = {};
+        const draftFeatureLabels = {};
+        Object.keys(listingDraft.FEATURE_LABELS).forEach((rSlug) => {
+            draftFeatureMap[rSlug] = listingDraft.featuresFor(rSlug);
+            draftFeatureMap[rSlug].forEach((feature) => {
+                draftFeatureLabels[feature] = res.locals.t(`draft.features.${feature}`);
+            });
+        });
 
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = 'İlanı Düzenle';
@@ -366,6 +421,9 @@ const showEdit = async (req, res, next) => {
         res.render('listings/edit', {
             listing,
             categories,
+            categoryTree,
+            draftFeatureMap,
+            draftFeatureLabels,
             images,
             requiresPrice: listingPolicy.requiresPrice(rootSlug),
             requiresPhotos: listingPolicy.requiresPhotos(rootSlug),
@@ -430,6 +488,28 @@ const update = async (req, res, next) => {
         }
 
         await Listing.update(listing.id, updates);
+
+        // Update structured attributes
+        const attributes = {};
+        const directKeys = ['rooms', 'size', 'floor', 'build_year', 'buildYear', 'brand', 'model', 'year', 'km', 'fuel', 'gear', 'condition'];
+        directKeys.forEach(k => {
+            const v = req.body[k] || (req.body.attributes && req.body.attributes[k]);
+            if (v !== undefined && v !== null && String(v).trim() !== '') {
+                const canonicalKey = (k === 'buildYear') ? 'build_year' : k;
+                attributes[canonicalKey] = String(v).trim();
+            }
+        });
+
+        const rawFeatures = req.body.features || (req.body.attributes && req.body.attributes.features);
+        if (rawFeatures) {
+            const list = Array.isArray(rawFeatures) ? rawFeatures : [rawFeatures];
+            const cleaned = list.filter(f => f && String(f).trim() !== '');
+            if (cleaned.length > 0) {
+                attributes.features = cleaned.join(',');
+            }
+        }
+
+        await Listing.setAttributes(listing.id, attributes);
 
         if (newImages.length > 0) {
             await Listing.replaceImages(listing.id, newImages);

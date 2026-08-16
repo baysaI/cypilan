@@ -3,6 +3,7 @@ const path = require('path');
 const Setting = require(t.rootDir + '/models/Setting');
 const listingPolicy = require(t.rootDir + '/config/listingPolicy');
 const Listing = require(t.rootDir + '/models/Listing');
+const Category = require(t.rootDir + '/models/Category');
 const maintenanceController = require(t.rootDir + '/controllers/maintenanceController');
 
 t.run('Sınırsız İlan Modu & Opsiyonel İş İlanı Ücreti', async (db) => {
@@ -125,4 +126,63 @@ t.run('Sınırsız İlan Modu & Opsiyonel İş İlanı Ücreti', async (db) => {
   });
   t.assertEqual(agentEval.allowed, true, 'Acente danışmanı (agent) 200 ilanı olsa bile daima ilan açabilir');
   t.assertEqual(agentEval.isUnlimited, true, 'isUnlimited true döner');
+
+  // 7. Category Tree and Optgroup Rendering in create.ejs
+  const categoryTree = await Category.getTree();
+  const createHtml = await t.render('listings/create.ejs', {
+    categoryTree,
+    categories: await Category.getAll(),
+    formData: {},
+    draftFeatureMap: { emlak: ['esyali', 'balkon', 'havuz'] },
+    draftFeatureLabels: { esyali: 'Eşyalı', balkon: 'Balkonlu', havuz: 'Havuzlu' },
+    quota: { limit: null, isUnlimited: true, categories: ['emlak'], freeCategories: [] }
+  });
+  t.assert(createHtml.includes('<optgroup label="Emlak">'), 'create.ejs Emlak için optgroup render ediyor');
+  t.assert(createHtml.includes('<optgroup label="Vasıta">'), 'create.ejs Vasıta için optgroup render ediyor');
+  t.assert(createHtml.includes('Satılık Daire'), 'Satılık Daire alt seçeneği optgroup içinde bulunuyor');
+
+  // 8. Structured Attributes Saving and Rendering in show.ejs
+  const propertyListing = await Listing.create({
+    user_id: employer,
+    category_id: 101, // Satılık Daire
+    title: 'Lefkoşa Merkezde Geniş 3+1 Daire',
+    slug: 'lefkosa-merkezde-genis-3-1-daire-test',
+    description: 'Şehir merkezinde, hastaneye yakın, geniş ve aydınlık daire.',
+    price: 120000,
+    currency: 'GBP',
+    city: 'Lefkoşa',
+    district: 'Gönyeli',
+    status: 'active'
+  });
+
+  await Listing.setAttributes(propertyListing.id, {
+    rooms: '3+1',
+    size: '145',
+    floor: '3',
+    build_year: '2021',
+    features: 'esyali,balkon,havuz'
+  });
+
+  const detail = await Listing.findDetailBySlug('lefkosa-merkezde-genis-3-1-daire-test');
+  t.assert(detail.attributes, 'findDetailBySlug attributes nesnesini yüklüyor');
+  t.assertEqual(detail.attributes.rooms, '3+1', 'Oda sayısı yüklendi');
+  t.assertEqual(detail.attributes.size, '145', 'Metrekare yüklendi');
+  t.assertEqual(detail.attributes.floor, '3', 'Kat bilgisi yüklendi');
+  t.assertEqual(detail.attributes.build_year, '2021', 'Yapım yılı yüklendi');
+
+  const showHtml = await t.render('listings/show.ejs', {
+    listing: detail,
+    isFavorited: false,
+    sellerRating: { avg: 5, count: 1 },
+    bidSummary: { total: 0, best_amount: null },
+    openServiceRequests: {},
+    offeredServices: ['assurance']
+  });
+
+  t.assert(showHtml.includes('3+1'), 'show.ejs Oda sayısını (3+1) gösteriyor');
+  t.assert(showHtml.includes('145 m²'), 'show.ejs Metrekareyi (145 m²) gösteriyor');
+  t.assert(showHtml.includes('2021'), 'show.ejs Yapım yılını (2021) gösteriyor');
+  t.assert(showHtml.includes('Eşyalı'), 'show.ejs Eşyalı rozetini gösteriyor');
+  t.assert(showHtml.includes('Balkonlu'), 'show.ejs Balkonlu rozetini gösteriyor');
+  t.assert(showHtml.includes('Havuzlu'), 'show.ejs Havuzlu rozetini gösteriyor');
 });

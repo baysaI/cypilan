@@ -99,6 +99,14 @@ class Listing {
     if (!row) return null;
 
     row.images = await this.getImages(row.id);
+    const rawAttrs = await this.getAttributes(row.id);
+    const attrMap = {};
+    if (Array.isArray(rawAttrs)) {
+      rawAttrs.forEach(a => {
+        attrMap[a.attribute_key] = a.attribute_value;
+      });
+    }
+    row.attributes = attrMap;
     return row;
   }
 

@@ -79,25 +79,50 @@
                     </div>
                     <div class="card-body p-4">
                         <%
-                            // The "collect offers from professionals" option only applies to
-                            // property and vehicles, so each option carries its root slug and
-                            // the form decides client-side whether to reveal the checkbox.
                             const categoryById = {};
-                            if (typeof categories !== 'undefined') {
+                            if (typeof categories !== 'undefined' && Array.isArray(categories)) {
                                 categories.forEach(function (cat) { categoryById[cat.id] = cat; });
                             }
                             const rootSlugOf = function (cat) {
                                 const parent = cat.parent_id ? categoryById[cat.parent_id] : null;
                                 return parent ? parent.slug : cat.slug;
                             };
+
+                            let treeToRender = [];
+                            if (typeof categoryTree !== 'undefined' && Array.isArray(categoryTree) && categoryTree.length > 0) {
+                                treeToRender = categoryTree;
+                            } else if (typeof categories !== 'undefined' && Array.isArray(categories)) {
+                                const tempMap = {};
+                                categories.forEach(function(c) {
+                                    tempMap[c.id] = Object.assign({}, c, { children: [] });
+                                });
+                                categories.forEach(function(c) {
+                                    if (c.parent_id && tempMap[c.parent_id]) {
+                                        tempMap[c.parent_id].children.push(tempMap[c.id]);
+                                    } else if (!c.parent_id) {
+                                        treeToRender.push(tempMap[c.id]);
+                                    }
+                                });
+                            }
                         %>
                         <select name="category_id" id="categorySelect" class="form-select form-select-lg bg-light border-0 shadow-none focus-ring-primary fw-medium cursor-pointer" required>
                             <option value=""><%= t('listing.all_categories') %>...</option>
-                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-                                <% categories.forEach(function(cat) { %>
-                                    <option value="<%= cat.id %>" data-root="<%= rootSlugOf(cat) %>" <%= (typeof formData !== 'undefined' && String(formData.category_id) === String(cat.id)) ? 'selected' : '' %>><%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %></option>
-                                <% }); %>
-                            <% } %>
+                            <% treeToRender.forEach(function(mainCat) { %>
+                                <% const mainName = mainCat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || mainCat.name_tr; %>
+                                <% if (mainCat.children && mainCat.children.length > 0) { %>
+                                    <optgroup label="<%= mainName %>">
+                                        <% mainCat.children.forEach(function(subCat) { %>
+                                            <option value="<%= subCat.id %>" data-root="<%= mainCat.slug %>" <%= (typeof formData !== 'undefined' && String(formData.category_id) === String(subCat.id)) ? 'selected' : '' %>>
+                                                <%= subCat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || subCat.name_tr %>
+                                            </option>
+                                        <% }); %>
+                                    </optgroup>
+                                <% } else { %>
+                                    <option value="<%= mainCat.id %>" data-root="<%= mainCat.slug %>" <%= (typeof formData !== 'undefined' && String(formData.category_id) === String(mainCat.id)) ? 'selected' : '' %>>
+                                        <%= mainName %>
+                                    </option>
+                                <% } %>
+                            <% }); %>
                         </select>
                         <div class="invalid-feedback"><%= t('flash.select_valid_category') %></div>
                     </div>
@@ -136,21 +161,30 @@
                         <div class="mb-4">
                             <label for="descriptionInput" class="form-label fw-bold small text-muted"><%= t('listing.description') %> <span class="text-danger">*</span></label>
 
-                            <div class="border rounded-4 p-3 mb-2 bg-light" id="draftBox">
-                                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                                    <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
-                                    <span class="fw-semibold small"><%= t('draft.title') %></span>
+                            <div class="border rounded-4 p-3 mb-3 bg-light" id="draftBox">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2 pb-2 border-bottom">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-layer-group text-primary"></i>
+                                        <span class="fw-semibold small text-dark">İlan Özellikleri &amp; Detayları</span>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-none" id="draftBtn">
+                                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i><%= t('draft.generate') %>
+                                    </button>
                                 </div>
-                                <p class="text-muted small mb-2"><%= t('draft.help') %></p>
+                                <p class="text-muted small mb-3">Bu bilgileri doldurduğunuzda ilanda detay olarak gösterilir. Dilerseniz yukarıdaki butonla otomatik açıklama metni de oluşturabilirsiniz.</p>
 
-                                <div class="row g-2 mb-2" id="draftFields"></div>
+                                <div class="row g-2 mb-3" id="draftFields"></div>
 
-                                <div class="d-flex flex-wrap gap-2 mb-2" id="draftFeatures"></div>
+                                <div class="pt-2 border-top" id="featuresSection">
+                                    <label class="form-label small fw-semibold text-muted d-block mb-2">
+                                        <i class="fa-solid fa-check-double text-primary me-1"></i>Ekstra Donanım &amp; Özellikler
+                                    </label>
+                                    <div class="d-flex flex-wrap gap-2" id="draftFeatures"></div>
+                                </div>
 
-                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" id="draftBtn">
-                                    <i class="fa-solid fa-pen-fancy me-1"></i><%= t('draft.generate') %>
-                                </button>
-                                <span class="text-muted small ms-2" id="draftStatus"></span>
+                                <div class="mt-2 text-end">
+                                    <span class="text-muted small" id="draftStatus"></span>
+                                </div>
                             </div>
 
                             <textarea name="description" id="descriptionInput" class="form-control bg-light border-0 shadow-none focus-ring-primary" rows="6" placeholder="<%= t('listing.description') %>" required minlength="20"><%= typeof formData !== 'undefined' && formData.description ? formData.description : '' %></textarea>
@@ -468,12 +502,11 @@ document.addEventListener('DOMContentLoaded', function() {
         syncCategoryOptions();
     }
 
-    // --- Description draft -------------------------------------------------
-    // The extra inputs are per-category, so they are drawn from the root slug
-    // rather than shipped as five hidden blocks in the markup.
+    // --- Listing Attributes & Description draft ---------------------------
     const draftBox = document.getElementById('draftBox');
     const draftFields = document.getElementById('draftFields');
     const draftFeatures = document.getElementById('draftFeatures');
+    const featuresSection = document.getElementById('featuresSection');
     const draftBtn = document.getElementById('draftBtn');
     const draftStatus = document.getElementById('draftStatus');
     const descriptionInput = document.getElementById('descriptionInput');
@@ -481,21 +514,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (draftBox && categorySelect && descriptionInput) {
         const FIELDS = {
             emlak: [
-                { name: 'rooms', label: '<%= t("draft.field_rooms") %>', placeholder: '3+1' },
-                { name: 'size', label: '<%= t("draft.field_size") %>', placeholder: '120' },
-                { name: 'floor', label: '<%= t("draft.field_floor") %>', placeholder: '2' },
-                { name: 'buildYear', label: '<%= t("draft.field_build_year") %>', placeholder: '2015' }
+                { name: 'rooms', label: '<%= t("draft.field_rooms") %>', placeholder: 'Örn: 3+1' },
+                { name: 'size', label: '<%= t("draft.field_size") %> (m²)', placeholder: 'Örn: 120' },
+                { name: 'floor', label: '<%= t("draft.field_floor") %>', placeholder: 'Örn: 2' },
+                { name: 'build_year', draftKey: 'buildYear', label: '<%= t("draft.field_build_year") %>', placeholder: 'Örn: 2018' }
             ],
             vasita: [
-                { name: 'brand', label: '<%= t("draft.field_brand") %>', placeholder: '' },
-                { name: 'model', label: '<%= t("draft.field_model") %>', placeholder: '' },
-                { name: 'year', label: '<%= t("draft.field_year") %>', placeholder: '2019' },
-                { name: 'km', label: '<%= t("draft.field_km") %>', placeholder: '85000' }
+                { name: 'brand', label: '<%= t("draft.field_brand") %>', placeholder: 'Örn: BMW' },
+                { name: 'model', label: '<%= t("draft.field_model") %>', placeholder: 'Örn: 320i' },
+                { name: 'year', label: '<%= t("draft.field_year") %>', placeholder: 'Örn: 2019' },
+                { name: 'km', label: '<%= t("draft.field_km") %>', placeholder: 'Örn: 85000' }
             ]
         };
 
         const FEATURES = <%- JSON.stringify(draftFeatureMap) %>;
         const FEATURE_LABELS = <%- JSON.stringify(draftFeatureLabels) %>;
+        const savedFormData = <%- JSON.stringify(typeof formData !== 'undefined' ? formData : {}) %>;
+        const savedAttributes = savedFormData.attributes || savedFormData;
 
         const currentRoot = function () {
             const option = categorySelect.options[categorySelect.selectedIndex];
@@ -507,27 +542,39 @@ document.addEventListener('DOMContentLoaded', function() {
             draftFields.innerHTML = '';
             draftFeatures.innerHTML = '';
 
-            (FIELDS[root] || []).forEach(function (field) {
+            const fields = FIELDS[root] || [];
+            fields.forEach(function (field) {
                 const col = document.createElement('div');
                 col.className = 'col-6 col-md-3';
-                col.innerHTML = '<label class="form-label small mb-1">' + field.label + '</label>' +
-                    '<input type="text" class="form-control form-control-sm" data-draft="' + field.name +
-                    '" placeholder="' + field.placeholder + '">';
+                const draftKey = field.draftKey || field.name;
+                const existingVal = savedAttributes[field.name] || savedAttributes[draftKey] || '';
+                col.innerHTML = '<label class="form-label small fw-semibold text-muted mb-1" for="attr_' + field.name + '">' + field.label + '</label>' +
+                    '<input type="text" class="form-control form-control-sm bg-white" name="' + field.name +
+                    '" id="attr_' + field.name + '" data-draft="' + draftKey +
+                    '" placeholder="' + field.placeholder + '" value="' + (existingVal ? String(existingVal).replace(/"/g, '&quot;') : '') + '">';
                 draftFields.appendChild(col);
             });
 
-            (FEATURES[root] || []).forEach(function (feature) {
-                const id = 'feat_' + feature;
-                const wrap = document.createElement('div');
-                wrap.className = 'form-check form-check-inline';
-                wrap.innerHTML = '<input class="form-check-input" type="checkbox" value="' + feature +
-                    '" id="' + id + '" data-draft-feature="1">' +
-                    '<label class="form-check-label small" for="' + id + '">' +
-                    (FEATURE_LABELS[feature] || feature) + '</label>';
-                draftFeatures.appendChild(wrap);
-            });
+            const feats = FEATURES[root] || [];
+            if (feats.length > 0) {
+                if (featuresSection) featuresSection.hidden = false;
+                const savedFeats = savedAttributes.features ? (Array.isArray(savedAttributes.features) ? savedAttributes.features : String(savedAttributes.features).split(',')) : [];
+                feats.forEach(function (feature) {
+                    const id = 'feat_' + feature;
+                    const isChecked = savedFeats.includes(feature) ? 'checked' : '';
+                    const wrap = document.createElement('div');
+                    wrap.className = 'form-check form-check-inline bg-white px-3 py-1 rounded-pill border';
+                    wrap.innerHTML = '<input class="form-check-input cursor-pointer" type="checkbox" name="features[]" value="' + feature +
+                        '" id="' + id + '" data-draft-feature="1" ' + isChecked + '>' +
+                        '<label class="form-check-label small cursor-pointer ms-1" for="' + id + '">' +
+                        (FEATURE_LABELS[feature] || feature) + '</label>';
+                    draftFeatures.appendChild(wrap);
+                });
+            } else {
+                if (featuresSection) featuresSection.hidden = true;
+            }
 
-            draftBox.hidden = !root;
+            draftBox.hidden = !root || (fields.length === 0 && feats.length === 0);
         };
 
         categorySelect.addEventListener('change', renderDraftInputs);

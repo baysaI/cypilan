@@ -55,6 +55,83 @@
                     </div>
                 </div>
 
+                <%
+                    const attrs = (listing && listing.attributes) || {};
+                    const isEmlak = listing.category_id && (listing.category_id === 1 || (listing.category_id >= 101 && listing.category_id <= 109));
+                    const isVasita = listing.category_id && (listing.category_id === 2 || (listing.category_id >= 201 && listing.category_id <= 205));
+                %>
+
+                <% if (isEmlak || isVasita) { %>
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                        <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                            <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-layer-group text-primary me-2"></i><%= t('listing.attributes') %></h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <% if (isEmlak) { %>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_rooms') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="rooms" value="<%= attrs.rooms || '' %>" placeholder="3+1">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_size') %> (m²)</label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="size" value="<%= attrs.size || '' %>" placeholder="120">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_floor') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="floor" value="<%= attrs.floor || '' %>" placeholder="2">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_build_year') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="build_year" value="<%= attrs.build_year || attrs.buildYear || '' %>" placeholder="2018">
+                                    </div>
+                                <% } else if (isVasita) { %>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_brand') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="brand" value="<%= attrs.brand || '' %>" placeholder="BMW">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_model') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="model" value="<%= attrs.model || '' %>" placeholder="320i">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_year') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="year" value="<%= attrs.year || '' %>" placeholder="2019">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_km') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="km" value="<%= attrs.km || '' %>" placeholder="85000">
+                                    </div>
+                                <% } %>
+                            </div>
+
+                            <%
+                                const featMap = typeof draftFeatureMap !== 'undefined' ? draftFeatureMap : {};
+                                const featLabels = typeof draftFeatureLabels !== 'undefined' ? draftFeatureLabels : {};
+                                const categoryRoot = isEmlak ? 'emlak' : 'vasita';
+                                const availableFeats = featMap[categoryRoot] || [];
+                                const selectedFeats = attrs.features ? (Array.isArray(attrs.features) ? attrs.features : String(attrs.features).split(',')).map(s => s.trim()) : [];
+                            %>
+                            <% if (availableFeats.length > 0) { %>
+                                <div class="pt-3 border-top mt-3">
+                                    <label class="form-label small fw-bold text-muted d-block mb-2">Öne Çıkan Özellikler &amp; Donanım</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <% availableFeats.forEach(function (feature) { %>
+                                            <div class="form-check form-check-inline bg-light px-3 py-1 rounded-pill border">
+                                                <input class="form-check-input cursor-pointer" type="checkbox" name="features[]" value="<%= feature %>"
+                                                       id="edit_feat_<%= feature %>" <%= selectedFeats.includes(feature) ? 'checked' : '' %>>
+                                                <label class="form-check-label small cursor-pointer ms-1" for="edit_feat_<%= feature %>">
+                                                    <%= featLabels[feature] || feature %>
+                                                </label>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
                         <h5 class="fw-bold text-dark mb-0"><%= t('listing.location') %></h5>
