@@ -1,5 +1,7 @@
 <!-- CYPILAN Canlı Destek Floating Widget -->
 <div id="cypilanSupportWidget" class="cypilan-support-container" style="display: none;">
+    <input type="hidden" id="cypSupportCsrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+
     <!-- Launcher Button -->
     <button type="button" id="cypSupportLauncher" class="cyp-support-launcher shadow-lg" aria-label="<%= t('support.launcher_title') || 'Canlı Destek' %>">
         <div class="cyp-support-launcher-pulse"></div>
@@ -43,9 +45,12 @@
             <!-- Quick Action Chips -->
             <div id="cypSupportFaqChips" class="cyp-faq-chips mb-3">
                 <div class="small fw-semibold text-muted mb-2" style="font-size: 0.75rem;">
-                    <i class="fa-regular fa-lightbulb text-warning me-1"></i><%= t('support.quick_topics') || 'Hızlı Konular:' %>
+                    <i class="fa-regular fa-lightbulb text-warning me-1"></i><%= t('support.quick_topics') || 'Hızlı Konular & Bağlantı:' %>
                 </div>
                 <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-sm btn-primary rounded-pill cyp-chip-btn fw-bold text-white shadow-sm" data-action="connect_agent" style="background-color: #0284c7; border-color: #0284c7;">
+                        <i class="fa-solid fa-headset me-1"></i><%= t('support.chip_connect_agent') || 'Canlı Desteğe Bağlan' %>
+                    </button>
                     <button type="button" class="btn btn-sm btn-light border rounded-pill cyp-chip-btn" data-faq="faq_post_listing">
                         💡 <%= t('support.chip_how_to_post') || 'İlan Nasıl Verilir?' %>
                     </button>
@@ -369,6 +374,8 @@
     let currentStatus = 'waiting';
 
     function getCsrf() {
+        const inputEl = document.getElementById('cypSupportCsrf');
+        if (inputEl && inputEl.value) return inputEl.value;
         const meta = document.querySelector('meta[name="csrf-token"]');
         return meta ? meta.getAttribute('content') : '';
     }
@@ -433,7 +440,7 @@
             notice.innerHTML = `<span class="badge bg-light text-secondary border px-3 py-1 rounded-pill small">${escapeHtml(msg.message)}</span>`;
             messagesList.appendChild(notice);
         } else {
-            // Admin or system assistant message: rendered as beautiful left-aligned incoming chat bubble
+            // Admin or system assistant message
             const bubble = document.createElement('div');
             bubble.className = 'cyp-msg-bubble cyp-msg-admin';
             const senderName = msg.sender_name || 'CYPILAN Destek';
@@ -466,7 +473,7 @@
                     'x-csrf-token': getCsrf(),
                     'x-support-token': sessionToken
                 },
-                body: JSON.stringify({ session_token: sessionToken })
+                body: JSON.stringify({ session_token: sessionToken, _csrf: getCsrf() })
             });
             const data = await res.json();
             if (data.success) {
@@ -497,8 +504,8 @@
         }
     }
 
-    async function sendUserMessage(text, faqKey = null) {
-        if (!text && !faqKey) return;
+    async function sendUserMessage(text, faqKey = null, action = null) {
+        if (!text && !faqKey && !action) return;
 
         const tempMsg = {
             sender_type: 'user',
@@ -519,13 +526,17 @@
                 },
                 body: JSON.stringify({
                     session_token: sessionToken,
+                    _csrf: getCsrf(),
                     message: text,
-                    faq_key: faqKey
+                    faq_key: faqKey,
+                    action: action
                 })
             });
             const data = await res.json();
             if (data.success && data.message) {
                 if (data.message.id > lastMessageId) lastMessageId = data.message.id;
+                // Trigger immediate poll to fetch assistant/agent response
+                setTimeout(poll, 600);
             }
         } catch (err) {
             console.error('Support send error:', err);
@@ -541,8 +552,9 @@
     document.querySelectorAll('.cyp-chip-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const faqKey = this.getAttribute('data-faq');
+            const action = this.getAttribute('data-action');
             const label = this.textContent.trim();
-            sendUserMessage(label, faqKey);
+            sendUserMessage(label, faqKey, action);
         });
     });
 
@@ -598,7 +610,7 @@
                     'x-csrf-token': getCsrf(),
                     'x-support-token': sessionToken
                 },
-                body: JSON.stringify({ session_token: sessionToken })
+                body: JSON.stringify({ session_token: sessionToken, _csrf: getCsrf() })
             });
             currentStatus = 'closed';
             showRatingScreen(true);
@@ -622,6 +634,7 @@
                 },
                 body: JSON.stringify({
                     session_token: sessionToken,
+                    _csrf: getCsrf(),
                     rating: selectedRating,
                     comment
                 })

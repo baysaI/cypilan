@@ -1242,6 +1242,7 @@
     "input_placeholder": "Mesajınızı yazın...",
     "confirm_close_chat": "Canlı destek görüşmesini sonlandırmak istiyor musunuz?",
     "thank_you_rating": "Teşekkür Ederiz!",
-    "rating_saved": "Geri bildiriminiz başarıyla kaydedildi."
+    "rating_saved": "Geri bildiriminiz başarıyla kaydedildi.",
+    "chip_connect_agent": "Canlı Desteğe Bağlan"
   }
 }

@@ -99,15 +99,38 @@ const sendMessage = async (req, res) => {
       message: messageText
     });
 
-    // Check if user clicked a quick FAQ topic
-    if (faqKey && FAQ_KNOWLEDGE_BASE[faqKey]) {
+    const faqKey = req.body.faq_key;
+    const action = req.body.action;
+
+    // Check if user requested direct live support agent connection
+    if (action === 'connect_agent' || faqKey === 'connect_agent' || messageText.toLowerCase().includes('temsilci') || messageText.toLowerCase().includes('canlı destek')) {
+      await Support.updateStatus(conversation.id, 'waiting');
+      await Support.sendMessage({
+        conversationId: conversation.id,
+        senderType: 'system',
+        senderName: conversation.agent_name || 'CYPILAN Destek',
+        message: `🔔 Talebinizi aldım! Sizi hemen müşteri temsilcimize (${conversation.agent_name || 'Canlı Destek'}) aktarıyorum. Temsilcimiz bildirim aldı ve sohbete bağlanıyor, lütfen hattan ayrılmayınız.`
+      });
+    } else if (faqKey && FAQ_KNOWLEDGE_BASE[faqKey]) {
       const faq = FAQ_KNOWLEDGE_BASE[faqKey];
       await Support.sendMessage({
         conversationId: conversation.id,
         senderType: 'system',
         senderName: conversation.agent_name || 'CYPILAN Destek',
-        message: `${faq.title}\n\n${faq.answer}\n\nBaşka bir konuda bilgi almak ister misiniz? Canlı destek ekibimize dilediğiniz zaman yazabilirsiniz.`
+        message: `${faq.title}\n\n${faq.answer}\n\nBaşka bir konuda bilgi almak ister misiniz? Temsilcimizle görüşmek için "Canlı Desteğe Bağlan" butonuna tıklayabilirsiniz.`
       });
+    } else {
+      // Automatic warm acknowledgement if first user message
+      const priorMsgs = await Support.getMessages(conversation.id, 0);
+      const userMsgsCount = priorMsgs.filter(m => m.sender_type === 'user').length;
+      if (userMsgsCount <= 1) {
+        await Support.sendMessage({
+          conversationId: conversation.id,
+          senderType: 'system',
+          senderName: conversation.agent_name || 'CYPILAN Destek',
+          message: `Mesajınızı aldım! Konuyu hemen inceliyorum, lütfen hattan ayrılmayın; bir dakika içinde size yanıt vereceğim.`
+        });
+      }
     }
 
     return res.json({
