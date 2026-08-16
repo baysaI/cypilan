@@ -168,7 +168,7 @@ const register = async (req, res) => {
         const user = await User.findById(userId);
 
         // Send welcome email asynchronously
-        mailer.sendWelcomeEmail({ to: user.email, name: user.full_name }).catch(err => console.error('Welcome email error:', err));
+        mailer.sendWelcomeEmail({ to: user.email, name: user.full_name, baseUrl: mailer.baseUrlFor(req) }).catch(err => console.error('Welcome email error:', err));
 
         startAuthenticatedSession(
             req,

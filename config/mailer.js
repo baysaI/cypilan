@@ -127,7 +127,7 @@ async function sendPasswordResetEmail({ to, name, resetUrl }) {
   });
 }
 
-async function sendWelcomeEmail({ to, name }) {
+async function sendWelcomeEmail({ to, name, baseUrl }) {
   const title = 'CYPILAN.COM\'a Hoş Geldiniz!';
   const content = `
     <p>Merhaba ${name || 'Kullanıcımız'},</p>
@@ -139,7 +139,7 @@ async function sendWelcomeEmail({ to, name }) {
     html: getBaseTemplate({
       title,
       content,
-      ctaUrl: `${APP_URL}/listings/create`,
+      ctaUrl: `${baseUrl || APP_URL}/listings/create`,
       ctaText: 'Hemen İlan Ver'
     })
   });
