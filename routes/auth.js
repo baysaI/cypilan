@@ -69,7 +69,8 @@ const googleCallbackUrl = (req) => {
   if (process.env.NODE_ENV === 'production') return undefined;
 
   const host = req.get('host');
-  return host ? `${req.protocol}://${host}/auth/google/callback` : undefined;
+  const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' || (process.env.SITE_URL && process.env.SITE_URL.startsWith('https')) ? 'https' : req.protocol;
+  return host ? `${protocol}://${host}/auth/google/callback` : undefined;
 };
 
 router.get('/google', (req, res, next) => {
