@@ -87,8 +87,9 @@ const fData = (typeof formData !== 'undefined' && formData) ? formData : {};
 
                         <div class="mb-4 form-check">
                             <input type="checkbox" class="form-check-input shadow-none cursor-pointer" id="terms" name="terms" required>
-                            <label class="form-check-label small text-muted cursor-pointer" for="terms">
-                                <%= t('auth.terms_agree') %>
+                            <label class="form-check-label small text-muted" for="terms">
+                                <a href="/kullanim-kosullari" target="_blank" rel="noopener" class="text-primary fw-semibold text-decoration-underline" onclick="event.stopPropagation();"><%= t('footer.terms') %></a> <%= t('common.and') %> 
+                                <a href="/gizlilik-politikasi" target="_blank" rel="noopener" class="text-primary fw-semibold text-decoration-underline" onclick="event.stopPropagation();"><%= t('footer.privacy') %></a>'nı okudum, kabul ediyorum.
                             </label>
                         </div>
 
