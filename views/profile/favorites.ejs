@@ -15,7 +15,7 @@
     </div>
 
     <% if (favorites && favorites.length > 0) { %>
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-5">
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4 mb-5">
             <% favorites.forEach(function(listing) { %>
                 <div class="col">
                     <%- include('../partials/listingCard', { listing: listing, isFavorited: true }) %>

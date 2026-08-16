@@ -942,6 +942,45 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     white-space: nowrap;
 }
 
+/* Listing cards sit two to a row on a phone, so everything inside one has half
+   the width it was drawn for and has to come down a size to match. */
+@media (max-width: 575.98px) {
+    .listing-card .card-body {
+        padding: 0.625rem !important;
+    }
+
+    /* A single truncated line shows about three words at this width. Two
+       clamped lines give the title enough room to identify the listing. */
+    .listing-card .card-title.text-truncate {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 0.8125rem !important;
+        line-height: 1.3;
+    }
+
+    .listing-card .price-tag {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .listing-card .price-tag .fs-5 {
+        font-size: 1rem !important;
+    }
+
+    .listing-card .badge {
+        font-size: 0.625rem;
+        padding: 0.2rem 0.45rem;
+    }
+
+    .listing-card .card-body .small,
+    .listing-card .image-overlay .small {
+        font-size: 0.6875rem;
+    }
+}
+
 /* Category tiles: three to a row on a phone, so the icon circle and the label
    both have to come down a size to stay in proportion. The circle carries an
    inline width/height, hence the !important. */

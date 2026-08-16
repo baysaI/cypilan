@@ -39,7 +39,9 @@
                 <i class="fa-solid fa-location-dot text-accent me-1"></i>
                 <span class="text-truncate"><%= listing.location_city || listing.city || 'Kıbrıs' %><%= (listing.location_district || listing.district) ? ', ' + (listing.location_district || listing.district) : '' %></span>
             </div>
-            <div class="date whitespace-nowrap">
+            <%# Two cards to a row on a phone leaves ~150px here: the city wins
+                that space and the age of the listing waits for a wider screen. %>
+            <div class="date whitespace-nowrap d-none d-sm-block">
                 <i class="fa-regular fa-clock me-1"></i> <%= listing.created_at ? helpers.timeAgo(listing.created_at, lang) : t('common.today') %>
             </div>
         </div>
