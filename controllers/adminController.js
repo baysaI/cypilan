@@ -6,6 +6,7 @@ const Report = require('../models/Report');
 const Message = require('../models/Message');
 const Warning = require('../models/Warning');
 const ServiceRequest = require('../models/ServiceRequest');
+const Analytics = require('../models/Analytics');
 const mailer = require('../config/mailer');
 
 const PAGE_SIZE = 20;
@@ -14,11 +15,16 @@ const wantsJson = (req) => req.xhr || (req.headers.accept && req.headers.accept.
 
 const dashboard = async (req, res) => {
     try {
-        const [listingCounts, totalUsers, pendingReports, recent] = await Promise.all([
+        const [listingCounts, totalUsers, pendingReports, recent, analyticsSummary, dailyTrends, categoryDist, roleDist, statusDist] = await Promise.all([
             Listing.countByStatus(),
             User.countAll(),
             Report.countPending(),
-            Listing.adminFindAll({}, 1, 8)
+            Listing.adminFindAll({}, 1, 8),
+            Analytics.getSummary(),
+            Analytics.getDailyTrends(30),
+            Analytics.getCategoryDistribution(),
+            Analytics.getRoleDistribution(),
+            Analytics.getStatusDistribution()
         ]);
 
         res.locals.meta.title = 'Admin Paneli | CYPILAN.COM';
@@ -31,6 +37,13 @@ const dashboard = async (req, res) => {
                 pendingListings: listingCounts.pending || 0,
                 rejectedListings: listingCounts.rejected || 0,
                 pendingReports
+            },
+            analytics: {
+                summary: analyticsSummary,
+                trends: dailyTrends,
+                categories: categoryDist,
+                roles: roleDist,
+                statuses: statusDist
             },
             recentListings: recent.data,
             pendingReports,

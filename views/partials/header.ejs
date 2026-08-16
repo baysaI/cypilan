@@ -1,7 +1,7 @@
 <header class="site-header sticky-top bg-white shadow-sm">
     <div class="border-bottom">
         <div class="container py-2">
-            <div class="d-flex align-items-center gap-2 gap-md-3">
+            <div class="header-row d-flex align-items-center gap-2 gap-md-3">
                 <a href="/" class="site-brand d-flex align-items-center flex-shrink-0" aria-label="CypIlan">
                     <img src="/img/logo.png" alt="CypIlan" class="site-logo site-logo-light">
                     <img src="/img/logo-white.png" alt="CypIlan" class="site-logo site-logo-dark">
@@ -149,14 +149,18 @@
                             </ul>
                         </div>
                     <% } else { %>
-                        <a href="/auth/login" class="btn btn-outline-primary px-2 px-md-3" aria-label="<%= t('nav.login') %>">
-                            <i class="fa-regular fa-user d-sm-none"></i>
-                            <span class="d-none d-sm-inline"><%= t('nav.login') %></span>
+                        <%# The row has room to spare on a phone once the member
+                            name is out of it, so both calls to action carry
+                            their label rather than sitting there as bare icons.
+                            Below 360px the labels step back out again. %>
+                        <a href="/auth/login" class="btn btn-outline-primary px-2 px-lg-3" aria-label="<%= t('nav.login') %>">
+                            <i class="fa-regular fa-user"></i>
+                            <span class="header-btn-label ms-1"><%= t('nav.login') %></span>
                         </a>
                     <% } %>
 
-                    <a href="/listings/create" class="btn btn-accent fw-bold text-white px-2 px-md-3" aria-label="<%= t('nav.post_ad') %>">
-                        <i class="fa-solid fa-plus me-md-1"></i><span class="d-none d-md-inline"><%= t('nav.post_ad') %></span>
+                    <a href="/listings/create" class="btn btn-accent fw-bold text-white px-2 px-lg-3" aria-label="<%= t('nav.post_ad') %>">
+                        <i class="fa-solid fa-plus"></i><span class="header-btn-label ms-1"><%= t('nav.post_ad') %></span>
                     </a>
                 </div>
             </div>
@@ -184,6 +188,18 @@
                 <li class="nav-item"><a class="nav-link px-3 py-2" href="/listings?category=ikinci-el"><%= t('categories.second_hand') %></a></li>
                 <li class="nav-item"><a class="nav-link px-3 py-2 text-accent fw-bold" href="/ogrenci"><i class="fa-solid fa-graduation-cap me-1"></i><%= t('students.title') %></a></li>
             </ul>
+
+            <%# Each arrow appears only while the rail still has entries on that
+                side — a second, unmistakable "there is more" on top of the fade,
+                and a way through the list without swiping. %>
+            <button type="button" class="category-rail-arrow category-rail-arrow-prev" data-rail-scroll="-1"
+                    aria-label="<%= t('common.previous') %>" tabindex="-1">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button type="button" class="category-rail-arrow category-rail-arrow-next" data-rail-scroll="1"
+                    aria-label="<%= t('common.next') %>" tabindex="-1">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
           </div>
         </div>
     </nav>

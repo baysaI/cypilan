@@ -14,8 +14,31 @@ document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.style.setProperty('--cyp-header-h', Math.round(siteHeader.offsetHeight) + 'px');
         };
 
+        // "Giriş Yap" and "İlan Ver" show their labels when the top row can
+        // hold them and fall back to bare icons when it cannot — which depends
+        // on the language as much as on the screen. Measured rather than
+        // guessed at a breakpoint.
+        const headerRow = siteHeader.querySelector('.header-row');
+        const fitHeaderLabels = () => {
+            if (!headerRow) return;
+
+            siteHeader.classList.add('header-labels-fit');
+            if (headerRow.scrollWidth > headerRow.clientWidth + 1) {
+                siteHeader.classList.remove('header-labels-fit');
+            }
+        };
+
+        fitHeaderLabels();
         publishHeaderHeight();
-        window.addEventListener('load', publishHeaderHeight);
+
+        window.addEventListener('load', () => {
+            // The web font changes every label's width, so measure again once
+            // it has actually arrived.
+            fitHeaderLabels();
+            publishHeaderHeight();
+        });
+
+        window.addEventListener('resize', fitHeaderLabels);
 
         if (typeof ResizeObserver !== 'undefined') {
             new ResizeObserver(publishHeaderHeight).observe(siteHeader);
@@ -96,6 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const end = categoryRail.scrollLeft < max - 1;
             categoryRail.setAttribute('data-overflowing', start && end ? 'both' : (start ? 'start' : 'end'));
         };
+
+        // Just under a screenful per press, so the entry at the edge stays on
+        // screen and the reader keeps their place.
+        const railWrapper = categoryRail.parentElement;
+        if (railWrapper) {
+            railWrapper.querySelectorAll('[data-rail-scroll]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const direction = Number(button.getAttribute('data-rail-scroll')) || 1;
+                    categoryRail.scrollBy({ left: direction * categoryRail.clientWidth * 0.7, behavior: 'smooth' });
+                });
+            });
+        }
 
         publishRailEdges();
         categoryRail.addEventListener('scroll', publishRailEdges, { passive: true });

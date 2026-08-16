@@ -143,11 +143,13 @@ app.set('layout extractStyles', true);
 
 // After i18n so that a rejected request can report the failure in the
 // visitor's own language.
+const analyticsMiddleware = require('./middlewares/analytics');
 app.use(i18nMiddleware);
 app.use(themeMiddleware);
 app.use(csrfProtection);
 app.use(seoMiddleware);
 app.use(setUserLocal);
+app.use(analyticsMiddleware);
 
 const helpers = require('./utils/helpers');
 const cities = require('./config/cities');

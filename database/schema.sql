@@ -339,3 +339,18 @@ CREATE TABLE IF NOT EXISTS settings (
   updated_by INTEGER REFERENCES users(id),
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ---------------------------------------------------------------------------
+-- Page Views & Analytics
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS page_views (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id TEXT,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  path TEXT NOT NULL,
+  ip_hash TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_page_views_session ON page_views(session_id);

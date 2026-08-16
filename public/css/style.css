@@ -779,6 +779,21 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
 
 /* The account button carries the member's name, which has no length limit and
    was pushing the header past the viewport on a 320–375px phone. */
+/* Whether "log in" and "post an ad" can carry their labels on a phone depends
+   on the language, not on a breakpoint: "İlan Ver" is 111px wide, the Greek
+   "Δημοσίευση Αγγελίας" is 228px and pushes the header off a 414px screen. So
+   the labels stay off below lg and main.js measures the row and switches them
+   on when they fit. With no script the header keeps its icons. */
+@media (max-width: 991.98px) {
+    .header-btn-label {
+        display: none;
+    }
+
+    .site-header.header-labels-fit .header-btn-label {
+        display: inline;
+    }
+}
+
 .header-user-name {
     max-width: 12ch;
     overflow: hidden;
@@ -837,6 +852,58 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
    gutter. A strip that ends 16px short of the screen reads as a finished list;
    one that runs off the edge, with an entry cut by it, reads as continuing.
    The first entry still lines up with the page gutter. */
+.category-rail {
+    position: relative;
+}
+
+/* Hidden until main.js reports the rail has somewhere to go on that side. The
+   arrows are decorative duplicates of entries already in the strip, so they
+   stay out of the tab order. */
+.category-rail-arrow {
+    display: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 50%;
+    background: var(--cyp-surface);
+    color: var(--cyp-primary-fg);
+    font-size: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* 0.5rem, not less: the 44px tap area below overhangs the 30px circle by 7px
+   a side, and at a smaller offset that overhang runs past the screen edge and
+   widens the page. */
+.category-rail-arrow-prev { left: 0.5rem; }
+.category-rail-arrow-next { right: 0.5rem; }
+
+/* The drawn circle stays 30px; the tap target around it is 44. */
+.category-rail-arrow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+}
+
+@media (max-width: 991.98px) {
+    .navbar-nav[data-overflowing="start"] ~ .category-rail-arrow-prev,
+    .navbar-nav[data-overflowing="both"] ~ .category-rail-arrow-prev,
+    .navbar-nav[data-overflowing="end"] ~ .category-rail-arrow-next,
+    .navbar-nav[data-overflowing="both"] ~ .category-rail-arrow-next {
+        display: flex;
+    }
+}
+
 @media (max-width: 991.98px) {
     .category-nav > .container {
         --bs-gutter-x: 0;
