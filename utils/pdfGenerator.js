@@ -1,4 +1,5 @@
 const PDFDocument = require('pdfkit');
+const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 
@@ -28,7 +29,7 @@ const CITY_LABELS = {
  * @returns {Promise<Buffer>}
  */
 function generateCvPdf({ user, profile }) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const doc = new PDFDocument({
         size: 'A4',
@@ -116,9 +117,16 @@ function generateCvPdf({ user, profile }) {
         const photoDiskPath = path.join(__dirname, '..', 'public', candidatePhoto.replace(/^\//, ''));
         if (fs.existsSync(photoDiskPath)) {
           try {
+            const rawImgBuffer = await fs.promises.readFile(photoDiskPath);
+            const photoBuffer = await sharp(rawImgBuffer)
+              .rotate()
+              .resize(220, 220, { fit: 'cover', position: 'center' })
+              .png()
+              .toBuffer();
+
             doc.save();
             doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).clip();
-            doc.image(photoDiskPath, photoX, photoY, { width: photoSize, height: photoSize, fit: [photoSize, photoSize] });
+            doc.image(photoBuffer, photoX, photoY, { width: photoSize, height: photoSize });
             doc.restore();
             doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).lineWidth(1.2).stroke('#0284c7');
             photoDrawn = true;
