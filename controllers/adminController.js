@@ -394,9 +394,17 @@ const revokeWarning = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-        const id = parseInt(req.params.id, 10);
-        const { fullName, phone, role, companyName, password } = req.body;
-        const email = String(req.body.email || '').trim().toLowerCase();
+        const { id } = req.params;
+        const { fullName, email, phone, role, companyName, password, isVerified } = req.body;
+
+        const updateData = {
+            full_name: fullName,
+            email,
+            phone,
+            role,
+            company_name: companyName,
+            is_verified: (isVerified === '1' || isVerified === 1 || isVerified === 'on' || isVerified === true) ? 1 : 0
+        };
 
         const user = await User.findById(id);
         if (!user) {

@@ -44,6 +44,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                             <th class="d-none d-md-table-cell">Telefon</th>
                             <th>Rol</th>
                             <th class="d-none d-sm-table-cell">İlan</th>
+                            <th>E-posta Onayı</th>
                             <th>Durum</th>
                             <th>Uyarı</th>
                             <th class="pe-3 text-end">İşlem</th>
@@ -60,6 +61,17 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                 <td><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2"><%= u.role %></span></td>
                                 <td class="d-none d-sm-table-cell">
                                     <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="text-decoration-none"><%= u.listing_count || 0 %></a>
+                                </td>
+                                <td>
+                                    <% if (u.is_verified) { %>
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2" title="E-posta Doğrulanmış">
+                                            <i class="fa-solid fa-circle-check me-1"></i>Onaylı
+                                        </span>
+                                    <% } else { %>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2" title="E-posta Henüz Doğrulanmamış">
+                                            <i class="fa-solid fa-clock me-1"></i>Onaysız
+                                        </span>
+                                    <% } %>
                                 </td>
                                 <td>
                                     <% if (u.is_active) { %>
@@ -87,6 +99,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                             data-phone="<%= u.phone || '' %>"
                                             data-role="<%= u.role || 'user' %>"
                                             data-company="<%= u.company_name || '' %>"
+                                            data-is-verified="<%= u.is_verified ? '1' : '0' %>"
                                             title="Düzenle">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
@@ -110,7 +123,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                             </tr>
                             <% if (u.id !== activeAdminUser.id) { %>
                                 <tr class="collapse" id="warnForm<%= u.id %>">
-                                    <td colspan="7" class="bg-light">
+                                    <td colspan="8" class="bg-light">
                                         <form action="/admin/users/<%= u.id %>/uyari" method="POST"
                                               class="d-flex flex-wrap gap-2 align-items-center py-2">
                                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -178,6 +191,16 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                         <label class="form-label small fw-medium">Firma Adı (Kurumsal/Acente ise)</label>
                         <input type="text" name="companyName" id="editCompanyName" class="form-control">
                     </div>
+
+                    <!-- Email Verification Toggle -->
+                    <div class="mb-3 form-check form-switch bg-light rounded p-3 border ms-0">
+                        <input class="form-check-input ms-0 me-2 cursor-pointer" type="checkbox" name="isVerified" id="editIsVerified" value="1">
+                        <label class="form-check-label small fw-bold cursor-pointer" for="editIsVerified">
+                            <i class="fa-solid fa-circle-check me-1 text-success"></i>E-posta Adresi Doğrulanmış
+                        </label>
+                        <div class="form-text small mt-1">Manuel olarak kullanıcının e-posta doğrulama durumunu değiştirmek için işaretleyin.</div>
+                    </div>
+
                     <hr class="my-3">
                     <div class="mb-2">
                         <label class="form-label small fw-medium text-danger"><i class="fa-solid fa-key me-1"></i>Yeni Şifre Belirle (Opsiyonel)</label>
@@ -209,6 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const phone = this.getAttribute('data-phone');
             const role = this.getAttribute('data-role');
             const company = this.getAttribute('data-company');
+            const isVerified = this.getAttribute('data-is-verified') === '1';
 
             editForm.action = '/admin/users/' + id;
             document.getElementById('editFullName').value = name;
@@ -216,6 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('editPhone').value = phone;
             document.getElementById('editRole').value = role;
             document.getElementById('editCompanyName').value = company;
+            document.getElementById('editIsVerified').checked = isVerified;
             document.getElementById('editPassword').value = '';
 
             editModal.show();
