@@ -759,6 +759,23 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     }
 }
 
+/* Header user dropdown menu vertical scroll & prevent body scroll leak on mobile */
+.site-header .dropdown-menu {
+    max-height: calc(100vh - 75px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.site-header .dropdown-menu::-webkit-scrollbar {
+    width: 4px;
+}
+
+.site-header .dropdown-menu::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
 .site-logo {
     height: 44px;
     width: auto;
