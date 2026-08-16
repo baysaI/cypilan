@@ -37,9 +37,24 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com", "fonts.googleapis.com"],
       fontSrc: ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com", "cdn.jsdelivr.net"],
       imgSrc: ["'self'", "data:", "blob:", "http:", "https:"],
-      connectSrc: ["'self'"]
+      connectSrc: ["'self'"],
+
+      // Helmet turns upgrade-insecure-requests on by default. Over plain http
+      // it tells the browser to fetch every same-origin asset over https
+      // instead — so a phone opening http://192.168.1.x:3000 gets the HTML but
+      // no stylesheet, no script and no images: the upgraded requests hit a
+      // port that speaks no TLS and fail silently. Chrome exempts localhost as
+      // a trustworthy origin, which is why the same build looks correct on the
+      // development machine and broken on a phone on the same network.
+      // Production is served over TLS, so it keeps the directive.
+      upgradeInsecureRequests: IS_PRODUCTION ? [] : null
     }
   },
+
+  // Same reasoning: a browser only honours HSTS over https, but sending it
+  // from a development server invites a stale policy on any hostname the
+  // developer later reuses.
+  strictTransportSecurity: IS_PRODUCTION,
   crossOriginEmbedderPolicy: false
 }));
 
