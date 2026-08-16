@@ -59,9 +59,12 @@ const isAlwaysFree = (rootSlug) => ALWAYS_FREE_CATEGORIES.includes(rootSlug);
 
 const usesQuota = (rootSlug) => QUOTA_CATEGORIES.includes(rootSlug);
 
+const isCorporateRole = (role) => role === 'business' || role === 'agent' || role === 'admin';
+
 const evaluate = ({ role, rootSlug, usedCount, isUnlimited = false }) => {
-  if (role === 'admin' || isUnlimited) {
-    return { allowed: true, free: true, remaining: null, isUnlimited: Boolean(isUnlimited), reason: null };
+  const unlimited = Boolean(isUnlimited) || isCorporateRole(role);
+  if (unlimited) {
+    return { allowed: true, free: true, remaining: null, isUnlimited: true, reason: null };
   }
 
   if (isAlwaysFree(rootSlug)) {
@@ -100,5 +103,6 @@ module.exports = {
   requiresPrice,
   isAlwaysFree,
   usesQuota,
+  isCorporateRole,
   evaluate
 };

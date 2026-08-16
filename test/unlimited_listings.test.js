@@ -106,4 +106,23 @@ t.run('Sınırsız İlan Modu & Opsiyonel İş İlanı Ücreti', async (db) => {
 
   t.assert(jobWithoutPrice && jobWithoutPrice.id, 'Fiyatsız iş ilanı başarıyla veritabanına kaydedildi');
   t.assertEqual(jobWithoutPrice.price, null, 'Kayıtlı fiyat null olarak tutuldu');
+
+  // 6. Corporate roles (business & agent) always have unlimited listings even when unlimited mode is off
+  const businessEval = listingPolicy.evaluate({
+    role: 'business',
+    rootSlug: 'emlak',
+    usedCount: 100,
+    isUnlimited: false
+  });
+  t.assertEqual(businessEval.allowed, true, 'Kurumsal işletme (business) 100 ilanı olsa bile daima ilan açabilir');
+  t.assertEqual(businessEval.isUnlimited, true, 'isUnlimited true döner');
+
+  const agentEval = listingPolicy.evaluate({
+    role: 'agent',
+    rootSlug: 'vasita',
+    usedCount: 200,
+    isUnlimited: false
+  });
+  t.assertEqual(agentEval.allowed, true, 'Acente danışmanı (agent) 200 ilanı olsa bile daima ilan açabilir');
+  t.assertEqual(agentEval.isUnlimited, true, 'isUnlimited true döner');
 });

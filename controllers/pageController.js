@@ -161,7 +161,9 @@ const pricing = async (req, res, next) => {
         res.locals.meta.title = res.locals.t('footer.pricing');
 
         const Setting = require('../models/Setting');
-        const isUnlimited = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
+        const isUnlimitedSetting = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
+        const isCorporate = Boolean(req.session && listingPolicy.isCorporateRole(req.session.userRole));
+        const isUserUnlimited = isUnlimitedSetting || isCorporate;
 
         let quota = null;
         if (req.session && req.session.userId) {
@@ -170,17 +172,19 @@ const pricing = async (req, res, next) => {
                 listingPolicy.QUOTA_CATEGORIES
             );
             quota = {
-                limit: isUnlimited ? null : listingPolicy.FREE_LISTING_QUOTA,
+                limit: isUserUnlimited ? null : listingPolicy.FREE_LISTING_QUOTA,
                 used,
-                remaining: isUnlimited ? null : Math.max(0, listingPolicy.FREE_LISTING_QUOTA - used),
-                isUnlimited
+                remaining: isUserUnlimited ? null : Math.max(0, listingPolicy.FREE_LISTING_QUOTA - used),
+                isUnlimited: isUserUnlimited,
+                isCorporate
             };
         }
 
         res.render('pages/pricing', {
             packages: listingPolicy.PACKAGES,
-            freeQuota: isUnlimited ? null : listingPolicy.FREE_LISTING_QUOTA,
-            isUnlimited,
+            freeQuota: isUnlimitedSetting ? null : listingPolicy.FREE_LISTING_QUOTA,
+            isUnlimited: isUnlimitedSetting,
+            isCorporate,
             paidTiersLive: listingPolicy.PAID_TIERS_LIVE,
             supportEmail: appConfig.app.supportEmail,
             quota,

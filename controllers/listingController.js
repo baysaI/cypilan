@@ -182,7 +182,10 @@ const showCreate = async (req, res, next) => {
         const categories = await Category.getAll();
         const user = await User.findById(req.session.userId);
 
-        const isUnlimited = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
+        const isUnlimitedSetting = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
+        const isCorporate = listingPolicy.isCorporateRole(req.session.userRole);
+        const isUnlimited = isUnlimitedSetting || isCorporate;
+
         const usedQuota = await Listing.countByUserInRootCategories(
             req.session.userId,
             listingPolicy.QUOTA_CATEGORIES
@@ -216,6 +219,7 @@ const showCreate = async (req, res, next) => {
                 used: usedQuota,
                 remaining: isUnlimited ? null : Math.max(0, listingPolicy.FREE_LISTING_QUOTA - usedQuota),
                 isUnlimited: isUnlimited,
+                isCorporate: isCorporate,
                 categories: listingPolicy.QUOTA_CATEGORIES,
                 freeCategories: listingPolicy.ALWAYS_FREE_CATEGORIES
             },

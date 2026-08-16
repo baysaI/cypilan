@@ -10,15 +10,29 @@
         <div class="col-12 col-lg-9 col-xl-8">
             
             <% if (typeof quota !== 'undefined' && quota) { %>
-                <% if (quota.isUnlimited) { %>
+                <% if (quota.isCorporate) { %>
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-primary">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <i class="fa-solid fa-building-circle-check fs-4 text-primary mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold text-primary mb-1"><%= t('listing.corporate_unlimited_title') %></h6>
+                                    <p class="text-muted small mb-0">
+                                        <%= t('listing.corporate_unlimited_desc') %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } else if (quota.isUnlimited) { %>
                     <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-success">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-start gap-3">
                                 <i class="fa-solid fa-gift fs-4 text-success mt-1"></i>
                                 <div class="flex-grow-1">
-                                    <h6 class="fw-bold text-success mb-1">Sınırsız İlan Modu Aktif</h6>
+                                    <h6 class="fw-bold text-success mb-1"><%= t('listing.unlimited_mode_title') %></h6>
                                     <p class="text-muted small mb-0">
-                                        Şu an sistemde tüm kategorilerde dilediğiniz kadar ücretsiz ilan yayınlayabilirsiniz. Herhangi bir kota sınırı bulunmamaktadır.
+                                        <%= t('listing.unlimited_mode_desc') %>
                                     </p>
                                 </div>
                             </div>
