@@ -2,7 +2,12 @@ const Career = require('../models/Career');
 const Listing = require('../models/Listing');
 const Category = require('../models/Category');
 const Message = require('../models/Message');
+const User = require('../models/User');
 const cities = require('../config/cities');
+const { generateCvPdf } = require('../utils/pdfGenerator');
+const { removeCvFileByUrl } = require('../middlewares/upload');
+const path = require('path');
+const fs = require('fs');
 
 const MAX_COVER_LETTER = 1500;
 
@@ -16,7 +21,10 @@ const isJobListing = async (listing) => {
 
 const editProfile = async (req, res, next) => {
     try {
-        const profile = await Career.getProfile(req.session.userId);
+        const [profile, currentUser] = await Promise.all([
+            Career.getProfile(req.session.userId),
+            User.findById(req.session.userId)
+        ]);
 
         res.locals.meta = res.locals.meta || {};
         res.locals.meta.title = res.locals.t('career.my_cv');
@@ -24,6 +32,7 @@ const editProfile = async (req, res, next) => {
 
         res.render('career/profile', {
             profile,
+            candidateUser: currentUser,
             completeness: Career.profileCompleteness(profile),
             workTypes: Career.WORK_TYPES,
             cityNames: cities.names(),
@@ -39,12 +48,15 @@ const saveProfile = async (req, res) => {
     try {
         const headline = String(req.body.headline || '').trim();
 
-        if (!headline) {
-            req.flash('error', 'flash.cv_headline_required');
-            return res.redirect('/kariyer/cv');
+        if (!headline && !req.processedCustomCv) {
+            const currentProfile = await Career.getProfile(req.session.userId);
+            if (!currentProfile || (!currentProfile.headline && !currentProfile.custom_cv_url)) {
+                req.flash('error', 'flash.cv_headline_required');
+                return res.redirect('/kariyer/cv');
+            }
         }
 
-        await Career.saveProfile(req.session.userId, {
+        const profileData = {
             headline: headline.slice(0, 120),
             summary: String(req.body.summary || '').trim().slice(0, 2000),
             experience_years: req.body.experience_years,
@@ -56,13 +68,119 @@ const saveProfile = async (req, res) => {
             preferred_work_type: req.body.preferred_work_type,
             is_open_to_work: Boolean(req.body.is_open_to_work),
             is_public: Boolean(req.body.is_public)
-        });
+        };
+
+        if (req.processedCvPhoto) {
+            profileData.photo_url = req.processedCvPhoto;
+        }
+
+        if (req.processedCustomCv) {
+            profileData.custom_cv_url = req.processedCustomCv.url;
+            profileData.custom_cv_name = req.processedCustomCv.name;
+            profileData.custom_cv_size = req.processedCustomCv.size;
+        }
+
+        await Career.saveProfile(req.session.userId, profileData);
 
         req.flash('success', 'flash.cv_saved');
         res.redirect('/kariyer/cv');
     } catch (error) {
         console.error('CV Save Error:', error);
         req.flash('error', 'flash.cv_save_failed');
+        res.redirect('/kariyer/cv');
+    }
+};
+
+const downloadCypilanPdf = async (req, res, next) => {
+    try {
+        const targetUserId = parseInt(req.params.userId, 10) || req.session.userId;
+        if (!targetUserId) {
+            req.flash('error', 'flash.login_required');
+            return res.redirect('/auth/login');
+        }
+
+        const [user, profile] = await Promise.all([
+            User.findById(targetUserId),
+            Career.getProfile(targetUserId)
+        ]);
+
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/kariyer');
+        }
+
+        const pdfBuffer = await generateCvPdf({ user, profile: profile || {} });
+
+        const safeName = (user.full_name || 'Aday')
+            .replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ\-_]/g, '_')
+            .slice(0, 50);
+        const filename = `CYPILAN-CV-${safeName}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(filename)}"`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Download CYPILAN PDF Error:', error);
+        req.flash('error', 'flash.generic_error');
+        res.redirect('/kariyer/cv');
+    }
+};
+
+const downloadCustomCv = async (req, res, next) => {
+    try {
+        const targetUserId = parseInt(req.params.userId, 10) || req.session.userId;
+        const profile = await Career.getProfile(targetUserId);
+
+        if (!profile || !profile.custom_cv_url) {
+            req.flash('error', 'flash.custom_cv_not_found');
+            return res.redirect(req.get('referer') || '/kariyer/cv');
+        }
+
+        const filePath = path.join(__dirname, '..', 'public', profile.custom_cv_url.replace(/^\//, ''));
+        if (!fs.existsSync(filePath)) {
+            req.flash('error', 'flash.custom_cv_not_found');
+            return res.redirect(req.get('referer') || '/kariyer/cv');
+        }
+
+        res.download(filePath, profile.custom_cv_name || 'Orijinal_CV.pdf');
+    } catch (error) {
+        console.error('Download Custom CV Error:', error);
+        req.flash('error', 'flash.generic_error');
+        res.redirect('/kariyer/cv');
+    }
+};
+
+const removeCustomCv = async (req, res) => {
+    try {
+        const profile = await Career.getProfile(req.session.userId);
+        if (profile && profile.custom_cv_url) {
+            await removeCvFileByUrl(profile.custom_cv_url);
+            await Career.removeCustomCv(req.session.userId);
+        }
+
+        req.flash('success', 'flash.custom_cv_removed');
+        res.redirect('/kariyer/cv');
+    } catch (error) {
+        console.error('Remove Custom CV Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/kariyer/cv');
+    }
+};
+
+const removePhoto = async (req, res) => {
+    try {
+        const profile = await Career.getProfile(req.session.userId);
+        if (profile && profile.photo_url) {
+            await removeCvFileByUrl(profile.photo_url);
+            await Career.removePhoto(req.session.userId);
+        }
+
+        req.flash('success', 'flash.cv_photo_removed');
+        res.redirect('/kariyer/cv');
+    } catch (error) {
+        console.error('Remove CV Photo Error:', error);
+        req.flash('error', 'flash.action_failed');
         res.redirect('/kariyer/cv');
     }
 };
@@ -258,6 +376,10 @@ const setApplicationStatus = async (req, res) => {
 module.exports = {
     editProfile,
     saveProfile,
+    downloadCypilanPdf,
+    downloadCustomCv,
+    removeCustomCv,
+    removePhoto,
     openings,
     apply,
     myApplications,

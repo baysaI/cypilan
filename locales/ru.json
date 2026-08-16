@@ -205,7 +205,18 @@
     "work_type_part_time": "Частичная занятость",
     "work_type_seasonal": "Сезонная",
     "years_experience": "опыт {years} лет",
-    "you_are_shortlisted": "Поздравляем, вы в коротком списке!"
+    "you_are_shortlisted": "Поздравляем, вы в коротком списке!",
+    "download_cypilan_pdf": "Скачать CYPILAN PDF",
+    "section_media": "Фото и готовый PDF-файл",
+    "cv_photo": "Фотография резюме",
+    "photo_help": "Квадратный формат, JPG, PNG или WEBP (макс. 5 МБ)",
+    "remove_photo": "Удалить фото из резюме",
+    "custom_cv_file": "Готовое резюме в PDF",
+    "custom_cv_help": "Если у вас есть готовое резюме в формате PDF, вы можете загрузить его сюда (макс. 10 МБ).",
+    "replace_custom_cv": "Загрузить новый PDF",
+    "remove_custom_cv": "Удалить PDF",
+    "cypilan_cv_pdf": "CYPILAN CV (PDF)",
+    "applicant_custom_pdf": "PDF-файл кандидата"
   },
   "categories": {
     "jobs": "Вакансии",
@@ -502,7 +513,10 @@
     "warning_revoked": "Предупреждение снято.",
     "weak_password": "Пароль должен содержать не менее 8 символов, одну заглавную букву и одну цифру.",
     "notifications_marked_read": "Все уведомления отмечены как прочитанные.",
-    "notification_deleted": "Уведомление удалено."
+    "notification_deleted": "Уведомление удалено.",
+    "custom_cv_removed": "Загруженное резюме в формате PDF удалено.",
+    "cv_photo_removed": "Фотография из резюме удалена.",
+    "custom_cv_not_found": "Загруженный PDF-документ не найден."
   },
   "footer": {
     "about": "О нас",

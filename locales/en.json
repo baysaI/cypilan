@@ -205,7 +205,18 @@
     "work_type_part_time": "Part Time",
     "work_type_seasonal": "Seasonal",
     "years_experience": "{years} years of experience",
-    "you_are_shortlisted": "Congratulations, you have been shortlisted!"
+    "you_are_shortlisted": "Congratulations, you have been shortlisted!",
+    "download_cypilan_pdf": "CYPILAN Branded PDF",
+    "section_media": "Photo & Uploaded PDF Resume",
+    "cv_photo": "Resume Photo",
+    "photo_help": "Square format, JPG, PNG or WEBP (Max. 5 MB)",
+    "remove_photo": "Remove Custom CV Photo",
+    "custom_cv_file": "Custom PDF Resume",
+    "custom_cv_help": "If you have a pre-made PDF resume, you can upload it here (Max. 10 MB).",
+    "replace_custom_cv": "Upload New PDF",
+    "remove_custom_cv": "Remove PDF",
+    "cypilan_cv_pdf": "CYPILAN CV (PDF)",
+    "applicant_custom_pdf": "Applicant's PDF File"
   },
   "categories": {
     "jobs": "Jobs",
@@ -502,7 +513,10 @@
     "warning_revoked": "The warning has been lifted.",
     "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit.",
     "notifications_marked_read": "All notifications marked as read.",
-    "notification_deleted": "Notification deleted."
+    "notification_deleted": "Notification deleted.",
+    "custom_cv_removed": "Uploaded PDF resume removed.",
+    "cv_photo_removed": "Custom CV photo removed.",
+    "custom_cv_not_found": "No uploaded PDF document found."
   },
   "footer": {
     "about": "About Us",

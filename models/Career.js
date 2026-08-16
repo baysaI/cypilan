@@ -28,13 +28,19 @@ class Career {
 
   static async saveProfile(userId, data) {
     const db = getDb();
+    const existing = await this.getProfile(userId);
+
+    const photoUrl = data.photo_url !== undefined ? data.photo_url : (existing ? existing.photo_url : null);
+    const customCvUrl = data.custom_cv_url !== undefined ? data.custom_cv_url : (existing ? existing.custom_cv_url : null);
+    const customCvName = data.custom_cv_name !== undefined ? data.custom_cv_name : (existing ? existing.custom_cv_name : null);
+    const customCvSize = data.custom_cv_size !== undefined ? data.custom_cv_size : (existing ? existing.custom_cv_size : null);
 
     db.prepare(`
       INSERT INTO candidate_profiles (
         user_id, headline, summary, experience_years, education,
         skills, languages, certificates, preferred_city, preferred_work_type,
-        is_open_to_work, is_public
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        is_open_to_work, is_public, photo_url, custom_cv_url, custom_cv_name, custom_cv_size
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(user_id) DO UPDATE SET
         headline = excluded.headline,
         summary = excluded.summary,
@@ -47,6 +53,10 @@ class Career {
         preferred_work_type = excluded.preferred_work_type,
         is_open_to_work = excluded.is_open_to_work,
         is_public = excluded.is_public,
+        photo_url = excluded.photo_url,
+        custom_cv_url = excluded.custom_cv_url,
+        custom_cv_name = excluded.custom_cv_name,
+        custom_cv_size = excluded.custom_cv_size,
         updated_at = CURRENT_TIMESTAMP
     `).run([
       userId,
@@ -60,9 +70,33 @@ class Career {
       data.preferred_city || null,
       WORK_TYPES.includes(data.preferred_work_type) ? data.preferred_work_type : null,
       data.is_open_to_work ? 1 : 0,
-      data.is_public ? 1 : 0
+      data.is_public ? 1 : 0,
+      photoUrl,
+      customCvUrl,
+      customCvName,
+      customCvSize
     ]);
 
+    return this.getProfile(userId);
+  }
+
+  static async removeCustomCv(userId) {
+    const db = getDb();
+    db.prepare(`
+      UPDATE candidate_profiles
+      SET custom_cv_url = NULL, custom_cv_name = NULL, custom_cv_size = NULL, updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ?
+    `).run([userId]);
+    return this.getProfile(userId);
+  }
+
+  static async removePhoto(userId) {
+    const db = getDb();
+    db.prepare(`
+      UPDATE candidate_profiles
+      SET photo_url = NULL, updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ?
+    `).run([userId]);
     return this.getProfile(userId);
   }
 
@@ -70,6 +104,7 @@ class Career {
   // "one-click apply" button checks before it offers itself.
   static isProfileReady(profile) {
     if (!profile) return false;
+    if (profile.custom_cv_url) return true;
     return Boolean(
       (profile.headline && profile.headline.trim()) &&
       (profile.summary && profile.summary.trim().length >= 40)
@@ -207,7 +242,8 @@ class Career {
              l.title as listing_title, l.slug as listing_slug, l.status as listing_status,
              u.full_name as applicant_name, u.avatar_url as applicant_avatar,
              c.headline, c.summary, c.experience_years, c.skills, c.languages,
-             c.education, c.preferred_city, c.is_public
+             c.education, c.preferred_city, c.is_public, c.photo_url as applicant_photo,
+             c.custom_cv_url, c.custom_cv_name, c.custom_cv_size
       FROM job_applications a
       JOIN listings l ON a.listing_id = l.id
       JOIN users u ON a.applicant_id = u.id

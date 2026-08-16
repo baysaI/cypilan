@@ -92,13 +92,46 @@ t.run('İş ilanları modülü', async (db) => {
   t.assertRejected(await Career.withdraw(applicationId, other), 'Başkası başvuruyu geri çekemiyor');
   t.assert(await Career.withdraw(applicationId, seeker), 'Aday kendi başvurusunu geri çekebiliyor');
 
+  // --- Özel PDF & Fotoğraf Testi
+  await Career.saveProfile(seeker, {
+    headline: 'Deneyimli Resepsiyonist & Ön Büro Şefi',
+    photo_url: '/uploads/cvs/photo-test.webp',
+    custom_cv_url: '/uploads/cvs/cv-test.pdf',
+    custom_cv_name: 'Ayse_Aday_CV.pdf',
+    custom_cv_size: 1048576
+  });
+
+  const updatedProfile = await Career.getProfile(seeker);
+  t.assertEqual(updatedProfile.custom_cv_url, '/uploads/cvs/cv-test.pdf', 'Özel CV PDF yolu kaydedildi');
+  t.assertEqual(updatedProfile.custom_cv_name, 'Ayse_Aday_CV.pdf', 'Özel CV dosya adı kaydedildi');
+  t.assertEqual(updatedProfile.photo_url, '/uploads/cvs/photo-test.webp', 'CV fotoğraf yolu kaydedildi');
+
+  // --- CYPILAN Filigranlı PDF Oluşturma Testi
+  const { generateCvPdf } = require(t.rootDir + '/utils/pdfGenerator');
+  const User = require(t.rootDir + '/models/User');
+  const seekerUser = await User.findById(seeker);
+  const pdfBuffer = await generateCvPdf({ user: seekerUser, profile: updatedProfile });
+
+  t.assert(Buffer.isBuffer(pdfBuffer) && pdfBuffer.length > 5000, 'CYPILAN filigranlı PDF başarıyla üretildi');
+  t.assert(pdfBuffer.toString('utf8', 0, 4) === '%PDF', 'Üretilen dosya geçerli PDF başlığı (%PDF) içeriyor');
+
+  // --- Özel CV ve Fotoğraf Kaldırma
+  await Career.removePhoto(seeker);
+  const noPhotoProfile = await Career.getProfile(seeker);
+  t.assertEqual(noPhotoProfile.photo_url, null, 'CV fotoğrafı veritabanından kaldırıldı');
+
+  await Career.removeCustomCv(seeker);
+  const noCvProfile = await Career.getProfile(seeker);
+  t.assertEqual(noCvProfile.custom_cv_url, null, 'Özel PDF veritabanından kaldırıldı');
+
   // --- Sablonlar
   const cvHtml = await t.render('career/profile.ejs', {
-    profile, completeness: Career.profileCompleteness(profile),
+    profile: updatedProfile, candidateUser: seekerUser, completeness: Career.profileCompleteness(updatedProfile),
     workTypes: Career.WORK_TYPES, cityNames: t.cities.names(),
     title: 'test', user: { id: seeker, name: 'Ayşe Aday' }
   });
-  t.assert(cvHtml.includes('Deneyimli Resepsiyonist'), 'career/profile.ejs kayıtlı değerleri dolu getiriyor');
+  t.assert(cvHtml.includes('CYPILAN PDF Çıktısı'), 'career/profile.ejs PDF indirme butonunu basıyor');
+  t.assert(cvHtml.includes('Fotoğraf ve Hazır PDF Dosyası'), 'career/profile.ejs fotoğraf ve PDF yükleme alanını basıyor');
 
   const openHtml = await t.render('career/openings.ejs', {
     openings: ranked, pagination: { currentPage: 1, totalPages: 1, totalItems: 1 },
@@ -111,12 +144,18 @@ t.run('İş ilanları modülü', async (db) => {
   const employerHtml = await t.render('career/employer.ejs', {
     groups: [{
       listingTitle: 'Resepsiyon Görevlisi', listingSlug: 'resepsiyon-gorevlisi',
-      listingStatus: 'active', applications
+      listingStatus: 'active', applications: [{
+        ...applications[0],
+        custom_cv_url: '/uploads/cvs/cv-test.pdf',
+        custom_cv_name: 'Ayse_CV.pdf'
+      }]
     }],
     statuses: Career.APPLICATION_STATUSES.filter((status) => status !== 'withdrawn'),
     title: 'test', user: { id: employer, name: 'Otel A.Ş.' }
   });
   t.assert(employerHtml.includes('İşveren Paneli'), 'career/employer.ejs render ediliyor');
+  t.assert(employerHtml.includes('CYPILAN CV (PDF)'), 'career/employer.ejs CYPILAN CV PDF butonunu gösteriyor');
+  t.assert(employerHtml.includes('Adayın PDF Dosyası'), 'career/employer.ejs Adayın Özel PDF butonunu gösteriyor');
 
   const mineHtml = await t.render('career/applications.ejs', {
     applications: await Career.applicationsForApplicant(seeker),
@@ -125,7 +164,7 @@ t.run('İş ilanları modülü', async (db) => {
   t.assert(mineHtml.includes('Resepsiyon Görevlisi'), 'career/applications.ejs render ediliyor');
 
   const allLangs = ['tr', 'en', 'el', 'ru', 'fa'].every((lang) =>
-    ['career.one_click_apply', 'career.employer_panel', 'flash.cv_incomplete', 'career.work_type_full_time']
+    ['career.one_click_apply', 'career.employer_panel', 'flash.cv_incomplete', 'career.download_cypilan_pdf']
       .every((key) => t.translate(key, lang) !== key)
   );
   t.assert(allLangs, 'career.* anahtarları 5 dilde çözülüyor');

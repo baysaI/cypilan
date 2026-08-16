@@ -121,6 +121,91 @@ const removeImagesByUrl = async (imageUrls = []) => {
     }));
 };
 
+const cvUploadDir = path.join(__dirname, '../public/uploads/cvs');
+if (!fs.existsSync(cvUploadDir)) {
+    fs.mkdirSync(cvUploadDir, { recursive: true });
+}
+
+// Multer instance for CV photo & PDF uploads
+const cvMulter = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10 MB max for custom CV / photo
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.fieldname === 'photo') {
+            if (ALLOWED_TYPES.includes(file.mimetype)) {
+                return cb(null, true);
+            }
+            return cb(new Error('Fotoğraf için sadece JPG, PNG veya WEBP yükleyebilirsiniz.'), false);
+        } else if (file.fieldname === 'cv_file') {
+            if (file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) {
+                return cb(null, true);
+            }
+            return cb(new Error('Özgeçmiş belgesi için sadece PDF formatı kabul edilir.'), false);
+        }
+        cb(null, false);
+    }
+});
+
+const uploadCv = cvMulter.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'cv_file', maxCount: 1 }
+]);
+
+const processCvUploads = async (req, res, next) => {
+    try {
+        if (req.files) {
+            // Process photo if present
+            if (req.files.photo && req.files.photo.length > 0) {
+                const photoFile = req.files.photo[0];
+                const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+                const filename = `photo-${uniqueSuffix}.webp`;
+                const outputPath = path.join(cvUploadDir, filename);
+
+                await sharp(photoFile.buffer)
+                    .rotate()
+                    .resize(400, 400, {
+                        fit: 'cover',
+                        position: 'center'
+                    })
+                    .webp({ quality: 88 })
+                    .toFile(outputPath);
+
+                req.processedCvPhoto = `/uploads/cvs/${filename}`;
+            }
+
+            // Process custom PDF CV if present
+            if (req.files.cv_file && req.files.cv_file.length > 0) {
+                const pdfFile = req.files.cv_file[0];
+                const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+                const filename = `cv-${uniqueSuffix}.pdf`;
+                const outputPath = path.join(cvUploadDir, filename);
+
+                await fs.promises.writeFile(outputPath, pdfFile.buffer);
+
+                req.processedCustomCv = {
+                    url: `/uploads/cvs/${filename}`,
+                    name: pdfFile.originalname.slice(0, 150),
+                    size: pdfFile.size
+                };
+            }
+        }
+        next();
+    } catch (error) {
+        console.error('Error in processCvUploads:', error);
+        next(error);
+    }
+};
+
+const removeCvFileByUrl = async (fileUrl) => {
+    if (typeof fileUrl !== 'string' || !fileUrl.startsWith('/uploads/cvs/')) {
+        return Promise.resolve();
+    }
+    const filename = path.basename(fileUrl);
+    return fs.promises.unlink(path.join(cvUploadDir, filename)).catch(() => {});
+};
+
 // Removes an avatar referenced by its public URL (/uploads/avatars/<name>).
 const removeAvatarByUrl = async (avatarUrl) => {
     if (typeof avatarUrl !== 'string' || !avatarUrl.startsWith('/uploads/avatars/')) {
@@ -133,9 +218,12 @@ const removeAvatarByUrl = async (avatarUrl) => {
 module.exports = {
     uploadListingImages,
     uploadAvatar,
+    uploadCv,
     processImagesWithWatermark,
     processAvatarImage,
+    processCvUploads,
     discardProcessedImages,
     removeImagesByUrl,
-    removeAvatarByUrl
+    removeAvatarByUrl,
+    removeCvFileByUrl
 };

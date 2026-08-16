@@ -205,7 +205,18 @@
     "work_type_part_time": "Μερική Απασχόληση",
     "work_type_seasonal": "Εποχιακή",
     "years_experience": "{years} έτη εμπειρίας",
-    "you_are_shortlisted": "Συγχαρητήρια, μπήκατε στη βραχεία λίστα!"
+    "you_are_shortlisted": "Συγχαρητήρια, μπήκατε στη βραχεία λίστα!",
+    "download_cypilan_pdf": "Έξοδος PDF CYPILAN",
+    "section_media": "Φωτογραφία & Έτοιμο Αρχείο PDF",
+    "cv_photo": "Φωτογραφία Βιογραφικού",
+    "photo_help": "Τετράγωνη μορφή, JPG, PNG ή WEBP (Μέγ. 5 MB)",
+    "remove_photo": "Αφαίρεση Φωτογραφίας Βιογραφικού",
+    "custom_cv_file": "Έτοιμο Βιογραφικό PDF",
+    "custom_cv_help": "Εάν έχετε έτοιμο βιογραφικό PDF, μπορείτε να το ανεβάσετε εδώ (Μέγ. 10 MB).",
+    "replace_custom_cv": "Μεταφόρτωση νέου PDF",
+    "remove_custom_cv": "Αφαίρεση PDF",
+    "cypilan_cv_pdf": "CYPILAN CV (PDF)",
+    "applicant_custom_pdf": "Αρχείο PDF Υποψηφίου"
   },
   "categories": {
     "jobs": "Θέσεις Εργασίας",
@@ -502,7 +513,10 @@
     "warning_revoked": "Η προειδοποίηση αφαιρέθηκε.",
     "weak_password": "Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες, ένα κεφαλαίο και έναν αριθμό.",
     "notifications_marked_read": "Όλες οι ειδοποιήσεις επισημάνθηκαν ως αναγνωσμένες.",
-    "notification_deleted": "Η ειδοποίηση διαγράφηκε."
+    "notification_deleted": "Η ειδοποίηση διαγράφηκε.",
+    "custom_cv_removed": "Το μεταφορτωμένο βιογραφικό PDF αφαιρέθηκε.",
+    "cv_photo_removed": "Η φωτογραφία του βιογραφικού αφαιρέθηκε.",
+    "custom_cv_not_found": "Δεν βρέθηκε μεταφορτωμένο έγγραφο PDF."
   },
   "footer": {
     "about": "Σχετικά με εμάς",

@@ -238,6 +238,10 @@ CREATE TABLE IF NOT EXISTS candidate_profiles (
   preferred_work_type TEXT,
   is_open_to_work INTEGER DEFAULT 1,
   is_public INTEGER DEFAULT 1,
+  photo_url TEXT,
+  custom_cv_url TEXT,
+  custom_cv_name TEXT,
+  custom_cv_size INTEGER,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

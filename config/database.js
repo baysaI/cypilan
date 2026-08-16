@@ -51,7 +51,11 @@ const COLUMN_MIGRATIONS = [
   { table: 'users', column: 'password_reset_expires', ddl: 'ALTER TABLE users ADD COLUMN password_reset_expires DATETIME' },
   { table: 'users', column: 'email_verification_token', ddl: 'ALTER TABLE users ADD COLUMN email_verification_token TEXT' },
   { table: 'users', column: 'email_verification_expires', ddl: 'ALTER TABLE users ADD COLUMN email_verification_expires DATETIME' },
-  { table: 'reports', column: 'type', ddl: "ALTER TABLE reports ADD COLUMN type TEXT DEFAULT 'listing'" }
+  { table: 'reports', column: 'type', ddl: "ALTER TABLE reports ADD COLUMN type TEXT DEFAULT 'listing'" },
+  { table: 'candidate_profiles', column: 'photo_url', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN photo_url TEXT' },
+  { table: 'candidate_profiles', column: 'custom_cv_url', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_url TEXT' },
+  { table: 'candidate_profiles', column: 'custom_cv_name', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_name TEXT' },
+  { table: 'candidate_profiles', column: 'custom_cv_size', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_size INTEGER' }
 ];
 
 const columnsOf = (db, table) => db.pragma(`table_info(${table})`).map((column) => column.name);

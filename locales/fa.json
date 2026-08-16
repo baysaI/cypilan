@@ -205,7 +205,18 @@
     "work_type_part_time": "پاره‌وقت",
     "work_type_seasonal": "فصلی",
     "years_experience": "{years} سال سابقه",
-    "you_are_shortlisted": "تبریک، به فهرست کوتاه راه یافتید!"
+    "you_are_shortlisted": "تبریک، به فهرست کوتاه راه یافتید!",
+    "download_cypilan_pdf": "خروجی PDF سیپلان",
+    "section_media": "عکس و فایل آماده PDF",
+    "cv_photo": "عکس رزومه",
+    "photo_help": "فرمت مربعی، JPG، PNG یا WEBP (حداکثر ۵ مگابایت)",
+    "remove_photo": "حذف عکس سفارشی رزومه",
+    "custom_cv_file": "رزومه آماده PDF",
+    "custom_cv_help": "اگر رزومه آماده PDF دارید، می‌توانید آن را از اینجا آپلود کنید (حداکثر ۱۰ مگابایت).",
+    "replace_custom_cv": "آپلود PDF جدید",
+    "remove_custom_cv": "حذف PDF",
+    "cypilan_cv_pdf": "CYPILAN CV (PDF)",
+    "applicant_custom_pdf": "فایل PDF متقاضی"
   },
   "categories": {
     "jobs": "استخدام",
@@ -502,7 +513,10 @@
     "warning_revoked": "اخطار برداشته شد.",
     "weak_password": "رمز عبور باید حداقل ۸ کاراکتر و شامل یک حرف بزرگ و یک رقم باشد.",
     "notifications_marked_read": "تمام اعلان‌ها به عنوان خوانده شده علامت‌گذاری شدند.",
-    "notification_deleted": "اعلان حذف شد."
+    "notification_deleted": "اعلان حذف شد.",
+    "custom_cv_removed": "رزومه آپلود شده PDF حذف شد.",
+    "cv_photo_removed": "عکس سفارشی رزومه حذف شد.",
+    "custom_cv_not_found": "هیچ سند PDF آپلود شده‌ای یافت نشد."
   },
   "footer": {
     "about": "درباره ما",

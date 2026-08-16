@@ -205,7 +205,18 @@
     "work_type_part_time": "Yarı Zamanlı",
     "work_type_seasonal": "Sezonluk",
     "years_experience": "{years} yıl deneyim",
-    "you_are_shortlisted": "Tebrikler, kısa listeye alındın!"
+    "you_are_shortlisted": "Tebrikler, kısa listeye alındın!",
+    "download_cypilan_pdf": "CYPILAN PDF Çıktısı",
+    "section_media": "Fotoğraf ve Hazır PDF Dosyası",
+    "cv_photo": "Özgeçmiş Fotoğrafı",
+    "photo_help": "Kare format, JPG, PNG veya WEBP (Maks. 5 MB)",
+    "remove_photo": "Özel CV Fotoğrafını Kaldır",
+    "custom_cv_file": "Hazır PDF Özgeçmişi",
+    "custom_cv_help": "Hazır bir PDF özgeçmişiniz varsa buradan yükleyebilirsiniz (Maks. 10 MB).",
+    "replace_custom_cv": "Yeni PDF Yükle",
+    "remove_custom_cv": "PDF'i Kaldır",
+    "cypilan_cv_pdf": "CYPILAN CV (PDF)",
+    "applicant_custom_pdf": "Adayın PDF Dosyası"
   },
   "categories": {
     "jobs": "İş İlanları",
@@ -502,7 +513,10 @@
     "warning_revoked": "Uyarı kaldırıldı.",
     "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.",
     "notifications_marked_read": "Tüm bildirimler okundu olarak işaretlendi.",
-    "notification_deleted": "Bildirim silindi."
+    "notification_deleted": "Bildirim silindi.",
+    "custom_cv_removed": "Yüklenen PDF özgeçmiş kaldırıldı.",
+    "cv_photo_removed": "Özel CV fotoğrafı kaldırıldı.",
+    "custom_cv_not_found": "Yüklenmiş bir PDF belgesi bulunamadı."
   },
   "footer": {
     "about": "Hakkımızda",
