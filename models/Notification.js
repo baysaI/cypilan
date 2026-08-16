@@ -1,12 +1,31 @@
 const { getDb } = require('../config/database');
 
 class Notification {
+  static ensureTable(db) {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        link_url TEXT,
+        is_read INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at DESC);
+    `);
+  }
+
   static async create({ user_id, actor_id = null, type, title, message, link_url = null }) {
     if (!user_id || !title || !message) {
       throw new Error('user_id, title and message are required for notification');
     }
 
     const db = getDb();
+    this.ensureTable(db);
     const info = db.prepare(`
       INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
       VALUES (?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
@@ -17,6 +36,7 @@ class Notification {
 
   static async findById(id, userId = null) {
     const db = getDb();
+    this.ensureTable(db);
     let query = `
       SELECT n.*, u.full_name as actor_name, u.avatar_url as actor_avatar
       FROM notifications n
@@ -33,6 +53,7 @@ class Notification {
 
   static async getByUserId(userId, { limit = 50, offset = 0, unreadOnly = false } = {}) {
     const db = getDb();
+    this.ensureTable(db);
     let whereClause = 'WHERE n.user_id = ?';
     const params = [userId];
 
@@ -54,6 +75,7 @@ class Notification {
 
   static async countForUser(userId, { unreadOnly = false } = {}) {
     const db = getDb();
+    this.ensureTable(db);
     let query = 'SELECT COUNT(*) as count FROM notifications WHERE user_id = ?';
     const params = [userId];
 
@@ -72,6 +94,7 @@ class Notification {
   static async getUnreadCount(userId) {
     if (!userId) return 0;
     const db = getDb();
+    this.ensureTable(db);
     const row = db.prepare(
       'SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0'
     ).get([userId]);
@@ -80,6 +103,7 @@ class Notification {
 
   static async markAsRead(id, userId = null) {
     const db = getDb();
+    this.ensureTable(db);
     let query = 'UPDATE notifications SET is_read = 1 WHERE id = ?';
     const params = [id];
     if (userId) {
@@ -93,6 +117,7 @@ class Notification {
   static async markAllAsRead(userId) {
     if (!userId) return false;
     const db = getDb();
+    this.ensureTable(db);
     const result = db.prepare(
       'UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0'
     ).run([userId]);
@@ -101,6 +126,7 @@ class Notification {
 
   static async delete(id, userId) {
     const db = getDb();
+    this.ensureTable(db);
     const result = db.prepare(
       'DELETE FROM notifications WHERE id = ? AND user_id = ?'
     ).run([id, userId]);
@@ -109,6 +135,7 @@ class Notification {
 
   static async deleteAll(userId) {
     const db = getDb();
+    this.ensureTable(db);
     const result = db.prepare(
       'DELETE FROM notifications WHERE user_id = ?'
     ).run([userId]);
@@ -118,6 +145,7 @@ class Notification {
   static async notifyAdmins({ actor_id = null, type = 'support', title, message, link_url = '/admin/canli-destek' }) {
     if (!title || !message) return [];
     const db = getDb();
+    this.ensureTable(db);
     const adminRows = db.prepare("SELECT id FROM users WHERE role = 'admin' AND is_active = 1").all();
     const notifications = [];
     for (const admin of adminRows) {
