@@ -1,0 +1,209 @@
+<%
+const logsArr = (typeof logs !== 'undefined' && logs) ? logs : [];
+const topPagesArr = (typeof topPages !== 'undefined' && topPages) ? topPages : [];
+const topVisitorsArr = (typeof topVisitors !== 'undefined' && topVisitors) ? topVisitors : [];
+const summaryData = (typeof summary !== 'undefined' && summary) ? summary : {};
+const pageInfo = (typeof pagination !== 'undefined' && pagination) ? pagination : { page: 1, totalPages: 1, total: 0 };
+%>
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="fs-4 fw-bold mb-0">Canlı Ziyaretçi Günlüğü & Sayfa Analitiği</h1>
+        <p class="text-muted small mb-0">Sitenize giren çıkan tüm insanların saniyesi saniyesine hareket dökümü</p>
+    </div>
+    <a href="/admin/analytics" class="btn btn-outline-primary btn-sm">
+        <i class="fa-solid fa-rotate me-1"></i> Sayfayı Yenile
+    </a>
+</div>
+
+<!-- Summary Quick Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+                <div class="text-muted small font-monospace">BUGÜN</div>
+                <div class="fs-5 fw-bold text-primary"><%= (summaryData.today?.views || 0).toLocaleString() %> <span class="fs-6 text-muted fw-normal">hit</span></div>
+                <div class="small text-muted"><%= summaryData.today?.visitors || 0 %> tekil kişi</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+                <div class="text-muted small font-monospace">SON 7 GÜN</div>
+                <div class="fs-5 fw-bold text-success"><%= (summaryData.week?.views || 0).toLocaleString() %> <span class="fs-6 text-muted fw-normal">hit</span></div>
+                <div class="small text-muted"><%= summaryData.week?.visitors || 0 %> tekil kişi</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+                <div class="text-muted small font-monospace">SON 30 GÜN</div>
+                <div class="fs-5 fw-bold text-warning"><%= (summaryData.month?.views || 0).toLocaleString() %> <span class="fs-6 text-muted fw-normal">hit</span></div>
+                <div class="small text-muted"><%= summaryData.month?.visitors || 0 %> tekil kişi</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+                <div class="text-muted small font-monospace">TÜM ZAMANLAR</div>
+                <div class="fs-5 fw-bold text-dark"><%= (summaryData.all?.views || 0).toLocaleString() %> <span class="fs-6 text-muted fw-normal">hit</span></div>
+                <div class="small text-muted"><%= summaryData.all?.visitors || 0 %> tekil kişi</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- Top Visited Pages -->
+    <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h2 class="fs-6 fw-bold mb-0"><i class="fa-solid fa-fire text-danger me-2"></i>En Çok Gezilen Sayfalar</h2>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Sayfa Yolu (URL)</th>
+                                <th class="text-end">Tıklama (Hit)</th>
+                                <th class="text-end pe-3">Tekil Ziyaretçi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (topPagesArr.length === 0) { %>
+                                <tr><td colspan="3" class="text-center text-muted py-4">Henüz veri yok.</td></tr>
+                            <% } else { %>
+                                <% topPagesArr.forEach(function(p) { %>
+                                    <tr>
+                                        <td class="ps-3 fw-mono text-truncate" style="max-width: 260px;">
+                                            <a href="<%= p.path %>" target="_blank" rel="noopener" class="text-decoration-none text-dark fw-medium">
+                                                <%= p.path %>
+                                            </a>
+                                        </td>
+                                        <td class="text-end fw-bold text-primary"><%= p.views.toLocaleString() %></td>
+                                        <td class="text-end pe-3 text-muted"><%= p.unique_visitors.toLocaleString() %></td>
+                                    </tr>
+                                <% }); %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Active Visitors -->
+    <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h2 class="fs-6 fw-bold mb-0"><i class="fa-solid fa-user-ninja text-primary me-2"></i>En Aktif Ziyaretçiler</h2>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Kimlik / Kullanıcı</th>
+                                <th class="text-end">Gezdiği Sayfa</th>
+                                <th class="text-end pe-3">Son Görülme</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (topVisitorsArr.length === 0) { %>
+                                <tr><td colspan="3" class="text-center text-muted py-4">Henüz veri yok.</td></tr>
+                            <% } else { %>
+                                <% topVisitorsArr.forEach(function(v) { %>
+                                    <tr>
+                                        <td class="ps-3">
+                                            <% if (v.user_name) { %>
+                                                <span class="badge bg-primary me-1">Üye</span>
+                                                <strong class="text-dark"><%= v.user_name %></strong>
+                                                <div class="text-muted" style="font-size:0.7rem;"><%= v.user_email %></div>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary me-1">Misafir</span>
+                                                <span class="font-monospace text-muted" style="font-size:0.75rem;">IP#<%= (v.visitor_key || '').substring(0, 10) %></span>
+                                            <% } %>
+                                        </td>
+                                        <td class="text-end fw-bold text-success"><%= v.view_count %> sayfa</td>
+                                        <td class="text-end pe-3 text-muted" style="font-size:0.75rem;"><%= helpers.timeAgo(v.last_seen, lang) %></td>
+                                    </tr>
+                                <% }); %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Live Logs Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h2 class="fs-6 fw-bold mb-0"><i class="fa-solid fa-list-ol text-success me-2"></i>Canlı Ziyaret Akışı (Saniye Saniye)</h2>
+        <span class="badge bg-light text-dark border">Toplam <%= pageInfo.total.toLocaleString() %> Kayıt</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Tarih & Saat</th>
+                        <th>Gezilen Sayfa (Path)</th>
+                        <th>Ziyaretçi Kimliği</th>
+                        <th class="pe-3 text-end">IP / Oturum Kodu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (logsArr.length === 0) { %>
+                        <tr><td colspan="4" class="text-center text-muted py-5">Henüz canlı ziyaret kaydı yok. Sitede gezinmeye başladığınızda buraya saniye saniye akacaktır.</td></tr>
+                    <% } else { %>
+                        <% logsArr.forEach(function(log) { %>
+                            <tr>
+                                <td class="ps-3 text-nowrap">
+                                    <div class="fw-medium text-dark"><%= new Date(log.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></div>
+                                    <div class="text-muted" style="font-size: 0.7rem;"><%= new Date(log.created_at).toLocaleDateString('tr-TR') %></div>
+                                </td>
+                                <td>
+                                    <a href="<%= log.path %>" target="_blank" rel="noopener" class="text-decoration-none text-primary fw-medium font-monospace">
+                                        <%= log.path %>
+                                    </a>
+                                </td>
+                                <td>
+                                    <% if (log.user_name) { %>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill me-1">Üye</span>
+                                        <strong><%= log.user_name %></strong>
+                                    <% } else { %>
+                                        <span class="badge bg-light text-muted border rounded-pill me-1">Misafir</span>
+                                        <span class="text-muted">Anonim Ziyaretçi</span>
+                                    <% } %>
+                                </td>
+                                <td class="pe-3 text-end font-monospace text-muted" style="font-size: 0.75rem;">
+                                    <%= log.ip_hash || log.session_id ? (log.ip_hash || log.session_id).substring(0, 12) : '-' %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <% if (pageInfo.totalPages > 1) { %>
+        <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
+            <span class="small text-muted">Sayfa <%= pageInfo.page %> / <%= pageInfo.totalPages %></span>
+            <div class="btn-group btn-group-sm">
+                <% if (pageInfo.page > 1) { %>
+                    <a href="/admin/analytics?page=<%= pageInfo.page - 1 %>" class="btn btn-outline-secondary">Önceki</a>
+                <% } %>
+                <% if (pageInfo.page < pageInfo.totalPages) { %>
+                    <a href="/admin/analytics?page=<%= pageInfo.page + 1 %>" class="btn btn-outline-secondary">Sonraki</a>
+                <% } %>
+            </div>
+        </div>
+    <% } %>
+</div>

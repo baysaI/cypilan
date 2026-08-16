@@ -392,6 +392,34 @@ const revokeWarning = async (req, res) => {
     }
 };
 
+const analytics = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page, 10) || 1;
+        const [logs, topPages, topVisitors, summary] = await Promise.all([
+            Analytics.getRecentLogs(page, 50),
+            Analytics.getTopPages(15),
+            Analytics.getTopVisitors(15),
+            Analytics.getSummary()
+        ]);
+
+        res.locals.meta.title = 'Ziyaretçi Günlüğü & Analitik | CYPILAN.COM';
+        res.render('admin/analytics', {
+            layout: 'admin/layout',
+            logs: logs.data,
+            pagination: { page, totalPages: logs.pages, total: logs.total },
+            topPages,
+            topVisitors,
+            summary,
+            activePage: 'analytics',
+            title: 'Ziyaretçi Günlüğü'
+        });
+    } catch (error) {
+        console.error('Admin Analytics Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin');
+    }
+};
+
 module.exports = {
     dashboard,
     users,
@@ -403,5 +431,6 @@ module.exports = {
     toggleUserStatus,
     resolveReport,
     issueWarning,
-    revokeWarning
+    revokeWarning,
+    analytics
 };

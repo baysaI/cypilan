@@ -108,6 +108,56 @@ class Analytics {
       GROUP BY status
     `).all();
   }
+
+  static async getRecentLogs(page = 1, limit = 50) {
+    const db = getDb();
+    const offset = (page - 1) * limit;
+
+    const { total } = db.prepare('SELECT COUNT(*) as total FROM page_views').get();
+
+    const data = db.prepare(`
+      SELECT pv.id, pv.session_id, pv.user_id, pv.path, pv.ip_hash, pv.created_at,
+             u.full_name as user_name, u.email as user_email, u.role as user_role
+      FROM page_views pv
+      LEFT JOIN users u ON pv.user_id = u.id
+      ORDER BY pv.created_at DESC
+      LIMIT ? OFFSET ?
+    `).all([limit, offset]);
+
+    return {
+      data,
+      total,
+      pages: Math.ceil(total / limit) || 1
+    };
+  }
+
+  static async getTopPages(limit = 15) {
+    const db = getDb();
+    return db.prepare(`
+      SELECT path, COUNT(*) as views, COUNT(DISTINCT COALESCE(ip_hash, session_id)) as unique_visitors
+      FROM page_views
+      GROUP BY path
+      ORDER BY views DESC
+      LIMIT ?
+    `).all([limit]);
+  }
+
+  static async getTopVisitors(limit = 15) {
+    const db = getDb();
+    return db.prepare(`
+      SELECT COALESCE(pv.ip_hash, pv.session_id) as visitor_key,
+             pv.user_id,
+             u.full_name as user_name,
+             u.email as user_email,
+             COUNT(*) as view_count,
+             MAX(pv.created_at) as last_seen
+      FROM page_views pv
+      LEFT JOIN users u ON pv.user_id = u.id
+      GROUP BY visitor_key
+      ORDER BY view_count DESC
+      LIMIT ?
+    `).all([limit]);
+  }
 }
 
 module.exports = Analytics;
