@@ -286,6 +286,7 @@ module.exports = {
   formatPrice,
   formatDate,
   timeAgo,
+  formatRelativeTime: timeAgo,
   truncate,
   generateSlug,
   sanitizeHtml,

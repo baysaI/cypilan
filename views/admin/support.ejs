@@ -125,7 +125,7 @@
                                     <div class="flex-grow-1 min-w-0">
                                         <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
                                             <span class="fw-bold text-truncate small text-dark"><%= conv.user_name || 'Ziyaretçi' %></span>
-                                            <span class="text-muted" style="font-size: 0.68rem;"><%= helpers.formatRelativeTime(conv.last_message_at) %></span>
+                                            <span class="text-muted" style="font-size: 0.68rem;"><%= (typeof helpers !== 'undefined' && helpers.timeAgo) ? helpers.timeAgo(conv.last_message_at) : '' %></span>
                                         </div>
 
                                         <p class="text-muted small text-truncate mb-1" style="font-size: 0.78rem;">

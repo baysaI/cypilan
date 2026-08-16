@@ -237,20 +237,23 @@ const adminPanel = async (req, res, next) => {
     res.locals.meta = res.locals.meta || {};
     res.locals.meta.title = 'Canlı Destek Yönetimi | CYPILAN Admin';
 
+    const helpers = require('../utils/helpers');
+
     res.render('admin/support', {
       layout: 'admin/layout',
       activePage: 'support',
       title: 'Canlı Destek Yönetimi',
       stats,
-      conversations: conversationsList.data,
+      conversations: conversationsList.data || [],
       pagination: {
-        currentPage: conversationsList.page,
-        totalPages: conversationsList.totalPages,
-        totalItems: conversationsList.total
+        currentPage: conversationsList.page || 1,
+        totalPages: conversationsList.totalPages || 1,
+        totalItems: conversationsList.total || 0
       },
       currentStatus: req.query.status || 'all',
       searchQuery: req.query.q || '',
-      pendingSupport
+      pendingSupport,
+      helpers
     });
   } catch (error) {
     console.error('Admin support panel error:', error);
