@@ -124,7 +124,13 @@
 
                                     <div class="flex-grow-1 min-w-0">
                                         <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
-                                            <span class="fw-bold text-truncate small text-dark"><%= conv.user_name || 'Ziyaretçi' %></span>
+                                            <% if (conv.user_id) { %>
+                                                <a href="/profile/<%= conv.user_id %>" target="_blank" rel="noopener" class="fw-bold text-truncate small text-dark text-decoration-none hover-primary" onclick="event.stopPropagation();" title="Kullanıcı Profilini Aç">
+                                                    <%= conv.user_name || 'Ziyaretçi' %> <i class="fa-solid fa-arrow-up-right-from-square text-primary" style="font-size: 0.65rem;"></i>
+                                                </a>
+                                            <% } else { %>
+                                                <span class="fw-bold text-truncate small text-dark"><%= conv.user_name || 'Ziyaretçi' %></span>
+                                            <% } %>
                                             <span class="text-muted" style="font-size: 0.68rem;"><%= (typeof helpers !== 'undefined' && helpers.timeAgo) ? helpers.timeAgo(conv.last_message_at) : '' %></span>
                                         </div>
 
@@ -189,8 +195,14 @@
                             </div>
                             <div class="text-truncate">
                                 <div class="d-flex align-items-center gap-2">
-                                    <h6 class="mb-0 fw-bold text-truncate" id="adminActiveName">Ziyaretçi</h6>
+                                    <a id="adminActiveUserLink" href="#" target="_blank" rel="noopener" class="text-dark text-decoration-none d-inline-flex align-items-center gap-1 hover-primary" style="pointer-events: none;" title="Kullanıcı Profilini Aç">
+                                        <h6 class="mb-0 fw-bold text-truncate" id="adminActiveName">Ziyaretçi</h6>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-primary small" id="adminActiveUserLinkIcon" style="font-size: 0.72rem; display: none;"></i>
+                                    </a>
                                     <span id="adminActiveUserBadge" class="badge bg-light text-muted border">Misafir</span>
+                                    <a id="adminActiveProfileBtn" href="#" target="_blank" rel="noopener" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0" style="font-size: 0.68rem; display: none;" title="Profili Yeni Sekmede Aç">
+                                        <i class="fa-regular fa-user me-1"></i>Profili Gör
+                                    </a>
                                 </div>
                                 <div class="d-flex align-items-center gap-2 mt-1">
                                     <small class="text-muted" id="adminActiveEmail">-</small>
@@ -427,6 +439,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const avatarHtml = conv.registered_user_avatar
                 ? `<img src="${conv.registered_user_avatar}" class="rounded-circle object-fit-cover border" width="40" height="40">`
                 : `<div class="rounded-circle bg-light text-primary border d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">${initial}</div>`;
+            
+            const nameHtml = conv.user_id
+                ? `<a href="/profile/${conv.user_id}" target="_blank" rel="noopener" class="fw-bold text-truncate small text-dark text-decoration-none hover-primary" onclick="event.stopPropagation();" title="Kullanıcı Profilini Aç">${escapeHtml(conv.user_name || 'Ziyaretçi')} <i class="fa-solid fa-arrow-up-right-from-square text-primary" style="font-size: 0.65rem;"></i></a>`
+                : `<span class="fw-bold text-truncate small text-dark">${escapeHtml(conv.user_name || 'Ziyaretçi')}</span>`;
 
             return `
                 <div class="admin-conv-card p-3 rounded-3 mb-2 border transition-all ${isSelected}" data-id="${conv.id}" style="cursor: pointer;">
@@ -437,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="flex-grow-1 min-w-0">
                             <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
-                                <span class="fw-bold text-truncate small text-dark">${escapeHtml(conv.user_name || 'Ziyaretçi')}</span>
+                                ${nameHtml}
                                 <span class="text-muted" style="font-size: 0.68rem;">${formatTime(conv.last_message_at)}</span>
                             </div>
                             <p class="text-muted small text-truncate mb-1" style="font-size: 0.78rem;">
@@ -512,6 +528,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeAvatar.textContent = (conv.user_name || 'Z')[0].toUpperCase();
                 activeUserBadge.textContent = conv.user_id ? 'Kayıtlı Üye' : 'Misafir';
                 activeUserBadge.className = conv.user_id ? 'badge bg-primary-subtle text-primary border' : 'badge bg-light text-muted border';
+
+                const activeUserLink = document.getElementById('adminActiveUserLink');
+                const activeUserLinkIcon = document.getElementById('adminActiveUserLinkIcon');
+                const activeProfileBtn = document.getElementById('adminActiveProfileBtn');
+
+                if (conv.user_id) {
+                    if (activeUserLink) {
+                        activeUserLink.href = `/profile/${conv.user_id}`;
+                        activeUserLink.style.pointerEvents = 'auto';
+                    }
+                    if (activeUserLinkIcon) activeUserLinkIcon.style.display = 'inline-block';
+                    if (activeProfileBtn) {
+                        activeProfileBtn.href = `/profile/${conv.user_id}`;
+                        activeProfileBtn.style.display = 'inline-flex';
+                    }
+                } else {
+                    if (activeUserLink) {
+                        activeUserLink.removeAttribute('href');
+                        activeUserLink.style.pointerEvents = 'none';
+                    }
+                    if (activeUserLinkIcon) activeUserLinkIcon.style.display = 'none';
+                    if (activeProfileBtn) {
+                        activeProfileBtn.style.display = 'none';
+                    }
+                }
 
                 const agentBadge = document.getElementById('adminActiveAgentBadge');
                 if (agentBadge) {

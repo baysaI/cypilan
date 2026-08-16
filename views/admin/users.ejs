@@ -54,7 +54,12 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                         <% list.forEach(function(u) { %>
                             <tr>
                                 <td class="ps-3">
-                                    <div class="fw-medium"><%= u.company_name || u.full_name %></div>
+                                    <div>
+                                        <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="fw-bold text-dark text-decoration-none d-inline-flex align-items-center gap-1 hover-primary" title="Kullanıcı Profilini Aç">
+                                            <span><%= u.company_name || u.full_name %></span>
+                                            <i class="fa-solid fa-arrow-up-right-from-square text-primary small" style="font-size: 0.70rem;"></i>
+                                        </a>
+                                    </div>
                                     <div class="text-muted small"><%= u.email %></div>
                                 </td>
                                 <td class="d-none d-md-table-cell small"><%= u.phone || '-' %></td>
@@ -92,6 +97,9 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                     <% } %>
                                 </td>
                                 <td class="pe-3 text-end text-nowrap">
+                                    <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary me-1" title="Profili Görüntüle">
+                                        <i class="fa-regular fa-user"></i>
+                                    </a>
                                     <button class="btn btn-sm btn-outline-primary btn-edit-user me-1" type="button"
                                             data-id="<%= u.id %>"
                                             data-name="<%= u.full_name || '' %>"

@@ -1194,3 +1194,11 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
         height: 0;
     }
 }
+
+.hover-primary {
+    transition: color 0.15s ease-in-out, text-decoration 0.15s ease-in-out;
+}
+.hover-primary:hover {
+    color: var(--bs-primary, #0d6efd) !important;
+    text-decoration: underline !important;
+}
