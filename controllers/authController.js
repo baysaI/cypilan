@@ -344,13 +344,23 @@ const resendVerification = async (req, res) => {
         await User.setVerificationToken(user.id, verificationToken, expiresAt);
 
         const verificationUrl = `${mailer.baseUrlFor(req)}/auth/verify-email/${verificationToken}`;
-        await mailer.sendEmailVerificationEmail({
+        const sent = await mailer.sendEmailVerificationEmail({
             to: user.email,
             name: user.full_name,
             verificationUrl
         });
 
-        req.flash('success', 'flash.verification_email_sent');
+        console.log(`\n================ [EMAIL VERIFICATION LINK] ================`);
+        console.log(`User:  ${user.email} (${user.full_name})`);
+        console.log(`Link:  ${verificationUrl}`);
+        console.log(`===========================================================\n`);
+
+        if (sent) {
+            req.flash('success', 'flash.verification_email_sent');
+        } else {
+            req.flash('info', 'flash.verification_email_sent');
+        }
+
         res.redirect(req.get('referer') || '/profile');
     } catch (error) {
         console.error('Resend Verification Error:', error);
