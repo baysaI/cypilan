@@ -3,7 +3,7 @@ const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const listingController = require('../controllers/listingController');
 const Listing = require('../models/Listing');
-const { isAuthenticated, isOwner } = require('../middlewares/auth');
+const { isAuthenticated, isOwner, requireVerifiedEmail } = require('../middlewares/auth');
 const { verifyCsrf } = require('../middlewares/csrf');
 const { uploadListingImages, processImagesWithWatermark } = require('../middlewares/upload');
 
