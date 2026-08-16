@@ -65,6 +65,7 @@ router.post('/logout', authController.logout);
 // credentials, so a LAN address has to be added there before Google sign-in
 // works from a phone. E-mail registration needs none of this.
 const googleCallbackUrl = (req) => {
+  if (process.env.GOOGLE_CALLBACK_URL) return process.env.GOOGLE_CALLBACK_URL;
   if (process.env.NODE_ENV === 'production') return undefined;
 
   const host = req.get('host');
