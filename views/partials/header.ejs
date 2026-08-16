@@ -192,11 +192,11 @@
             <%# Each arrow appears only while the rail still has entries on that
                 side — a second, unmistakable "there is more" on top of the fade,
                 and a way through the list without swiping. %>
-            <button type="button" class="category-rail-arrow category-rail-arrow-prev" data-rail-scroll="-1"
+            <button type="button" class="category-rail-arrow category-rail-arrow-prev d-none" data-rail-scroll="-1"
                     aria-label="<%= t('common.previous') %>" tabindex="-1">
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
-            <button type="button" class="category-rail-arrow category-rail-arrow-next" data-rail-scroll="1"
+            <button type="button" class="category-rail-arrow category-rail-arrow-next d-none" data-rail-scroll="1"
                     aria-label="<%= t('common.next') %>" tabindex="-1">
                 <i class="fa-solid fa-chevron-right"></i>
             </button>
