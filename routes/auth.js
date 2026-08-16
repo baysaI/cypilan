@@ -66,11 +66,13 @@ router.post('/logout', authController.logout);
 // works from a phone. E-mail registration needs none of this.
 const googleCallbackUrl = (req) => {
   if (process.env.GOOGLE_CALLBACK_URL) return process.env.GOOGLE_CALLBACK_URL;
-  if (process.env.NODE_ENV === 'production') return undefined;
 
   const host = req.get('host');
-  const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' || (process.env.SITE_URL && process.env.SITE_URL.startsWith('https')) ? 'https' : req.protocol;
-  return host ? `${protocol}://${host}/auth/google/callback` : undefined;
+  if (!host) return undefined;
+
+  const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+  const protocol = isLocal ? req.protocol : 'https';
+  return `${protocol}://${host}/auth/google/callback`;
 };
 
 router.get('/google', (req, res, next) => {
