@@ -200,8 +200,8 @@ const toggleListingStatus = async (req, res) => {
         const listingObj = await Listing.findById(id);
         if (listingObj && listingObj.user_id) {
             const owner = await User.findById(listingObj.user_id);
+            const reason = req.body.reason || req.body.rejection_reason || null;
             if (owner && owner.email) {
-                const reason = req.body.reason || req.body.rejection_reason || null;
                 const listingUrl = `${mailer.baseUrlFor(req)}/listings/${id}`;
                 mailer.sendListingStatusEmail({
                     to: owner.email,
@@ -210,6 +210,38 @@ const toggleListingStatus = async (req, res) => {
                     reason,
                     listingUrl
                 }).catch(err => console.error('Listing status email error:', err));
+            }
+
+            // In-app notification for listing approval/rejection
+            try {
+                const Notification = require('../models/Notification');
+                const t = res.locals.t || ((k) => k);
+                if (status === 'rejected') {
+                    const reasonText = reason ? ` (Neden: ${reason})` : '';
+                    await Notification.create({
+                        user_id: listingObj.user_id,
+                        actor_id: req.session.userId,
+                        type: 'warning',
+                        title: t('notifications.listing_rejected_title') !== 'notifications.listing_rejected_title' ? t('notifications.listing_rejected_title') : 'İlanınız Reddedildi',
+                        message: t('notifications.listing_rejected_message', { title: listingObj.title, reason: reasonText }) !== 'notifications.listing_rejected_message'
+                            ? t('notifications.listing_rejected_message', { title: listingObj.title, reason: reasonText })
+                            : `«${listingObj.title}» başlıklı ilanınız incelendi ve reddedildi.${reasonText}`,
+                        link_url: '/profile/listings'
+                    });
+                } else if (status === 'active') {
+                    await Notification.create({
+                        user_id: listingObj.user_id,
+                        actor_id: req.session.userId,
+                        type: 'system',
+                        title: t('notifications.listing_approved_title') !== 'notifications.listing_approved_title' ? t('notifications.listing_approved_title') : 'İlanınız Yayında',
+                        message: t('notifications.listing_approved_message', { title: listingObj.title }) !== 'notifications.listing_approved_message'
+                            ? t('notifications.listing_approved_message', { title: listingObj.title })
+                            : `«${listingObj.title}» başlıklı ilanınız onaylandı ve yayına alındı.`,
+                        link_url: `/listings/${listingObj.slug}`
+                    });
+                }
+            } catch (notifyErr) {
+                console.error('Listing status notification error:', notifyErr);
             }
         }
 
@@ -352,18 +384,41 @@ const issueWarning = async (req, res) => {
             note: (note || '').trim().slice(0, 500) || null
         });
 
-        // The member has to be told what happened and why, or a warning is just a
-        // row in a table they never see.
+        // Create system warning notification for the user
         try {
-            await Message.create({
-                sender_id: req.session.userId,
-                receiver_id: userId,
-                content: result.suspended
-                    ? res.locals.t('warnings.notify_suspended', { count: result.count })
-                    : res.locals.t('warnings.notify_warned', {
-                        count: result.count,
-                        remaining: Warning.remainingBeforeSuspension(result.count)
-                    })
+            const Notification = require('../models/Notification');
+            const t = res.locals.t || ((k) => k);
+            const reasonKey = 'reports.reason_' + reason;
+            const reasonLabel = t(reasonKey) !== reasonKey ? t(reasonKey) : reason;
+
+            const title = result.suspended
+                ? (t('notifications.warning_suspended_title') !== 'notifications.warning_suspended_title'
+                    ? t('notifications.warning_suspended_title')
+                    : 'Hesabınız Askıya Alındı')
+                : (t('notifications.warning_title') !== 'notifications.warning_title'
+                    ? t('notifications.warning_title')
+                    : 'İçeriğiniz / Hesabınız Uyarı Aldı');
+
+            const noteText = (note && note.trim()) ? ` (Not: ${note.trim()})` : '';
+            let message = '';
+            if (result.suspended) {
+                message = t('notifications.warning_suspended_message', { reason: reasonLabel, note: noteText }) !== 'notifications.warning_suspended_message'
+                    ? t('notifications.warning_suspended_message', { reason: reasonLabel, note: noteText })
+                    : `Hesabınız "${reasonLabel}" gerekçesiyle üst üste 3. uyarısını aldığı için otomatik olarak askıya alınmıştır.${noteText}`;
+            } else {
+                const remaining = Warning.remainingBeforeSuspension(result.count);
+                message = t('notifications.warning_message', { reason: reasonLabel, note: noteText, remaining }) !== 'notifications.warning_message'
+                    ? t('notifications.warning_message', { reason: reasonLabel, note: noteText, remaining })
+                    : `İçeriğiniz "${reasonLabel}" gerekçesiyle uyarı aldı.${noteText} (Askıya alınmaya kalan hak: ${remaining})`;
+            }
+
+            await Notification.create({
+                user_id: userId,
+                actor_id: req.session.userId,
+                type: 'warning',
+                title,
+                message,
+                link_url: '/panel'
             });
         } catch (notifyError) {
             console.error('Warning notification failed:', notifyError);

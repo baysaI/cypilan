@@ -500,7 +500,9 @@
     "warning_issued": "Uyarı gönderildi.",
     "warning_issued_suspended": "Uyarı gönderildi ve sınıra ulaşıldığı için hesap askıya alındı.",
     "warning_revoked": "Uyarı kaldırıldı.",
-    "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir."
+    "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.",
+    "notifications_marked_read": "Tüm bildirimler okundu olarak işaretlendi.",
+    "notification_deleted": "Bildirim silindi."
   },
   "footer": {
     "about": "Hakkımızda",
@@ -1179,5 +1181,26 @@
     "remaining_body": "{remaining} uyarı daha alırsan hesabın otomatik olarak askıya alınır.",
     "suspended_body": "Uyarı sınırına ulaştığın için hesabın askıya alındı. İtiraz için destek ekibiyle iletişime geç.",
     "title": "Hesabında {count}/{threshold} uyarı var"
+  },
+  "notifications": {
+    "all": "Tümü",
+    "empty_desc": "İlanlarınız favoriye eklendiğinde veya önemli sistem bildirimleri geldiğinde burada görüntülenecektir.",
+    "favorite_message": "«{title}» başlıklı ilanınız bir kullanıcı tarafından favorilere eklendi.",
+    "favorite_title": "İlanınız Favorilere Eklendi",
+    "listing_approved_message": "«{title}» başlıklı ilanınız onaylandı ve yayına alındı.",
+    "listing_approved_title": "İlanınız Yayında",
+    "listing_rejected_message": "«{title}» başlıklı ilanınız incelendi ve reddedildi.{reason}",
+    "listing_rejected_title": "İlanınız Reddedildi",
+    "mark_all_read": "Tümünü Okundu İşaretle",
+    "no_notifications": "Henüz bildiriminiz bulunmuyor",
+    "no_unread": "Okunmamış bildiriminiz yok",
+    "subtitle": "İlanlarınız ve hesabınızla ilgili tüm anlık güncellemeler",
+    "title": "Bildirimler",
+    "unread": "Okunmamış",
+    "view_details": "Detayları Gör",
+    "warning_message": "İçeriğiniz \"{reason}\" gerekçesiyle uyarı aldı.{note} (Askıya alınmaya kalan hak: {remaining})",
+    "warning_suspended_message": "Hesabınız \"{reason}\" gerekçesiyle üst üste 3. uyarısını aldığı için otomatik olarak askıya alınmıştır.{note}",
+    "warning_suspended_title": "Hesabınız Askıya Alındı",
+    "warning_title": "İçeriğiniz / Hesabınız Uyarı Aldı"
   }
 }

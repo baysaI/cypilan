@@ -98,6 +98,13 @@ router.post('/listing-draft', isAuthenticated, async (req, res) => {
     }
 });
 
+const notificationController = require('../controllers/notificationController');
+
 router.post('/listings/:id/favorite', isAuthenticated, listingController.toggleFavorite);
 
+router.get('/notifications', isAuthenticated, notificationController.getRecentApi);
+router.post('/notifications/mark-all-read', isAuthenticated, notificationController.markAllRead);
+router.post('/notifications/:id/read', isAuthenticated, notificationController.readAndRedirect);
+
 module.exports = router;
+

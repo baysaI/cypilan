@@ -63,6 +63,14 @@
 
                     <% const activeUser = (typeof user !== 'undefined' && user) ? user : ((typeof currentUser !== 'undefined' && currentUser) ? currentUser : null); %>
                     <% if (activeUser) { %>
+                        <% const totalUnread = ((typeof unreadMessages !== 'undefined' ? unreadMessages : 0) + (typeof unreadNotifications !== 'undefined' ? unreadNotifications : 0)); %>
+                        <a href="/notifications" class="btn btn-light border-0 position-relative px-2 px-md-3" title="<%= t('notifications.title') %>" aria-label="<%= t('notifications.title') %>">
+                            <i class="fa-regular fa-bell text-primary"></i>
+                            <% if (typeof unreadNotifications !== 'undefined' && unreadNotifications > 0) { %>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><%= unreadNotifications %></span>
+                            <% } %>
+                        </a>
+
                         <div class="dropdown">
                             <%# The member's name has no length limit, so below md it is dropped
                                 entirely and the button falls back to the avatar icon. %>
@@ -74,8 +82,8 @@
                                     <i class="fa-regular fa-user me-md-2"></i>
                                 <% } %>
                                 <span class="header-user-name d-none d-md-inline-block"><%= activeUser.name %></span>
-                                <% if (typeof unreadMessages !== 'undefined' && unreadMessages > 0) { %>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><%= unreadMessages %></span>
+                                <% if (totalUnread > 0) { %>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><%= totalUnread %></span>
                                 <% } %>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end mt-2 shadow-sm rounded-3 py-2" style="min-width: 230px;">
@@ -93,6 +101,15 @@
                                 <li><a class="dropdown-item py-2" href="/panel"><i class="fa-solid fa-chart-line me-2 text-success"></i><%= t('panel.title') %></a></li>
                                 <li><a class="dropdown-item py-2" href="/profile"><i class="fa-solid fa-id-card me-2 text-primary"></i><%= t('nav.my_profile') %></a></li>
                                 <li><a class="dropdown-item py-2" href="/profile/listings"><i class="fa-solid fa-list me-2 text-primary"></i><%= t('nav.my_listings') %></a></li>
+                                <li>
+                                    <a class="dropdown-item py-2 d-flex align-items-center" href="/notifications">
+                                        <i class="fa-regular fa-bell me-2 text-primary"></i>
+                                        <span class="flex-grow-1"><%= t('notifications.title') %></span>
+                                        <% if (typeof unreadNotifications !== 'undefined' && unreadNotifications > 0) { %>
+                                            <span class="badge bg-danger rounded-pill ms-2"><%= unreadNotifications %></span>
+                                        <% } %>
+                                    </a>
+                                </li>
                                 <li>
                                     <a class="dropdown-item py-2 d-flex align-items-center" href="/messages">
                                         <i class="fa-regular fa-comments me-2 text-primary"></i>

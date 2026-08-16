@@ -13,6 +13,7 @@ const reportsRoutes = require('./reports');
 const reviewsRoutes = require('./reviews');
 const bidsRoutes = require('./bids');
 const careerRoutes = require('./career');
+const notificationsRoutes = require('./notifications');
 
 router.get('/', homeController.index);
 
@@ -23,6 +24,7 @@ router.use('/listings', listingsRoutes);
 router.use('/api', apiRoutes);
 router.use('/admin', adminRoutes);
 router.use('/messages', messagesRoutes);
+router.use('/notifications', notificationsRoutes);
 router.use('/report', reportsRoutes);
 router.use('/reviews', reviewsRoutes);
 router.use('/teklifler', bidsRoutes);
@@ -41,6 +43,7 @@ router.post('/profile/email', isAuthenticated, profileController.changeEmail);
 router.get('/profile/listings', isAuthenticated, profileController.myListings);
 router.get('/profile/favorites', isAuthenticated, profileController.myFavorites);
 router.get('/profile/messages', isAuthenticated, (req, res) => res.redirect('/messages'));
+router.get('/profile/notifications', isAuthenticated, (req, res) => res.redirect('/notifications'));
 
 const panelController = require('../controllers/panelController');
 router.get('/panel', isAuthenticated, panelController.index);

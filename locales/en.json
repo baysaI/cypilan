@@ -500,7 +500,9 @@
     "warning_issued": "The warning has been sent.",
     "warning_issued_suspended": "The warning was sent and the account was suspended on reaching the limit.",
     "warning_revoked": "The warning has been lifted.",
-    "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit."
+    "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit.",
+    "notifications_marked_read": "All notifications marked as read.",
+    "notification_deleted": "Notification deleted."
   },
   "footer": {
     "about": "About Us",
@@ -1179,5 +1181,26 @@
     "remaining_body": "{remaining} more warnings and your account will be suspended automatically.",
     "suspended_body": "Your account has been suspended because you reached the warning limit. Contact support to appeal.",
     "title": "Your account has {count}/{threshold} warnings"
+  },
+  "notifications": {
+    "all": "All",
+    "empty_desc": "When your listings are favorited or important system notices arrive, they will appear here.",
+    "favorite_message": "Your listing \"{title}\" has been added to favorites by a user.",
+    "favorite_title": "Your Listing Was Favorited",
+    "listing_approved_message": "Your listing \"{title}\" was approved and published.",
+    "listing_approved_title": "Your Listing Is Live",
+    "listing_rejected_message": "Your listing \"{title}\" was reviewed and rejected.{reason}",
+    "listing_rejected_title": "Your Listing Was Rejected",
+    "mark_all_read": "Mark All as Read",
+    "no_notifications": "You have no notifications yet",
+    "no_unread": "No unread notifications",
+    "subtitle": "All live updates regarding your listings and account",
+    "title": "Notifications",
+    "unread": "Unread",
+    "view_details": "View Details",
+    "warning_message": "Your content received a warning for \"{reason}\".{note} (Strikes left before suspension: {remaining})",
+    "warning_suspended_message": "Your account has been automatically suspended after receiving a 3rd warning for \"{reason}\".{note}",
+    "warning_suspended_title": "Your Account Has Been Suspended",
+    "warning_title": "Your Content / Account Received a Warning"
   }
 }

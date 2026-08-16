@@ -591,6 +591,30 @@ const toggleFavorite = async (req, res) => {
 
         const result = await Listing.toggleFavorite(listingId, req.session.userId);
 
+        if (result.favorited && listing.user_id && req.session.userId !== listing.user_id) {
+            try {
+                const Notification = require('../models/Notification');
+                const t = res.locals.t || ((k) => k);
+                const titleText = t('notifications.favorite_title') !== 'notifications.favorite_title'
+                    ? t('notifications.favorite_title')
+                    : 'İlanınız Favorilere Eklendi';
+                const messageText = t('notifications.favorite_message', { title: listing.title }) !== 'notifications.favorite_message'
+                    ? t('notifications.favorite_message', { title: listing.title })
+                    : `«${listing.title}» başlıklı ilanınız bir kullanıcı tarafından favorilere eklendi.`;
+
+                await Notification.create({
+                    user_id: listing.user_id,
+                    actor_id: req.session.userId,
+                    type: 'favorite',
+                    title: titleText,
+                    message: messageText,
+                    link_url: `/listings/${listing.slug}`
+                });
+            } catch (notifyError) {
+                console.error('Favorite notification error:', notifyError);
+            }
+        }
+
         res.json({ success: true, favorited: result.favorited });
     } catch (error) {
         console.error('Toggle Favorite Error:', error);

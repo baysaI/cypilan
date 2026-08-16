@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Message = require('../models/Message');
 const Bid = require('../models/Bid');
 const Career = require('../models/Career');
+const Notification = require('../models/Notification');
 
 const isAuthenticated = (req, res, next) => {
     if ((req.session && req.session.userId) || req.isAuthenticated()) {
@@ -147,11 +148,19 @@ const setUserLocal = async (req, res, next) => {
             console.error('Pending application count error:', error);
             res.locals.pendingApplicationCount = 0;
         }
+
+        try {
+            res.locals.unreadNotifications = await Notification.getUnreadCount(userId);
+        } catch (error) {
+            console.error('Unread notifications count error:', error);
+            res.locals.unreadNotifications = 0;
+        }
     } else {
         res.locals.user = null;
         res.locals.currentUser = null;
         res.locals.isEmailUnverified = false;
         res.locals.unreadMessages = 0;
+        res.locals.unreadNotifications = 0;
         res.locals.pendingBidCount = 0;
         res.locals.pendingApplicationCount = 0;
     }
