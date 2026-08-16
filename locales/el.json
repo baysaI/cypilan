@@ -1,10 +1,14 @@
 {
   "admin": {
     "activate": "Ενεργοποίηση",
+    "analytics_title": "Αναλύσεις επισκεπτών και διαφημίσεων",
     "approve": "Έγκριση",
     "dashboard": "Πίνακας Διαχείρισης",
     "deactivate": "Απενεργοποίηση",
     "listing_moderation": "Εποπτεία Αγγελιών",
+    "new_listings": "Αναρτημένες αγγελίες",
+    "new_registrations": "Νέοι δίσκοι",
+    "page_views": "Προβολές σελίδας",
     "pending_reports": "Εκκρεμείς Αναφορές",
     "recent_listings": "Πρόσφατες Αγγελίες",
     "recent_reports": "Πρόσφατες Αναφορές",
@@ -12,6 +16,7 @@
     "total_listings": "Συνολικές Αγγελίες",
     "total_revenue": "Συνολικά Έσοδα",
     "total_users": "Συνολικοί Χρήστες",
+    "unique_visitors": "Μοναδικός Επισκέπτης",
     "user_management": "Διαχείριση Χρηστών"
   },
   "admin_conversation": {

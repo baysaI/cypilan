@@ -1,10 +1,14 @@
 {
   "admin": {
     "activate": "Активировать",
+    "analytics_title": "Посетители и рекламная аналитика",
     "approve": "Одобрить",
     "dashboard": "Панель администратора",
     "deactivate": "Деактивировать",
     "listing_moderation": "Модерация объявлений",
+    "new_listings": "Размещенные объявления",
+    "new_registrations": "Новые рекорды",
+    "page_views": "Просмотры страниц",
     "pending_reports": "Ожидающие жалобы",
     "recent_listings": "Последние объявления",
     "recent_reports": "Последние жалобы",
@@ -12,6 +16,7 @@
     "total_listings": "Всего объявлений",
     "total_revenue": "Общий доход",
     "total_users": "Всего пользователей",
+    "unique_visitors": "Уникальный посетитель",
     "user_management": "Управление пользователями"
   },
   "admin_conversation": {

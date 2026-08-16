@@ -1,10 +1,14 @@
 {
   "admin": {
     "activate": "Activate",
+    "analytics_title": "Visitor & Ad Analytics",
     "approve": "Approve",
     "dashboard": "Admin Panel",
     "deactivate": "Deactivate",
     "listing_moderation": "Listing Moderation",
+    "new_listings": "Posted Ads",
+    "new_registrations": "New Records",
+    "page_views": "Page Views",
     "pending_reports": "Pending Reports",
     "recent_listings": "Recent Listings",
     "recent_reports": "Recent Reports",
@@ -12,6 +16,7 @@
     "total_listings": "Total Listings",
     "total_revenue": "Total Revenue",
     "total_users": "Total Users",
+    "unique_visitors": "Unique Visitor",
     "user_management": "User Management"
   },
   "admin_conversation": {

@@ -1,10 +1,14 @@
 {
   "admin": {
     "activate": "فعال‌سازی",
+    "analytics_title": "تحلیل بازدیدکنندگان و تبلیغات",
     "approve": "تایید",
     "dashboard": "پنل مدیریت",
     "deactivate": "غیرفعال‌سازی",
     "listing_moderation": "تایید آگهی‌ها",
+    "new_listings": "تبلیغات ارسال شده",
+    "new_registrations": "رکوردهای جدید",
+    "page_views": "بازدید از صفحه",
     "pending_reports": "گزارش‌های در انتظار",
     "recent_listings": "آخرین آگهی‌ها",
     "recent_reports": "آخرین گزارش‌ها",
@@ -12,6 +16,7 @@
     "total_listings": "کل آگهی‌ها",
     "total_revenue": "کل درآمد",
     "total_users": "کل کاربران",
+    "unique_visitors": "بازدید کننده منحصر به فرد",
     "user_management": "مدیریت کاربران"
   },
   "admin_conversation": {

@@ -1,10 +1,14 @@
 {
   "admin": {
     "activate": "Aktifleştir",
+    "analytics_title": "Ziyaretçi & İlan Analitiği",
     "approve": "Onayla",
     "dashboard": "Admin Paneli",
     "deactivate": "Pasifleştir",
     "listing_moderation": "İlan Moderasyonu",
+    "new_listings": "Açılan İlanlar",
+    "new_registrations": "Yeni Kayıtlar",
+    "page_views": "Sayfa Gösterimi",
     "pending_reports": "Bekleyen Şikayetler",
     "recent_listings": "Son İlanlar",
     "recent_reports": "Son Şikayetler",
@@ -12,12 +16,8 @@
     "total_listings": "Toplam İlan",
     "total_revenue": "Toplam Gelir",
     "total_users": "Toplam Kullanıcı",
-    "user_management": "Kullanıcı Yönetimi",
-    "analytics_title": "Ziyaretçi & İlan Analitiği",
-    "page_views": "Sayfa Gösterimi",
     "unique_visitors": "Tekil Ziyaretçi",
-    "new_registrations": "Yeni Kayıtlar",
-    "new_listings": "Açılan İlanlar"
+    "user_management": "Kullanıcı Yönetimi"
   },
   "admin_conversation": {
     "closed_status": "Bu şikayet kapatılmış. Durum: {status}",
