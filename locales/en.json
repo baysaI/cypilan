@@ -1201,6 +1201,7 @@
     "warning_message": "Your content received a warning for \"{reason}\".{note} (Strikes left before suspension: {remaining})",
     "warning_suspended_message": "Your account has been automatically suspended after receiving a 3rd warning for \"{reason}\".{note}",
     "warning_suspended_title": "Your Account Has Been Suspended",
-    "warning_title": "Your Content / Account Received a Warning"
+    "warning_title": "Your Content / Account Received a Warning",
+    "browse_listings": "Explore Listings"
   }
 }

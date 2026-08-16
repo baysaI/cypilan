@@ -1201,6 +1201,7 @@
     "warning_message": "İçeriğiniz \"{reason}\" gerekçesiyle uyarı aldı.{note} (Askıya alınmaya kalan hak: {remaining})",
     "warning_suspended_message": "Hesabınız \"{reason}\" gerekçesiyle üst üste 3. uyarısını aldığı için otomatik olarak askıya alınmıştır.{note}",
     "warning_suspended_title": "Hesabınız Askıya Alındı",
-    "warning_title": "İçeriğiniz / Hesabınız Uyarı Aldı"
+    "warning_title": "İçeriğiniz / Hesabınız Uyarı Aldı",
+    "browse_listings": "İlanları Keşfet"
   }
 }

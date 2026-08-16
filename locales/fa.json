@@ -1201,6 +1201,7 @@
     "warning_message": "محتوای شما به دلیل «{reason}» اخطار دریافت کرد.{note} (فرصت باقی‌مانده قبل از تعلیق: {remaining})",
     "warning_suspended_message": "حساب شما پس از دریافت سومین اخطار به دلیل «{reason}» به طور خودکار به حالت تعلیق درآمد.{note}",
     "warning_suspended_title": "حساب شما به حالت تعلیق درآمد",
-    "warning_title": "محتوا / حساب شما اخطار دریافت کرد"
+    "warning_title": "محتوا / حساب شما اخطار دریافت کرد",
+    "browse_listings": "مشاهده آگهی‌ها"
   }
 }
