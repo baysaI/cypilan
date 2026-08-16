@@ -444,6 +444,7 @@
     "rate_limit_message": "Saatlik mesaj gönderme sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.",
     "rate_limit_phone": "Saatlik numara görüntüleme sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.",
     "rate_limit_report": "Saatlik şikayet sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.",
+    "rate_limit_verification": "Çok fazla doğrulama e-postası talebinde bulundunuz. Lütfen 15 dakika sonra tekrar deneyin.",
     "recipient_not_found": "Alıcı bulunamadı.",
     "register_failed": "Kayıt sırasında bir hata oluştu.",
     "register_success": "Hesabınız başarıyla oluşturuldu ve giriş yapıldı.",

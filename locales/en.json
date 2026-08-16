@@ -444,6 +444,7 @@
     "rate_limit_message": "You have reached the hourly message limit. Please try again later.",
     "rate_limit_phone": "You have reached the hourly limit for revealing numbers. Please try again later.",
     "rate_limit_report": "You have reached the hourly report limit. Please try again later.",
+    "rate_limit_verification": "You've requested too many verification emails. Please try again in 15 minutes.",
     "recipient_not_found": "Recipient not found.",
     "register_failed": "Something went wrong while creating your account.",
     "register_success": "Your account was created and you are signed in.",

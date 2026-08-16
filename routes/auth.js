@@ -82,8 +82,20 @@ router.get('/google', (req, res, next) => {
   })(req, res, next);
 });
 
+const resendVerificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => String(req.session.userId || req.ip),
+  handler: (req, res) => {
+    req.flash('error', 'flash.rate_limit_verification');
+    res.redirect(req.get('referer') || '/profile');
+  }
+});
+
 router.get('/verify-email/:token', authController.verifyEmail);
-router.post('/resend-verification', authController.resendVerification);
+router.post('/resend-verification', resendVerificationLimiter, authController.resendVerification);
 
 router.get('/google/callback', (req, res, next) => {
   // The same address has to be presented again when the code is exchanged.
