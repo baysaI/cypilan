@@ -81,6 +81,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 categoryRail.scrollLeft = activeLink.offsetLeft - 16;
             }
         }
+
+        // A rail that simply stops at the screen edge reads as a cut-off list.
+        // The attribute drives a soft fade on whichever side has more to show,
+        // so it reads as "there is more this way" instead.
+        const publishRailEdges = () => {
+            const max = categoryRail.scrollWidth - categoryRail.clientWidth;
+            if (max <= 1) {
+                categoryRail.removeAttribute('data-overflowing');
+                return;
+            }
+            const start = categoryRail.scrollLeft > 1;
+            const end = categoryRail.scrollLeft < max - 1;
+            categoryRail.setAttribute('data-overflowing', start && end ? 'both' : (start ? 'start' : 'end'));
+        };
+
+        publishRailEdges();
+        categoryRail.addEventListener('scroll', publishRailEdges, { passive: true });
+        window.addEventListener('resize', publishRailEdges);
     }
 
     const langSwitches = document.querySelectorAll('.lang-switch');
@@ -344,6 +362,53 @@ document.addEventListener('DOMContentLoaded', () => {
             try { rawPrefix = decodeURIComponent(rawPrefix); } catch(e) {}
             const prefix = rawPrefix;
 
+            // The animation used to type "Ne arıyorsun? Örn: " plus a 37-character
+            // example into a box that holds 35 characters on a phone, so it always
+            // ended mid-word against the right edge. Each line is now measured
+            // against the input's real width first: the lead-in is dropped when it
+            // does not leave room for the example, and an example longer than the
+            // box is cut at a word boundary rather than mid-word.
+            const measurer = document.createElement('canvas').getContext('2d');
+            let lines = [];
+
+            function fitToInput() {
+                const styles = window.getComputedStyle(input);
+                const inner = input.clientWidth
+                    - parseFloat(styles.paddingLeft || 0)
+                    - parseFloat(styles.paddingRight || 0);
+
+                if (!(inner > 0)) return false;
+
+                measurer.font = [styles.fontStyle, styles.fontWeight, styles.fontSize, styles.fontFamily].join(' ');
+                const width = text => measurer.measureText(text).width;
+
+                const trimToWidth = text => {
+                    if (width(text) <= inner) return text;
+                    const words = text.split(' ');
+                    let out = '';
+                    for (const word of words) {
+                        const next = out ? out + ' ' + word : word;
+                        if (width(next + '…') > inner) break;
+                        out = next;
+                    }
+                    return (out || text.slice(0, 1)) + '…';
+                };
+
+                lines = placeholders.map(raw => {
+                    const example = raw.startsWith(prefix) ? raw.slice(prefix.length) : raw;
+                    return width(prefix + example) <= inner
+                        ? { lead: prefix, body: example }
+                        : { lead: '', body: trimToWidth(example) };
+                });
+
+                return true;
+            }
+
+            fitToInput();
+            window.addEventListener('resize', () => {
+                if (fitToInput()) charIdx = Math.min(charIdx, lines[currentIdx].body.length);
+            });
+
             function type() {
                 // Do not animate if input is focused or has user typed text
                 if (document.activeElement === input || input.value.trim() !== '') {
@@ -351,10 +416,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                let currentText = placeholders[currentIdx];
-                if (currentText.startsWith(prefix)) {
-                    currentText = currentText.substring(prefix.length);
+                // The input is hidden at this breakpoint (the header carries one
+                // for wide screens and one for narrow), so it has no width to
+                // measure against yet.
+                if (lines.length === 0 && !fitToInput()) {
+                    setTimeout(type, 1000);
+                    return;
                 }
+
+                const line = lines[currentIdx];
+                const currentText = line.body;
 
                 if (isDeleting) {
                     charIdx--;
@@ -362,17 +433,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     charIdx++;
                 }
 
-                const displayedText = prefix + currentText.substring(0, charIdx);
+                const displayedText = line.lead + currentText.substring(0, charIdx);
                 input.setAttribute('placeholder', displayedText);
 
                 let typeSpeed = isDeleting ? 25 : 55;
 
-                if (!isDeleting && charIdx === currentText.length) {
+                // `>=` rather than `===`: a resize mid-sentence can re-fit the
+                // line to something shorter than the cursor has already reached.
+                if (!isDeleting && charIdx >= currentText.length) {
                     typeSpeed = 2300; // Pause at full sentence
                     isDeleting = true;
-                } else if (isDeleting && charIdx === 0) {
+                } else if (isDeleting && charIdx <= 0) {
+                    charIdx = 0;
                     isDeleting = false;
-                    currentIdx = (currentIdx + 1) % placeholders.length;
+                    currentIdx = (currentIdx + 1) % lines.length;
                     typeSpeed = 350; // Pause before typing next sentence
                 }
 

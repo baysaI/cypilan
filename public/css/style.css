@@ -815,6 +815,24 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     .category-nav .nav-link {
         white-space: nowrap;
     }
+
+    /* main.js marks which side still has entries; the fade tells the reader the
+       rail continues rather than ends. */
+    .category-nav .navbar-nav[data-overflowing="end"] {
+        mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+    }
+    .category-nav .navbar-nav[data-overflowing="start"] {
+        mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent);
+    }
+    .category-nav .navbar-nav[data-overflowing="both"] {
+        mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+    }
+
+    /* The active category is the one thing that must not be lost in the strip. */
+    .category-nav .nav-link.active {
+        color: var(--cyp-primary-fg);
+        box-shadow: inset 0 -3px 0 var(--cyp-accent);
+    }
 }
 
 /* Sticky rails (filter sidebar, seller card) sit below the header rather than
@@ -922,6 +940,34 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* Category tiles: three to a row on a phone, so the icon circle and the label
+   both have to come down a size to stay in proportion. The circle carries an
+   inline width/height, hence the !important. */
+@media (max-width: 575.98px) {
+    .category-card {
+        padding: 0.75rem !important;
+    }
+
+    .category-card .icon-wrapper {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    .category-card .icon-wrapper i {
+        font-size: 1.15rem !important;
+    }
+
+    .category-card-title {
+        font-size: 0.8125rem;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .category-card .small {
+        font-size: 0.6875rem;
+    }
 }
 
 /* The listing gallery: taller framing on a phone (portrait photos dominate),

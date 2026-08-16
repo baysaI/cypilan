@@ -7,7 +7,10 @@
                     <img src="/img/logo-white.png" alt="CypIlan" class="site-logo site-logo-dark">
                 </a>
 
-                <form action="/search" method="GET" class="flex-grow-1 d-none d-sm-block" style="max-width: 640px;">
+                <%# The inline search shares the row with the account controls, so
+                    between sm and lg it was squeezed down to ~145px of typing
+                    room. Below lg it moves to its own full-width row instead. %>
+                <form action="/search" method="GET" class="flex-grow-1 d-none d-lg-block" style="max-width: 640px;">
                     <%
                         const searchPlaceholders = t('smart.placeholders');
                         const searchPlaceholdersJson = Array.isArray(searchPlaceholders) ? JSON.stringify(searchPlaceholders) : JSON.stringify([t('smart.placeholder')]);
@@ -158,7 +161,7 @@
                 </div>
             </div>
 
-            <form action="/search" method="GET" class="d-sm-none mt-2">
+            <form action="/search" method="GET" class="d-lg-none mt-2">
                 <div class="input-group">
                     <input type="text" name="q" class="form-control smart-search-input" placeholder="<%= t('smart.placeholder') %>" data-prefix="<%= encodeURIComponent(t('smart.search_prefix')) %>" data-placeholders="<%= encodeURIComponent(searchPlaceholdersJson) %>">
                     <button class="btn btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>

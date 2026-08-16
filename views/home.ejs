@@ -10,7 +10,11 @@
                 </div>
             </div>
             
-            <div class="row g-3 g-md-4">
+            <%# Three across on a phone rather than two: five categories in a
+                two-column grid leaves the last one alone on a half-empty row,
+                and three rows of tall cards push everything else off screen.
+                Centring keeps the short final row deliberate at any count. %>
+            <div class="row g-2 g-sm-3 g-md-4 justify-content-center">
                 <% 
                 const catIcons = {
                     'emlak': 'fa-house',
@@ -24,13 +28,13 @@
                 
                 <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
                     <% categories.forEach(function(cat) { %>
-                        <div class="col-6 col-md-4 col-lg">
+                        <div class="col-4 col-lg">
                             <a href="/listings?category=<%= cat.slug %>" class="text-decoration-none">
                                 <div class="card category-card border-0 shadow-sm rounded-4 h-100 bg-light hover-bg-primary-light transition-all text-center p-3 p-md-4 group">
-                                    <div class="icon-wrapper mb-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
+                                    <div class="icon-wrapper mb-2 mb-md-3 mx-auto bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 64px; height: 64px;">
                                         <i class="fa-solid <%= catIcons[cat.slug] || 'fa-tag' %> fs-3 text-primary group-hover-scale"></i>
                                     </div>
-                                    <h6 class="fw-bold text-dark mb-1"><%= cat['name_' + currentLang] || cat.name_tr %></h6>
+                                    <h6 class="category-card-title fw-bold text-dark mb-1"><%= cat['name_' + currentLang] || cat.name_tr %></h6>
                                     <span class="small text-muted"><%= cat.listing_count || 0 %> <%= t('home.ad_unit') %></span>
                                 </div>
                             </a>
