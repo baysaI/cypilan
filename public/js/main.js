@@ -290,13 +290,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // Enhanced Share & Instagram Story Generator
     // ==========================================
+    const firstShareEl = document.querySelector('.share-btn, .direct-story-btn');
     let currentShareData = {
-        title: '',
-        url: window.location.href,
-        price: '',
-        city: '',
-        category: '',
-        image: ''
+        title: firstShareEl ? (firstShareEl.getAttribute('data-title') || document.title) : document.title,
+        url: firstShareEl ? (firstShareEl.getAttribute('data-url') || window.location.href) : window.location.href,
+        price: firstShareEl ? (firstShareEl.getAttribute('data-price') || '') : '',
+        city: firstShareEl ? (firstShareEl.getAttribute('data-city') || '') : '',
+        category: firstShareEl ? (firstShareEl.getAttribute('data-category') || '') : '',
+        image: firstShareEl ? (firstShareEl.getAttribute('data-image') || '') : ''
     };
 
     const shareBtns = document.querySelectorAll('.share-btn');
@@ -428,7 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Story Maker Modal & Canvas Generator
     const openStoryMakerBtn = document.getElementById('openStoryMakerBtn');
     const storyCanvas = document.getElementById('storyCanvas');
-    const storyLoadingSpinner = document.getElementById('storyLoadingSpinner');
     let generatedStoryBlob = null;
 
     if (openStoryMakerBtn && storyCanvas) {
@@ -706,7 +706,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // STEP 1: Immediately render synchronous base frame (0ms delay)
         drawCanvas(null);
-        if (storyLoadingSpinner) storyLoadingSpinner.style.display = 'none';
 
         // STEP 2: Asynchronously load image and redraw
         if (currentShareData.image) {
