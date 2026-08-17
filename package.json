@@ -10,6 +10,7 @@
     "db:init": "node -e \"require('./config/database').initialize()\"",
     "db:fix": "node scripts/fix-database.js",
     "db:seed": "node -e \"require('./config/database').seed()\"",
+    "migrate": "node scripts/migrate.js",
     "i18n:check": "node scripts/i18n-tool.js check",
     "i18n:sync": "node scripts/i18n-tool.js sync",
     "i18n:scan": "node scripts/i18n-tool.js scan",

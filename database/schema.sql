@@ -480,4 +480,39 @@ CREATE TABLE IF NOT EXISTS price_alerts (
 CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id);
 CREATE INDEX IF NOT EXISTS idx_price_alerts_listing ON price_alerts(listing_id);
 
+-- ---------------------------------------------------------------------------
+-- Feedback (Öneri ve Hata Bildirimleri)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  type TEXT NOT NULL CHECK(type IN ('bug', 'suggestion', 'other')),
+  message TEXT NOT NULL,
+  contact_email TEXT,
+  page_url TEXT,
+  status TEXT DEFAULT 'new' CHECK(status IN ('new', 'read', 'resolved')),
+  admin_note TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status, created_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- Broadcasts (Toplu Yönetici Duyuruları)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS broadcasts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sent_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  link_url TEXT,
+  audience TEXT NOT NULL,
+  audience_detail TEXT,
+  recipient_count INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_broadcasts_created ON broadcasts(created_at DESC);
+
 
