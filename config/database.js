@@ -170,23 +170,24 @@ const applyColumnMigrations = (db) => {
       user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
       type TEXT NOT NULL CHECK(type IN ('bug', 'suggestion', 'other')),
       message TEXT NOT NULL,
-      contact TEXT,
+      contact_email TEXT,
       page_url TEXT,
-      user_agent TEXT,
-      status TEXT DEFAULT 'new' CHECK(status IN ('new', 'reviewed', 'archived')),
+      status TEXT DEFAULT 'new' CHECK(status IN ('new', 'read', 'resolved')),
       admin_note TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
-    CREATE INDEX IF NOT EXISTS idx_feedback_queue ON feedback(status, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
 
     CREATE TABLE IF NOT EXISTS broadcasts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      sent_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
       title TEXT NOT NULL,
       message TEXT NOT NULL,
       link_url TEXT,
-      target_role TEXT DEFAULT 'all' CHECK(target_role IN ('all', 'user', 'business', 'agent')),
+      audience TEXT NOT NULL,
+      audience_detail TEXT,
       recipient_count INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
