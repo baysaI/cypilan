@@ -13,17 +13,30 @@
         }
     %>
     
-    <%# Top-Left Over Photo: Display strictly 1 primary badge on mobile so photo is never obscured %>
+    <%# Top-Left Over Photo: On mobile strictly 1 primary badge; on desktop show all badges (up to 3) %>
     <% if (primaryBadge) { %>
         <div class="position-absolute top-0 start-0 m-2 z-2 d-flex flex-column align-items-start gap-1 pe-none" style="max-width: 68%;">
-            <span class="badge <%= primaryBadge.class %> rounded-pill shadow-sm fw-bold px-2 py-1" style="font-size: 0.72rem;">
+            <%# Mobile: Strictly 1 primary badge %>
+            <span class="badge <%= primaryBadge.class %> rounded-pill shadow-sm fw-bold px-2 py-1 d-md-none" style="font-size: 0.72rem;">
                 <i class="fa-solid <%= primaryBadge.icon %> me-1"></i><%= primaryBadge.label %>
             </span>
-            <% if (cardBadges.length > 1 && !listing.is_premium && !listing.isPremium) { %>
-                <span class="badge bg-<%= cardBadges[1].variant %> text-white rounded-pill shadow-sm fw-bold px-2 py-1 d-none d-md-inline-block" style="font-size: 0.70rem;">
-                    <i class="fa-solid <%= cardBadges[1].icon %> me-1"></i><%= t('listing.badge_' + cardBadges[1].key) %>
+
+            <%# Desktop: Display all active badges %>
+            <% if (listing.listing_type === 'wanted') { %>
+                <span class="badge bg-warning text-dark rounded-pill shadow-sm fw-bold px-2 py-1 d-none d-md-inline-block" style="font-size: 0.72rem;">
+                    <i class="fa-solid fa-hand-holding-heart me-1"></i><%= t('listing.badge_wanted') || 'TALEP' %>
                 </span>
             <% } %>
+            <% if (listing.is_premium || listing.isPremium) { %>
+                <span class="premium-badge px-2 py-1 rounded-pill shadow-sm fw-bold text-white bg-gradient-golden d-none d-md-inline-block" style="font-size: 0.72rem;">
+                    <i class="fa-solid fa-crown me-1"></i> Premium
+                </span>
+            <% } %>
+            <% cardBadges.forEach(function (badge) { %>
+                <span class="badge bg-<%= badge.variant %> text-white rounded-pill shadow-sm fw-bold px-2 py-1 d-none d-md-inline-block" style="font-size: 0.70rem;">
+                    <i class="fa-solid <%= badge.icon %> me-1"></i><%= t('listing.badge_' + badge.key) %>
+                </span>
+            <% }); %>
         </div>
     <% } %>
 
