@@ -69,16 +69,16 @@
                     <h2 class="text-primary fw-bolder mb-0 fs-4"><%= (listing.listing_type === 'job' || listing.category_slug === 'is-ilanlari') ? t('career.salary_unspecified') : t('listing.price_unspecified') %></h2>
                 <% } %>
                 <div class="d-flex gap-2 flex-wrap">
-                    <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 favorite-btn" data-id="<%= listing.id %>">
+                    <button type="button" class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 favorite-btn" data-id="<%= listing.id %>">
                         <i class="<%= isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i> <%= t('listing.add_favorite') %>
                     </button>
-                    <button class="btn <%= (typeof isPriceAlertActive !== 'undefined' && isPriceAlertActive) ? 'btn-warning text-dark active' : 'btn-outline-warning' %> btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 price-alert-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" title="<%= t('alerts.price_alert') || 'Fiyat Alarmı' %>">
+                    <button type="button" class="btn <%= (typeof isPriceAlertActive !== 'undefined' && isPriceAlertActive) ? 'btn-warning text-dark active' : 'btn-outline-warning' %> btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 price-alert-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" title="<%= t('alerts.price_alert') || 'Fiyat Alarmı' %>">
                         <i class="fa-solid fa-bell"></i> <%= t('alerts.price_alert') || 'Fiyat Alarmı' %>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 compare-toggle-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= imgs[0] || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 compare-toggle-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= imgs[0] || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>">
                         <i class="fa-solid fa-code-compare"></i> <%= t('compare.button') || 'Karşılaştır' %>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 share-btn" data-title="<%= listing.title %>">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 share-btn" data-title="<%= listing.title %>">
                         <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                     </button>
                 </div>
@@ -340,16 +340,16 @@
             <% } %>
 
             <div class="d-none d-lg-flex gap-2 mb-4 flex-wrap">
-                <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 favorite-btn" data-id="<%= listing.id %>">
+                <button type="button" class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 favorite-btn" data-id="<%= listing.id %>">
                     <i class="<%= isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i> <%= t('listing.add_favorite') %>
                 </button>
-                <button class="btn <%= (typeof isPriceAlertActive !== 'undefined' && isPriceAlertActive) ? 'btn-warning text-dark active' : 'btn-outline-warning' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 price-alert-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" title="<%= t('alerts.price_alert') || 'Fiyat Alarmı' %>">
+                <button type="button" class="btn <%= (typeof isPriceAlertActive !== 'undefined' && isPriceAlertActive) ? 'btn-warning text-dark active' : 'btn-outline-warning' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 price-alert-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" title="<%= t('alerts.price_alert') || 'Fiyat Alarmı' %>">
                     <i class="fa-solid fa-bell"></i> <%= t('alerts.price_alert') || 'Fiyat Alarmı' %>
                 </button>
-                <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 compare-toggle-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= imgs[0] || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>">
+                <button type="button" class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 compare-toggle-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= imgs[0] || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>">
                     <i class="fa-solid fa-code-compare"></i> <%= t('compare.button') || 'Karşılaştır' %>
                 </button>
-                <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 share-btn" data-title="<%= listing.title %>">
+                <button type="button" class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 share-btn" data-title="<%= listing.title %>">
                     <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                 </button>
             </div>

@@ -299,8 +299,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const shareUrlInput = document.getElementById('shareUrlInput');
             if (shareUrlInput) shareUrlInput.value = url;
 
+            const shareText = `🔥 CYPILAN'da İlan: ${title} 👉 ${url}`;
             const shareWa = document.getElementById('shareWhatsapp');
-            if (shareWa) shareWa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + url)}`;
+            if (shareWa) shareWa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
 
             const shareFb = document.getElementById('shareFacebook');
             if (shareFb) shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
@@ -561,56 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 2. Share Modal & Pre-formatted Links
-    // -------------------------------------------------------------
-    const shareBtns = document.querySelectorAll('.share-btn');
-    const shareModal = document.getElementById('shareModal');
-    const shareUrlInput = document.getElementById('shareUrlInput');
-    const shareWhatsapp = document.getElementById('shareWhatsapp');
-    const shareFacebook = document.getElementById('shareFacebook');
-    const shareTelegram = document.getElementById('shareTelegram');
-    const shareTwitter = document.getElementById('shareTwitter');
-    const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
-
-    if (shareBtns.length > 0) {
-        shareBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const title = btn.getAttribute('data-title') || document.title;
-                const currentUrl = window.location.href;
-
-                if (shareUrlInput) shareUrlInput.value = currentUrl;
-
-                const shareText = `🔥 CYPILAN'da İlan: ${title} 👉 ${currentUrl}`;
-                if (shareWhatsapp) shareWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-                if (shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title)}`;
-                if (shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
-                if (shareTwitter) shareTwitter.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title)}`;
-
-                if (shareModal && typeof bootstrap !== 'undefined') {
-                    const bsModal = bootstrap.Modal.getInstance(shareModal) || new bootstrap.Modal(shareModal);
-                    bsModal.show();
-                }
-            });
-        });
-    }
-
-    if (copyShareLinkBtn && shareUrlInput) {
-        copyShareLinkBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(shareUrlInput.value).then(() => {
-                const originalHtml = copyShareLinkBtn.innerHTML;
-                copyShareLinkBtn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Kopyalandı!';
-                copyShareLinkBtn.classList.replace('btn-primary', 'btn-success');
-                setTimeout(() => {
-                    copyShareLinkBtn.innerHTML = originalHtml;
-                    copyShareLinkBtn.classList.replace('btn-success', 'btn-primary');
-                }, 2000);
-            });
-        });
-    }
-
-    // -------------------------------------------------------------
-    // 3. Quick Offer Modal Calculations & Form Presets
+    // 2. Quick Offer Modal Calculations & Form Presets
     // -------------------------------------------------------------
     const offerPresetBtns = document.querySelectorAll('.cyp-offer-preset-btn');
     const offerAmountInput = document.getElementById('offerAmountInput');
@@ -626,13 +578,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 4. Price Alert Toggle
+    // 3. Price Alert Toggle
     // -------------------------------------------------------------
     const priceAlertBtns = document.querySelectorAll('.price-alert-btn');
     if (priceAlertBtns.length > 0) {
         priceAlertBtns.forEach(btn => {
             btn.addEventListener('click', async function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 const listingId = this.getAttribute('data-id');
                 if (!listingId) return;
 
@@ -648,7 +601,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     if (res.status === 401) {
-                        window.location.href = '/auth/login';
+                        showToast('Fiyat alarmı kurmak için lütfen giriş yapın.', 'info');
+                        setTimeout(() => {
+                            window.location.href = '/auth/login';
+                        }, 1200);
                         return;
                     }
 
@@ -657,9 +613,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (data.active) {
                             this.classList.add('active', 'btn-warning', 'text-dark');
                             this.classList.remove('btn-outline-warning');
+                            showToast(data.message || 'Fiyat alarmı kuruldu!', 'success');
                         } else {
                             this.classList.remove('active', 'btn-warning', 'text-dark');
                             this.classList.add('btn-outline-warning');
+                            showToast(data.message || 'Fiyat alarmı kaldırıldı.', 'info');
                             const cardCol = this.closest('.col');
                             if (cardCol && window.location.pathname.includes('/alarmlar')) {
                                 cardCol.style.transition = 'all 0.3s ease';
@@ -668,16 +626,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                 setTimeout(() => cardCol.remove(), 300);
                             }
                         }
+                    } else {
+                        showToast(data.error || 'İşlem gerçekleştirilemedi.', 'danger');
                     }
                 } catch (err) {
                     console.error('Price alert toggle error:', err);
+                    showToast('Bağlantı hatası oluştu.', 'danger');
                 }
             });
         });
     }
 
     // -------------------------------------------------------------
-    // 5. Listing Comparison Manager
+    // 4. Listing Comparison Manager
     // -------------------------------------------------------------
     const COMPARE_STORAGE_KEY = 'cyp_compare_list';
     const MAX_COMPARE = 4;
@@ -755,12 +716,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (existingIdx > -1) {
             list.splice(existingIdx, 1);
+            showToast('İlan karşılaştırma listesinden çıkarıldı.', 'info');
         } else {
             if (list.length >= MAX_COMPARE) {
-                alert(`En fazla ${MAX_COMPARE} ilan karşılaştırabilirsiniz.`);
+                showToast(`En fazla ${MAX_COMPARE} ilan karşılaştırabilirsiniz.`, 'warning');
                 return;
             }
             list.push({ id, title, image, price, currency });
+            showToast('İlan karşılaştırma listesine eklendi!', 'success');
         }
 
         saveStoredCompareListings(list);
