@@ -1266,3 +1266,82 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
 }
 
+/* -------------------------------------------------------------
+   Listing Type Filter Pills & Interactive Category List
+------------------------------------------------------------- */
+.cyp-type-pill {
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    font-weight: 500 !important;
+    border: 1.5px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    color: #475569 !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    user-select: none !important;
+}
+
+.cyp-type-pill:hover {
+    border-color: #cbd5e1 !important;
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.cyp-type-pill:active {
+    transform: scale(0.96) !important;
+}
+
+.cyp-type-pill.active {
+    background: #0284c7 !important;
+    border-color: #0284c7 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 3px 10px rgba(2, 132, 199, 0.3) !important;
+}
+
+.cyp-type-pill.active.pill-wanted {
+    background: #f59e0b !important;
+    border-color: #f59e0b !important;
+    color: #0f172a !important;
+    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35) !important;
+}
+
+.cyp-category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.85rem;
+    margin-bottom: 0.25rem;
+    border-radius: 0.6rem;
+    transition: all 0.15s ease;
+    text-decoration: none !important;
+    color: #334155;
+    border: 1px solid transparent;
+}
+
+.cyp-category-item:hover {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: #0284c7;
+    padding-left: 1rem;
+}
+
+.cyp-category-item:active {
+    transform: scale(0.98);
+}
+
+.cyp-category-item.active {
+    background-color: #f0f9ff !important;
+    border-color: #bae6fd !important;
+    color: #0369a1 !important;
+    font-weight: 700 !important;
+    border-left: 4px solid #0284c7 !important;
+}
+
+.cyp-category-item.active .badge-count {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+

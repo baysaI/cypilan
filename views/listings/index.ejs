@@ -3,7 +3,12 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted hover-text-primary"><i class="fa-solid fa-house small"></i> <%= t('nav.home') %></a></li>
-            <li class="breadcrumb-item active fw-medium" aria-current="page"><%= t('listing.all_categories') %></li>
+            <% if (currentCategoryName) { %>
+                <li class="breadcrumb-item"><a href="/listings" class="text-decoration-none text-muted hover-text-primary"><%= t('listing.all_categories') %></a></li>
+                <li class="breadcrumb-item active fw-bold text-primary" aria-current="page"><%= currentCategoryName %></li>
+            <% } else { %>
+                <li class="breadcrumb-item active fw-medium" aria-current="page"><%= t('listing.all_categories') %></li>
+            <% } %>
         </ol>
     </nav>
 
@@ -56,7 +61,17 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h1 class="fs-3 fw-bold mb-1"><%= typeof currentCategoryName !== 'undefined' ? currentCategoryName : t('listing.all_categories') %></h1>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <h1 class="fs-3 fw-bold mb-0"><%= typeof currentCategoryName !== 'undefined' && currentCategoryName ? currentCategoryName : t('listing.all_categories') %></h1>
+                <% if (currentCategoryName) { %>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 small fw-bold">
+                        <i class="fa-solid fa-folder-open me-1"></i><%= currentCategoryName %>
+                    </span>
+                    <a href="/listings" class="badge bg-light text-muted border rounded-pill px-2 py-1 text-decoration-none hover-text-danger" title="<%= t('listing.clear_filters') %>">
+                        <i class="fa-solid fa-xmark me-1"></i>Kategoriyi Temizle
+                    </a>
+                <% } %>
+            </div>
             <p class="text-muted small mb-0"><%= t('common.all') %> <span class="fw-bold text-primary"><%= pagination.totalItems || (listings ? listings.length : 0) %></span> <%= t('listing.total_found') %></p>
         </div>
         <div class="d-flex gap-2">
@@ -94,16 +109,16 @@
         }
     %>
     <div class="d-flex flex-wrap gap-2 mb-4">
-        <a href="<%= buildTypeUrl('') %>" class="btn btn-sm <%= !currentType ? 'btn-primary text-white shadow-sm fw-bold' : 'btn-light border bg-white text-secondary' %> rounded-pill px-3 py-2">
+        <a href="<%= buildTypeUrl('') %>" class="btn btn-sm cyp-type-pill rounded-pill px-3 py-2 <%= !currentType ? 'active' : '' %>">
             <i class="fa-solid fa-list-ul me-1"></i> <%= t('common.all') || 'Tüm İlanlar' %>
         </a>
-        <a href="<%= buildTypeUrl('sale') %>" class="btn btn-sm <%= currentType === 'sale' ? 'btn-primary text-white shadow-sm fw-bold' : 'btn-light border bg-white text-secondary' %> rounded-pill px-3 py-2">
+        <a href="<%= buildTypeUrl('sale') %>" class="btn btn-sm cyp-type-pill rounded-pill px-3 py-2 <%= currentType === 'sale' ? 'active' : '' %>">
             <i class="fa-solid fa-tag me-1 <%= currentType === 'sale' ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_sale') || 'Satılık' %>
         </a>
-        <a href="<%= buildTypeUrl('rent') %>" class="btn btn-sm <%= currentType === 'rent' ? 'btn-primary text-white shadow-sm fw-bold' : 'btn-light border bg-white text-secondary' %> rounded-pill px-3 py-2">
+        <a href="<%= buildTypeUrl('rent') %>" class="btn btn-sm cyp-type-pill rounded-pill px-3 py-2 <%= currentType === 'rent' ? 'active' : '' %>">
             <i class="fa-solid fa-key me-1 <%= currentType === 'rent' ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_rent') || 'Kiralık' %>
         </a>
-        <a href="<%= buildTypeUrl('wanted') %>" class="btn btn-sm <%= currentType === 'wanted' ? 'btn-warning text-dark shadow-sm fw-bold border border-warning' : 'btn-light border bg-white text-secondary' %> rounded-pill px-3 py-2">
+        <a href="<%= buildTypeUrl('wanted') %>" class="btn btn-sm cyp-type-pill pill-wanted rounded-pill px-3 py-2 <%= currentType === 'wanted' ? 'active' : '' %>">
             <i class="fa-solid fa-hand-holding-heart me-1 text-warning"></i> <%= t('listing.type_wanted') || '📢 Arıyorum (Talepler)' %>
         </a>
     </div>
@@ -131,17 +146,47 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.category') %></label>
-                            <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-                                <% categories.forEach(function(cat) { %>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="cat_<%= cat.id %>" <%= (filters.category === cat.slug || (cat.slug === 'usta-hizmetler' && filters.category === 'ustalar')) ? 'checked' : '' %>>
-                                        <label class="form-check-label cursor-pointer" for="cat_<%= cat.id %>">
-                                            <%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %> <span class="text-muted small">(<%= cat.listing_count || 0 %>)</span>
-                                        </label>
-                                    </div>
-                                <% }); %>
-                            <% } %>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1 mb-0"><%= t('listing.category') %></label>
+                                <% if (filters.category) { %>
+                                    <a href="<%= buildTypeUrl('') %>" class="small text-primary text-decoration-none fw-semibold">Tümü</a>
+                                <% } %>
+                            </div>
+                            <div class="cyp-category-list">
+                                <%
+                                    function makeCatUrl(cSlug) {
+                                        const p = new URLSearchParams();
+                                        if (filters.q) p.set('q', filters.q);
+                                        if (cSlug) p.set('category', cSlug);
+                                        if (filters.city) p.set('city', filters.city);
+                                        if (filters.minPrice) p.set('minPrice', filters.minPrice);
+                                        if (filters.maxPrice) p.set('maxPrice', filters.maxPrice);
+                                        if (filters.currency) p.set('currency', filters.currency);
+                                        if (filters.sort) p.set('sort', filters.sort);
+                                        if (filters.badge) p.set('badge', filters.badge);
+                                        if (filters.type) p.set('type', filters.type);
+                                        return '/listings?' + p.toString();
+                                    }
+                                %>
+                                <a href="<%= makeCatUrl('') %>" class="cyp-category-item <%= !filters.category ? 'active' : '' %>">
+                                    <span class="d-flex align-items-center"><i class="fa-solid fa-border-all me-2"></i><%= t('listing.all_categories') %></span>
+                                </a>
+                                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                    <% categories.forEach(function(cat) { %>
+                                        <%
+                                            const isCatActive = (filters.category === cat.slug || (cat.slug === 'usta-hizmetler' && filters.category === 'ustalar'));
+                                            const catName = cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr;
+                                        %>
+                                        <a href="<%= makeCatUrl(cat.slug) %>" class="cyp-category-item <%= isCatActive ? 'active' : '' %>">
+                                            <span class="text-truncate me-2 d-flex align-items-center">
+                                                <i class="fa-solid fa-chevron-right small me-2 <%= isCatActive ? 'text-primary' : 'text-muted opacity-50' %>"></i>
+                                                <%= catName %>
+                                            </span>
+                                            <span class="badge rounded-pill <%= isCatActive ? 'bg-primary text-white' : 'bg-light text-muted' %> badge-count px-2 py-1 small"><%= cat.listing_count || 0 %></span>
+                                        </a>
+                                    <% }); %>
+                                <% } %>
+                            </div>
                         </div>
 
                         <div class="mb-4">
@@ -250,17 +295,32 @@
                 <input type="hidden" name="type" value="<%= filters.type %>">
             <% } %>
             <div class="mb-4">
-                <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.category') %></label>
-                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-                    <% categories.forEach(function(cat) { %>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input cursor-pointer shadow-none" type="radio" name="category" value="<%= cat.slug %>" id="m_cat_<%= cat.id %>" <%= (filters.category === cat.slug || (cat.slug === 'usta-hizmetler' && filters.category === 'ustalar')) ? 'checked' : '' %>>
-                            <label class="form-check-label cursor-pointer" for="m_cat_<%= cat.id %>">
-                                <%= cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr %> <span class="text-muted small">(<%= cat.listing_count || 0 %>)</span>
-                            </label>
-                        </div>
-                    <% }); %>
-                <% } %>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1 mb-0"><%= t('listing.category') %></label>
+                    <% if (filters.category) { %>
+                        <a href="<%= makeCatUrl('') %>" class="small text-primary text-decoration-none fw-semibold">Tümü</a>
+                    <% } %>
+                </div>
+                <div class="cyp-category-list">
+                    <a href="<%= makeCatUrl('') %>" class="cyp-category-item <%= !filters.category ? 'active' : '' %>">
+                        <span class="d-flex align-items-center"><i class="fa-solid fa-border-all me-2"></i><%= t('listing.all_categories') %></span>
+                    </a>
+                    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                        <% categories.forEach(function(cat) { %>
+                            <%
+                                const isCatActive = (filters.category === cat.slug || (cat.slug === 'usta-hizmetler' && filters.category === 'ustalar'));
+                                const catName = cat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || cat.name_tr;
+                            %>
+                            <a href="<%= makeCatUrl(cat.slug) %>" class="cyp-category-item <%= isCatActive ? 'active' : '' %>">
+                                <span class="text-truncate me-2 d-flex align-items-center">
+                                    <i class="fa-solid fa-chevron-right small me-2 <%= isCatActive ? 'text-primary' : 'text-muted opacity-50' %>"></i>
+                                    <%= catName %>
+                                </span>
+                                <span class="badge rounded-pill <%= isCatActive ? 'bg-primary text-white' : 'bg-light text-muted' %> badge-count px-2 py-1 small"><%= cat.listing_count || 0 %></span>
+                            </a>
+                        <% }); %>
+                    <% } %>
+                </div>
             </div>
 
             <div class="mb-4">
