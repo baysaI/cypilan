@@ -10,7 +10,7 @@
 
 const FEATURE_LABELS = {
   emlak: ['esyali', 'balkon', 'asansor', 'otopark', 'havuz', 'bahce', 'deniz_manzara', 'dogalgaz', 'guvenlik'],
-  vasita: ['otomatik', 'manuel', 'dizel', 'benzin', 'hasarsiz', 'servis_bakimli', 'tek_elden', 'klima', 'suru_destek'],
+  vasita: ['hasarsiz', 'servis_bakimli', 'tek_elden', 'klima', 'suru_destek'],
   'ikinci-el': ['az_kullanilmis', 'kutulu', 'garantili', 'faturali'],
   'usta-hizmetler': ['ayni_gun', 'hafta_sonu', 'kesif_ucretsiz', 'garantili_is'],
   'is-ilanlari': ['yemek', 'servis', 'sigorta', 'esnek_saat', 'terfi_imkani'],

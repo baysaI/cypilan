@@ -75,21 +75,21 @@ t.run('Hizmet talepleri ve açıklama taslağı', async (db) => {
 
   const vehicle = listingDraft.build({
     rootSlug: 'vasita', categoryName: 'Otomobil', cityName: 'Gazimağusa',
-    brand: 'Toyota', model: 'Corolla', year: '2019', km: '85000',
-    features: ['otomatik', 'hasarsiz']
+    brand: 'Toyota', model: 'Corolla', year: '2019', km: '85000', gear: 'Otomatik',
+    features: ['hasarsiz', 'klima']
   }, translate);
   t.assert(
-    vehicle.includes('Toyota') && vehicle.includes('85000') && vehicle.includes('Otomatik vites'),
+    vehicle.includes('Toyota') && vehicle.includes('85000') && vehicle.includes('Vites: Otomatik.'),
     'Vasıta taslağı marka, kilometre ve özellikleri kullanıyor'
   );
 
   const vehicleManual = listingDraft.build({
     rootSlug: 'vasita', categoryName: 'Otomobil', cityName: 'Girne',
-    brand: 'Honda', model: 'Civic', year: '2018', km: '60000',
-    features: ['manuel', 'klima']
+    brand: 'Honda', model: 'Civic', year: '2018', km: '60000', gear: 'Manuel',
+    features: ['klima']
   }, translate);
   t.assert(
-    vehicleManual.includes('Honda') && vehicleManual.includes('Manuel vites'),
+    vehicleManual.includes('Honda') && vehicleManual.includes('Vites: Manuel.'),
     'Vasıta manuel seçeneği taslakta görünüyor'
   );
 
@@ -99,12 +99,12 @@ t.run('Hizmet talepleri ve açıklama taslağı', async (db) => {
   t.assert(generic.includes('Mobilya'), 'Şablonu olmayan kategoride genel taslak üretiliyor');
 
   t.assert(
-    listingDraft.featuresFor('vasita').includes('manuel') && listingDraft.featuresFor('vasita').includes('otomatik'),
-    'Vasıta özellikleri hem manuel hem otomatik vites içeriyor'
+    listingDraft.featuresFor('vasita').includes('hasarsiz') && listingDraft.featuresFor('vasita').includes('klima'),
+    'Vasıta özellikleri hasarsız ve klima içeriyor'
   );
 
   t.assert(
-    !listingDraft.featuresFor('emlak').includes('otomatik') && !listingDraft.featuresFor('emlak').includes('manuel'),
+    !listingDraft.featuresFor('emlak').includes('hasarsiz') && !listingDraft.featuresFor('vasita').includes('esyali'),
     'Özellik listesi kategoriye göre ayrışıyor'
   );
 
