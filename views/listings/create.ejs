@@ -349,11 +349,13 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <label for="fileInput" class="w-100 border-2 border-dashed border-primary rounded-4 p-5 text-center bg-light cursor-pointer hover-bg-primary-light transition-all d-block position-relative mb-0" id="dropArea">
-                            <i class="fa-solid fa-cloud-arrow-up display-4 text-primary mb-3 pointer-events-none"></i>
-                            <h5 class="fw-bold text-dark pointer-events-none"><%= t('listing.drag_images') %></h5>
-                            <p class="text-muted small mb-4 pointer-events-none"><%= t('listing.max_images') %> (Maks. 15 MB)</p>
-                            <span class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm pointer-events-none"><%= t('nav.post_ad') %></span>
+                        <label for="fileInput" class="w-100 border-2 border-dashed border-primary rounded-4 p-4 p-md-5 text-center bg-light cursor-pointer hover-bg-primary-light transition-all d-block position-relative mb-0" id="dropArea">
+                            <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle pointer-events-none" style="width: 68px; height: 68px;">
+                                <i class="fa-solid fa-camera fs-2"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark pointer-events-none mb-1"><%= t('listing.drag_images') %></h5>
+                            <p class="text-muted small mb-3 pointer-events-none"><%= t('listing.max_images') %> (Maks. 15 MB)</p>
+                            <span class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm pointer-events-none"><i class="fa-solid fa-plus me-1"></i><%= t('listing.select_photos') || 'Fotoğraf Seç' %></span>
                             <input type="file" name="images" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="position-absolute" style="opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden; z-index: -1;">
                         </label>
 

@@ -123,6 +123,11 @@
             </a>
         </li>
         <li>
+            <a href="/admin/duyuru" class="nav-link rounded-3 <%= activePage === 'broadcast' ? 'active' : '' %>">
+                <span><i class="fa-solid fa-bullhorn fa-fw me-2"></i> Duyuru Gönder</span>
+            </a>
+        </li>
+        <li>
             <a href="/admin/geri-bildirim" class="nav-link rounded-3 d-flex justify-content-between align-items-center <%= activePage === 'feedback' ? 'active' : '' %>">
                 <span><i class="fa-solid fa-lightbulb fa-fw me-2"></i> Öneri &amp; Hata</span>
                 <% if (typeof pendingFeedback !== 'undefined' && pendingFeedback > 0) { %>

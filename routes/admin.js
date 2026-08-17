@@ -58,6 +58,10 @@ router.get('/bakim', maintenanceController.show);
 router.post('/bakim', maintenanceController.update);
 router.post('/sinirsiz-ilan', maintenanceController.updateUnlimited);
 
+const broadcastController = require('../controllers/broadcastController');
+router.get('/duyuru', broadcastController.compose);
+router.post('/duyuru', broadcastController.send);
+
 const feedbackController = require('../controllers/feedbackController');
 router.get('/geri-bildirim', feedbackController.adminQueue);
 router.post('/geri-bildirim/:id/durum', feedbackController.adminSetStatus);

@@ -179,6 +179,25 @@ CREATE TABLE IF NOT EXISTS feedback (
 CREATE INDEX IF NOT EXISTS idx_feedback_queue ON feedback(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
 
+-- A record of every announcement sent from the admin panel.
+--
+-- The notifications themselves are per-user rows that recipients may delete, so
+-- they cannot answer "what did we announce, to whom, and when". This can. It is
+-- also the only place that remembers the audience filter after the fact, which is
+-- what stops the same announcement going out twice.
+CREATE TABLE IF NOT EXISTS broadcasts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sent_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  link_url TEXT,
+  audience TEXT NOT NULL,
+  audience_detail TEXT,
+  recipient_count INTEGER NOT NULL DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_broadcasts_created ON broadcasts(created_at DESC);
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_listings_user ON listings(user_id);
 CREATE INDEX IF NOT EXISTS idx_listings_category ON listings(category_id);
