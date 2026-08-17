@@ -456,43 +456,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = storyCanvas.getContext('2d');
         if (!ctx) return;
 
-        if (storyLoadingSpinner) storyLoadingSpinner.style.display = 'flex';
-
         const W = 1080;
         const H = 1920;
         storyCanvas.width = W;
         storyCanvas.height = H;
-
-        // 1. Background Gradient (Luxury Dark Theme)
-        const bgGrad = ctx.createLinearGradient(0, 0, W, H);
-        bgGrad.addColorStop(0, '#0a0f1d');
-        bgGrad.addColorStop(0.5, '#0f172a');
-        bgGrad.addColorStop(1, '#030712');
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, W, H);
-
-        // Ambient Decorative Glow Orbs
-        const orb1 = ctx.createRadialGradient(W * 0.2, H * 0.15, 50, W * 0.2, H * 0.15, 450);
-        orb1.addColorStop(0, 'rgba(14, 165, 233, 0.25)');
-        orb1.addColorStop(1, 'rgba(14, 165, 233, 0)');
-        ctx.fillStyle = orb1;
-        ctx.fillRect(0, 0, W, H);
-
-        const orb2 = ctx.createRadialGradient(W * 0.8, H * 0.7, 50, W * 0.8, H * 0.7, 500);
-        orb2.addColorStop(0, 'rgba(234, 179, 8, 0.18)');
-        orb2.addColorStop(1, 'rgba(234, 179, 8, 0)');
-        ctx.fillStyle = orb2;
-        ctx.fillRect(0, 0, W, H);
-
-        // 2. Header: CYPILAN Logo & Brand Banner
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '900 64px "Inter", "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('CYPILAN', W / 2, 130);
-
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '600 28px "Inter", "Segoe UI", sans-serif';
-        ctx.fillText('KIBRIS\'IN İLAN PAZARYERİ • cypilan.com', W / 2, 180);
 
         // Helper to draw rounded rectangle
         function roundRect(x, y, w, h, radius) {
@@ -509,21 +476,58 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
         }
 
-        // Draw card and load image
-        const imgBoxX = 70;
-        const imgBoxY = 240;
-        const imgBoxW = W - 140;
-        const imgBoxH = 920;
-
-        const finalizeStoryDrawing = (img) => {
-            // Draw Image Container Card
+        // Draw complete canvas
+        function drawCanvas(photoImg) {
             ctx.save();
-            roundRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 40);
+            ctx.clearRect(0, 0, W, H);
+
+            // 1. Background Gradient (Dark Luxury Theme)
+            const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+            bgGrad.addColorStop(0, '#0a0f1d');
+            bgGrad.addColorStop(0.5, '#0f172a');
+            bgGrad.addColorStop(1, '#030712');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Ambient Decorative Glow Orbs
+            const orb1 = ctx.createRadialGradient(W * 0.2, H * 0.15, 50, W * 0.2, H * 0.15, 450);
+            orb1.addColorStop(0, 'rgba(14, 165, 233, 0.22)');
+            orb1.addColorStop(1, 'rgba(14, 165, 233, 0)');
+            ctx.fillStyle = orb1;
+            ctx.fillRect(0, 0, W, H);
+
+            const orb2 = ctx.createRadialGradient(W * 0.8, H * 0.7, 50, W * 0.8, H * 0.7, 500);
+            orb2.addColorStop(0, 'rgba(234, 179, 8, 0.16)');
+            orb2.addColorStop(1, 'rgba(234, 179, 8, 0)');
+            ctx.fillStyle = orb2;
+            ctx.fillRect(0, 0, W, H);
+
+            // 2. Header Brand Section
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+
+            // CYPILAN Logo Text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 60px "Inter", "Segoe UI", sans-serif';
+            ctx.fillText('CYPILAN', W / 2, 140);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '700 24px "Inter", "Segoe UI", sans-serif';
+            ctx.fillText('KIBRIS\'IN İLAN PAZARYERİ • cypilan.com', W / 2, 185);
+
+            // 3. Photo Card Container
+            const imgBoxX = 90;
+            const imgBoxY = 230;
+            const imgBoxW = 900;
+            const imgBoxH = 840;
+
+            ctx.save();
+            roundRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 36);
             ctx.clip();
 
-            if (img) {
-                // Cover image scaling
-                const imgAspect = img.width / img.height;
+            if (photoImg && photoImg.width > 0 && photoImg.height > 0) {
+                // Object fit cover
+                const imgAspect = photoImg.width / photoImg.height;
                 const boxAspect = imgBoxW / imgBoxH;
                 let drawW, drawH, drawX, drawY;
 
@@ -538,112 +542,132 @@ document.addEventListener('DOMContentLoaded', () => {
                     drawX = imgBoxX;
                     drawY = imgBoxY - (drawH - imgBoxH) / 2;
                 }
-                ctx.drawImage(img, drawX, drawY, drawW, drawH);
+                ctx.drawImage(photoImg, drawX, drawY, drawW, drawH);
+
+                // Subtle vignette on photo
+                const photoGrad = ctx.createLinearGradient(0, imgBoxY + imgBoxH - 260, 0, imgBoxY + imgBoxH);
+                photoGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                photoGrad.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+                ctx.fillStyle = photoGrad;
+                ctx.fillRect(imgBoxX, imgBoxY + imgBoxH - 260, imgBoxW, 260);
             } else {
                 // Fallback elegant box
                 ctx.fillStyle = '#1e293b';
                 ctx.fillRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH);
-            }
 
-            // Subtle dark bottom gradient on image
-            const imgDarkGrad = ctx.createLinearGradient(0, imgBoxY + imgBoxH - 300, 0, imgBoxY + imgBoxH);
-            imgDarkGrad.addColorStop(0, 'rgba(0,0,0,0)');
-            imgDarkGrad.addColorStop(1, 'rgba(0,0,0,0.8)');
-            ctx.fillStyle = imgDarkGrad;
-            ctx.fillRect(imgBoxX, imgBoxY + imgBoxH - 300, imgBoxW, 300);
+                ctx.fillStyle = '#64748b';
+                ctx.font = '600 32px "Inter", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('📷 CYPILAN İlan Görseli', W / 2, imgBoxY + imgBoxH / 2);
+            }
             ctx.restore();
 
-            // Card Border
+            // Photo Card Border
             ctx.save();
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            ctx.lineWidth = 4;
-            roundRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 40);
+            ctx.lineWidth = 3;
+            roundRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 36);
             ctx.stroke();
             ctx.restore();
 
-            // Tag Badge (Top Left of image)
+            // Top-left badge over photo
             ctx.save();
             ctx.fillStyle = '#0284c7';
-            roundRect(imgBoxX + 30, imgBoxY + 30, 240, 56, 28);
+            roundRect(imgBoxX + 24, imgBoxY + 24, 230, 52, 26);
             ctx.fill();
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 26px "Inter", sans-serif';
+            ctx.font = '700 24px "Inter", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('✨ GÜNCEL İLAN', imgBoxX + 150, imgBoxY + 68);
+            ctx.fillText('✨ GÜNCEL İLAN', imgBoxX + 139, imgBoxY + 59);
             ctx.restore();
 
-            // 3. Info Container (Below Image)
-            const infoY = imgBoxY + imgBoxH + 40;
+            // 4. Details Section (Strictly Structured)
+            const detailStartY = imgBoxY + imgBoxH + 45; // 1115
+            let currentX = imgBoxX; // 90
 
-            // Price Badge if available
+            // Row 1: Price Badge + City / Category Badges
             if (currentShareData.price) {
                 ctx.save();
+                ctx.font = '900 52px "Inter", sans-serif';
                 const priceText = currentShareData.price;
-                ctx.font = '900 68px "Inter", sans-serif';
-                ctx.textAlign = 'left';
-                const priceWidth = ctx.measureText(priceText).width + 70;
+                const priceW = ctx.measureText(priceText).width + 60;
+                const priceH = 84;
 
-                // Price badge background
-                const pGrad = ctx.createLinearGradient(imgBoxX, infoY, imgBoxX + priceWidth, infoY + 100);
+                const pGrad = ctx.createLinearGradient(currentX, detailStartY, currentX + priceW, detailStartY + priceH);
                 pGrad.addColorStop(0, '#f59e0b');
                 pGrad.addColorStop(1, '#d97706');
                 ctx.fillStyle = pGrad;
-                roundRect(imgBoxX, infoY, priceWidth, 96, 24);
+                roundRect(currentX, detailStartY, priceW, priceH, 22);
                 ctx.fill();
 
-                // Price Text
                 ctx.fillStyle = '#0f172a';
-                ctx.fillText(priceText, imgBoxX + 35, infoY + 70);
+                ctx.textAlign = 'center';
+                ctx.fillText(priceText, currentX + priceW / 2, detailStartY + 59);
+                ctx.restore();
+
+                currentX += priceW + 16;
+            }
+
+            // Location Badge (City)
+            if (currentShareData.city) {
+                ctx.save();
+                const cityText = `📍 ${currentShareData.city}, KKTC`;
+                ctx.font = '600 28px "Inter", sans-serif';
+                const cityW = ctx.measureText(cityText).width + 40;
+                const badgeH = 84;
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                roundRect(currentX, detailStartY, cityW, badgeH, 22);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.fillText(cityText, currentX + cityW / 2, detailStartY + 53);
+                ctx.restore();
+
+                currentX += cityW + 16;
+            }
+
+            // Category Badge
+            if (currentShareData.category && currentX < (W - 250)) {
+                ctx.save();
+                const catText = `🏷️ ${currentShareData.category}`;
+                ctx.font = '600 28px "Inter", sans-serif';
+                const catW = ctx.measureText(catText).width + 40;
+                const badgeH = 84;
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                roundRect(currentX, detailStartY, catW, badgeH, 22);
+                ctx.fill();
+
+                ctx.fillStyle = '#e2e8f0';
+                ctx.textAlign = 'center';
+                ctx.fillText(catText, currentX + catW / 2, detailStartY + 53);
                 ctx.restore();
             }
 
-            // Location & Category Pills
-            const pillsY = currentShareData.price ? (infoY + 125) : infoY;
-            let pillOffset = imgBoxX;
-
-            if (currentShareData.city) {
-                const cityText = `📍 ${currentShareData.city}, KKTC`;
-                ctx.font = '600 32px "Inter", sans-serif';
-                const cityW = ctx.measureText(cityText).width + 40;
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-                roundRect(pillOffset, pillsY, cityW, 58, 29);
-                ctx.fill();
-                ctx.fillStyle = '#e2e8f0';
-                ctx.fillText(cityText, pillOffset + 20, pillsY + 40);
-                pillOffset += cityW + 16;
-            }
-
-            if (currentShareData.category) {
-                const catText = `🏷️ ${currentShareData.category}`;
-                ctx.font = '600 32px "Inter", sans-serif';
-                const catW = ctx.measureText(catText).width + 40;
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-                roundRect(pillOffset, pillsY, catW, 58, 29);
-                ctx.fill();
-                ctx.fillStyle = '#e2e8f0';
-                ctx.fillText(catText, pillOffset + 20, pillsY + 40);
-            }
-
-            // Title (Wrapped 2 lines)
-            const titleY = pillsY + 95;
+            // Row 2: Listing Title (Multi-line, properly positioned below badges)
+            const titleY = detailStartY + 155; // 1270
+            ctx.save();
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 48px "Inter", sans-serif';
+            ctx.font = '800 48px "Inter", "Segoe UI", sans-serif';
             ctx.textAlign = 'left';
 
+            const maxTitleW = imgBoxW;
             const words = (currentShareData.title || '').split(' ');
             let line = '';
             let curY = titleY;
-            let linesDrawn = 0;
+            let linesCount = 0;
 
             for (let i = 0; i < words.length; i++) {
                 const testLine = line + words[i] + ' ';
                 const testWidth = ctx.measureText(testLine).width;
-                if (testWidth > imgBoxW && i > 0) {
+                if (testWidth > maxTitleW && i > 0) {
                     ctx.fillText(line.trim(), imgBoxX, curY);
                     line = words[i] + ' ';
-                    curY += 60;
-                    linesDrawn++;
-                    if (linesDrawn >= 2 && i < words.length - 1) {
+                    curY += 64;
+                    linesCount++;
+                    if (linesCount >= 3 && i < words.length - 1) {
                         line = line + '...';
                         break;
                     }
@@ -652,13 +676,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (line) ctx.fillText(line.trim(), imgBoxX, curY);
+            ctx.restore();
 
-            // 4. Footer Call To Action Box
-            const footY = H - 180;
+            // 5. Footer Call To Action Box
+            const footY = H - 190;
             ctx.save();
             ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+            ctx.lineWidth = 2.5;
             roundRect(imgBoxX, footY, imgBoxW, 110, 30);
             ctx.fill();
             ctx.stroke();
@@ -666,39 +691,52 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = '#38bdf8';
             ctx.font = '700 32px "Inter", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('👉 Detaylar & İletişim İçin İnceleyin: cypilan.com', W / 2, footY + 68);
+            ctx.fillText('👉 Detaylar & İletişim İçin: cypilan.com', W / 2, footY + 68);
             ctx.restore();
 
-            if (storyLoadingSpinner) storyLoadingSpinner.style.display = 'none';
+            ctx.restore();
 
-            // Store blob for sharing
+            // Generate blob
             try {
                 storyCanvas.toBlob((blob) => {
                     generatedStoryBlob = blob;
                 }, 'image/png');
             } catch(e) {}
-        };
+        }
 
-        // Load image or fallback
+        // STEP 1: Immediately render synchronous base frame (0ms delay)
+        drawCanvas(null);
+        if (storyLoadingSpinner) storyLoadingSpinner.style.display = 'none';
+
+        // STEP 2: Asynchronously load image and redraw
         if (currentShareData.image) {
             const img = new Image();
-            if (currentShareData.image.startsWith('http://') || currentShareData.image.startsWith('https://')) {
+            // If image is local relative path, do not set crossOrigin
+            const isExternal = currentShareData.image.startsWith('http://') || currentShareData.image.startsWith('https://');
+            if (isExternal) {
                 img.crossOrigin = 'anonymous';
             }
-            img.onload = () => finalizeStoryDrawing(img);
-            img.onerror = () => {
-                const fallbackImg = new Image();
-                fallbackImg.onload = () => finalizeStoryDrawing(fallbackImg);
-                fallbackImg.onerror = () => finalizeStoryDrawing(null);
-                fallbackImg.src = currentShareData.image;
+
+            img.onload = () => {
+                drawCanvas(img);
             };
+
+            img.onerror = () => {
+                if (isExternal && img.crossOrigin) {
+                    const fallbackImg = new Image();
+                    fallbackImg.onload = () => drawCanvas(fallbackImg);
+                    fallbackImg.onerror = () => drawCanvas(null);
+                    fallbackImg.src = currentShareData.image;
+                } else {
+                    drawCanvas(null);
+                }
+            };
+
             img.src = currentShareData.image;
-        } else {
-            finalizeStoryDrawing(null);
         }
     }
 
-    // Also auto-render when modal is shown via Bootstrap data attributes
+    // Auto-render when story modal opens
     const storyModalEl = document.getElementById('storyMakerModal');
     if (storyModalEl) {
         storyModalEl.addEventListener('shown.bs.modal', () => {
@@ -711,16 +749,46 @@ document.addEventListener('DOMContentLoaded', () => {
     if (downloadStoryBtn && storyCanvas) {
         downloadStoryBtn.addEventListener('click', () => {
             try {
-                const dataUrl = storyCanvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `cypilan-hikaye-${Date.now()}.png`;
-                link.href = dataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showToast('Hikaye görseli başarıyla indirildi!', 'success');
+                if (storyCanvas.width === 0 || storyCanvas.height === 0) {
+                    renderStoryCard();
+                }
+
+                // If blob is available use object URL, else data URL
+                const triggerDownload = (url) => {
+                    const link = document.createElement('a');
+                    link.download = `cypilan-hikaye-${Date.now()}.png`;
+                    link.href = url;
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                    }, 100);
+                    showToast('Hikaye görseli başarıyla indirildi!', 'success');
+                };
+
+                storyCanvas.toBlob((blob) => {
+                    if (blob) {
+                        const blobUrl = URL.createObjectURL(blob);
+                        triggerDownload(blobUrl);
+                        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                    } else {
+                        const dataUrl = storyCanvas.toDataURL('image/png');
+                        triggerDownload(dataUrl);
+                    }
+                }, 'image/png');
             } catch(e) {
-                showToast('Görsel indirilirken bir hata oluştu.', 'error');
+                try {
+                    const dataUrl = storyCanvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = `cypilan-hikaye-${Date.now()}.png`;
+                    link.href = dataUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => document.body.removeChild(link), 100);
+                    showToast('Hikaye görseli başarıyla indirildi!', 'success');
+                } catch(err) {
+                    showToast('Görsel indirilirken bir hata oluştu.', 'error');
+                }
             }
         });
     }
@@ -732,7 +800,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 storyCanvas.toBlob(async (blob) => {
                     if (!blob) {
-                        showToast('Görsel hazırlanamadı.', 'error');
+                        showToast('Görsel henüz hazırlanıyor, lütfen tekrar deneyin.', 'error');
                         return;
                     }
                     const file = new File([blob], `cypilan-ilan-${Date.now()}.png`, { type: 'image/png' });
@@ -749,18 +817,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             url: currentShareData.url
                         });
                     } else {
-                        // Fallback to download
-                        const link = document.createElement('a');
-                        link.download = `cypilan-hikaye-${Date.now()}.png`;
-                        link.href = storyCanvas.toDataURL('image/png');
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        showToast('Görsel indirildi! Instagram veya WhatsApp hikayenizde paylaşabilirsiniz.', 'success');
+                        downloadStoryBtn.click();
                     }
                 }, 'image/png');
             } catch(err) {
-                showToast('Paylaşım başlatılamadı.', 'error');
+                if (err.name !== 'AbortError') {
+                    showToast('Paylaşım başlatılamadı.', 'error');
+                }
             }
         });
     }
