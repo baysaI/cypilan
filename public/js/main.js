@@ -519,4 +519,299 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(type, 600);
         });
     }
+
+    // -------------------------------------------------------------
+    // 1. Leaflet Map Initialization for Listing Detail
+    // -------------------------------------------------------------
+    const mapModal = document.getElementById('listingMapModal');
+    const mapContainer = document.getElementById('listingMapContainer');
+    let leafletMapInstance = null;
+
+    if (mapModal && mapContainer && typeof L !== 'undefined') {
+        mapModal.addEventListener('shown.bs.modal', () => {
+            const lat = parseFloat(mapContainer.getAttribute('data-lat')) || 35.1856;
+            const lng = parseFloat(mapContainer.getAttribute('data-lng')) || 33.3823;
+            const zoom = parseInt(mapContainer.getAttribute('data-zoom'), 10) || 13;
+            const title = mapContainer.getAttribute('data-title') || '';
+            const city = mapContainer.getAttribute('data-city') || '';
+            const district = mapContainer.getAttribute('data-district') || '';
+            const isExact = mapContainer.getAttribute('data-exact') === '1';
+
+            if (!leafletMapInstance) {
+                leafletMapInstance = L.map('listingMapContainer').setView([lat, lng], zoom);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+                }).addTo(leafletMapInstance);
+
+                const marker = L.marker([lat, lng]).addTo(leafletMapInstance);
+                const popupContent = `
+                    <div style="font-family: inherit; min-width: 150px;">
+                        <strong style="font-size: 0.9rem; display: block; margin-bottom: 4px;">${title}</strong>
+                        <span style="font-size: 0.8rem; color: #6c757d;">📍 ${city}${district ? ' / ' + district : ''}</span>
+                        ${!isExact ? '<div style="font-size: 0.72rem; color: #e67e22; margin-top: 4px;">(Yaklaşık İlçe/Şehir Konumu)</div>' : ''}
+                    </div>
+                `;
+                marker.bindPopup(popupContent).openPopup();
+            } else {
+                leafletMapInstance.invalidateSize();
+                leafletMapInstance.setView([lat, lng], zoom);
+            }
+        });
+    }
+
+    // -------------------------------------------------------------
+    // 2. Share Modal & Pre-formatted Links
+    // -------------------------------------------------------------
+    const shareBtns = document.querySelectorAll('.share-btn');
+    const shareModal = document.getElementById('shareModal');
+    const shareUrlInput = document.getElementById('shareUrlInput');
+    const shareWhatsapp = document.getElementById('shareWhatsapp');
+    const shareFacebook = document.getElementById('shareFacebook');
+    const shareTelegram = document.getElementById('shareTelegram');
+    const shareTwitter = document.getElementById('shareTwitter');
+    const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
+
+    if (shareBtns.length > 0) {
+        shareBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const title = btn.getAttribute('data-title') || document.title;
+                const currentUrl = window.location.href;
+
+                if (shareUrlInput) shareUrlInput.value = currentUrl;
+
+                const shareText = `🔥 CYPILAN'da İlan: ${title} 👉 ${currentUrl}`;
+                if (shareWhatsapp) shareWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+                if (shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title)}`;
+                if (shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+                if (shareTwitter) shareTwitter.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title)}`;
+
+                if (shareModal && typeof bootstrap !== 'undefined') {
+                    const bsModal = bootstrap.Modal.getInstance(shareModal) || new bootstrap.Modal(shareModal);
+                    bsModal.show();
+                }
+            });
+        });
+    }
+
+    if (copyShareLinkBtn && shareUrlInput) {
+        copyShareLinkBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(shareUrlInput.value).then(() => {
+                const originalHtml = copyShareLinkBtn.innerHTML;
+                copyShareLinkBtn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Kopyalandı!';
+                copyShareLinkBtn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => {
+                    copyShareLinkBtn.innerHTML = originalHtml;
+                    copyShareLinkBtn.classList.replace('btn-success', 'btn-primary');
+                }, 2000);
+            });
+        });
+    }
+
+    // -------------------------------------------------------------
+    // 3. Quick Offer Modal Calculations & Form Presets
+    // -------------------------------------------------------------
+    const offerPresetBtns = document.querySelectorAll('.cyp-offer-preset-btn');
+    const offerAmountInput = document.getElementById('offerAmountInput');
+    if (offerPresetBtns.length > 0 && offerAmountInput) {
+        offerPresetBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                offerPresetBtns.forEach(b => b.classList.remove('active', 'btn-primary', 'text-white'));
+                this.classList.add('active', 'btn-primary', 'text-white');
+                const val = this.getAttribute('data-val');
+                if (val) offerAmountInput.value = val;
+            });
+        });
+    }
+
+    // -------------------------------------------------------------
+    // 4. Price Alert Toggle
+    // -------------------------------------------------------------
+    const priceAlertBtns = document.querySelectorAll('.price-alert-btn');
+    if (priceAlertBtns.length > 0) {
+        priceAlertBtns.forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const listingId = this.getAttribute('data-id');
+                if (!listingId) return;
+
+                try {
+                    const res = await fetch(`/listings/${listingId}/price-alert`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ _csrf: csrfToken })
+                    });
+
+                    if (res.status === 401) {
+                        window.location.href = '/auth/login';
+                        return;
+                    }
+
+                    const data = await res.json();
+                    if (data.success) {
+                        if (data.active) {
+                            this.classList.add('active', 'btn-warning', 'text-dark');
+                            this.classList.remove('btn-outline-warning');
+                        } else {
+                            this.classList.remove('active', 'btn-warning', 'text-dark');
+                            this.classList.add('btn-outline-warning');
+                            const cardCol = this.closest('.col');
+                            if (cardCol && window.location.pathname.includes('/alarmlar')) {
+                                cardCol.style.transition = 'all 0.3s ease';
+                                cardCol.style.opacity = '0';
+                                cardCol.style.transform = 'scale(0.9)';
+                                setTimeout(() => cardCol.remove(), 300);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error('Price alert toggle error:', err);
+                }
+            });
+        });
+    }
+
+    // -------------------------------------------------------------
+    // 5. Listing Comparison Manager
+    // -------------------------------------------------------------
+    const COMPARE_STORAGE_KEY = 'cyp_compare_list';
+    const MAX_COMPARE = 4;
+
+    function getStoredCompareListings() {
+        try {
+            const raw = localStorage.getItem(COMPARE_STORAGE_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveStoredCompareListings(list) {
+        try {
+            localStorage.setItem(COMPARE_STORAGE_KEY, JSON.stringify(list));
+        } catch (e) {}
+    }
+
+    function updateCompareUI() {
+        const list = getStoredCompareListings();
+        const drawer = document.getElementById('compareFloatingDrawer');
+        const countSpan = document.getElementById('compareCount');
+        const thumbsContainer = document.getElementById('compareThumbnails');
+        const goToBtn = document.getElementById('goToCompareBtn');
+
+        document.querySelectorAll('.compare-toggle-btn').forEach(btn => {
+            const id = parseInt(btn.getAttribute('data-id'), 10);
+            const isSelected = list.some(item => item.id === id);
+            if (isSelected) {
+                btn.classList.add('active', 'btn-primary', 'text-white');
+                btn.classList.remove('btn-outline-secondary', 'btn-light');
+            } else {
+                btn.classList.remove('active', 'btn-primary', 'text-white');
+                if (btn.closest('.listing-card')) {
+                    btn.classList.add('btn-light');
+                } else {
+                    btn.classList.add('btn-outline-secondary');
+                }
+            }
+        });
+
+        if (drawer && countSpan && thumbsContainer && goToBtn) {
+            if (list.length > 0 && !window.location.pathname.startsWith('/listings/compare')) {
+                drawer.classList.remove('d-none');
+                countSpan.textContent = list.length;
+                thumbsContainer.innerHTML = list.map(item => `
+                    <img src="${item.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800'}" 
+                         style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover; border: 1px solid #dee2e6;" 
+                         alt="${item.title || ''}" title="${item.title || ''}">
+                `).join('');
+                const ids = list.map(item => item.id).join(',');
+                goToBtn.href = `/listings/compare?ids=${ids}`;
+            } else {
+                drawer.classList.add('d-none');
+            }
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.compare-toggle-btn');
+        if (!btn) return;
+        e.preventDefault();
+
+        const id = parseInt(btn.getAttribute('data-id'), 10);
+        const title = btn.getAttribute('data-title') || '';
+        const image = btn.getAttribute('data-image') || '';
+        const price = btn.getAttribute('data-price') || '';
+        const currency = btn.getAttribute('data-currency') || 'TRY';
+
+        if (!id) return;
+
+        let list = getStoredCompareListings();
+        const existingIdx = list.findIndex(item => item.id === id);
+
+        if (existingIdx > -1) {
+            list.splice(existingIdx, 1);
+        } else {
+            if (list.length >= MAX_COMPARE) {
+                alert(`En fazla ${MAX_COMPARE} ilan karşılaştırabilirsiniz.`);
+                return;
+            }
+            list.push({ id, title, image, price, currency });
+        }
+
+        saveStoredCompareListings(list);
+        updateCompareUI();
+    });
+
+    const clearDrawerBtn = document.getElementById('clearCompareDrawerBtn');
+    if (clearDrawerBtn) {
+        clearDrawerBtn.addEventListener('click', () => {
+            saveStoredCompareListings([]);
+            updateCompareUI();
+        });
+    }
+
+    const clearAllCompareBtn = document.getElementById('clearAllCompareBtn');
+    if (clearAllCompareBtn) {
+        clearAllCompareBtn.addEventListener('click', () => {
+            saveStoredCompareListings([]);
+            window.location.href = '/listings/compare';
+        });
+    }
+
+    document.querySelectorAll('.remove-compare-item-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = parseInt(btn.getAttribute('data-id'), 10);
+            let list = getStoredCompareListings();
+            list = list.filter(item => item.id !== id);
+            saveStoredCompareListings(list);
+            const remainingIds = list.map(item => item.id).join(',');
+            window.location.href = remainingIds ? `/listings/compare?ids=${remainingIds}` : '/listings/compare';
+        });
+    });
+
+    const highlightDiffsToggle = document.getElementById('highlightDiffsToggle');
+    if (highlightDiffsToggle) {
+        highlightDiffsToggle.addEventListener('change', function() {
+            const rows = document.querySelectorAll('.compare-row');
+            rows.forEach(row => {
+                const cells = Array.from(row.querySelectorAll('.compare-cell'));
+                if (cells.length > 1) {
+                    const firstVal = cells[0].textContent.trim();
+                    const isDiff = cells.some(c => c.textContent.trim() !== firstVal);
+                    if (this.checked && isDiff) {
+                        row.classList.add('table-warning');
+                    } else {
+                        row.classList.remove('table-warning');
+                    }
+                }
+            });
+        });
+    }
+
+    updateCompareUI();
 });

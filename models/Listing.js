@@ -18,6 +18,7 @@ class Listing {
       currency = 'TRY', listing_type = 'sale', status = 'pending',
       location_lat = null, location_lng = null,
       is_premium = 0, is_featured = 0, expires_at = null,
+      is_urgent = 0, is_opportunity = 0, is_negotiable = 0,
       images = []
     } = listingData;
 
@@ -31,12 +32,14 @@ class Listing {
         INSERT INTO listings (
           user_id, category_id, title, slug, description, price, currency,
           listing_type, status, location_city, location_district,
-          location_lat, location_lng, is_premium, is_featured, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          location_lat, location_lng, is_premium, is_featured, expires_at,
+          is_urgent, is_opportunity, is_negotiable
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run([
         user_id, category_id, title, slug, description ?? null, price ?? null, currency,
         listing_type, status, location_city, location_district,
-        location_lat, location_lng, is_premium, is_featured, expires_at
+        location_lat, location_lng, is_premium, is_featured, expires_at,
+        is_urgent, is_opportunity, is_negotiable
       ]);
 
       const listingId = Number(result.lastInsertRowid);
@@ -89,7 +92,8 @@ class Listing {
              u.full_name as seller_name, u.phone as seller_phone,
              COALESCE(u.show_phone, 1) as seller_show_phone,
              u.avatar_url as seller_avatar, u.role as seller_role,
-             u.company_name as seller_company, u.created_at as seller_since
+             u.company_name as seller_company, u.created_at as seller_since,
+             u.last_seen_at as seller_last_seen
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.id
       LEFT JOIN users u ON l.user_id = u.id
@@ -115,11 +119,29 @@ class Listing {
     const keys = Object.keys(updateData);
     if (keys.length === 0) return false;
 
+    const oldListing = db.prepare('SELECT * FROM listings WHERE id = ?').get([id]);
+
     const setClause = keys.map(k => `${k} = ?`).join(', ');
     const values = Object.values(updateData);
 
-    return db.prepare(`UPDATE listings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
-      .run([...values, id]).changes > 0;
+    const changes = db.prepare(`UPDATE listings SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+      .run([...values, id]).changes;
+
+    if (changes > 0 && oldListing && updateData.price !== undefined && oldListing.price !== null) {
+      const oldPrice = Number(oldListing.price);
+      const newPrice = Number(updateData.price);
+      if (newPrice < oldPrice) {
+        try {
+          const PriceAlert = require('./PriceAlert');
+          const updated = { ...oldListing, ...updateData };
+          PriceAlert.triggerPriceDropNotifications(updated, oldPrice, newPrice);
+        } catch (err) {
+          console.error('Price alert notification error:', err);
+        }
+      }
+    }
+
+    return changes > 0;
   }
 
   static async delete(id) {
@@ -158,7 +180,8 @@ class Listing {
       SELECT l.*, c.name_tr as category_name,
              (SELECT image_url FROM listing_images
                WHERE listing_id = l.id
-               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
+               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image,
+             (SELECT COUNT(*) FROM listing_images WHERE listing_id = l.id) as image_count
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.id
       WHERE l.user_id = ?
@@ -172,7 +195,8 @@ class Listing {
       SELECT l.*, c.name_tr as category_name,
              (SELECT image_url FROM listing_images
                WHERE listing_id = l.id
-               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
+               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image,
+             (SELECT COUNT(*) FROM listing_images WHERE listing_id = l.id) as image_count
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.id
       WHERE l.is_featured = 1 AND l.status = 'active'
@@ -186,7 +210,8 @@ class Listing {
       SELECT l.*, c.name_tr as category_name,
              (SELECT image_url FROM listing_images
                WHERE listing_id = l.id
-               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
+               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image,
+             (SELECT COUNT(*) FROM listing_images WHERE listing_id = l.id) as image_count
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.id
       WHERE l.status = 'active'
@@ -222,9 +247,16 @@ class Listing {
 
   static async search(filters = {}, page = 1, limit = 20) {
     const Category = require('./Category');
+    const listingPolicy = require('../config/listingPolicy');
+    const listingBadges = require('../config/listingBadges');
     const db = getDb();
     let where = ' WHERE 1=1';
     const params = [];
+
+    // Some trees put professional sellers first. Resolved from the requested
+    // category rather than passed in by the caller, so every route that searches
+    // — the listing page, the API, the landing pages — gets the same ordering.
+    let corporateFirst = false;
 
     if (filters.status) {
       where += ' AND l.status = ?';
@@ -234,11 +266,19 @@ class Listing {
     }
 
     if (filters.category) {
-      const categoryIds = await Category.getCategoryAndSubcategoryIds(filters.category);
+      const category = await Category.getBySlug(filters.category);
+      const categoryIds = category ? await Category.getCategoryAndSubcategoryIds(filters.category) : [];
+
       if (categoryIds.length > 0) {
         const placeholders = categoryIds.map(() => '?').join(',');
         where += ` AND l.category_id IN (${placeholders})`;
         params.push(...categoryIds);
+
+        // A subcategory inherits its root's ordering: somebody browsing
+        // "İnşaat Malzemeleri" is inside the supplier network just as much as
+        // somebody browsing the whole tree.
+        const rootSlug = category.parent_id ? await Category.getRootSlug(category.id) : category.slug;
+        corporateFirst = listingPolicy.isCorporateFirst(rootSlug);
       } else {
         where += ' AND 1=0';
       }
@@ -259,24 +299,57 @@ class Listing {
       where += ' AND l.price <= ?';
       params.push(filters.maxPrice);
     }
-
-    let orderBy = ' ORDER BY l.created_at DESC';
-    if (filters.sort === 'price_asc') {
-      orderBy = ' ORDER BY l.price ASC';
-    } else if (filters.sort === 'price_desc') {
-      orderBy = ' ORDER BY l.price DESC';
+    if (filters.listing_type || filters.type) {
+      const targetType = filters.listing_type || filters.type;
+      where += ' AND l.listing_type = ?';
+      params.push(targetType);
     }
 
+    // The column name is looked up from the badge definitions rather than taken
+    // from the query string: this is the one filter whose value would otherwise
+    // reach the SQL text itself, and an unknown key must narrow nothing rather
+    // than name a column.
+    if (filters.badge) {
+      const badge = listingBadges.byKey(String(filters.badge));
+      if (badge) {
+        where += ` AND l.${badge.column} = 1`;
+        // "Negotiable" is only meaningful against a real number, and it is only
+        // shown on such listings — so it must not match ones without a price.
+        if (badge.requiresPrice) where += ' AND l.price > 0';
+      } else {
+        where += ' AND 1=0';
+      }
+    }
+
+    const orderClauses = [];
+    if (corporateFirst) {
+      orderClauses.push("CASE WHEN u.role IN ('business', 'agent') THEN 0 ELSE 1 END");
+    }
+    if (filters.sort === 'price_asc') {
+      orderClauses.push('l.price ASC');
+    } else if (filters.sort === 'price_desc') {
+      orderClauses.push('l.price DESC');
+    } else {
+      orderClauses.push('l.created_at DESC');
+    }
+    const orderBy = ' ORDER BY ' + orderClauses.join(', ');
+
+    // The count is unaffected by ordering, so it never needs the seller join.
     const { total } = db.prepare(`SELECT COUNT(*) as total FROM listings l${where}`).get(params);
+
+    // Joined only where the ordering reads it, so an ordinary search keeps the
+    // query plan it had.
+    const sellerJoin = corporateFirst ? ' LEFT JOIN users u ON l.user_id = u.id' : '';
 
     const offset = (page - 1) * limit;
     const data = db.prepare(`
       SELECT l.*, c.name_tr as category_name, c.name_en as category_name_en, c.name_el as category_name_el, c.name_ru as category_name_ru, c.name_fa as category_name_fa,
              (SELECT image_url FROM listing_images
                WHERE listing_id = l.id
-               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
+               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image,
+             (SELECT COUNT(*) FROM listing_images WHERE listing_id = l.id) as image_count
       FROM listings l
-      LEFT JOIN categories c ON l.category_id = c.id
+      LEFT JOIN categories c ON l.category_id = c.id${sellerJoin}
       ${where}${orderBy} LIMIT ? OFFSET ?
     `).all([...params, limit, offset]);
 
@@ -325,7 +398,8 @@ class Listing {
              u.full_name as owner_name, u.email as owner_email,
              (SELECT image_url FROM listing_images
                WHERE listing_id = l.id
-               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
+               ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image,
+             (SELECT COUNT(*) FROM listing_images WHERE listing_id = l.id) as image_count
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.id
       LEFT JOIN users u ON l.user_id = u.id
@@ -406,6 +480,7 @@ class Listing {
              (SELECT image_url FROM listing_images
                 WHERE listing_id = l.id
                 ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image,
+             (SELECT COUNT(*) FROM listing_images WHERE listing_id = l.id) as image_count,
              f.created_at as favorited_at
       FROM favorites f
       JOIN listings l ON f.listing_id = l.id
@@ -427,6 +502,35 @@ class Listing {
     const db = getDb();
     const { total } = db.prepare("SELECT COUNT(*) as total FROM listings WHERE status = 'active'").get();
     return total;
+  }
+
+  static async getCompareListings(ids) {
+    if (!Array.isArray(ids) || ids.length === 0) return [];
+    const validIds = ids.map(id => parseInt(id, 10)).filter(id => Number.isInteger(id) && id > 0).slice(0, 4);
+    if (validIds.length === 0) return [];
+
+    const db = getDb();
+    const placeholders = validIds.map(() => '?').join(',');
+    const rows = db.prepare(`
+      SELECT l.*, c.name_tr as category_name, c.name_en as category_name_en, c.name_el as category_name_el, c.name_ru as category_name_ru, c.name_fa as category_name_fa, c.slug as category_slug,
+             u.full_name as seller_name, u.role as seller_role, u.company_name as seller_company, u.avatar_url as seller_avatar, u.last_seen_at as seller_last_seen,
+             (SELECT AVG(rating) FROM reviews WHERE reviewed_user_id = u.id) as seller_rating,
+             (SELECT COUNT(*) FROM reviews WHERE reviewed_user_id = u.id) as seller_rating_count,
+             (SELECT image_url FROM listing_images WHERE listing_id = l.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
+      FROM listings l
+      LEFT JOIN categories c ON l.category_id = c.id
+      LEFT JOIN users u ON l.user_id = u.id
+      WHERE l.id IN (${placeholders}) AND l.status = 'active'
+    `).all(validIds);
+
+    for (const item of rows) {
+      const attrs = db.prepare('SELECT attribute_key, attribute_value FROM listing_attributes WHERE listing_id = ?').all([item.id]);
+      const attrMap = {};
+      attrs.forEach(a => { attrMap[a.attribute_key] = a.attribute_value; });
+      item.attributes = attrMap;
+    }
+
+    return rows;
   }
 }
 

@@ -6,6 +6,27 @@ const { getDb } = require('../config/database');
 // spot — and a moderator who wants that can still suspend directly.
 const SUSPENSION_THRESHOLD = 3;
 
+// Lifting a warning and deleting one both have to re-examine the account: once
+// the strike that locked it is gone, the lock goes with it. Otherwise clearing a
+// mistake would leave the member shut out with nothing left to point at. Kept in
+// one place so the two paths cannot drift apart.
+//
+// Note this reactivates an account whose suspension came from somewhere else too
+// — there is no column recording *why* an account was suspended, so a warning
+// being cleared cannot tell the difference.
+const recountAndSyncAccount = (db, userId) => {
+  const { count } = db.prepare(
+    'SELECT COUNT(*) as count FROM user_warnings WHERE user_id = ? AND is_active = 1'
+  ).get([userId]);
+
+  if (count < SUSPENSION_THRESHOLD) {
+    db.prepare('UPDATE users SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run([userId]);
+  }
+
+  return count;
+};
+
 class Warning {
   // Issuing the third warning suspends the account in the same transaction, so
   // the count and the account state can never disagree.
@@ -54,31 +75,43 @@ class Warning {
     return count;
   }
 
-  // Lifting a warning also lifts the suspension it caused, provided the member
-  // is no longer at the threshold. Otherwise clearing a mistake would leave the
-  // account locked with nothing left to point at.
+  // Lifting a warning keeps the row, marked inactive: the moderation trail is
+  // the point, so "we were wrong about this one" should still be readable later.
+  // Returns the row so the caller can tell the member their warning was lifted.
   static async revoke(warningId) {
     const db = getDb();
 
     const lift = db.transaction(() => {
       const warning = db.prepare('SELECT * FROM user_warnings WHERE id = ?').get([warningId]);
-      if (!warning) return false;
+      if (!warning) return null;
+      if (Number(warning.is_active) === 0) return warning;
 
       db.prepare('UPDATE user_warnings SET is_active = 0 WHERE id = ?').run([warningId]);
+      recountAndSyncAccount(db, warning.user_id);
 
-      const { count } = db.prepare(
-        'SELECT COUNT(*) as count FROM user_warnings WHERE user_id = ? AND is_active = 1'
-      ).get([warning.user_id]);
-
-      if (count < SUSPENSION_THRESHOLD) {
-        db.prepare('UPDATE users SET is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-          .run([warning.user_id]);
-      }
-
-      return true;
+      return warning;
     });
 
     return lift();
+  }
+
+  // Erases the row outright, for a warning that should never have been recorded
+  // — the wrong member, a duplicate, a test entry. Distinct from revoke because
+  // a lifted warning is history worth keeping and a mistaken one is noise in it.
+  static async remove(warningId) {
+    const db = getDb();
+
+    const drop = db.transaction(() => {
+      const warning = db.prepare('SELECT * FROM user_warnings WHERE id = ?').get([warningId]);
+      if (!warning) return null;
+
+      db.prepare('DELETE FROM user_warnings WHERE id = ?').run([warningId]);
+      recountAndSyncAccount(db, warning.user_id);
+
+      return warning;
+    });
+
+    return drop();
   }
 
   static remainingBeforeSuspension(activeCount) {

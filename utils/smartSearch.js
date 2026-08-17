@@ -43,6 +43,19 @@ const CATEGORY_TERMS = {
   'nakliyat': ['nakliyat', 'nakliye', 'removals', 'tasima', 'taşıma', 'перевозки'],
   'tam-zamanli': ['tam zamanli', 'tam zamanlı', 'full time', 'full-time'],
   'yari-zamanli': ['yari zamanli', 'yarı zamanlı', 'part time', 'part-time'],
+  'insaat-malzemeleri': ['insaat malzemesi', 'inşaat malzemesi', 'insaat malzemeleri', 'inşaat malzemeleri', 'building materials', 'cimento', 'çimento', 'beton', 'tugla', 'tuğla', 'demir', 'kereste', 'стройматериалы'],
+  'hirdavat-nalburiye': ['hirdavat', 'hırdavat', 'nalburiye', 'nalbur', 'hardware', 'vida', 'civata'],
+  'elektrik-aydinlatma': ['elektrik malzemesi', 'aydinlatma', 'aydınlatma', 'lighting', 'kablo', 'armatur', 'armatür'],
+  'sihhi-tesisat-isitma': ['sihhi tesisat', 'sıhhi tesisat', 'tesisat', 'isitma', 'ısıtma', 'plumbing', 'heating', 'kombi', 'radyator', 'radyatör'],
+  'boya-yalitim': ['boya', 'yalitim', 'yalıtım', 'paint', 'insulation', 'izolasyon', 'mantolama'],
+  // 'iskele' is deliberately absent: it is one of the five cities, and the
+  // category matcher picks the longest term present — so it would swallow every
+  // search that mentions İskele and send it to construction machinery instead.
+  'is-makineleri-ekipman': ['is makinesi', 'iş makinesi', 'is makineleri', 'iş makineleri', 'ekipman', 'machinery', 'equipment', 'jeneratör', 'jenerator'],
+  'gida-icecek-toptan': ['gida toptan', 'gıda toptan', 'icecek toptan', 'içecek toptan', 'food wholesale', 'toptan gida', 'toptan gıda'],
+  'temizlik-hijyen-toptan': ['temizlik toptan', 'hijyen', 'hygiene', 'deterjan', 'toptan temizlik'],
+  'mobilya-dekorasyon-toptan': ['toptan mobilya', 'mobilya toptan', 'dekorasyon toptan', 'furniture wholesale'],
+  'ambalaj-lojistik': ['ambalaj', 'packaging', 'koli', 'palet', 'lojistik', 'logistics', 'упаковка'],
   // Bare nouns land on the root category: "daire" alone does not say whether the
   // visitor wants to buy or rent, so narrowing to a leaf would guess wrong half
   // the time. The rent/sale hint below refines it when the sentence says so.
@@ -50,7 +63,8 @@ const CATEGORY_TERMS = {
   'vasita': ['vasita', 'vasıta', 'arac', 'araç', 'vehicle', 'οχηματα', 'транспорт'],
   'ikinci-el': ['ikinci el', 'second hand', 'used', 'μεταχειρισμενα', 'б/у'],
   'usta-hizmetler': ['usta', 'hizmet', 'trades', 'services', 'υπηρεσιες', 'услуги'],
-  'is-ilanlari': ['is ilani', 'iş ilanı', 'is ilanlari', 'iş ilanları', 'job', 'jobs', 'vacancy', 'работа']
+  'is-ilanlari': ['is ilani', 'iş ilanı', 'is ilanlari', 'iş ilanları', 'job', 'jobs', 'vacancy', 'работа'],
+  'kurumsal-tedarikci': ['toptan', 'toptanci', 'toptancı', 'tedarikci', 'tedarikçi', 'tedarik', 'wholesale', 'supplier', 'kurumsal tedarik', 'insaat', 'inşaat', 'malzeme', 'χονδρικη', 'оптом', 'поставщик', 'عمده']
 };
 
 // Words that put a number on one side of a range or the other.

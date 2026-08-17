@@ -50,6 +50,8 @@ router.post(
     listingController.create
 );
 
+router.get('/compare', listingController.compare);
+
 router.get('/:slug', listingController.show);
 
 router.get('/:slug/edit', isAuthenticated, fetchListingForOwnership, isOwner, listingController.showEdit);
@@ -72,5 +74,9 @@ router.delete('/:slug', isAuthenticated, fetchListingForOwnership, isOwner, list
 router.get('/:id/phone', isAuthenticated, phoneRevealLimiter, listingController.revealPhone);
 
 router.post('/:id/favorite', isAuthenticated, listingController.toggleFavorite);
+
+router.post('/:id/price-alert', isAuthenticated, listingController.togglePriceAlert);
+
+router.post('/:id/quick-offer', isAuthenticated, listingController.quickOffer);
 
 module.exports = router;

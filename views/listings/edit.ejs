@@ -19,6 +19,35 @@
                     <div class="card-body p-4">
 
                         <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted d-block">
+                                <i class="fa-solid fa-bullhorn text-primary me-1"></i><%= t('listing.listing_purpose') || 'İlan Amacı / Türü' %> <span class="text-danger">*</span>
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="listing_type" id="typeSale" value="sale" <%= (!listing.listing_type || listing.listing_type === 'sale') ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-primary w-100 rounded-3 py-2 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeSale">
+                                        <i class="fa-solid fa-tag mb-1 fs-5"></i>
+                                        <span><%= t('listing.type_sale') || 'Satılık' %></span>
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="listing_type" id="typeRent" value="rent" <%= (listing.listing_type === 'rent') ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-primary w-100 rounded-3 py-2 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeRent">
+                                        <i class="fa-solid fa-key mb-1 fs-5"></i>
+                                        <span><%= t('listing.type_rent') || 'Kiralık' %></span>
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="listing_type" id="typeWanted" value="wanted" <%= (listing.listing_type === 'wanted') ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-warning w-100 rounded-3 py-2 fw-semibold small d-flex flex-column align-items-center justify-content-center text-dark" for="typeWanted">
+                                        <i class="fa-solid fa-hand-holding-heart mb-1 fs-5 text-warning"></i>
+                                        <span><%= t('listing.type_wanted') || '📢 Arıyorum (Talep)' %></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
                             <label class="form-label fw-bold small text-muted"><%= t('listing.title') %> <span class="text-danger">*</span></label>
                             <input type="text" name="title" id="titleInput" class="form-control form-control-lg bg-light border-0 shadow-none focus-ring-primary"
                                    value="<%= listing.title %>" required maxlength="150">
@@ -131,6 +160,12 @@
                         </div>
                     </div>
                 <% } %>
+
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-body p-4">
+                        <%- include('../partials/badgePicker', { current: listing, idPrefix: 'edit_' }) %>
+                    </div>
+                </div>
 
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">

@@ -74,6 +74,36 @@
                 </ul>
             </div>
         </div>
+    <%
+        const currentType = filters.type || filters.listing_type || '';
+        function buildTypeUrl(tVal) {
+            const params = new URLSearchParams();
+            if (filters.q) params.set('q', filters.q);
+            if (filters.category) params.set('category', filters.category);
+            if (filters.city) params.set('city', filters.city);
+            if (filters.minPrice) params.set('minPrice', filters.minPrice);
+            if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
+            if (filters.currency) params.set('currency', filters.currency);
+            if (filters.sort) params.set('sort', filters.sort);
+            if (filters.badge) params.set('badge', filters.badge);
+            if (tVal) params.set('type', tVal);
+            const qs = params.toString();
+            return qs ? '/listings?' + qs : '/listings';
+        }
+    %>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="<%= buildTypeUrl('') %>" class="btn btn-sm <%= !currentType ? 'btn-primary text-white shadow-sm' : 'btn-light border text-muted' %> rounded-pill px-3 py-2 fw-medium">
+            <i class="fa-solid fa-list-ul me-1"></i> <%= t('common.all') || 'Tüm İlanlar' %>
+        </a>
+        <a href="<%= buildTypeUrl('sale') %>" class="btn btn-sm <%= currentType === 'sale' ? 'btn-primary text-white shadow-sm' : 'btn-light border text-muted' %> rounded-pill px-3 py-2 fw-medium">
+            <i class="fa-solid fa-tag me-1"></i> <%= t('listing.type_sale') || 'Satılık' %>
+        </a>
+        <a href="<%= buildTypeUrl('rent') %>" class="btn btn-sm <%= currentType === 'rent' ? 'btn-primary text-white shadow-sm' : 'btn-light border text-muted' %> rounded-pill px-3 py-2 fw-medium">
+            <i class="fa-solid fa-key me-1"></i> <%= t('listing.type_rent') || 'Kiralık' %>
+        </a>
+        <a href="<%= buildTypeUrl('wanted') %>" class="btn btn-sm <%= currentType === 'wanted' ? 'btn-warning text-dark fw-bold shadow-sm' : 'btn-light border text-dark' %> rounded-pill px-3 py-2 fw-medium">
+            <i class="fa-solid fa-hand-holding-heart me-1 text-warning"></i> <%= t('listing.type_wanted') || '📢 Arıyorum (Talepler)' %>
+        </a>
     </div>
 
     <div class="row g-4">
@@ -112,6 +142,11 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.city') %></label>
                             <%- include('../partials/citySelect', { selectedCity: filters.city }) %>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.badge_filter_label') %></label>
+                            <%- include('../partials/badgeFilter', { selectedBadge: filters.badge || '', idPrefix: 'd_' }) %>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift"><%= t('listing.apply_filters') %></button>
@@ -220,6 +255,11 @@
             <div class="mb-4">
                 <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.city') %></label>
                 <%- include('../partials/citySelect', { selectedCity: filters.city }) %>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.badge_filter_label') %></label>
+                <%- include('../partials/badgeFilter', { selectedBadge: filters.badge || '', idPrefix: 'm_' }) %>
             </div>
 
             <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift"><%= t('listing.apply_filters') %></button>

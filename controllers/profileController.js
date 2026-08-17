@@ -292,6 +292,22 @@ const myFavorites = async (req, res, next) => {
     }
 };
 
+const myPriceAlerts = async (req, res, next) => {
+    try {
+        const PriceAlert = require('../models/PriceAlert');
+        const alerts = await PriceAlert.getUserAlerts(req.session.userId);
+
+        res.locals.meta = res.locals.meta || {};
+        res.locals.meta.title = 'Fiyat Alarmlarım | CYPILAN.COM';
+        res.locals.meta.robots = 'noindex, nofollow';
+
+        res.render('profile/alerts', { alerts, title: 'Fiyat Alarmlarım' });
+    } catch (error) {
+        console.error('My Price Alerts Error:', error);
+        next(error);
+    }
+};
+
 module.exports = {
     index,
     show,
@@ -300,5 +316,6 @@ module.exports = {
     changePassword,
     changeEmail,
     myListings,
-    myFavorites
+    myFavorites,
+    myPriceAlerts
 };

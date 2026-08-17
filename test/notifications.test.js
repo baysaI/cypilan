@@ -104,9 +104,20 @@ t.run('Bildirim Sistemi & Favori/Uyarı Bildirimleri', async (db) => {
   const buyerNotifications = await Notification.getByUserId(buyer);
   t.assertEqual(buyerNotifications.length, 1, 'Kullanıcının 1 bildirimi var');
   t.assertEqual(buyerNotifications[0].type, 'warning', 'Bildirim türü warning');
-  t.assert(buyerNotifications[0].message.includes('Uygunsuz İçerik') || buyerNotifications[0].message.includes('inappropriate'), 'Bildirimde uyarı gerekçesi belirtildi');
+  // Gerekce, moderatorun kendi listesini besleyen anahtardan cozulur. Bu
+  // iddia eskiden ham 'inappropriate' degerini de kabul ediyordu ve bu yuzden
+  // kullaniciya okunamaz metin gonderen hatayi yakalamadi.
+  t.assert(
+    buyerNotifications[0].message.includes(t.translate('report_modal.reasons.inappropriate', 'tr')),
+    'Bildirimde uyarı gerekçesi çevrilmiş olarak yer alıyor'
+  );
+  t.assert(
+    !buyerNotifications[0].message.includes('inappropriate'),
+    'Ham enum değeri kullanıcıya sızmıyor'
+  );
   t.assert(buyerNotifications[0].message.includes('uygunsuz kelimeler'), 'Bildirimde yönetici notu yer alıyor');
   t.assert(buyerNotifications[0].message.includes('2'), 'Askıya alınmaya kalan hak (2) bildirildi');
+  t.assertEqual(buyerNotifications[0].link_url, '/profile/listings', 'Detay bağlantısı uyarı listesine gidiyor');
 
   // 3. Bildirimi Okundu İşaretleme & Yönlendirme
   const notifId = sellerNotifications[0].id;

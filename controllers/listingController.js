@@ -9,7 +9,9 @@ const { generateSlug, maskPhone } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
 const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/upload');
 const Setting = require('../models/Setting');
+const PriceAlert = require('../models/PriceAlert');
 const listingPolicy = require('../config/listingPolicy');
+const listingBadges = require('../config/listingBadges');
 const smartSearch = require('../utils/smartSearch');
 const cities = require('../config/cities');
 const listingDraft = require('../utils/listingDraft');
@@ -51,6 +53,9 @@ const index = async (req, res, next) => {
             city: req.query.city,
             minPrice: req.query.minPrice,
             maxPrice: req.query.maxPrice,
+            // Unknown values are dropped here rather than passed down: an
+            // unrecognised badge should widen nothing and narrow nothing.
+            badge: listingBadges.isKnownKey(req.query.badge) ? req.query.badge : undefined,
             sort: req.query.sort || 'newest'
         };
 
@@ -142,10 +147,17 @@ const show = async (req, res, next) => {
         }
 
         let isFavorited = false;
+        let isPriceAlertActive = false;
         if (req.session && req.session.userId) {
-            const userFavs = await Listing.getUserFavoriteIds(req.session.userId);
+            const [userFavs, alert] = await Promise.all([
+                Listing.getUserFavoriteIds(req.session.userId),
+                PriceAlert.findByPair(req.session.userId, listing.id)
+            ]);
             isFavorited = userFavs.includes(listing.id);
+            isPriceAlertActive = alert !== null;
         }
+
+        const coordinates = cities.getCoordinates(listing.location_city, listing.location_lat, listing.location_lng);
 
         const sellerRating = await Review.getSummary(listing.user_id);
         const bidSummary = listing.listing_type === 'bid_request'
@@ -167,6 +179,8 @@ const show = async (req, res, next) => {
         res.render('listings/show', {
             listing,
             isFavorited,
+            isPriceAlertActive,
+            coordinates,
             sellerRating,
             bidSummary,
             openServiceRequests,
@@ -335,6 +349,7 @@ const create = async (req, res, next) => {
             district,
             status,
             expires_at: listingPolicy.expiresAt(),
+            ...listingBadges.fromBody(req.body),
             images
         });
 
@@ -478,7 +493,10 @@ const update = async (req, res, next) => {
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : listing.currency,
             location_city: cities.isKnown(city) ? city : listing.location_city,
             location_district: district ? district.trim() : null,
-            status: nextStatus
+            status: nextStatus,
+            // Unticking a badge has to clear it, so these are always written —
+            // fromBody returns 0 for anything absent from the form.
+            ...listingBadges.fromBody(req.body)
         };
 
         // Reviving an expired listing without a fresh deadline would just let the
@@ -622,6 +640,127 @@ const toggleFavorite = async (req, res) => {
     }
 };
 
+const compare = async (req, res, next) => {
+    try {
+        let rawIds = req.query.ids;
+        let ids = [];
+        if (typeof rawIds === 'string') {
+            ids = rawIds.split(',').map(s => parseInt(s.trim(), 10)).filter(n => Number.isInteger(n) && n > 0);
+        } else if (Array.isArray(rawIds)) {
+            ids = rawIds.map(s => parseInt(s, 10)).filter(n => Number.isInteger(n) && n > 0);
+        }
+
+        const listings = ids.length > 0 ? await Listing.getCompareListings(ids) : [];
+
+        res.locals.meta = res.locals.meta || {};
+        res.locals.meta.title = 'İlan Karşılaştırma | CYPILAN.COM';
+        res.locals.meta.robots = 'noindex, nofollow';
+
+        res.render('listings/compare', {
+            listings,
+            compareIds: ids,
+            title: 'İlan Karşılaştırma'
+        });
+    } catch (error) {
+        console.error('Listings Compare Error:', error);
+        next(error);
+    }
+};
+
+const togglePriceAlert = async (req, res) => {
+    try {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ success: false, error: 'Fiyat alarmı kurmak için lütfen giriş yapınız.' });
+        }
+
+        const listingId = parseInt(req.params.id, 10);
+        if (!Number.isInteger(listingId) || listingId <= 0) {
+            return res.status(400).json({ success: false, error: 'Geçersiz ilan ID.' });
+        }
+
+        const existing = await PriceAlert.findByPair(req.session.userId, listingId);
+
+        if (existing) {
+            await PriceAlert.delete(req.session.userId, listingId);
+            return res.json({ success: true, active: false, message: 'Fiyat alarmı kaldırıldı.' });
+        } else {
+            const targetPrice = req.body.target_price ? parseFloat(req.body.target_price) : null;
+            await PriceAlert.create({
+                user_id: req.session.userId,
+                listing_id: listingId,
+                target_price: Number.isFinite(targetPrice) ? targetPrice : null
+            });
+            return res.json({ success: true, active: true, message: 'Fiyat alarmı kuruldu! Fiyat düştüğünde size bildireceğiz.' });
+        }
+    } catch (error) {
+        console.error('Toggle Price Alert Error:', error);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+const quickOffer = async (req, res) => {
+    try {
+        if (!req.session || !req.session.userId) {
+            if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+                return res.status(401).json({ success: false, error: 'Teklif vermek için lütfen giriş yapınız.' });
+            }
+            req.flash('error', 'flash.login_required');
+            return res.redirect('/auth/login');
+        }
+
+        const listingId = parseInt(req.params.id, 10);
+        const amount = parseFloat(req.body.amount);
+        const message = String(req.body.message || '').trim();
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+            if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+                return res.status(400).json({ success: false, error: 'Lütfen geçerli bir teklif tutarı giriniz.' });
+            }
+            req.flash('error', 'flash.bid_amount_required');
+            return res.redirect(req.get('referer') || '/listings');
+        }
+
+        const listing = await Listing.findById(listingId);
+        if (!listing || listing.status !== 'active') {
+            if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+                return res.status(404).json({ success: false, error: 'İlan bulunamadı veya yayında değil.' });
+            }
+            req.flash('error', 'flash.listing_not_found');
+            return res.redirect('/listings');
+        }
+
+        if (listing.user_id === req.session.userId) {
+            if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+                return res.status(400).json({ success: false, error: 'Kendi ilanınıza teklif veremezsiniz.' });
+            }
+            req.flash('error', 'flash.bid_cannot_bid_own');
+            return res.redirect(req.get('referer') || '/listings');
+        }
+
+        await Bid.submitQuickOffer({
+            listing_id: listingId,
+            bidder_id: req.session.userId,
+            amount,
+            currency: req.body.currency || listing.currency || 'TRY',
+            message: message || null
+        });
+
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+            return res.json({ success: true, message: 'Pazarlık teklifiniz satıcıya başarıyla iletildi!' });
+        }
+
+        req.flash('success', 'flash.bid_sent');
+        return res.redirect(`/listings/${listing.slug}`);
+    } catch (error) {
+        console.error('Quick Offer Error:', error);
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+            return res.status(500).json({ success: false, error: error.message });
+        }
+        req.flash('error', 'Teklif gönderilirken bir hata oluştu.');
+        return res.redirect(req.get('referer') || '/listings');
+    }
+};
+
 module.exports = {
     index,
     show,
@@ -631,5 +770,8 @@ module.exports = {
     update,
     delete: deleteListing,
     revealPhone,
-    toggleFavorite
+    toggleFavorite,
+    compare,
+    togglePriceAlert,
+    quickOffer
 };

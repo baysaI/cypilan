@@ -81,6 +81,27 @@ const requireVerifiedEmail = async (req, res, next) => {
     return res.redirect('/auth/verify-email-pending');
 };
 
+// How stale the stored timestamp is allowed to get. Writing on every request
+// would mean an UPDATE per page view per member — for a figure nobody reads to
+// the minute. Five minutes also matches the window the templates call "online",
+// so the label can never be more wrong than its own resolution.
+const LAST_SEEN_TOUCH_INTERVAL_MS = 5 * 60 * 1000;
+
+const touchLastSeen = async (req, userId) => {
+    if (!req.session) return;
+
+    const lastTouch = Number(req.session.lastSeenTouchedAt) || 0;
+    if (Date.now() - lastTouch < LAST_SEEN_TOUCH_INTERVAL_MS) return;
+
+    try {
+        await User.touchLastSeen(userId);
+        req.session.lastSeenTouchedAt = Date.now();
+    } catch (error) {
+        // Presence is decoration. A failed write must not cost the member the page.
+        console.error('Last seen touch error:', error);
+    }
+};
+
 const setUserLocal = async (req, res, next) => {
     let userId = req.session && req.session.userId;
     let user = req.user;
@@ -155,6 +176,8 @@ const setUserLocal = async (req, res, next) => {
             console.error('Unread notifications count error:', error);
             res.locals.unreadNotifications = 0;
         }
+
+        await touchLastSeen(req, userId);
     } else {
         res.locals.user = null;
         res.locals.currentUser = null;
@@ -172,5 +195,6 @@ module.exports = {
     isAdmin,
     isOwner,
     requireVerifiedEmail,
-    setUserLocal
+    setUserLocal,
+    LAST_SEEN_TOUCH_INTERVAL_MS
 };

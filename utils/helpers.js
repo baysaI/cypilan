@@ -95,6 +95,53 @@ function formatDate(date, lang = 'tr') {
   }
 }
 
+// Same as formatDate but keeps the clock, for places where "which day" is not
+// precise enough — the admin user table wants to tell 9 minutes ago from 9 hours.
+function formatDateTime(date, lang = 'tr') {
+  if (!date) return '';
+  const d = parseDate(date);
+  if (isNaN(d.getTime())) return '';
+
+  const locale = INTL_LOCALES[lang] || INTL_LOCALES['tr'];
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(d);
+  } catch (err) {
+    return d.toLocaleString();
+  }
+}
+
+// A member counts as present for this long after their last request. Shorter and
+// somebody reading a long listing looks like they left; longer and "online" stops
+// meaning "answer likely now". It matches the interval at which the timestamp is
+// actually written, so the label is never staler than its own resolution.
+const ONLINE_WINDOW_MINUTES = 5;
+
+// Buckets a last-seen timestamp instead of formatting it, so a template can pick
+// the wording — and so what counts as "now" is decided in one place rather than
+// separately in every view that shows presence.
+function lastSeenState(value) {
+  const unknown = { known: false, online: false, today: false, minutes: null };
+  if (!value) return unknown;
+
+  const d = parseDate(value);
+  if (isNaN(d.getTime())) return unknown;
+
+  const minutes = Math.max(0, Math.floor((Date.now() - d.getTime()) / 60000));
+
+  return {
+    known: true,
+    online: minutes < ONLINE_WINDOW_MINUTES,
+    today: minutes < 24 * 60,
+    minutes
+  };
+}
+
 function timeAgo(date, lang = 'tr') {
   if (!date) return '';
   const d = parseDate(date);
@@ -285,6 +332,9 @@ function getCityName(cityName, lang = 'tr') {
 module.exports = {
   formatPrice,
   formatDate,
+  formatDateTime,
+  lastSeenState,
+  ONLINE_WINDOW_MINUTES,
   timeAgo,
   formatRelativeTime: timeAgo,
   truncate,

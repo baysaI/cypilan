@@ -99,4 +99,82 @@ t.run('Kademeli uyarı ve performans paneli', async (db) => {
       .every((key) => t.translate(key, lang) !== key)
   );
   t.assert(allLangs, 'warnings.* / panel.* / students.* 5 dilde çözülüyor');
+
+  // --- Bildirimdeki gerekce etiketi
+  // Uyari bildirimi 'reports.reason_*' anahtarini ariyordu; o namespace hic
+  // olmadigi icin metin ham enum degerine dusuyor ve kullaniciya iceriginin
+  // "other" gerekcesiyle uyari aldigi soyleniyordu.
+  const reasonsResolve = ['wrong_category', 'spam', 'fraud', 'other', 'harassment'].every((reason) =>
+    ['tr', 'en', 'el', 'ru', 'fa'].every((lang) =>
+      t.translate('report_modal.reasons.' + reason, lang) !== 'report_modal.reasons.' + reason
+    )
+  );
+  t.assert(reasonsResolve, 'Uyarı gerekçeleri 5 dilde çözülüyor');
+
+  const warnMessage = t.translate('notifications.warning_message', 'tr', {
+    reason: t.translate('report_modal.reasons.other', 'tr'),
+    note: ' ' + t.translate('notifications.warning_note', 'tr', { note: 'deneme' }),
+    remaining: 2
+  });
+  t.assert(
+    warnMessage.includes('Diğer') && !warnMessage.includes('other'),
+    'Bildirim metni çevrilmiş gerekçeyi taşıyor, ham enum değerini değil'
+  );
+  t.assert(warnMessage.includes('(Not: deneme)'), 'Yönetici notu çevrilebilir kalıpla ekleniyor');
+
+  // --- Kalici silme: kaldirmadan farki gecmiste iz birakmamasi
+  const standing = (await Warning.forUser(seller)).filter((w) => Number(w.is_active) === 1);
+  const removed = await Warning.remove(standing[0].id);
+  t.assert(removed && removed.id === standing[0].id, 'Warning.remove silinen kaydı döndürüyor (bildirim bunu kullanıyor)');
+  t.assertEqual(await Warning.countActive(seller), 1, 'Kalıcı silme aktif uyarı sayısını düşürüyor');
+  t.assertEqual(
+    (await Warning.forUser(seller)).some((w) => w.id === standing[0].id),
+    false,
+    'Silinen kayıt geçmişte de görünmüyor'
+  );
+  t.assertEqual(await Warning.remove(999999), null, 'Olmayan uyarıyı silmek hata atmıyor');
+
+  // Askiya sebep olan kayit silinince hesap da geri acilmali
+  await Warning.issue({ user_id: seller, issued_by: admin, reason: 'spam' });
+  const third = await Warning.issue({ user_id: seller, issued_by: admin, reason: 'inappropriate' });
+  t.assert(third.suspended, 'Silme sonrası yeniden 3. uyarıda askı işliyor');
+
+  const lastStanding = (await Warning.forUser(seller)).filter((w) => Number(w.is_active) === 1)[0];
+  await Warning.remove(lastStanding.id);
+  user = db.prepare('SELECT is_active FROM users WHERE id = ?').get([seller]);
+  t.assertEqual(Number(user.is_active), 1, 'Askıya sebep olan kayıt silinince askı da kalkıyor');
+
+  // --- Admin panelinde uyari gecmisi
+  const history = await Warning.forUser(seller);
+  const adminUsersHtml = await t.render('admin/users.ejs', {
+    pagination: { page: 1, totalItems: 1, totalPages: 1 },
+    filters: {},
+    users: [{
+      id: seller, email: 'seller@test.local', full_name: 'Satıcı', role: 'user',
+      is_active: 1, is_verified: 1, created_at: '2026-08-01 10:00:00', listing_count: 2
+    }],
+    currentUser: { id: admin },
+    warningCounts: { [seller]: history.filter((w) => Number(w.is_active) === 1).length },
+    warningHistory: { [seller]: history },
+    suspensionThreshold: Warning.SUSPENSION_THRESHOLD,
+    reportReasons: ['wrong_category', 'spam', 'fraud', 'other'],
+    pendingReports: 0
+  });
+
+  t.assert(adminUsersHtml.includes('Uyarı Geçmişi'), 'Admin paneli uyarı geçmişi bölümünü basıyor');
+  t.assert(adminUsersHtml.includes('Admin'), 'Uyarıyı kimin verdiği görünüyor');
+  t.assert(
+    history.some((w) => adminUsersHtml.includes(`/admin/uyari/${w.id}/sil`)),
+    'Her kayıt için kalıcı silme aksiyonu var'
+  );
+  t.assert(
+    history.filter((w) => Number(w.is_active) === 1)
+      .every((w) => adminUsersHtml.includes(`/admin/uyari/${w.id}/kaldir`)),
+    'Aktif kayıtlar için kaldırma aksiyonu var'
+  );
+  t.assert(
+    history.filter((w) => Number(w.is_active) === 0)
+      .every((w) => !adminUsersHtml.includes(`/admin/uyari/${w.id}/kaldir`)),
+    'Kaldırılmış kayıtta tekrar kaldırma butonu çıkmıyor'
+  );
 });

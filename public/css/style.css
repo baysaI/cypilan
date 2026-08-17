@@ -1202,3 +1202,64 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     color: var(--bs-primary, #0d6efd) !important;
     text-decoration: underline !important;
 }
+
+/* --------------------------------------------------------------------------
+   9. New Features: Compare Drawer, Matrix & Price Alerts
+   -------------------------------------------------------------------------- */
+#compareFloatingDrawer {
+    animation: cypDrawerSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.3s ease;
+}
+
+@keyframes cypDrawerSlideUp {
+    from {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.compare-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.compare-table th, .compare-table td {
+    vertical-align: middle;
+}
+
+.compare-row.table-warning {
+    background-color: #fff8e1 !important;
+}
+
+.price-alert-btn.active {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+    border-color: #ffc107 !important;
+}
+
+.price-alert-btn.active i {
+    animation: cypBellRing 0.5s ease-in-out;
+}
+
+@keyframes cypBellRing {
+    0%, 100% { transform: rotate(0); }
+    20%, 60% { transform: rotate(15deg); }
+    40%, 80% { transform: rotate(-15deg); }
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+}
+

@@ -1,0 +1,30 @@
+<%#
+    The badge filter, shared by the sidebar form and the mobile offcanvas form so
+    the two cannot drift apart. Callers pass `selectedBadge` and an `idPrefix`,
+    since both copies live in the same document and label/for pairs must be unique.
+
+    A radio group, not checkboxes: the query supports one badge at a time, and
+    three boxes would promise combinations the filter cannot express. The "any"
+    option is always present so a chosen filter can be undone without reloading.
+%>
+<div class="d-flex flex-column gap-2">
+    <div class="form-check mb-0">
+        <input class="form-check-input cursor-pointer shadow-none" type="radio" name="badge" value=""
+               id="<%= idPrefix %>badge_any" <%= selectedBadge ? '' : 'checked' %>>
+        <label class="form-check-label cursor-pointer text-muted" for="<%= idPrefix %>badge_any">
+            <%= t('listing.badge_any') %>
+        </label>
+    </div>
+
+    <% listingBadges.BADGES.forEach(function (badge) { %>
+        <div class="form-check mb-0">
+            <input class="form-check-input cursor-pointer shadow-none" type="radio" name="badge"
+                   value="<%= badge.key %>" id="<%= idPrefix %>badge_<%= badge.key %>" <%= selectedBadge === badge.key ? 'checked' : '' %>>
+            <label class="form-check-label cursor-pointer d-inline-flex align-items-center gap-2"
+                   for="<%= idPrefix %>badge_<%= badge.key %>">
+                <i class="fa-solid <%= badge.icon %> text-<%= badge.variant %>"></i>
+                <%= t('listing.badge_' + badge.key) %>
+            </label>
+        </div>
+    <% }); %>
+</div>

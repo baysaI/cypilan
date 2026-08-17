@@ -24,8 +24,29 @@
             <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                 <div class="min-w-0">
                     <h1 class="fs-3 fw-bold mb-2 text-break-anywhere"><%= listing.title %></h1>
+
+                    <%# Each badge doubles as the way into the rest of them: a visitor who
+                        came for the bargains can go straight from one to the whole list. %>
+                    <% const detailBadges = (typeof listingBadges !== 'undefined' && listingBadges) ? listingBadges.activeFor(listing) : []; %>
+                    <% if (detailBadges.length > 0) { %>
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <% detailBadges.forEach(function (badge) { %>
+                                <a href="/listings?badge=<%= badge.key %>"
+                                   class="badge bg-<%= badge.variant %> text-white rounded-pill px-3 py-2 text-decoration-none"
+                                   title="<%= t('listing.badge_filter_hint') %>">
+                                    <i class="fa-solid <%= badge.icon %> me-1"></i><%= t('listing.badge_' + badge.key) %>
+                                </a>
+                            <% }); %>
+                        </div>
+                    <% } %>
+
                     <div class="d-flex align-items-center text-muted small fw-medium gap-3 flex-wrap">
-                        <span><i class="fa-solid fa-location-dot text-primary me-1"></i> <%= helpers.getCityName(listing.location_city, lang) || '-' %><%= listing.location_district ? ', ' + listing.location_district : '' %></span>
+                        <span>
+                            <i class="fa-solid fa-location-dot text-primary me-1"></i> <%= helpers.getCityName(listing.location_city, lang) || '-' %><%= listing.location_district ? ', ' + listing.location_district : '' %>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 ms-2 fw-medium" data-bs-toggle="modal" data-bs-target="#listingMapModal" style="font-size: 0.78rem;">
+                                <i class="fa-solid fa-map-location-dot me-1"></i><%= t('map.view_on_map') || 'Haritada Gör' %>
+                            </button>
+                        </span>
                         <span><i class="fa-regular fa-clock me-1"></i> <%= helpers.timeAgo(listing.created_at, lang) %></span>
                         <span><i class="fa-regular fa-eye me-1"></i> <%= listing.views_count || 0 %></span>
                         <span><%= t('listing.ad_no') %> <strong class="text-dark">#<%= listing.id %></strong></span>
@@ -47,9 +68,15 @@
                 <% } else { %>
                     <h2 class="text-primary fw-bolder mb-0 fs-4"><%= (listing.listing_type === 'job' || listing.category_slug === 'is-ilanlari') ? t('career.salary_unspecified') : t('listing.price_unspecified') %></h2>
                 <% } %>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap">
                     <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 favorite-btn" data-id="<%= listing.id %>">
                         <i class="<%= isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i> <%= t('listing.add_favorite') %>
+                    </button>
+                    <button class="btn <%= (typeof isPriceAlertActive !== 'undefined' && isPriceAlertActive) ? 'btn-warning text-dark active' : 'btn-outline-warning' %> btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 price-alert-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" title="<%= t('alerts.price_alert') || 'Fiyat Alarmı' %>">
+                        <i class="fa-solid fa-bell"></i> <%= t('alerts.price_alert') || 'Fiyat Alarmı' %>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 compare-toggle-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= imgs[0] || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>">
+                        <i class="fa-solid fa-code-compare"></i> <%= t('compare.button') || 'Karşılaştır' %>
                     </button>
                     <button class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 share-btn" data-title="<%= listing.title %>">
                         <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
@@ -312,11 +339,17 @@
                 </div>
             <% } %>
 
-            <div class="d-none d-lg-flex gap-2 mb-4">
-                <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2 favorite-btn" data-id="<%= listing.id %>">
+            <div class="d-none d-lg-flex gap-2 mb-4 flex-wrap">
+                <button class="btn <%= isFav ? 'btn-danger text-white' : 'btn-outline-primary' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 favorite-btn" data-id="<%= listing.id %>">
                     <i class="<%= isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i> <%= t('listing.add_favorite') %>
                 </button>
-                <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-2 share-btn" data-title="<%= listing.title %>">
+                <button class="btn <%= (typeof isPriceAlertActive !== 'undefined' && isPriceAlertActive) ? 'btn-warning text-dark active' : 'btn-outline-warning' %> rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 price-alert-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" title="<%= t('alerts.price_alert') || 'Fiyat Alarmı' %>">
+                    <i class="fa-solid fa-bell"></i> <%= t('alerts.price_alert') || 'Fiyat Alarmı' %>
+                </button>
+                <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 compare-toggle-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= imgs[0] || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>">
+                    <i class="fa-solid fa-code-compare"></i> <%= t('compare.button') || 'Karşılaştır' %>
+                </button>
+                <button class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 share-btn" data-title="<%= listing.title %>">
                     <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                 </button>
             </div>
@@ -348,6 +381,34 @@
 
                     <h5 class="fw-bold mb-1"><%= listing.seller_company || listing.seller_name || t('user.member') %></h5>
                     <p class="text-muted small mb-2"><%= listing.seller_role === 'business' ? t('user.business_member') : (listing.seller_role === 'agent' ? t('user.agent_member') : t('user.individual_member')) %></p>
+
+                    <%# Presence, so a buyer can tell whether a message is likely to be
+                        read today. Deliberately coarse: the exact minute somebody last
+                        opened the site is nobody else's business, and "3 gün önce
+                        aktif" already answers the only question being asked. %>
+                    <% const sellerSeen = helpers.lastSeenState(listing.seller_last_seen); %>
+                    <% if (sellerSeen.known) { %>
+                        <p class="small mb-2 d-flex align-items-center justify-content-center gap-2">
+                            <span class="d-inline-block rounded-circle flex-shrink-0 <%= sellerSeen.online ? 'bg-success' : 'bg-secondary opacity-50' %>"
+                                  style="width: 8px; height: 8px;" aria-hidden="true"></span>
+                            <span class="<%= sellerSeen.online ? 'text-success fw-semibold' : 'text-muted' %>">
+                                <% if (sellerSeen.online) { %>
+                                    <%= t('user.last_seen_online') %>
+                                <% } else if (sellerSeen.today) { %>
+                                    <%= t('user.last_seen_today') %>
+                                <% } else { %>
+                                    <%= t('user.last_seen_ago', { time: helpers.timeAgo(listing.seller_last_seen, lang) }) %>
+                                <% } %>
+                            </span>
+                        </p>
+                        <% if (sellerSeen.online || sellerSeen.today) { %>
+                            <div class="mb-2">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small fw-medium">
+                                    <i class="fa-solid fa-bolt me-1"></i><%= t('user.fast_responder') || 'Hızlı Yanıt Verir' %>
+                                </span>
+                            </div>
+                        <% } %>
+                    <% } %>
 
                     <% if (authUser && authUser.id === listing.user_id) { %>
                         <div class="border rounded-4 p-3 mb-3 text-start bg-light">
@@ -455,6 +516,11 @@
                             <a href="/messages/<%= listing.user_id %>?listing=<%= listing.id %>" class="btn <%= messageBtnClass %> rounded-pill fw-medium">
                                 <i class="fa-regular fa-comment-dots me-2"></i> Mesaj Gönder
                             </a>
+                        <% } %>
+                        <% if (listing.price && Number(listing.price) > 0 && (!authUser || authUser.id !== listing.user_id)) { %>
+                            <button type="button" class="btn btn-outline-success rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#quickOfferModal">
+                                <i class="fa-solid fa-handshake"></i> <%= t('bids.quick_offer_btn') || 'Pazarlık Teklifi Ver' %>
+                            </button>
                         <% } %>
                         <a href="/profile/<%= listing.user_id %>" class="btn btn-outline-dark rounded-pill fw-medium">
                             <i class="fa-regular fa-user me-2"></i> <%= t('user.seller_profile') %>
@@ -585,6 +651,118 @@
     });
 })();
 </script>
+
+<div class="modal fade" id="listingMapModal" tabindex="-1" aria-labelledby="listingMapModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+      <div class="modal-header border-bottom px-4 py-3 bg-light">
+        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="listingMapModalLabel">
+          <i class="fa-solid fa-map-location-dot text-primary"></i>
+          <span><%= t('map.modal_title') || 'İlan Konumu & Harita' %></span>
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0 position-relative">
+        <%# `coordinates ? …` alone throws when the local was never passed at all —
+            an absent EJS local is an undeclared identifier, not an undefined one.
+            Guarded with typeof, the same way isPriceAlertActive is above. %>
+        <% const mapPoint = (typeof coordinates !== 'undefined' && coordinates) ? coordinates : null; %>
+        <div id="listingMapContainer" style="height: 380px; width: 100%;"
+             data-lat="<%= mapPoint ? mapPoint.lat : 35.1856 %>"
+             data-lng="<%= mapPoint ? mapPoint.lng : 33.3823 %>"
+             data-zoom="<%= mapPoint ? mapPoint.zoom : 13 %>"
+             data-title="<%= listing.title %>"
+             data-city="<%= helpers.getCityName(listing.location_city, lang) %>"
+             data-district="<%= listing.location_district || '' %>"
+             data-exact="<%= mapPoint && mapPoint.isExact ? '1' : '0' %>">
+        </div>
+      </div>
+      <div class="modal-footer border-top px-4 py-3 bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="small text-muted d-flex align-items-center gap-2">
+          <i class="fa-solid fa-location-dot text-primary"></i>
+          <span><%= helpers.getCityName(listing.location_city, lang) %><%= listing.location_district ? ' / ' + listing.location_district : '' %></span>
+          <% if (!mapPoint || !mapPoint.isExact) { %>
+            <span class="badge bg-secondary-subtle text-secondary border rounded-pill" style="font-size: 0.72rem;"><%= t('map.approximate') || 'Yaklaşık Şehir Merkezi' %></span>
+          <% } %>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="https://www.google.com/maps/search/?api=1&query=<%= mapPoint ? mapPoint.lat : '' %>,<%= mapPoint ? mapPoint.lng : '' %>" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1">
+            <i class="fa-brands fa-google"></i> Google Maps'te Aç
+          </a>
+          <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Kapat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="quickOfferModal" tabindex="-1" aria-labelledby="quickOfferModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <form action="/listings/<%= listing.id %>/quick-offer" method="POST" id="quickOfferForm">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="modal-header border-bottom px-4 py-3 bg-light rounded-top-4">
+          <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="quickOfferModalLabel">
+            <i class="fa-solid fa-handshake text-success"></i>
+            <span><%= t('bids.quick_offer_title') || 'Hızlı Pazarlık Teklifi Ver' %></span>
+          </h5>
+          <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-light border rounded-3 p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="text-muted d-block">İlan Fiyatı:</small>
+                <strong class="fs-5 text-primary"><%= fmt(listing.price, listing.currency) %></strong>
+              </div>
+              <div class="text-end">
+                <small class="text-muted d-block">Satıcı:</small>
+                <strong class="text-dark"><%= listing.seller_company || listing.seller_name %></strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-muted">
+              <i class="fa-solid fa-calculator text-primary me-1"></i>Hızlı İndirim Seçin:
+            </label>
+            <div class="d-flex gap-2" id="quickOfferPresets">
+              <% const curPrice = Number(listing.price) || 0; %>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill flex-fill cyp-offer-preset-btn" data-percent="5" data-val="<%= Math.round(curPrice * 0.95) %>">
+                -%5 (<%= Math.round(curPrice * 0.95).toLocaleString('tr-TR') %>)
+              </button>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill flex-fill cyp-offer-preset-btn" data-percent="10" data-val="<%= Math.round(curPrice * 0.90) %>">
+                -%10 (<%= Math.round(curPrice * 0.90).toLocaleString('tr-TR') %>)
+              </button>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill flex-fill cyp-offer-preset-btn" data-percent="15" data-val="<%= Math.round(curPrice * 0.85) %>">
+                -%15 (<%= Math.round(curPrice * 0.85).toLocaleString('tr-TR') %>)
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="offerAmountInput" class="form-label fw-semibold small text-dark">Teklif Ettiğiniz Tutar (<%= listing.currency || 'TRY' %>) <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input type="number" id="offerAmountInput" name="amount" class="form-control form-control-lg rounded-3" required min="1" step="any" placeholder="Teklifinizi girin" value="<%= Math.round(curPrice * 0.90) || '' %>">
+              <span class="input-group-text fw-bold bg-light"><%= listing.currency || 'TRY' %></span>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label for="offerMessageInput" class="form-label fw-semibold small text-dark">Satıcıya Kısa Not (Opsiyonel)</label>
+            <textarea id="offerMessageInput" name="message" class="form-control rounded-3" rows="2" maxlength="300" placeholder="Örn: Nakit alıcıyım, hafta sonu aracı görebilir miyim?"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-top px-4 py-3 bg-light rounded-bottom-4">
+          <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" id="quickOfferSubmitBtn" class="btn btn-success rounded-pill px-4 fw-bold text-white shadow-sm">
+            <i class="fa-solid fa-paper-plane me-1"></i> Teklifi İlet
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">

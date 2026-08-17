@@ -138,6 +138,38 @@
                     <div class="card-body p-4">
                         
                         <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted d-block">
+                                <i class="fa-solid fa-bullhorn text-primary me-1"></i><%= t('listing.listing_purpose') || 'İlan Amacı / Türü' %> <span class="text-danger">*</span>
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="listing_type" id="typeSale" value="sale" <%= (!formData.listing_type || formData.listing_type === 'sale') ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-primary w-100 rounded-3 py-2 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeSale">
+                                        <i class="fa-solid fa-tag mb-1 fs-5"></i>
+                                        <span><%= t('listing.type_sale') || 'Satılık' %></span>
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="listing_type" id="typeRent" value="rent" <%= (formData.listing_type === 'rent') ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-primary w-100 rounded-3 py-2 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeRent">
+                                        <i class="fa-solid fa-key mb-1 fs-5"></i>
+                                        <span><%= t('listing.type_rent') || 'Kiralık' %></span>
+                                    </label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="listing_type" id="typeWanted" value="wanted" <%= (formData.listing_type === 'wanted') ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-warning w-100 rounded-3 py-2 fw-semibold small d-flex flex-column align-items-center justify-content-center text-dark" for="typeWanted">
+                                        <i class="fa-solid fa-hand-holding-heart mb-1 fs-5 text-warning"></i>
+                                        <span><%= t('listing.type_wanted') || '📢 Arıyorum (Talep)' %></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-text small text-muted mt-1">
+                                Bir ürün, ev veya araç arıyorsanız <strong>"Arıyorum (Talep)"</strong> seçeneğini işaretleyerek ihtiyacınızı duyurabilirsiniz.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
                             <label class="form-label fw-bold small text-muted"><%= t('listing.title') %> <span class="text-danger">*</span></label>
                             <input type="text" name="title" id="titleInput" class="form-control form-control-lg bg-light border-0 shadow-none focus-ring-primary" placeholder="<%= t('listing.title') %>" value="<%= typeof formData !== 'undefined' && formData.title ? formData.title : '' %>" required maxlength="70">
                             <div class="invalid-feedback"><%= t('listing.title') %> gereklidir.</div>
@@ -235,6 +267,13 @@
                                         <i class="fa-solid fa-gavel text-primary me-1"></i><%= t('bids.opt_in_label') %>
                                     </label>
                                     <div class="form-text small mb-0"><%= t('bids.opt_in_help') %></div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <%- include('../partials/badgePicker', {
+                                        current: (typeof formData !== 'undefined' ? formData : {}),
+                                        idPrefix: 'new_'
+                                    }) %>
                                 </div>
 
                                 <div class="border rounded-4 p-3 mt-3 bg-light" id="jobFieldsBox" hidden>
@@ -504,7 +543,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const priceRequiredStar = document.getElementById('priceRequiredStar');
             const priceLabel = document.getElementById('priceLabel');
 
-            if (root === 'is-ilanlari' || root === 'usta-hizmetler') {
+            // A wage is negotiated, a job quoted after a survey, and wholesale
+            // priced per pallet or on request — none of the three fit one number
+            // in a box, so the star comes off. The server agrees: requiresPrice
+            // covers the quota categories only.
+            const PRICE_OPTIONAL_ROOTS = ['is-ilanlari', 'usta-hizmetler', 'kurumsal-tedarikci'];
+
+            if (PRICE_OPTIONAL_ROOTS.indexOf(root) > -1) {
                 if (priceInput) {
                     priceInput.required = false;
                     priceInput.classList.remove('is-invalid');

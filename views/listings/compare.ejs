@@ -1,0 +1,243 @@
+<div class="bg-primary text-white py-4 py-md-5">
+    <div class="container text-center">
+        <div class="d-inline-flex align-items-center justify-content-center bg-white bg-opacity-25 rounded-circle p-3 mb-3" style="width: 64px; height: 64px;">
+            <i class="fa-solid fa-code-compare fs-3"></i>
+        </div>
+        <h1 class="fw-bold mb-2"><%= t('compare.title') || 'İlan Karşılaştırma' %></h1>
+        <p class="text-white-50 mb-0">Seçtiğiniz ilanları yan yana tüm özellikleri ve fiyatlarıyla kıyaslayın.</p>
+    </div>
+</div>
+
+<div class="container py-4 py-md-5">
+    <% if (!listings || listings.length === 0) { %>
+        <div class="card border-0 shadow-sm rounded-4 text-center p-5">
+            <div class="my-4">
+                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fa-solid fa-code-compare text-muted fs-2"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">Karşılaştırılacak İlan Bulunamadı</h4>
+                <p class="text-muted mb-4" style="max-width: 460px; margin: 0 auto;">
+                    İlan detay sayfalarındaki veya ilan kartlarındaki <strong>"Karşılaştır"</strong> butonuna tıklayarak en fazla 4 ilanı buraya ekleyip kıyaslayabilirsiniz.
+                </p>
+                <a href="/listings" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+                    <i class="fa-solid fa-magnifying-glass me-2"></i> İlanları İncele
+                </a>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <span class="badge bg-primary rounded-pill px-3 py-2 fw-semibold fs-6">
+                    <i class="fa-solid fa-layer-group me-1"></i> <%= listings.length %> İlan Kıyaslanıyor
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="highlightDiffsToggle" role="switch">
+                    <label class="form-check-label small fw-semibold text-muted" for="highlightDiffsToggle">Farklılıkları Vurgula</label>
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" id="clearAllCompareBtn">
+                    <i class="fa-solid fa-trash-can me-1"></i> Listeyi Temizle
+                </button>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 compare-table" id="compareMatrixTable">
+                    <thead>
+                        <tr class="bg-light">
+                            <th class="p-4 border-end" style="min-width: 180px; width: 220px;">
+                                <span class="fw-bold text-dark fs-6">İlan Özeti</span>
+                            </th>
+                            <% listings.forEach(function(item) { %>
+                                <th class="p-4 text-center border-end position-relative compare-col" style="min-width: 250px; width: <%= Math.floor(78 / listings.length) %>%;">
+                                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-compare-item-btn shadow-none" data-id="<%= item.id %>" title="Karşılaştırmadan Çıkar"></button>
+                                    <div class="mb-3 position-relative overflow-hidden rounded-3 bg-light shadow-sm" style="height: 160px;">
+                                        <img src="<%= item.primary_image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800' %>" class="w-100 h-100 object-fit-cover" alt="<%= item.title %>">
+                                        <% if (item.listing_type === 'wanted') { %>
+                                            <span class="position-absolute top-0 start-0 m-2 badge bg-warning text-dark fw-bold">📢 TALEP</span>
+                                        <% } else if (item.is_premium) { %>
+                                            <span class="position-absolute top-0 start-0 m-2 badge bg-gradient-golden text-white fw-bold">👑 Premium</span>
+                                        <% } %>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2 text-truncate-2" style="font-size: 0.95rem; min-height: 2.8em;" title="<%= item.title %>">
+                                        <a href="/listings/<%= item.slug %>" class="text-decoration-none text-dark hover-text-primary"><%= item.title %></a>
+                                    </h6>
+                                    <div class="text-primary fw-bolder fs-5 mb-3">
+                                        <%= item.price ? helpers.formatPrice(item.price, item.currency) : (item.listing_type === 'job' ? 'Maaş Belirtilmedi' : 'Fiyat Belirtilmedi') %>
+                                    </div>
+                                    <a href="/listings/<%= item.slug %>" class="btn btn-primary btn-sm rounded-pill w-100 fw-semibold shadow-sm">
+                                        <i class="fa-solid fa-eye me-1"></i> İlanı İncele
+                                    </a>
+                                </th>
+                            <% }); %>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Kategori ve Tür -->
+                        <tr class="compare-row" data-field="category">
+                            <td class="fw-bold text-muted bg-light p-3 border-end">Kategori / Tür</td>
+                            <% listings.forEach(function(item) { %>
+                                <td class="p-3 text-center border-end compare-cell">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
+                                        <%= item.category_name_tr || item.category_name || '-' %>
+                                    </span>
+                                    <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2 py-1 ms-1">
+                                        <%= item.listing_type === 'wanted' ? 'Arıyorum / Talep' : (item.listing_type === 'rent' ? 'Kiralık' : 'Satılık') %>
+                                    </span>
+                                </td>
+                            <% }); %>
+                        </tr>
+
+                        <!-- Konum -->
+                        <tr class="compare-row" data-field="location">
+                            <td class="fw-bold text-muted bg-light p-3 border-end">Konum</td>
+                            <% listings.forEach(function(item) { %>
+                                <td class="p-3 text-center border-end compare-cell">
+                                    <i class="fa-solid fa-location-dot text-danger me-1"></i>
+                                    <strong><%= helpers.getCityName(item.location_city, lang) || item.location_city || '-' %></strong>
+                                    <% if (item.location_district) { %>
+                                        <div class="small text-muted"><%= item.location_district %></div>
+                                    <% } %>
+                                </td>
+                            <% }); %>
+                        </tr>
+
+                        <!-- Emlak Özellikleri (varsa) -->
+                        <%
+                            const hasRooms = listings.some(l => l.attributes && l.attributes.rooms);
+                            const hasSize = listings.some(l => l.attributes && l.attributes.size);
+                            const hasFloor = listings.some(l => l.attributes && l.attributes.floor);
+                            const hasBuildYear = listings.some(l => l.attributes && (l.attributes.build_year || l.attributes.buildYear));
+                            const hasBrand = listings.some(l => l.attributes && l.attributes.brand);
+                            const hasModel = listings.some(l => l.attributes && l.attributes.model);
+                            const hasKM = listings.some(l => l.attributes && l.attributes.km);
+                            const hasFuel = listings.some(l => l.attributes && l.attributes.fuel);
+                            const hasGear = listings.some(l => l.attributes && l.attributes.gear);
+                            const hasCondition = listings.some(l => l.attributes && l.attributes.condition);
+                        %>
+
+                        <% if (hasRooms) { %>
+                            <tr class="compare-row" data-field="rooms">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Oda Sayısı</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell fw-medium"><%= (item.attributes && item.attributes.rooms) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasSize) { %>
+                            <tr class="compare-row" data-field="size">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Metrekare (m²)</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell fw-medium"><%= (item.attributes && item.attributes.size) ? (item.attributes.size + ' m²') : '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasFloor) { %>
+                            <tr class="compare-row" data-field="floor">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Bulunduğu Kat</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.floor) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasBuildYear) { %>
+                            <tr class="compare-row" data-field="build_year">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Bina / Model Yılı</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell fw-medium"><%= (item.attributes && (item.attributes.build_year || item.attributes.buildYear || item.attributes.year)) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasBrand) { %>
+                            <tr class="compare-row" data-field="brand">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Marka &amp; Model</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell fw-medium">
+                                        <%= (item.attributes && item.attributes.brand) ? (item.attributes.brand + ' ' + (item.attributes.model || '')) : '-' %>
+                                    </td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasKM) { %>
+                            <tr class="compare-row" data-field="km">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Kilometre (KM)</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell fw-medium">
+                                        <%= (item.attributes && item.attributes.km) ? Number(item.attributes.km).toLocaleString('tr-TR') + ' km' : '-' %>
+                                    </td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasFuel || hasGear) { %>
+                            <tr class="compare-row" data-field="fuel_gear">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Yakıt &amp; Vites</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell">
+                                        <%= (item.attributes && (item.attributes.fuel || item.attributes.gear)) ? ((item.attributes.fuel || '') + ' / ' + (item.attributes.gear || '')) : '-' %>
+                                    </td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasCondition) { %>
+                            <tr class="compare-row" data-field="condition">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Kullanım Durumu</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.condition) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <!-- Satıcı Bilgileri -->
+                        <tr class="compare-row" data-field="seller">
+                            <td class="fw-bold text-muted bg-light p-3 border-end">Satıcı &amp; Puan</td>
+                            <% listings.forEach(function(item) { %>
+                                <td class="p-3 text-center border-end compare-cell">
+                                    <div class="fw-bold text-dark"><%= item.seller_company || item.seller_name || 'Kullanıcı' %></div>
+                                    <div class="small text-muted mb-1"><%= item.seller_role === 'business' ? 'Kurumsal Mağaza' : (item.seller_role === 'agent' ? 'Emlak / Galeri' : 'Bireysel Üye') %></div>
+                                    <% if (item.seller_rating_count && item.seller_rating_count > 0) { %>
+                                        <div class="small text-warning">
+                                            <i class="fa-solid fa-star"></i> <%= Number(item.seller_rating_avg).toFixed(1) %> (<%= item.seller_rating_count %>)
+                                        </div>
+                                    <% } else { %>
+                                        <div class="small text-muted">Henüz değerlendirilmedi</div>
+                                    <% } %>
+                                </td>
+                            <% }); %>
+                        </tr>
+
+                        <!-- İlan Tarihi -->
+                        <tr class="compare-row" data-field="date">
+                            <td class="fw-bold text-muted bg-light p-3 border-end">İlan Tarihi</td>
+                            <% listings.forEach(function(item) { %>
+                                <td class="p-3 text-center border-end compare-cell small text-muted">
+                                    <i class="fa-regular fa-calendar me-1"></i> <%= helpers.formatDate(item.created_at, lang) %>
+                                </td>
+                            <% }); %>
+                        </tr>
+
+                        <!-- Aksiyon -->
+                        <tr class="bg-light">
+                            <td class="fw-bold text-muted p-4 border-end">İletişim &amp; İşlem</td>
+                            <% listings.forEach(function(item) { %>
+                                <td class="p-4 text-center border-end">
+                                    <a href="/listings/<%= item.slug %>" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-semibold mb-2">
+                                        <i class="fa-regular fa-comment-dots me-1"></i> İletişime Geç
+                                    </a>
+                                </td>
+                            <% }); %>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <% } %>
+</div>

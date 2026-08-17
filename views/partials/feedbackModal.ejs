@@ -1,0 +1,83 @@
+<%#
+    "Öneri / Hata Bildir" — deliberately the plainest thing on the site.
+
+    A normal form post, not a fetch: no JavaScript to fail, no spinner to design,
+    and the flash message the rest of the site already uses says it arrived. The
+    whole point is that a first-time visitor who spots something broken can say so
+    in ten seconds, so anything that could get in the way has been left out.
+
+    Included from the main layout, so the trigger can sit anywhere — the footer
+    and the account menu both open this one copy. It does not take the bottom-right
+    corner because the live support launcher already lives there.
+%>
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <form action="/geri-bildirim" method="POST">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                <input type="hidden" name="page_url" value="<%= typeof currentPath !== 'undefined' ? currentPath : '/' %>">
+
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold fs-6 d-flex align-items-center gap-2" id="feedbackModalLabel">
+                        <i class="fa-solid fa-lightbulb text-warning"></i>
+                        <%= t('feedback.title') %>
+                    </h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="<%= t('common.close') || 'Kapat' %>"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="text-muted small mb-3"><%= t('feedback.intro') %></p>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted d-block mb-2"><%= t('feedback.type_label') %></label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <% [
+                                { key: 'bug', icon: 'fa-bug', variant: 'danger' },
+                                { key: 'suggestion', icon: 'fa-lightbulb', variant: 'warning' },
+                                { key: 'other', icon: 'fa-comment-dots', variant: 'secondary' }
+                            ].forEach(function (option, index) { %>
+                                <input type="radio" class="btn-check" name="type" value="<%= option.key %>"
+                                       id="fbType<%= option.key %>" <%= index === 0 ? 'checked' : '' %>>
+                                <label class="btn btn-outline-<%= option.variant %> btn-sm rounded-pill px-3 fw-medium"
+                                       for="fbType<%= option.key %>">
+                                    <i class="fa-solid <%= option.icon %> me-1"></i><%= t('feedback.type_' + option.key) %>
+                                </label>
+                            <% }); %>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="feedbackMessage" class="form-label small fw-semibold text-muted">
+                            <%= t('feedback.message_label') %> <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control bg-light border-0 shadow-none" id="feedbackMessage" name="message"
+                                  rows="5" required minlength="5" maxlength="2000"
+                                  placeholder="<%= t('feedback.message_placeholder') %>"></textarea>
+                    </div>
+
+                    <%# Signed-in senders are already identified by user_id, so the field
+                        only appears for visitors — and even then it is optional. %>
+                    <% if (typeof currentUser === 'undefined' || !currentUser) { %>
+                        <div class="mb-0">
+                            <label for="feedbackEmail" class="form-label small fw-semibold text-muted">
+                                <%= t('feedback.email_label') %>
+                            </label>
+                            <input type="email" class="form-control bg-light border-0 shadow-none" id="feedbackEmail"
+                                   name="contact_email" maxlength="200" placeholder="ornek@eposta.com">
+                            <div class="form-text small"><%= t('feedback.email_help') %></div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">
+                        <%= t('common.cancel') || 'İptal' %>
+                    </button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-medium">
+                        <i class="fa-solid fa-paper-plane me-1"></i><%= t('feedback.submit') %>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

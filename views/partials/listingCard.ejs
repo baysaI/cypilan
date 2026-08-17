@@ -1,15 +1,39 @@
 <div class="listing-card card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift transition-all <%= (listing.is_premium || listing.isPremium) ? 'premium-card' : '' %>">
     
-    <% if (listing.is_premium || listing.isPremium) { %>
-        <div class="premium-badge position-absolute top-0 start-0 m-2 z-2 px-2 py-1 rounded-2 shadow-sm fw-bold small text-white bg-gradient-golden">
-            <i class="fa-solid fa-crown me-1"></i> Premium
+    <%# Premium is a paid tier; the badges under it are free flags the seller set
+        themselves. Stacked in one corner so a listing carrying both does not push
+        the favourite button off the card. pe-none keeps the labels from
+        swallowing clicks meant for the photo link underneath. %>
+    <% const cardBadges = (typeof listingBadges !== 'undefined' && listingBadges) ? listingBadges.activeFor(listing) : []; %>
+    <% if (listing.is_premium || listing.isPremium || listing.listing_type === 'wanted' || cardBadges.length > 0) { %>
+        <div class="position-absolute top-0 start-0 m-2 z-2 d-flex flex-column align-items-start gap-1 pe-none" style="max-width: 78%;">
+            <% if (listing.listing_type === 'wanted') { %>
+                <span class="badge bg-warning text-dark rounded-2 shadow-sm fw-bold px-2 py-1">
+                    <i class="fa-solid fa-hand-holding-heart me-1"></i><%= t('listing.badge_wanted') || 'TALEP' %>
+                </span>
+            <% } %>
+            <% if (listing.is_premium || listing.isPremium) { %>
+                <span class="premium-badge px-2 py-1 rounded-2 shadow-sm fw-bold small text-white bg-gradient-golden">
+                    <i class="fa-solid fa-crown me-1"></i> Premium
+                </span>
+            <% } %>
+            <% cardBadges.forEach(function (badge) { %>
+                <span class="badge bg-<%= badge.variant %> text-white rounded-2 shadow-sm fw-bold px-2 py-1">
+                    <i class="fa-solid <%= badge.icon %> me-1"></i><%= t('listing.badge_' + badge.key) %>
+                </span>
+            <% }); %>
         </div>
     <% } %>
 
     <% const favActive = (typeof isFavorited !== 'undefined' && isFavorited) || (typeof userFavoriteIds !== 'undefined' && Array.isArray(userFavoriteIds) && userFavoriteIds.includes(listing.id)); %>
-    <button class="btn btn-light btn-sm favorite-btn position-absolute top-0 end-0 m-2 z-2 rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0 bg-white hover-bg-light" style="width: 32px; height: 32px;" data-id="<%= listing.id %>">
-        <i class="<%= favActive ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart text-muted' %> fs-6"></i>
-    </button>
+    <div class="position-absolute top-0 end-0 m-2 z-2 d-flex gap-1">
+        <button type="button" class="btn btn-light btn-sm compare-toggle-btn rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0 bg-white hover-bg-light" style="width: 32px; height: 32px;" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= listing.primary_image || listing.image || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= listing.location_city || listing.city || '' %>" title="<%= t('compare.button') || 'Karşılaştır' %>">
+            <i class="fa-solid fa-code-compare text-muted fs-6"></i>
+        </button>
+        <button type="button" class="btn btn-light btn-sm favorite-btn rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0 bg-white hover-bg-light" style="width: 32px; height: 32px;" data-id="<%= listing.id %>" title="<%= t('listing.add_favorite') %>">
+            <i class="<%= favActive ? 'fa-solid fa-heart text-danger' : 'fa-regular fa-heart text-muted' %> fs-6"></i>
+        </button>
+    </div>
 
     <a href="/listings/<%= listing.slug || listing.id %>" class="text-decoration-none d-block position-relative overflow-hidden bg-light" style="padding-top: 66%;">
         <img src="<%= listing.primary_image || listing.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800' %>" 
@@ -19,7 +43,15 @@
              onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800';">
         <div class="image-overlay position-absolute bottom-0 start-0 w-100 p-2 bg-gradient-to-t from-black-60 d-flex justify-content-between align-items-end z-1">
             <span class="badge bg-primary text-white rounded-pill px-2 py-1 fw-medium shadow-sm"><%= listing['category_name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || listing.category_name || listing.categoryName || t('home.ad_unit') %></span>
-            <span class="text-white small fw-medium text-shadow"><i class="fa-solid fa-camera me-1"></i> <%= listing.imageCount || 1 %></span>
+            <%# image_count comes from the queries that feed this card. It used to
+                read `imageCount || 1` — a field no query ever selected — so every
+                card claimed exactly one photo no matter how many were uploaded.
+                A listing with no photo at all shows the placeholder image, and
+                counting that as one would be the same lie in the other direction. %>
+            <% const photoCount = Number(listing.image_count ?? listing.imageCount ?? (Array.isArray(listing.images) ? listing.images.length : 0)) || 0; %>
+            <% if (photoCount > 0) { %>
+                <span class="text-white small fw-medium text-shadow"><i class="fa-solid fa-camera me-1"></i> <%= photoCount %></span>
+            <% } %>
         </div>
     </a>
 

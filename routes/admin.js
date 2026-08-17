@@ -14,19 +14,23 @@ router.use(async (req, res, next) => {
     try {
         const ServiceRequest = require('../models/ServiceRequest');
         const Support = require('../models/Support');
+        const Feedback = require('../models/Feedback');
         const Setting = require('../models/Setting');
-        const [pendingServices, pendingSupport] = await Promise.all([
+        const [pendingServices, pendingSupport, pendingFeedback] = await Promise.all([
             ServiceRequest.countPending(),
-            Support.countWaiting()
+            Support.countWaiting(),
+            Feedback.countNew()
         ]);
         res.locals.pendingServices = pendingServices;
         res.locals.pendingSupport = pendingSupport;
+        res.locals.pendingFeedback = pendingFeedback;
         res.locals.maintenanceOn = Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false);
         res.locals.unlimitedOn = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
     } catch (error) {
         console.error('Pending admin badge error:', error);
         res.locals.pendingServices = 0;
         res.locals.pendingSupport = 0;
+        res.locals.pendingFeedback = 0;
     }
     next();
 });
@@ -48,10 +52,16 @@ router.put('/reports/:id', adminController.resolveReport);
 
 router.post('/users/:id/uyari', adminController.issueWarning);
 router.post('/uyari/:id/kaldir', adminController.revokeWarning);
+router.post('/uyari/:id/sil', adminController.deleteWarning);
 
 router.get('/bakim', maintenanceController.show);
 router.post('/bakim', maintenanceController.update);
 router.post('/sinirsiz-ilan', maintenanceController.updateUnlimited);
+
+const feedbackController = require('../controllers/feedbackController');
+router.get('/geri-bildirim', feedbackController.adminQueue);
+router.post('/geri-bildirim/:id/durum', feedbackController.adminSetStatus);
+router.post('/geri-bildirim/:id/sil', feedbackController.adminDelete);
 
 router.get('/hizmet-talepleri', serviceController.adminQueue);
 router.post('/hizmet-talepleri/:id/durum', serviceController.adminSetStatus);

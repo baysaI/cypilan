@@ -9,8 +9,15 @@ const Notification = require('../models/Notification');
 const ServiceRequest = require('../models/ServiceRequest');
 const Analytics = require('../models/Analytics');
 const mailer = require('../config/mailer');
+const { translate } = require('../config/i18n');
 
 const PAGE_SIZE = 20;
+
+// A notification is stored translated, but unlike a flash message its reader is
+// somebody other than the admin who triggered it. Using res.locals.t here would
+// write the text in the moderator's language and send it to a member who may not
+// read it. Their own preference is on the row.
+const translatorFor = (user) => (key, params) => translate(key, (user && user.language_pref) || 'tr', params);
 
 const wantsJson = (req) => req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1);
 
@@ -65,11 +72,17 @@ const users = async (req, res) => {
         const result = await User.findAll(page, PAGE_SIZE, filters);
         const pendingReports = await Report.countPending();
 
-        // Standing warnings for exactly the rows on screen, so the table can show
-        // how close each member is to an automatic suspension.
+        // Warnings for exactly the rows on screen: the badge shows how close each
+        // member is to an automatic suspension, and the expandable row beneath it
+        // shows the warnings themselves — reason, note, who issued it and when.
+        // The history already contains the standing count, so asking countActive
+        // for it as well would be a second query per row for a number in hand.
+        const warningHistory = {};
         const warningCounts = {};
         await Promise.all(result.data.map(async (user) => {
-            warningCounts[user.id] = await Warning.countActive(user.id);
+            const history = await Warning.forUser(user.id, 20);
+            warningHistory[user.id] = history;
+            warningCounts[user.id] = history.filter((warning) => Number(warning.is_active) === 1).length;
         }));
 
         res.locals.meta.title = 'Kullanıcı Yönetimi | Admin Paneli';
@@ -80,6 +93,7 @@ const users = async (req, res) => {
             filters,
             pendingReports,
             warningCounts,
+            warningHistory,
             suspensionThreshold: Warning.SUSPENSION_THRESHOLD,
             reportReasons: Report.listingReasons,
             activePage: 'users',
@@ -388,30 +402,29 @@ const issueWarning = async (req, res) => {
         // Create system warning notification for the user
         try {
             const Notification = require('../models/Notification');
-            const t = res.locals.t || ((k) => k);
-            const reasonKey = 'reports.reason_' + reason;
-            const reasonLabel = t(reasonKey) !== reasonKey ? t(reasonKey) : reason;
+            const t = translatorFor(target);
+
+            // The reasons live under report_modal.reasons — the same keys the
+            // moderator's own dropdown renders from. The earlier 'reports.reason_*'
+            // namespace does not exist, so every notification fell through to the
+            // raw enum value and told the member their content broke rule "other".
+            const reasonLabel = t('report_modal.reasons.' + reason);
 
             const title = result.suspended
-                ? (t('notifications.warning_suspended_title') !== 'notifications.warning_suspended_title'
-                    ? t('notifications.warning_suspended_title')
-                    : 'Hesabınız Askıya Alındı')
-                : (t('notifications.warning_title') !== 'notifications.warning_title'
-                    ? t('notifications.warning_title')
-                    : 'İçeriğiniz / Hesabınız Uyarı Aldı');
+                ? t('notifications.warning_suspended_title')
+                : t('notifications.warning_title');
 
-            const noteText = (note && note.trim()) ? ` (Not: ${note.trim()})` : '';
-            let message = '';
-            if (result.suspended) {
-                message = t('notifications.warning_suspended_message', { reason: reasonLabel, note: noteText }) !== 'notifications.warning_suspended_message'
-                    ? t('notifications.warning_suspended_message', { reason: reasonLabel, note: noteText })
-                    : `Hesabınız "${reasonLabel}" gerekçesiyle üst üste 3. uyarısını aldığı için otomatik olarak askıya alınmıştır.${noteText}`;
-            } else {
-                const remaining = Warning.remainingBeforeSuspension(result.count);
-                message = t('notifications.warning_message', { reason: reasonLabel, note: noteText, remaining }) !== 'notifications.warning_message'
-                    ? t('notifications.warning_message', { reason: reasonLabel, note: noteText, remaining })
-                    : `İçeriğiniz "${reasonLabel}" gerekçesiyle uyarı aldı.${noteText} (Askıya alınmaya kalan hak: ${remaining})`;
-            }
+            const noteText = (note && note.trim())
+                ? ` ${t('notifications.warning_note', { note: note.trim() })}`
+                : '';
+
+            const message = result.suspended
+                ? t('notifications.warning_suspended_message', { reason: reasonLabel, note: noteText })
+                : t('notifications.warning_message', {
+                    reason: reasonLabel,
+                    note: noteText,
+                    remaining: Warning.remainingBeforeSuspension(result.count)
+                });
 
             await Notification.create({
                 user_id: userId,
@@ -419,7 +432,11 @@ const issueWarning = async (req, res) => {
                 type: 'warning',
                 title,
                 message,
-                link_url: '/panel'
+                // Straight to the banner that already lists every standing warning
+                // with its reason, note and remaining strikes. It used to point at
+                // /panel — the listing performance dashboard, which says nothing
+                // about warnings at all.
+                link_url: '/profile/listings'
             });
         } catch (notifyError) {
             console.error('Warning notification failed:', notifyError);
@@ -434,15 +451,69 @@ const issueWarning = async (req, res) => {
     }
 };
 
+// Issuing a warning notifies the member, so clearing one should too — otherwise
+// their account quietly comes back from suspension with no explanation, and the
+// notification accusing them is still the last word they have on the matter.
+const notifyWarningLifted = async (warning, actorId) => {
+    const target = await User.findById(warning.user_id);
+    if (!target) return;
+
+    const t = translatorFor(target);
+
+    await Notification.create({
+        user_id: warning.user_id,
+        actor_id: actorId,
+        type: 'system',
+        title: t('notifications.warning_lifted_title'),
+        message: t('notifications.warning_lifted_message', {
+            reason: t('report_modal.reasons.' + warning.reason)
+        }),
+        link_url: '/profile/listings'
+    });
+};
+
 const revokeWarning = async (req, res) => {
     try {
         const warningId = parseInt(req.params.id, 10);
-        const done = Number.isInteger(warningId) && await Warning.revoke(warningId);
+        const warning = Number.isInteger(warningId) ? await Warning.revoke(warningId) : null;
 
-        req.flash(done ? 'success' : 'error', done ? 'flash.warning_revoked' : 'flash.action_failed');
+        if (warning) {
+            try {
+                await notifyWarningLifted(warning, req.session.userId);
+            } catch (notifyError) {
+                console.error('Warning lifted notification failed:', notifyError);
+            }
+        }
+
+        req.flash(warning ? 'success' : 'error', warning ? 'flash.warning_revoked' : 'flash.action_failed');
         res.redirect(req.get('referer') || '/admin/users');
     } catch (error) {
         console.error('Revoke Warning Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/users');
+    }
+};
+
+// For a warning that should never have been recorded at all. Revoking keeps the
+// row as part of the trail; this erases it, so the member's history does not
+// carry an entry nobody stands behind.
+const deleteWarning = async (req, res) => {
+    try {
+        const warningId = parseInt(req.params.id, 10);
+        const warning = Number.isInteger(warningId) ? await Warning.remove(warningId) : null;
+
+        if (warning && Number(warning.is_active) === 1) {
+            try {
+                await notifyWarningLifted(warning, req.session.userId);
+            } catch (notifyError) {
+                console.error('Warning lifted notification failed:', notifyError);
+            }
+        }
+
+        req.flash(warning ? 'success' : 'error', warning ? 'flash.warning_deleted' : 'flash.action_failed');
+        res.redirect(req.get('referer') || '/admin/users');
+    } catch (error) {
+        console.error('Delete Warning Error:', error);
         req.flash('error', 'flash.action_failed');
         res.redirect('/admin/users');
     }
@@ -599,6 +670,7 @@ module.exports = {
     resolveReport,
     issueWarning,
     revokeWarning,
+    deleteWarning,
     analytics,
     sendListingNotice
 };

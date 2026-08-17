@@ -7,7 +7,8 @@ INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, icon, sort_order
 (2, NULL, 'vasita', 'Vasıta', 'car', 2),
 (3, NULL, 'is-ilanlari', 'İş İlanları', 'briefcase', 3),
 (4, NULL, 'usta-hizmetler', 'Usta & Hizmetler', 'wrench', 4),
-(5, NULL, 'ikinci-el', 'İkinci El', 'couch', 5);
+(5, NULL, 'ikinci-el', 'İkinci El', 'couch', 5),
+(6, NULL, 'kurumsal-tedarikci', 'Kurumsal Tedarikçi Ağı', 'industry', 6);
 
 -- Subcategories (Emlak)
 INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, sort_order) VALUES
@@ -46,6 +47,19 @@ INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, sort_order) VALU
 (502, 5, 'mobilya', 'Mobilya', 2),
 (503, 5, 'giyim', 'Giyim', 3);
 
+-- Subcategories (Kurumsal Tedarikçi Ağı — toptan ve inşaat malzemeleri)
+INSERT OR IGNORE INTO categories (id, parent_id, slug, name_tr, sort_order) VALUES
+(601, 6, 'insaat-malzemeleri', 'İnşaat Malzemeleri', 1),
+(602, 6, 'hirdavat-nalburiye', 'Hırdavat & Nalburiye', 2),
+(603, 6, 'elektrik-aydinlatma', 'Elektrik & Aydınlatma', 3),
+(604, 6, 'sihhi-tesisat-isitma', 'Sıhhi Tesisat & Isıtma', 4),
+(605, 6, 'boya-yalitim', 'Boya & Yalıtım', 5),
+(606, 6, 'is-makineleri-ekipman', 'İş Makineleri & Ekipman', 6),
+(607, 6, 'gida-icecek-toptan', 'Gıda & İçecek Toptan', 7),
+(608, 6, 'temizlik-hijyen-toptan', 'Temizlik & Hijyen Toptan', 8),
+(609, 6, 'mobilya-dekorasyon-toptan', 'Mobilya & Dekorasyon Toptan', 9),
+(610, 6, 'ambalaj-lojistik', 'Ambalaj & Lojistik', 10);
+
 -- Category names in the other four languages.
 -- Kept as UPDATEs because the INSERTs above are OR IGNORE: databases created
 -- before these columns were filled would otherwise keep falling back to Turkish.
@@ -54,6 +68,7 @@ UPDATE categories SET name_en = 'Vehicles',              name_el = 'Οχήματ
 UPDATE categories SET name_en = 'Jobs',                  name_el = 'Θέσεις εργασίας',           name_ru = 'Работа',              name_fa = 'آگهی‌های شغلی'       WHERE slug = 'is-ilanlari';
 UPDATE categories SET name_en = 'Trades & Services',     name_el = 'Τεχνίτες & Υπηρεσίες',      name_ru = 'Мастера и услуги',    name_fa = 'خدمات و پیشه‌وران'   WHERE slug = 'usta-hizmetler';
 UPDATE categories SET name_en = 'Second Hand',           name_el = 'Μεταχειρισμένα',            name_ru = 'Б/у товары',          name_fa = 'کالای دست دوم'      WHERE slug = 'ikinci-el';
+UPDATE categories SET name_en = 'Corporate Supplier Network', name_el = 'Δίκτυο Εταιρικών Προμηθευτών', name_ru = 'Сеть корпоративных поставщиков', name_fa = 'شبکه تأمین‌کنندگان شرکتی' WHERE slug = 'kurumsal-tedarikci';
 
 UPDATE categories SET name_en = 'Apartment for Sale',    name_el = 'Διαμέρισμα προς πώληση',    name_ru = 'Квартира на продажу', name_fa = 'آپارتمان فروشی'     WHERE slug = 'satilik-daire';
 UPDATE categories SET name_en = 'Apartment for Rent',    name_el = 'Διαμέρισμα προς ενοικίαση', name_ru = 'Квартира в аренду',   name_fa = 'آپارتمان اجاره‌ای'   WHERE slug = 'kiralik-daire';
@@ -81,3 +96,14 @@ UPDATE categories SET name_en = 'Removals',              name_el = 'Μεταφο
 UPDATE categories SET name_en = 'Electronics',           name_el = 'Ηλεκτρονικά',               name_ru = 'Электроника',         name_fa = 'لوازم الکترونیکی'   WHERE slug = 'elektronik';
 UPDATE categories SET name_en = 'Furniture',             name_el = 'Έπιπλα',                    name_ru = 'Мебель',              name_fa = 'مبلمان'             WHERE slug = 'mobilya';
 UPDATE categories SET name_en = 'Clothing',              name_el = 'Ένδυση',                    name_ru = 'Одежда',              name_fa = 'پوشاک'              WHERE slug = 'giyim';
+
+UPDATE categories SET name_en = 'Building Materials',    name_el = 'Οικοδομικά υλικά',          name_ru = 'Стройматериалы',      name_fa = 'مواد ساختمانی'      WHERE slug = 'insaat-malzemeleri';
+UPDATE categories SET name_en = 'Hardware & Ironmongery', name_el = 'Σιδηρικά & Εργαλεία',      name_ru = 'Скобяные изделия',    name_fa = 'ابزار و یراق'       WHERE slug = 'hirdavat-nalburiye';
+UPDATE categories SET name_en = 'Electrical & Lighting', name_el = 'Ηλεκτρολογικά & Φωτισμός',  name_ru = 'Электрика и освещение', name_fa = 'برق و روشنایی'     WHERE slug = 'elektrik-aydinlatma';
+UPDATE categories SET name_en = 'Plumbing & Heating',    name_el = 'Υδραυλικά & Θέρμανση',      name_ru = 'Сантехника и отопление', name_fa = 'لوله‌کشی و گرمایش' WHERE slug = 'sihhi-tesisat-isitma';
+UPDATE categories SET name_en = 'Paint & Insulation',    name_el = 'Χρώματα & Μόνωση',          name_ru = 'Краски и изоляция',   name_fa = 'رنگ و عایق'         WHERE slug = 'boya-yalitim';
+UPDATE categories SET name_en = 'Machinery & Equipment', name_el = 'Μηχανήματα & Εξοπλισμός',   name_ru = 'Техника и оборудование', name_fa = 'ماشین‌آلات و تجهیزات' WHERE slug = 'is-makineleri-ekipman';
+UPDATE categories SET name_en = 'Food & Beverage Wholesale', name_el = 'Τρόφιμα & Ποτά χονδρικής', name_ru = 'Продукты оптом',   name_fa = 'عمده غذا و نوشیدنی' WHERE slug = 'gida-icecek-toptan';
+UPDATE categories SET name_en = 'Cleaning & Hygiene Wholesale', name_el = 'Καθαριστικά & Υγιεινή χονδρικής', name_ru = 'Гигиена оптом', name_fa = 'عمده بهداشت و نظافت' WHERE slug = 'temizlik-hijyen-toptan';
+UPDATE categories SET name_en = 'Furniture & Decor Wholesale', name_el = 'Έπιπλα & Διακόσμηση χονδρικής', name_ru = 'Мебель и декор оптом', name_fa = 'عمده مبلمان و دکور' WHERE slug = 'mobilya-dekorasyon-toptan';
+UPDATE categories SET name_en = 'Packaging & Logistics', name_el = 'Συσκευασία & Logistics',    name_ru = 'Упаковка и логистика', name_fa = 'بسته‌بندی و لجستیک' WHERE slug = 'ambalaj-lojistik';

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_reset_expires DATETIME,
   email_verification_token TEXT,
   email_verification_expires DATETIME,
+  last_seen_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -48,7 +49,7 @@ CREATE TABLE IF NOT EXISTS listings (
   description TEXT,
   price REAL,
   currency TEXT DEFAULT 'TRY' CHECK(currency IN ('TRY', 'GBP')),
-  listing_type TEXT DEFAULT 'sale' CHECK(listing_type IN ('sale', 'rent', 'job', 'service', 'bid_request')),
+  listing_type TEXT DEFAULT 'sale' CHECK(listing_type IN ('sale', 'rent', 'job', 'service', 'bid_request', 'wanted')),
   status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'active', 'sold', 'expired', 'rejected', 'draft')),
   location_city TEXT,
   location_district TEXT,
@@ -57,6 +58,11 @@ CREATE TABLE IF NOT EXISTS listings (
   views_count INTEGER DEFAULT 0,
   is_premium INTEGER DEFAULT 0,
   is_featured INTEGER DEFAULT 0,
+  -- Seller-declared attention flags. See config/listingBadges.js: unlike the two
+  -- above, these are free and unverified, which is why they never affect ranking.
+  is_urgent INTEGER DEFAULT 0,
+  is_opportunity INTEGER DEFAULT 0,
+  is_negotiable INTEGER DEFAULT 0,
   expires_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -151,6 +157,27 @@ CREATE TABLE IF NOT EXISTS bids (
   status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'accepted', 'rejected', 'withdrawn')),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Bug reports and suggestions from visitors and members alike.
+--
+-- Separate from `reports`, which is moderation of other people's content, and
+-- from the live support chat, which is a conversation someone waits inside. This
+-- is a one-way note about the site itself, and it keeps user_id nullable because
+-- the people most likely to spot a broken page are the ones who never signed up.
+CREATE TABLE IF NOT EXISTS feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  type TEXT NOT NULL CHECK(type IN ('bug', 'suggestion', 'other')),
+  message TEXT NOT NULL,
+  contact_email TEXT,
+  page_url TEXT,
+  status TEXT DEFAULT 'new' CHECK(status IN ('new', 'read', 'resolved')),
+  admin_note TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_feedback_queue ON feedback(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_listings_user ON listings(user_id);
@@ -418,4 +445,20 @@ CREATE TABLE IF NOT EXISTS support_messages (
 
 CREATE INDEX IF NOT EXISTS idx_support_messages_conv ON support_messages(conversation_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_support_messages_read ON support_messages(conversation_id, is_read);
+
+-- ---------------------------------------------------------------------------
+-- Price Alerts (Fiyat Alarmı)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS price_alerts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  target_price REAL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, listing_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id);
+CREATE INDEX IF NOT EXISTS idx_price_alerts_listing ON price_alerts(listing_id);
+
 

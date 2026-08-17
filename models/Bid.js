@@ -39,6 +39,44 @@ class Bid {
     return this.findByPair(listing_id, bidder_id);
   }
 
+  /**
+   * Submits a fast bargaining offer from any buyer to the listing seller and notifies the seller.
+   */
+  static async submitQuickOffer({ listing_id, bidder_id, amount, currency = 'TRY', message = null }) {
+    const db = getDb();
+    const listing = db.prepare('SELECT * FROM listings WHERE id = ?').get([listing_id]);
+    if (!listing) throw new Error('İlan bulunamadı.');
+    if (listing.user_id === bidder_id) throw new Error('Kendi ilanınıza teklif veremezsiniz.');
+
+    const bid = await this.upsert({
+      listing_id,
+      bidder_id,
+      amount,
+      currency: currency || listing.currency || 'TRY',
+      message
+    });
+
+    const bidder = db.prepare('SELECT full_name FROM users WHERE id = ?').get([bidder_id]);
+    const bidderName = bidder ? bidder.full_name : 'Bir kullanıcı';
+    const Notification = require('./Notification');
+
+    const formattedAmount = `${Number(amount).toLocaleString('tr-TR')} ${currency || listing.currency || 'TRY'}`;
+    try {
+      await Notification.create({
+        user_id: listing.user_id,
+        actor_id: bidder_id,
+        type: 'bid',
+        title: 'Yeni Pazarlık Teklifi 🤝',
+        message: `${bidderName}, "${listing.title}" ilanınız için ${formattedAmount} teklif verdi.`,
+        link_url: `/profile/teklifler`
+      });
+    } catch (err) {
+      console.error('Notification for quick offer failed:', err);
+    }
+
+    return bid;
+  }
+
   // Accepting one offer settles the whole listing in a single transaction:
   // the winner is accepted, every other standing offer is rejected, and the
   // listing leaves the market. Doing this in steps would leave a window where

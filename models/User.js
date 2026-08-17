@@ -153,13 +153,24 @@ class User {
     const offset = (page - 1) * limit;
     const data = db.prepare(`
       SELECT u.id, u.email, u.full_name, u.phone, u.role, u.is_active, u.is_verified,
-             u.company_name, u.created_at,
+             u.company_name, u.created_at, u.last_seen_at,
              (SELECT COUNT(*) FROM listings WHERE user_id = u.id) as listing_count
       FROM users u${where}
       ORDER BY u.created_at DESC LIMIT ? OFFSET ?
     `).all([...params, limit, offset]);
 
     return { data, total, pages: Math.ceil(total / limit) || 1 };
+  }
+
+  // Bumped from the request pipeline rather than at login: somebody who signed in
+  // three weeks ago and has read listings every day since is active, and a login
+  // timestamp would report the opposite. updated_at is deliberately left alone —
+  // browsing is not an edit to the account, and moving it would make every row
+  // look freshly modified in the admin table.
+  static async touchLastSeen(id) {
+    const db = getDb();
+    return db.prepare('UPDATE users SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run([id]).changes > 0;
   }
 
   static async setActive(id, isActive) {

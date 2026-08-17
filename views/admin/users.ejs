@@ -46,6 +46,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                             <th class="d-none d-sm-table-cell">İlan</th>
                             <th>E-posta Onayı</th>
                             <th>Durum</th>
+                            <th class="d-none d-lg-table-cell">Son Aktiflik</th>
                             <th>Uyarı</th>
                             <th class="pe-3 text-end">İşlem</th>
                         </tr>
@@ -85,13 +86,37 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                         <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2">Askıda</span>
                                     <% } %>
                                 </td>
-                                <td>
-                                    <% const warnCount = (typeof warningCounts !== 'undefined' && warningCounts[u.id]) || 0; %>
-                                    <% if (warnCount > 0) { %>
-                                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2"
-                                              title="<%= warnCount %>/<%= suspensionThreshold %>">
-                                            <i class="fa-solid fa-triangle-exclamation me-1"></i><%= warnCount %>/<%= suspensionThreshold %>
+                                <%# The public listing page shows this coarsely; a moderator
+                                    deciding whether an account is dormant needs the clock,
+                                    so the exact stamp sits in the tooltip. %>
+                                <td class="d-none d-lg-table-cell small text-nowrap">
+                                    <% const seen = helpers.lastSeenState(u.last_seen_at); %>
+                                    <% if (!seen.known) { %>
+                                        <span class="text-muted" title="Bu hesap hiç görülmedi (son aktiflik kaydı tutulmaya başlamadan önce oluşturulmuş olabilir)">&mdash;</span>
+                                    <% } else { %>
+                                        <span title="<%= helpers.formatDateTime(u.last_seen_at, lang) %>">
+                                            <span class="d-inline-block rounded-circle align-middle me-1 <%= seen.online ? 'bg-success' : 'bg-secondary opacity-50' %>"
+                                                  style="width: 8px; height: 8px;" aria-hidden="true"></span>
+                                            <%= seen.online ? 'Çevrimiçi' : helpers.timeAgo(u.last_seen_at, lang) %>
                                         </span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <%
+                                        const warnCount = (typeof warningCounts !== 'undefined' && warningCounts[u.id]) || 0;
+                                        const warnHistory = (typeof warningHistory !== 'undefined' && warningHistory[u.id]) || [];
+                                    %>
+                                    <%# The count is the way into the history: clicking it opens the same
+                                        panel the "Uyar" button does, one row down. %>
+                                    <% if (warnCount > 0 || warnHistory.length > 0) { %>
+                                        <button type="button"
+                                                class="btn btn-sm border-0 p-0 bg-transparent"
+                                                data-bs-toggle="collapse" data-bs-target="#warnForm<%= u.id %>"
+                                                title="Uyarı geçmişini aç (<%= warnHistory.length %> kayıt)">
+                                            <span class="badge <%= warnCount > 0 ? 'bg-warning bg-opacity-10 text-warning' : 'bg-secondary bg-opacity-10 text-secondary' %> rounded-pill px-2">
+                                                <i class="fa-solid fa-triangle-exclamation me-1"></i><%= warnCount %>/<%= suspensionThreshold %>
+                                            </span>
+                                        </button>
                                     <% } else { %>
                                         <span class="text-muted small">&mdash;</span>
                                     <% } %>
@@ -129,11 +154,90 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                     <% } %>
                                 </td>
                             </tr>
-                            <% if (u.id !== activeAdminUser.id) { %>
-                                <tr class="collapse" id="warnForm<%= u.id %>">
-                                    <td colspan="8" class="bg-light">
+                            <%# Rendered for every row, including the admin's own: they cannot warn
+                                themselves, but they can still read a history somebody else recorded. %>
+                            <tr class="collapse" id="warnForm<%= u.id %>">
+                                <td colspan="9" class="bg-light">
+
+                                    <div class="py-2">
+                                        <h3 class="fs-6 fw-bold mb-2 d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-clock-rotate-left text-secondary"></i>
+                                            Uyarı Geçmişi
+                                            <span class="text-muted fw-normal small">(<%= warnHistory.length %> kayıt, <%= warnCount %> aktif)</span>
+                                        </h3>
+
+                                        <% if (warnHistory.length === 0) { %>
+                                            <p class="text-muted small mb-0">Bu kullanıcıya hiç uyarı verilmemiş.</p>
+                                        <% } else { %>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm bg-white align-middle mb-0 border">
+                                                    <thead class="table-light small text-muted">
+                                                        <tr>
+                                                            <th>Gerekçe</th>
+                                                            <th>Yönetici Notu</th>
+                                                            <th class="d-none d-md-table-cell">Veren</th>
+                                                            <th class="d-none d-sm-table-cell">Tarih</th>
+                                                            <th>Durum</th>
+                                                            <th class="text-end">İşlem</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% warnHistory.forEach(function (w) { %>
+                                                            <% const isStanding = Number(w.is_active) === 1; %>
+                                                            <tr class="<%= isStanding ? '' : 'text-muted' %>">
+                                                                <td class="small fw-semibold">
+                                                                    <%= t('report_modal.reasons.' + w.reason) %>
+                                                                </td>
+                                                                <td class="small" style="max-width: 320px;">
+                                                                    <% if (w.note) { %>
+                                                                        <span class="text-break-anywhere"><%= w.note %></span>
+                                                                    <% } else { %>
+                                                                        <span class="text-muted">&mdash;</span>
+                                                                    <% } %>
+                                                                </td>
+                                                                <td class="small d-none d-md-table-cell">
+                                                                    <%= w.issued_by_name || 'Sistem' %>
+                                                                </td>
+                                                                <td class="small d-none d-sm-table-cell text-nowrap"
+                                                                    title="<%= w.created_at %>">
+                                                                    <%= helpers.formatDate(w.created_at, lang) %>
+                                                                </td>
+                                                                <td>
+                                                                    <% if (isStanding) { %>
+                                                                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2">Aktif</span>
+                                                                    <% } else { %>
+                                                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2">Kaldırıldı</span>
+                                                                    <% } %>
+                                                                </td>
+                                                                <td class="text-end text-nowrap">
+                                                                    <% if (isStanding) { %>
+                                                                        <form action="/admin/uyari/<%= w.id %>/kaldir" method="POST" class="d-inline">
+                                                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                                            <button class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                                                                    title="Uyarıyı kaldır — kayıt geçmişte kalır, kullanıcıya bildirilir">
+                                                                                Kaldır
+                                                                            </button>
+                                                                        </form>
+                                                                    <% } %>
+                                                                    <form action="/admin/uyari/<%= w.id %>/sil" method="POST" class="d-inline btn-delete-warning">
+                                                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                                        <button class="btn btn-sm btn-outline-danger py-0 px-2"
+                                                                                title="Kaydı kalıcı olarak sil">
+                                                                            <i class="fa-regular fa-trash-can"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                        <% }); %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        <% } %>
+                                    </div>
+
+                                    <% if (u.id !== activeAdminUser.id) { %>
                                         <form action="/admin/users/<%= u.id %>/uyari" method="POST"
-                                              class="d-flex flex-wrap gap-2 align-items-center py-2">
+                                              class="d-flex flex-wrap gap-2 align-items-center py-2 border-top mt-2">
                                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <select name="reason" class="form-select form-select-sm" style="width: auto;" required>
                                                 <% reportReasons.forEach(function (r) { %>
@@ -147,9 +251,9 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                                 <%= suspensionThreshold %>. uyarıda hesap otomatik askıya alınır.
                                             </span>
                                         </form>
-                                    </td>
-                                </tr>
-                            <% } %>
+                                    <% } %>
+                                </td>
+                            </tr>
                         <% }); %>
                     </tbody>
                 </table>
@@ -227,6 +331,16 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Deleting a warning erases the moderation record rather than lifting it, so
+    // it asks first. Lifting is reversible and does not.
+    document.querySelectorAll('.btn-delete-warning').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!confirm('Bu uyarı kaydı kalıcı olarak silinecek. Geçmişte iz bırakmaz. Emin misiniz?')) {
+                event.preventDefault();
+            }
+        });
+    });
+
     const editModalEl = document.getElementById('editUserModal');
     if (!editModalEl) return;
     const editModal = new bootstrap.Modal(editModalEl);

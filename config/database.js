@@ -51,6 +51,10 @@ const COLUMN_MIGRATIONS = [
   { table: 'users', column: 'password_reset_expires', ddl: 'ALTER TABLE users ADD COLUMN password_reset_expires DATETIME' },
   { table: 'users', column: 'email_verification_token', ddl: 'ALTER TABLE users ADD COLUMN email_verification_token TEXT' },
   { table: 'users', column: 'email_verification_expires', ddl: 'ALTER TABLE users ADD COLUMN email_verification_expires DATETIME' },
+  { table: 'users', column: 'last_seen_at', ddl: 'ALTER TABLE users ADD COLUMN last_seen_at DATETIME' },
+  { table: 'listings', column: 'is_urgent', ddl: 'ALTER TABLE listings ADD COLUMN is_urgent INTEGER DEFAULT 0' },
+  { table: 'listings', column: 'is_opportunity', ddl: 'ALTER TABLE listings ADD COLUMN is_opportunity INTEGER DEFAULT 0' },
+  { table: 'listings', column: 'is_negotiable', ddl: 'ALTER TABLE listings ADD COLUMN is_negotiable INTEGER DEFAULT 0' },
   { table: 'reports', column: 'type', ddl: "ALTER TABLE reports ADD COLUMN type TEXT DEFAULT 'listing'" },
   { table: 'candidate_profiles', column: 'photo_url', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN photo_url TEXT' },
   { table: 'candidate_profiles', column: 'custom_cv_url', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_url TEXT' },
@@ -148,6 +152,17 @@ const applyColumnMigrations = (db) => {
     );
     CREATE INDEX IF NOT EXISTS idx_support_messages_conv ON support_messages(conversation_id, created_at ASC);
     CREATE INDEX IF NOT EXISTS idx_support_messages_read ON support_messages(conversation_id, is_read);
+
+    CREATE TABLE IF NOT EXISTS price_alerts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+      target_price REAL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user_id, listing_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id);
+    CREATE INDEX IF NOT EXISTS idx_price_alerts_listing ON price_alerts(listing_id);
   `);
 
   COLUMN_MIGRATIONS.forEach(({ table, column, ddl }) => {
@@ -157,6 +172,77 @@ const applyColumnMigrations = (db) => {
       console.log(`Migration applied: ${table}.${column}`);
     }
   });
+
+  // Ensure listings table CHECK constraint allows 'wanted'
+  try {
+    const tableSqlRow = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='listings'").get();
+    if (tableSqlRow && tableSqlRow.sql && !tableSqlRow.sql.includes("'wanted'")) {
+      const foreignKeysWereOn = db.pragma('foreign_keys', { simple: true }) === 1;
+      if (foreignKeysWereOn) db.pragma('foreign_keys = OFF');
+      try {
+        db.transaction(() => {
+          db.exec(`
+            CREATE TABLE listings_migrated (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL REFERENCES users(id),
+              category_id INTEGER NOT NULL REFERENCES categories(id),
+              title TEXT NOT NULL,
+              slug TEXT UNIQUE NOT NULL,
+              description TEXT,
+              price REAL,
+              currency TEXT DEFAULT 'TRY' CHECK(currency IN ('TRY', 'GBP')),
+              listing_type TEXT DEFAULT 'sale' CHECK(listing_type IN ('sale', 'rent', 'job', 'service', 'bid_request', 'wanted')),
+              status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'active', 'sold', 'expired', 'rejected', 'draft')),
+              location_city TEXT,
+              location_district TEXT,
+              location_lat REAL,
+              location_lng REAL,
+              views_count INTEGER DEFAULT 0,
+              is_premium INTEGER DEFAULT 0,
+              is_featured INTEGER DEFAULT 0,
+              is_urgent INTEGER DEFAULT 0,
+              is_opportunity INTEGER DEFAULT 0,
+              is_negotiable INTEGER DEFAULT 0,
+              expires_at DATETIME,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+            INSERT INTO listings_migrated SELECT
+              id, user_id, category_id, title, slug, description, price, currency,
+              listing_type, status, location_city, location_district,
+              location_lat, location_lng, views_count, is_premium, is_featured,
+              COALESCE(is_urgent, 0), COALESCE(is_opportunity, 0), COALESCE(is_negotiable, 0),
+              expires_at, created_at, updated_at
+            FROM listings;
+            DROP TABLE listings;
+            ALTER TABLE listings_migrated RENAME TO listings;
+          `);
+        })();
+        console.log("Migration applied: listings table rebuilt with 'wanted' listing_type support");
+      } finally {
+        if (foreignKeysWereOn) db.pragma('foreign_keys = ON');
+      }
+    }
+  } catch (err) {
+    console.error('Listings check constraint migration check error:', err);
+  }
+
+  // These live here rather than in schema.sql because they index columns the loop
+  // above adds. schema.sql is executed first, and on a database that predates
+  // those columns a CREATE INDEX naming one fails the whole file — taking the
+  // rest of the schema down with it.
+  //
+  // Partial indexes: each holds only the flagged rows, a handful beside the full
+  // table. That makes "show me the urgent ones" cheap without charging every
+  // ordinary listing insert for three more index writes.
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_listings_urgent
+      ON listings(status, created_at DESC) WHERE is_urgent = 1;
+    CREATE INDEX IF NOT EXISTS idx_listings_opportunity
+      ON listings(status, created_at DESC) WHERE is_opportunity = 1;
+    CREATE INDEX IF NOT EXISTS idx_listings_negotiable
+      ON listings(status, created_at DESC) WHERE is_negotiable = 1;
+  `);
 };
 
 const TABLE_REBUILDS = [

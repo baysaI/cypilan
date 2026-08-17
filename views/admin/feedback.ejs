@@ -1,0 +1,162 @@
+<%
+const pag = (typeof pagination !== 'undefined' && pagination) ? pagination : { page: 1, totalItems: 0, totalPages: 1 };
+const f = (typeof filters !== 'undefined' && filters) ? filters : {};
+const list = (typeof feedback !== 'undefined' && feedback) ? feedback : [];
+const c = (typeof counts !== 'undefined' && counts) ? counts : { total: 0, new: 0, read: 0, resolved: 0 };
+
+const TYPE_STYLES = {
+    bug: ['danger', 'fa-bug', 'Hata'],
+    suggestion: ['warning', 'fa-lightbulb', 'Öneri'],
+    other: ['secondary', 'fa-comment-dots', 'Diğer']
+};
+const STATUS_STYLES = {
+    new: ['warning', 'Yeni'],
+    read: ['info', 'Okundu'],
+    resolved: ['success', 'Çözüldü']
+};
+
+// Tab links keep the type filter, so switching status does not silently widen
+// the list back out to everything.
+const tabUrl = (status) => {
+    const params = [];
+    if (status) params.push('status=' + status);
+    if (f.type) params.push('type=' + f.type);
+    return '/admin/geri-bildirim' + (params.length ? '?' + params.join('&') : '');
+};
+%>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="fs-4 fw-bold mb-0">Öneri &amp; Hata Bildirimleri <span class="text-muted fw-normal fs-6">(<%= pag.totalItems %>)</span></h1>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+        <a href="<%= tabUrl('') %>" class="btn btn-sm <%= !f.status ? 'btn-primary' : 'btn-outline-secondary' %> rounded-pill px-3">
+            Tümü <span class="badge bg-light text-dark ms-1"><%= c.total %></span>
+        </a>
+        <% ['new', 'read', 'resolved'].forEach(function (status) { %>
+            <% const [color, label] = STATUS_STYLES[status]; %>
+            <a href="<%= tabUrl(status) %>" class="btn btn-sm <%= f.status === status ? 'btn-' + color + (color === 'warning' ? ' text-dark' : '') : 'btn-outline-secondary' %> rounded-pill px-3">
+                <%= label %> <span class="badge bg-light text-dark ms-1"><%= c[status] || 0 %></span>
+            </a>
+        <% }); %>
+
+        <div class="vr mx-1 d-none d-md-block"></div>
+
+        <form method="GET" action="/admin/geri-bildirim" class="d-flex gap-2 align-items-center ms-auto">
+            <% if (f.status) { %><input type="hidden" name="status" value="<%= f.status %>"><% } %>
+            <select name="type" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                <option value="">Tüm türler</option>
+                <% types.forEach(function (type) { %>
+                    <option value="<%= type %>" <%= f.type === type ? 'selected' : '' %>><%= TYPE_STYLES[type][2] %></option>
+                <% }); %>
+            </select>
+        </form>
+    </div>
+</div>
+
+<% if (list.length === 0) { %>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5 text-muted">
+            <i class="fa-regular fa-face-smile fs-2 d-block mb-2 opacity-50"></i>
+            Bu filtreye uyan bildirim yok.
+        </div>
+    </div>
+<% } else { %>
+    <div class="d-flex flex-column gap-3">
+        <% list.forEach(function (item) { %>
+            <% const [typeColor, typeIcon, typeLabel] = TYPE_STYLES[item.type] || TYPE_STYLES.other; %>
+            <% const [statusColor, statusLabel] = STATUS_STYLES[item.status] || STATUS_STYLES.new; %>
+            <div class="card border-0 shadow-sm <%= item.status === 'new' ? 'border-start border-4 border-warning' : '' %>">
+                <div class="card-body">
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <span class="badge bg-<%= typeColor %> bg-opacity-10 text-<%= typeColor %> rounded-pill px-2">
+                                <i class="fa-solid <%= typeIcon %> me-1"></i><%= typeLabel %>
+                            </span>
+                            <span class="badge bg-<%= statusColor %> bg-opacity-10 text-<%= statusColor %> rounded-pill px-2"><%= statusLabel %></span>
+                            <span class="text-muted small">#<%= item.id %></span>
+                        </div>
+                        <span class="text-muted small text-nowrap" title="<%= item.created_at %>">
+                            <i class="fa-regular fa-clock me-1"></i><%= helpers.formatDateTime(item.created_at, lang) %>
+                        </span>
+                    </div>
+
+                    <p class="mb-3 text-break-anywhere" style="white-space: pre-wrap;"><%= item.message %></p>
+
+                    <div class="d-flex flex-wrap gap-3 small text-muted mb-3">
+                        <span>
+                            <i class="fa-regular fa-user me-1"></i>
+                            <% if (item.user_id) { %>
+                                <a href="/profile/<%= item.user_id %>" target="_blank" rel="noopener" class="text-decoration-none">
+                                    <%= item.user_name || 'Üye' %>
+                                </a>
+                                <span class="text-muted">(<%= item.user_email %>)</span>
+                            <% } else { %>
+                                Ziyaretçi
+                                <% if (item.contact_email) { %>
+                                    &mdash; <a href="mailto:<%= item.contact_email %>" class="text-decoration-none"><%= item.contact_email %></a>
+                                <% } else { %>
+                                    <span class="fst-italic">(iletişim bırakmadı)</span>
+                                <% } %>
+                            <% } %>
+                        </span>
+                        <% if (item.page_url) { %>
+                            <span>
+                                <i class="fa-solid fa-link me-1"></i>
+                                <a href="<%= item.page_url %>" target="_blank" rel="noopener" class="text-decoration-none"><%= item.page_url %></a>
+                            </span>
+                        <% } %>
+                    </div>
+
+                    <% if (item.admin_note) { %>
+                        <div class="alert alert-light border py-2 px-3 small mb-3">
+                            <strong class="d-block text-muted">Yönetici notu</strong>
+                            <span class="text-break-anywhere"><%= item.admin_note %></span>
+                        </div>
+                    <% } %>
+
+                    <form action="/admin/geri-bildirim/<%= item.id %>/durum" method="POST"
+                          class="d-flex flex-wrap gap-2 align-items-center border-top pt-3">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <select name="status" class="form-select form-select-sm" style="width: auto;">
+                            <% statuses.forEach(function (status) { %>
+                                <option value="<%= status %>" <%= item.status === status ? 'selected' : '' %>>
+                                    <%= STATUS_STYLES[status][1] %>
+                                </option>
+                            <% }); %>
+                        </select>
+                        <input type="text" name="admin_note" class="form-control form-control-sm"
+                               style="max-width: min(360px, 100%);" maxlength="1000"
+                               placeholder="Not (opsiyonel, kaydedilir)">
+                        <button class="btn btn-sm btn-primary fw-medium">Kaydet</button>
+
+                        <span class="ms-auto"></span>
+                    </form>
+
+                    <form action="/admin/geri-bildirim/<%= item.id %>/sil" method="POST" class="mt-2 btn-delete-feedback">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn btn-sm btn-link text-danger text-decoration-none p-0" title="Kaydı kalıcı olarak sil">
+                            <i class="fa-regular fa-trash-can me-1"></i>Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <%- include('_pagination', { pagination: { page: pag.page, totalPages: pag.totalPages, totalItems: pag.totalItems }, baseUrl: '/admin/geri-bildirim', query: f }) %>
+<% } %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-delete-feedback').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!confirm('Bu bildirim kalıcı olarak silinecek. Emin misiniz?')) {
+                event.preventDefault();
+            }
+        });
+    });
+});
+</script>

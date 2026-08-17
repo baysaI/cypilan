@@ -13,7 +13,8 @@ const FEATURE_LABELS = {
   vasita: ['otomatik', 'manuel', 'dizel', 'benzin', 'hasarsiz', 'servis_bakimli', 'tek_elden', 'klima', 'suru_destek'],
   'ikinci-el': ['az_kullanilmis', 'kutulu', 'garantili', 'faturali'],
   'usta-hizmetler': ['ayni_gun', 'hafta_sonu', 'kesif_ucretsiz', 'garantili_is'],
-  'is-ilanlari': ['yemek', 'servis', 'sigorta', 'esnek_saat', 'terfi_imkani']
+  'is-ilanlari': ['yemek', 'servis', 'sigorta', 'esnek_saat', 'terfi_imkani'],
+  'kurumsal-tedarikci': ['toptan_fiyat', 'stoktan_teslim', 'nakliye_dahil', 'proje_teklifi', 'numune_gonderimi', 'kdv_dahil', 'faturali']
 };
 
 // Which template set to compose from. A job advert and a flat need different
@@ -61,9 +62,18 @@ const buildGeneric = (facts, t) => [
   t('draft.generic.opening', { category: facts.categoryName, city: facts.cityName })
 ];
 
+// A wholesale listing is read by a buyer asking "can you supply me, from where,
+// on what terms" — not "what does this one item look like". The opening says who
+// is supplying what and where from; the terms themselves come from the features
+// the supplier ticked, so nothing is claimed that was not entered.
+const buildKurumsal = (facts, t) => [
+  t('draft.kurumsal.opening', { category: facts.categoryName, city: facts.cityName })
+];
+
 const BUILDERS = {
   emlak: buildEmlak,
-  vasita: buildVasita
+  vasita: buildVasita,
+  'kurumsal-tedarikci': buildKurumsal
 };
 
 // `t` is the caller's translator, so the draft comes out in the language the

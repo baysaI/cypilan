@@ -1,7 +1,17 @@
 const FREE_LISTING_QUOTA = 3;
 
 const QUOTA_CATEGORIES = ['emlak', 'vasita', 'ikinci-el'];
-const ALWAYS_FREE_CATEGORIES = ['usta-hizmetler', 'is-ilanlari'];
+const ALWAYS_FREE_CATEGORIES = ['usta-hizmetler', 'is-ilanlari', 'kurumsal-tedarikci'];
+
+// A photo is required outside the quota categories too: a pallet of tiles or a
+// bag of cement is bought on the look of the goods, and a supplier listing with
+// no picture is a phone number pretending to be a product.
+const PHOTO_REQUIRED_CATEGORIES = [...QUOTA_CATEGORIES, 'kurumsal-tedarikci'];
+
+// Where a professional's stock is what the visitor came for, so business and
+// agent accounts lead the results. Everything below that is still ordered the way
+// the visitor asked — this promotes corporate listings, it does not hide others.
+const CORPORATE_FIRST_CATEGORIES = ['kurumsal-tedarikci'];
 
 const PAID_TIERS_LIVE = false;
 
@@ -51,9 +61,13 @@ const PACKAGES = [
   }
 ];
 
-const requiresPhotos = (rootSlug) => QUOTA_CATEGORIES.includes(rootSlug);
+const requiresPhotos = (rootSlug) => PHOTO_REQUIRED_CATEGORIES.includes(rootSlug);
 
+// A supplier quoting per tonne, per pallet or on request cannot put one number in
+// the box, so the wholesale tree is left out on purpose.
 const requiresPrice = (rootSlug) => QUOTA_CATEGORIES.includes(rootSlug);
+
+const isCorporateFirst = (rootSlug) => CORPORATE_FIRST_CATEGORIES.includes(rootSlug);
 
 const isAlwaysFree = (rootSlug) => ALWAYS_FREE_CATEGORIES.includes(rootSlug);
 
@@ -92,6 +106,9 @@ module.exports = {
   FREE_LISTING_QUOTA,
   QUOTA_CATEGORIES,
   ALWAYS_FREE_CATEGORIES,
+  PHOTO_REQUIRED_CATEGORIES,
+  CORPORATE_FIRST_CATEGORIES,
+  isCorporateFirst,
   PAID_TIERS_LIVE,
   PROMOTION_REQUESTS_LIVE,
   REQUIRE_APPROVAL,

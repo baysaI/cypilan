@@ -24,6 +24,7 @@
                     <li class="mb-2"><a href="/listings?category=is-ilanlari" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.jobs') %></a></li>
                     <li class="mb-2"><a href="/listings?category=usta-hizmetler" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.services') %></a></li>
                     <li class="mb-2"><a href="/listings?category=ikinci-el" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.second_hand') %></a></li>
+                    <li class="mb-2"><a href="/listings?category=kurumsal-tedarikci" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.corporate_supply') %></a></li>
                 </ul>
             </div>
 
@@ -44,6 +45,12 @@
                             <%= t('footer.soon') %>
                             <span class="badge rounded-pill bg-accent text-white ms-1" style="font-size: .6rem;"><%= t('pages.soon.badge_short') %></span>
                         </a>
+                    </li>
+                    <li class="mb-2">
+                        <button type="button" class="btn btn-link p-0 text-white-50 text-decoration-none hover-text-white transition-all border-0 align-baseline"
+                                data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                            <i class="fa-solid fa-lightbulb text-accent me-1"></i><%= t('feedback.title') %>
+                        </button>
                     </li>
                 </ul>
             </div>

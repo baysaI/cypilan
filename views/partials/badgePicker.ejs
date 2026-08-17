@@ -1,0 +1,39 @@
+<%#
+    The badge checkboxes, shared by the create and edit forms.
+
+    `current` is whatever holds the existing values: the retained form body on a
+    rejected submission, or the listing row when editing. Both expose the same
+    is_urgent / is_opportunity / is_negotiable keys, so one lookup covers both —
+    except the form body, where an unticked box is simply absent.
+
+    Callers pass `idPrefix` because create and edit use different id namespaces.
+%>
+<div class="border rounded-4 p-3 bg-light">
+    <div class="d-flex align-items-center gap-2 mb-1">
+        <i class="fa-solid fa-bullhorn text-primary"></i>
+        <span class="fw-semibold small text-dark"><%= t('listing.badge_picker_title') %></span>
+    </div>
+    <p class="text-muted small mb-3"><%= t('listing.badge_picker_help') %></p>
+
+    <div class="d-flex flex-wrap gap-2">
+        <% listingBadges.BADGES.forEach(function (badge) { %>
+            <% const checked = Boolean(current && (Number(current[badge.column]) === 1 || current['badge_' + badge.key])); %>
+            <div class="form-check form-check-inline bg-white px-3 py-2 rounded-pill border m-0">
+                <input class="form-check-input cursor-pointer shadow-none" type="checkbox"
+                       name="badge_<%= badge.key %>" value="1"
+                       id="<%= idPrefix %>badge_<%= badge.key %>" <%= checked ? 'checked' : '' %>>
+                <label class="form-check-label small cursor-pointer ms-1 d-inline-flex align-items-center gap-1"
+                       for="<%= idPrefix %>badge_<%= badge.key %>">
+                    <i class="fa-solid <%= badge.icon %> text-<%= badge.variant %>"></i>
+                    <%= t('listing.badge_' + badge.key) %>
+                </label>
+            </div>
+        <% }); %>
+    </div>
+
+    <%# Said plainly rather than enforced with a limit: "Acil" and "Pazarlıklı"
+        together is a perfectly normal combination, so a cap would block honest
+        sellers to slow down the ones who tick everything. Over-tagging is a
+        moderation matter, and moderation now has warnings for it. %>
+    <p class="text-muted small mb-0 mt-2 fst-italic"><%= t('listing.badge_picker_warning') %></p>
+</div>

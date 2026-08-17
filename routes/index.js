@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const homeController = require('../controllers/homeController');
 const searchController = require('../controllers/searchController');
@@ -44,6 +45,7 @@ router.post('/profile/password', isAuthenticated, profileController.changePasswo
 router.post('/profile/email', isAuthenticated, profileController.changeEmail);
 router.get('/profile/listings', isAuthenticated, profileController.myListings);
 router.get('/profile/favorites', isAuthenticated, profileController.myFavorites);
+router.get('/profile/alarmlar', isAuthenticated, profileController.myPriceAlerts);
 router.get('/profile/messages', isAuthenticated, (req, res) => res.redirect('/messages'));
 router.get('/profile/notifications', isAuthenticated, (req, res) => res.redirect('/notifications'));
 
@@ -61,6 +63,23 @@ router.post('/profile/teklifler/:id/reddet', isAuthenticated, bidController.reje
 
 router.get('/profile/:id', profileController.show);
 
+
+// Open to visitors, because the people most likely to notice a broken page are
+// the ones who have not signed up. Capped per address so the box cannot be used
+// as a firehose; CSRF is already enforced upstream for non-multipart posts.
+const feedbackLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    req.flash('error', 'flash.feedback_rate_limited');
+    res.redirect(req.get('referer') || '/');
+  }
+});
+
+const feedbackController = require('../controllers/feedbackController');
+router.post('/geri-bildirim', feedbackLimiter, feedbackController.submit);
 
 const pageController = require('../controllers/pageController');
 

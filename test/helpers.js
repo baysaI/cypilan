@@ -79,6 +79,7 @@ const results = () => ({ passed, failed });
 const { translate } = require(path.join(rootDir, 'config', 'i18n'));
 const helpers = require(path.join(rootDir, 'utils', 'helpers'));
 const cities = require(path.join(rootDir, 'config', 'cities'));
+const listingBadges = require(path.join(rootDir, 'config', 'listingBadges'));
 
 // The locals server.js puts on every response. Rendering a view with anything
 // less would fail for reasons the template is not responsible for.
@@ -87,6 +88,7 @@ const baseLocals = (overrides = {}) => Object.assign({
   currency: 'TRY',
   helpers,
   cities,
+  listingBadges,
   csrfToken: 'test-token',
   t: (key, params) => translate(key, 'tr', params)
 }, overrides);
@@ -137,5 +139,6 @@ module.exports = {
   makeUser,
   translate,
   helpers,
-  cities
+  cities,
+  listingBadges
 };

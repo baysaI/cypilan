@@ -154,9 +154,14 @@ app.use(analyticsMiddleware);
 
 const helpers = require('./utils/helpers');
 const cities = require('./config/cities');
+// The listing card is included from six templates and every one of them renders
+// badges, so the definitions are a global local rather than something each
+// controller has to remember to pass.
+const listingBadges = require('./config/listingBadges');
 app.use((req, res, next) => {
   res.locals.helpers = helpers;
   res.locals.cities = cities;
+  res.locals.listingBadges = listingBadges;
   res.locals.currentPath = req.path;
   // Absolute URLs in the page (canonical, og:image, structured data) follow the
   // configured site address in production. In development they follow the host
