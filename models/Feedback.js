@@ -40,7 +40,10 @@ class Feedback {
       FROM feedback f
       LEFT JOIN users u ON f.user_id = u.id
       ${where}
-      ORDER BY f.created_at DESC
+      -- created_at has one-second resolution, so a burst of reports would come
+      -- back in an arbitrary order and shuffle between page loads. The id breaks
+      -- the tie in the same direction the timestamp is sorted.
+      ORDER BY f.created_at DESC, f.id DESC
       LIMIT ? OFFSET ?
     `).all([...params, limit, offset]);
 

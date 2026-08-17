@@ -281,7 +281,8 @@
     "today": "Today",
     "try_again": "Try Again",
     "unverified_email_banner": "Your email address has not been verified yet. Please verify your email to post and message.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "language_currency": "Language and currency"
   },
   "compare": {
     "button": "Compare",
@@ -543,7 +544,13 @@
     "warning_issued": "The warning has been sent.",
     "warning_issued_suspended": "The warning was sent and the account was suspended on reaching the limit.",
     "warning_revoked": "The warning has been lifted.",
-    "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit."
+    "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit.",
+    "feedback_received": "Thanks for letting us know — our team will read your message.",
+    "feedback_too_short": "Please write at least {min} characters.",
+    "feedback_failed": "Your report could not be saved. Please try again.",
+    "feedback_rate_limited": "You have sent too many reports. Please try again later.",
+    "feedback_updated": "Feedback status updated.",
+    "feedback_deleted": "Feedback deleted."
   },
   "footer": {
     "about": "About Us",
@@ -1293,5 +1300,18 @@
     "remaining_body": "{remaining} more warnings and your account will be suspended automatically.",
     "suspended_body": "Your account has been suspended because you reached the warning limit. Contact support to appeal.",
     "title": "Your account has {count}/{threshold} warnings"
+  },
+  "feedback": {
+    "title": "Report a Bug / Suggest",
+    "intro": "The site is new. If you spotted something broken or missing, tell us — every message gets read.",
+    "type_label": "Topic",
+    "type_bug": "Bug",
+    "type_suggestion": "Suggestion",
+    "type_other": "Other",
+    "message_label": "Your message",
+    "message_placeholder": "What happened, on which page, and what did you expect instead?",
+    "email_label": "Email (optional)",
+    "email_help": "Only used if we need to get back to you.",
+    "submit": "Send"
   }
 }

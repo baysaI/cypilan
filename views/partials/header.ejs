@@ -24,8 +24,11 @@
                 <a href="/listings" class="text-decoration-none small fw-medium text-muted d-none d-lg-inline flex-shrink-0"><%= t('common.detailed_search') %></a>
 
                 <div class="ms-auto d-flex align-items-center gap-1 gap-md-3 flex-shrink-0">
+                    <% const activeCurrency = (typeof currency !== 'undefined' && currency === 'GBP') ? 'GBP' : 'TRY'; %>
+
                     <div class="dropdown">
-                        <button class="btn btn-light border-0 px-2 px-md-3" type="button" data-bs-toggle="dropdown" aria-label="<%= t('common.language') %>">
+                        <button class="btn btn-light border-0 px-2 px-md-3" type="button" data-bs-toggle="dropdown"
+                                aria-label="<%= t('common.language_currency') %>">
                             <i class="fa-solid fa-globe text-primary"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -34,12 +37,37 @@
                             <li><a class="dropdown-item lang-switch" href="#" data-lang="el">🇬🇷 Ελληνικά</a></li>
                             <li><a class="dropdown-item lang-switch" href="#" data-lang="ru">🇷🇺 Русский</a></li>
                             <li><a class="dropdown-item lang-switch" href="#" data-lang="fa">🇮🇷 فارسی</a></li>
+
+                            <%# The currency button beside this one is hidden below md, because the
+                                row is already tight there — the labels on "İlan Ver" have to be
+                                measured before they are allowed on at all. So on a phone the
+                                choice lives in here, where it costs the row no width and sits
+                                where a visitor already looks for locale settings. The active one
+                                is ticked because there is no ₺/£ button on screen to read it from. %>
+                            <li class="d-md-none"><hr class="dropdown-divider"></li>
+                            <li class="d-md-none">
+                                <h6 class="dropdown-header text-uppercase fw-bold text-muted pb-1"
+                                    style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                                    <%= t('common.currency') %>
+                                </h6>
+                            </li>
+                            <% [{ code: 'TRY', label: '₺ TRY' }, { code: 'GBP', label: '£ GBP' }].forEach(function (option) { %>
+                                <li class="d-md-none">
+                                    <a class="dropdown-item currency-switch d-flex align-items-center justify-content-between"
+                                       href="#" data-currency="<%= option.code %>">
+                                        <span><%= option.label %></span>
+                                        <% if (activeCurrency === option.code) { %>
+                                            <i class="fa-solid fa-check text-success small"></i>
+                                        <% } %>
+                                    </a>
+                                </li>
+                            <% }); %>
                         </ul>
                     </div>
 
                     <div class="dropdown d-none d-md-block">
                         <button class="btn btn-light border-0 fw-bold" type="button" data-bs-toggle="dropdown" aria-label="<%= t('common.currency') %>">
-                            <%= (typeof currency !== 'undefined' && currency === 'GBP') ? '£' : '₺' %>
+                            <%= activeCurrency === 'GBP' ? '£' : '₺' %>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item currency-switch" href="#" data-currency="TRY">₺ TRY</a></li>

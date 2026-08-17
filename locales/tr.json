@@ -281,7 +281,8 @@
     "today": "Bugün",
     "try_again": "Tekrar Dene",
     "unverified_email_banner": "E-posta adresiniz henüz doğrulanmadı. İlan yayınlamak ve mesajlaşmak için lütfen e-postanızı doğrulayın.",
-    "yes": "Evet"
+    "yes": "Evet",
+    "language_currency": "Dil ve para birimi"
   },
   "compare": {
     "button": "Karşılaştır",
@@ -543,7 +544,13 @@
     "warning_issued": "Uyarı gönderildi.",
     "warning_issued_suspended": "Uyarı gönderildi ve sınıra ulaşıldığı için hesap askıya alındı.",
     "warning_revoked": "Uyarı kaldırıldı.",
-    "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir."
+    "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.",
+    "feedback_received": "Bildiriminiz için teşekkürler! Ekibimiz mesajınızı okuyacak.",
+    "feedback_too_short": "Lütfen en az {min} karakter yazın.",
+    "feedback_failed": "Bildiriminiz kaydedilemedi. Lütfen tekrar deneyin.",
+    "feedback_rate_limited": "Çok fazla bildirim gönderdiniz. Lütfen bir süre sonra tekrar deneyin.",
+    "feedback_updated": "Bildirim durumu güncellendi.",
+    "feedback_deleted": "Bildirim silindi."
   },
   "footer": {
     "about": "Hakkımızda",
@@ -1293,5 +1300,18 @@
     "remaining_body": "{remaining} uyarı daha alırsan hesabın otomatik olarak askıya alınır.",
     "suspended_body": "Uyarı sınırına ulaştığın için hesabın askıya alındı. İtiraz için destek ekibiyle iletişime geç.",
     "title": "Hesabında {count}/{threshold} uyarı var"
+  },
+  "feedback": {
+    "title": "Öneri / Hata Bildir",
+    "intro": "Site yeni; gözden kaçan bir hata veya eksik gördüyseniz bize yazın. Her mesaj okunuyor.",
+    "type_label": "Konu",
+    "type_bug": "Hata",
+    "type_suggestion": "Öneri",
+    "type_other": "Diğer",
+    "message_label": "Mesajınız",
+    "message_placeholder": "Ne oldu, hangi sayfada ve ne olmasını beklerdiniz?",
+    "email_label": "E-posta (opsiyonel)",
+    "email_help": "Yalnızca size geri dönmemiz gerekirse kullanılır.",
+    "submit": "Gönder"
   }
 }
