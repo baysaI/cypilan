@@ -38,6 +38,16 @@ const BADGES = [
     // one. A job advert with no salary has nothing to haggle over, and the badge
     // would read as noise rather than an invitation.
     requiresPrice: true
+  },
+  {
+    key: 'swap',
+    column: 'is_swap',
+    icon: 'fa-arrows-rotate',
+    variant: 'warning',
+    requiresPrice: false,
+    // "Takaslı / Takasa Uygun" makes sense for vehicles, electronics & second-hand items,
+    // but not for property (emlak) or jobs (is-ilanlari)
+    excludedRoots: ['emlak', 'is-ilanlari', 'usta-hizmetler', 'kurumsal-tedarikci']
   }
 ];
 

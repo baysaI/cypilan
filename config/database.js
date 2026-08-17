@@ -55,6 +55,7 @@ const COLUMN_MIGRATIONS = [
   { table: 'listings', column: 'is_urgent', ddl: 'ALTER TABLE listings ADD COLUMN is_urgent INTEGER DEFAULT 0' },
   { table: 'listings', column: 'is_opportunity', ddl: 'ALTER TABLE listings ADD COLUMN is_opportunity INTEGER DEFAULT 0' },
   { table: 'listings', column: 'is_negotiable', ddl: 'ALTER TABLE listings ADD COLUMN is_negotiable INTEGER DEFAULT 0' },
+  { table: 'listings', column: 'is_swap', ddl: 'ALTER TABLE listings ADD COLUMN is_swap INTEGER DEFAULT 0' },
   { table: 'reports', column: 'type', ddl: "ALTER TABLE reports ADD COLUMN type TEXT DEFAULT 'listing'" },
   { table: 'candidate_profiles', column: 'photo_url', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN photo_url TEXT' },
   { table: 'candidate_profiles', column: 'custom_cv_url', ddl: 'ALTER TABLE candidate_profiles ADD COLUMN custom_cv_url TEXT' },

@@ -163,7 +163,11 @@
 
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-body p-4">
-                        <%- include('../partials/badgePicker', { current: listing, idPrefix: 'edit_' }) %>
+                        <%- include('../partials/badgePicker', {
+                            current: listing,
+                            idPrefix: 'edit_',
+                            categoryRoot: isEmlak ? 'emlak' : (isVasita ? 'vasita' : (listing.category_slug || ''))
+                        }) %>
                     </div>
                 </div>
 

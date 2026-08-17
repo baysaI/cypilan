@@ -560,7 +560,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (priceInput) priceInput.required = true;
                 if (priceRequiredStar) priceRequiredStar.hidden = false;
                 if (priceLabel) priceLabel.innerHTML = '<%= t("listing.price") %> <span class="text-danger" id="priceRequiredStar">*</span>';
-            }
+            // Filter attention badges according to category (e.g. Takaslı is not applicable for emlak)
+            document.querySelectorAll('.badge-picker-item').forEach(item => {
+                const excluded = JSON.parse(item.getAttribute('data-excluded-roots') || '[]');
+                const shouldHide = root && excluded.includes(root);
+                item.classList.toggle('d-none', shouldHide);
+                if (shouldHide) {
+                    const cb = item.querySelector('input[type="checkbox"]');
+                    if (cb) cb.checked = false;
+                }
+            });
         };
 
         categorySelect.addEventListener('change', syncCategoryOptions);
