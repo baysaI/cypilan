@@ -476,17 +476,15 @@
                         aktif" already answers the only question being asked. %>
                     <% const sellerSeen = helpers.lastSeenState(listing.seller_last_seen || listing.created_at); %>
                     <p class="small mb-2 d-flex align-items-center justify-content-center gap-2">
-                        <span class="d-inline-block rounded-circle flex-shrink-0 <%= sellerSeen.online ? 'bg-success' : (sellerSeen.today ? 'bg-success opacity-75' : 'bg-secondary opacity-50') %>"
+                        <span class="d-inline-block rounded-circle flex-shrink-0 <%= sellerSeen.online ? 'bg-success shadow-sm' : (sellerSeen.today ? 'bg-success opacity-75' : 'bg-secondary opacity-50') %>"
                               style="width: 8px; height: 8px;" aria-hidden="true"></span>
                         <span class="<%= sellerSeen.online ? 'text-success fw-bold' : (sellerSeen.today ? 'text-success fw-medium' : 'text-muted') %>">
                             <% if (sellerSeen.online) { %>
                                 <%= t('user.last_seen_online') %>
-                            <% } else if (sellerSeen.today) { %>
-                                <%= t('user.last_seen_today') %>
                             <% } else if (sellerSeen.known) { %>
                                 <%= t('user.last_seen_ago', { time: helpers.timeAgo(listing.seller_last_seen || listing.created_at, lang) }) %>
                             <% } else { %>
-                                <%= helpers.timeAgo(listing.created_at, lang) %> aktif
+                                <%= t('user.last_seen_ago', { time: helpers.timeAgo(listing.created_at, lang) }) %>
                             <% } %>
                         </span>
                     </p>

@@ -273,6 +273,11 @@
                                     <% } else { %>
                                         <div class="small text-muted">Henüz değerlendirilmedi</div>
                                     <% } %>
+                                    <% const compSellerSeen = helpers.lastSeenState(item.seller_last_seen || item.created_at); %>
+                                    <div class="small mt-1 text-muted d-flex align-items-center justify-content-center gap-1" style="font-size: 0.75rem;">
+                                        <span class="d-inline-block rounded-circle <%= compSellerSeen.online ? 'bg-success' : 'bg-secondary opacity-50' %>" style="width: 6px; height: 6px;"></span>
+                                        <span><%= compSellerSeen.online ? 'Çevrimiçi' : (helpers.timeAgo(item.seller_last_seen || item.created_at, lang) + ' aktifti') %></span>
+                                    </div>
                                 </td>
                             <% }); %>
                         </tr>
