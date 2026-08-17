@@ -1042,24 +1042,24 @@
 
 <!-- Instagram / WhatsApp Story Maker Modal -->
 <div class="modal fade" id="storyMakerModal" tabindex="-1" aria-labelledby="storyMakerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-md">
-    <div class="modal-content rounded-4 border-0 shadow-2xl bg-dark text-white overflow-hidden">
-      <div class="modal-header border-0 pb-0 pt-3 px-4">
-        <h5 class="modal-title fw-bold text-white fs-6" id="storyMakerModalLabel">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
+    <div class="modal-content rounded-4 border-0 shadow-2xl bg-dark text-white">
+      <div class="modal-header border-0 pb-1 pt-3 px-4 d-flex justify-content-between align-items-center">
+        <h5 class="modal-title fw-bold text-white fs-6 mb-0" id="storyMakerModalLabel">
           <i class="fa-brands fa-instagram text-danger me-2"></i>Hikaye (Story) Görseli Hazır!
         </h5>
         <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body p-3 text-center">
-        <div class="d-flex justify-content-center mb-3">
-          <div class="position-relative shadow-lg rounded-4 overflow-hidden border border-secondary" style="width: 290px; height: 515px; max-width: 100%; aspect-ratio: 9/16; background: #0f172a;">
+      <div class="modal-body p-3 text-center" style="overflow-y: auto; -webkit-overflow-scrolling: touch;">
+        <div class="d-flex justify-content-center my-2">
+          <div class="position-relative shadow-lg rounded-4 overflow-hidden border border-secondary" style="width: min(260px, 65vw); max-height: 46vh; aspect-ratio: 9/16; background: #0f172a;">
             <canvas id="storyCanvas" width="1080" height="1920" style="width: 100%; height: 100%; display: block; object-fit: contain;"></canvas>
           </div>
         </div>
         
-        <p class="text-secondary small mb-3">Görseli indirip Instagram veya WhatsApp durumunuzda doğrudan paylaşabilirsiniz.</p>
+        <p class="text-secondary small mb-3">Görseli indirip Instagram veya WhatsApp durumunuzda paylaşabilirsiniz.</p>
 
-        <div class="d-flex gap-2 justify-content-center flex-wrap">
+        <div class="d-flex gap-2 justify-content-center flex-wrap pb-2">
           <button type="button" id="downloadStoryBtn" class="btn btn-primary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow">
             <i class="fa-solid fa-download"></i> Görseli İndir (.PNG)
           </button>
