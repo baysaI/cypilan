@@ -254,7 +254,20 @@
                             <tr class="compare-row" data-field="swap">
                                 <td class="fw-bold text-muted bg-light p-3 border-end">Takas</td>
                                 <% listings.forEach(function(item) { %>
-                                    <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.swap) || '-' %></td>
+                                    <%
+                                        const itemSwap = item.attributes && item.attributes.swap;
+                                        const swapStr = String(itemSwap || '').trim().toLowerCase();
+                                        const isNo = swapStr.startsWith('hayır') || swapStr.includes('yok') || swapStr === 'no' || swapStr === '0';
+                                    %>
+                                    <td class="p-3 text-center border-end compare-cell">
+                                        <% if (!itemSwap) { %>
+                                            -
+                                        <% } else if (isNo) { %>
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1"><i class="fa-solid fa-xmark me-1"></i><%= itemSwap %></span>
+                                        <% } else { %>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1"><i class="fa-solid fa-arrows-rotate me-1"></i><%= itemSwap %></span>
+                                        <% } %>
+                                    </td>
                                 <% }); %>
                             </tr>
                         <% } %>

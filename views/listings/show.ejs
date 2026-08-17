@@ -271,13 +271,17 @@
                         <% } %>
 
                         <% if (attrs.swap) { %>
+                            <%
+                                const swapStr = String(attrs.swap).trim().toLowerCase();
+                                const isNoSwap = swapStr.startsWith('hayır') || swapStr.includes('yok') || swapStr === 'no' || swapStr === '0';
+                            %>
                             <div class="col">
                                 <div class="text-muted small mb-1"><%= t('draft.field_swap') %></div>
                                 <div class="fw-bold text-dark">
-                                    <% if (attrs.swap.includes('Evet') || attrs.swap.includes('Takas') || attrs.swap.includes('uygun') || attrs.swap.includes('Araçla')) { %>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1"><i class="fa-solid fa-arrows-rotate me-1"></i><%= attrs.swap %></span>
+                                    <% if (isNoSwap) { %>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1"><i class="fa-solid fa-xmark me-1"></i><%= attrs.swap %></span>
                                     <% } else { %>
-                                        <%= attrs.swap %>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1"><i class="fa-solid fa-arrows-rotate me-1"></i><%= attrs.swap %></span>
                                     <% } %>
                                 </div>
                             </div>
