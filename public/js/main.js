@@ -682,13 +682,28 @@ document.addEventListener('DOMContentLoaded', () => {
         // Load image or fallback
         if (currentShareData.image) {
             const img = new Image();
-            img.crossOrigin = 'anonymous';
+            if (currentShareData.image.startsWith('http://') || currentShareData.image.startsWith('https://')) {
+                img.crossOrigin = 'anonymous';
+            }
             img.onload = () => finalizeStoryDrawing(img);
-            img.onerror = () => finalizeStoryDrawing(null);
+            img.onerror = () => {
+                const fallbackImg = new Image();
+                fallbackImg.onload = () => finalizeStoryDrawing(fallbackImg);
+                fallbackImg.onerror = () => finalizeStoryDrawing(null);
+                fallbackImg.src = currentShareData.image;
+            };
             img.src = currentShareData.image;
         } else {
             finalizeStoryDrawing(null);
         }
+    }
+
+    // Also auto-render when modal is shown via Bootstrap data attributes
+    const storyModalEl = document.getElementById('storyMakerModal');
+    if (storyModalEl) {
+        storyModalEl.addEventListener('shown.bs.modal', () => {
+            renderStoryCard();
+        });
     }
 
     // Download Story Button

@@ -79,6 +79,8 @@
                         <i class="fa-solid fa-code-compare"></i> <%= t('compare.button') || 'Karşılaştır' %>
                     </button>
                     <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 share-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#shareModal"
                             data-id="<%= listing.id %>"
                             data-title="<%= listing.title %>"
                             data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
@@ -89,6 +91,8 @@
                         <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                     </button>
                     <button type="button" class="btn btn-outline-danger btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 direct-story-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#storyMakerModal"
                             data-id="<%= listing.id %>"
                             data-title="<%= listing.title %>"
                             data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
@@ -460,6 +464,8 @@
                     <i class="fa-solid fa-code-compare"></i> <%= t('compare.button') || 'Karşılaştır' %>
                 </button>
                 <button type="button" class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 share-btn"
+                        data-bs-toggle="modal"
+                        data-bs-target="#shareModal"
                         data-id="<%= listing.id %>"
                         data-title="<%= listing.title %>"
                         data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
@@ -470,6 +476,8 @@
                     <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                 </button>
                 <button type="button" class="btn btn-outline-danger rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 direct-story-btn"
+                        data-bs-toggle="modal"
+                        data-bs-target="#storyMakerModal"
                         data-id="<%= listing.id %>"
                         data-title="<%= listing.title %>"
                         data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
@@ -993,7 +1001,11 @@
 
         <!-- 2. Instagram & WhatsApp Story Generator Button -->
         <div class="mb-3">
-          <button type="button" id="openStoryMakerBtn" class="btn text-white w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border: none;">
+          <button type="button" id="openStoryMakerBtn"
+                  data-bs-toggle="modal"
+                  data-bs-target="#storyMakerModal"
+                  class="btn text-white w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                  style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border: none;">
             <i class="fa-brands fa-instagram fs-5"></i>
             <span>📸 Instagram / WhatsApp Hikaye (Story) Kartı Oluştur</span>
           </button>
