@@ -504,22 +504,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. Header Brand Section
             ctx.textAlign = 'center';
-            ctx.textBaseline = 'alphabetic';
+            ctx.textBaseline = 'middle';
 
             // CYPILAN Logo Text
             ctx.fillStyle = '#ffffff';
-            ctx.font = '900 60px "Inter", "Segoe UI", sans-serif';
-            ctx.fillText('CYPILAN', W / 2, 140);
+            ctx.font = '900 64px "Inter", "Segoe UI", sans-serif';
+            ctx.fillText('CYPILAN', W / 2, 110);
 
             ctx.fillStyle = '#94a3b8';
             ctx.font = '700 24px "Inter", "Segoe UI", sans-serif';
-            ctx.fillText('KIBRIS\'IN İLAN PAZARYERİ • cypilan.com', W / 2, 185);
+            ctx.fillText("KIBRIS'IN İLAN PAZARYERİ • cypilan.com", W / 2, 165);
 
             // 3. Photo Card Container
-            const imgBoxX = 90;
-            const imgBoxY = 230;
-            const imgBoxW = 900;
-            const imgBoxH = 840;
+            const imgBoxX = 80;
+            const imgBoxY = 210;
+            const imgBoxW = 920;
+            const imgBoxH = 820;
 
             ctx.save();
             roundRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 36);
@@ -545,11 +545,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.drawImage(photoImg, drawX, drawY, drawW, drawH);
 
                 // Subtle vignette on photo
-                const photoGrad = ctx.createLinearGradient(0, imgBoxY + imgBoxH - 260, 0, imgBoxY + imgBoxH);
+                const photoGrad = ctx.createLinearGradient(0, imgBoxY + imgBoxH - 240, 0, imgBoxY + imgBoxH);
                 photoGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
                 photoGrad.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
                 ctx.fillStyle = photoGrad;
-                ctx.fillRect(imgBoxX, imgBoxY + imgBoxH - 260, imgBoxW, 260);
+                ctx.fillRect(imgBoxX, imgBoxY + imgBoxH - 240, imgBoxW, 240);
             } else {
                 // Fallback elegant box
                 ctx.fillStyle = '#1e293b';
@@ -578,80 +578,95 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = '#ffffff';
             ctx.font = '700 24px "Inter", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('✨ GÜNCEL İLAN', imgBoxX + 139, imgBoxY + 59);
+            ctx.textBaseline = 'middle';
+            ctx.fillText('✨ GÜNCEL İLAN', imgBoxX + 139, imgBoxY + 50);
             ctx.restore();
 
-            // 4. Details Section (Strictly Structured)
-            const detailStartY = imgBoxY + imgBoxH + 45; // 1115
-            let currentX = imgBoxX; // 90
+            // 4. Details Section (Distinct Non-Overlapping Rows)
+            // ROW 1: Price Badge (Left) & Category Badge (Right)
+            const row1Y = imgBoxY + imgBoxH + 40; // 1070
+            const row1H = 84;
 
-            // Row 1: Price Badge + City / Category Badges
             if (currentShareData.price) {
                 ctx.save();
                 ctx.font = '900 52px "Inter", sans-serif';
                 const priceText = currentShareData.price;
                 const priceW = ctx.measureText(priceText).width + 60;
-                const priceH = 84;
 
-                const pGrad = ctx.createLinearGradient(currentX, detailStartY, currentX + priceW, detailStartY + priceH);
+                const pGrad = ctx.createLinearGradient(imgBoxX, row1Y, imgBoxX + priceW, row1Y + row1H);
                 pGrad.addColorStop(0, '#f59e0b');
                 pGrad.addColorStop(1, '#d97706');
                 ctx.fillStyle = pGrad;
-                roundRect(currentX, detailStartY, priceW, priceH, 22);
+                roundRect(imgBoxX, row1Y, priceW, row1H, 22);
                 ctx.fill();
 
                 ctx.fillStyle = '#0f172a';
                 ctx.textAlign = 'center';
-                ctx.fillText(priceText, currentX + priceW / 2, detailStartY + 59);
+                ctx.textBaseline = 'middle';
+                ctx.fillText(priceText, imgBoxX + priceW / 2, row1Y + row1H / 2);
                 ctx.restore();
-
-                currentX += priceW + 16;
             }
 
-            // Location Badge (City)
+            // Category Badge next to Price
+            if (currentShareData.category) {
+                ctx.save();
+                ctx.font = '700 30px "Inter", sans-serif';
+                const catText = `🏷️ ${currentShareData.category}`;
+                const catW = ctx.measureText(catText).width + 44;
+                const catH = 84;
+                
+                let catX = imgBoxX;
+                if (currentShareData.price) {
+                    ctx.font = '900 52px "Inter", sans-serif';
+                    const priceW = ctx.measureText(currentShareData.price).width + 60;
+                    catX = imgBoxX + priceW + 16;
+                }
+
+                if (catX + catW <= imgBoxX + imgBoxW) {
+                    ctx.font = '700 30px "Inter", sans-serif';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                    roundRect(catX, row1Y, catW, catH, 22);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(catText, catX + catW / 2, row1Y + catH / 2);
+                }
+                ctx.restore();
+            }
+
+            // ROW 2: Location (City) Pill
+            const row2Y = row1Y + row1H + 20; // 1174
+            const row2H = 64;
+
             if (currentShareData.city) {
                 ctx.save();
                 const cityText = `📍 ${currentShareData.city}, KKTC`;
-                ctx.font = '600 28px "Inter", sans-serif';
-                const cityW = ctx.measureText(cityText).width + 40;
-                const badgeH = 84;
+                ctx.font = '600 30px "Inter", sans-serif';
+                const cityW = ctx.measureText(cityText).width + 44;
 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-                roundRect(currentX, detailStartY, cityW, badgeH, 22);
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+                ctx.lineWidth = 1.5;
+                roundRect(imgBoxX, row2Y, cityW, row2H, 20);
                 ctx.fill();
+                ctx.stroke();
 
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = '#38bdf8';
                 ctx.textAlign = 'center';
-                ctx.fillText(cityText, currentX + cityW / 2, detailStartY + 53);
-                ctx.restore();
-
-                currentX += cityW + 16;
-            }
-
-            // Category Badge
-            if (currentShareData.category && currentX < (W - 250)) {
-                ctx.save();
-                const catText = `🏷️ ${currentShareData.category}`;
-                ctx.font = '600 28px "Inter", sans-serif';
-                const catW = ctx.measureText(catText).width + 40;
-                const badgeH = 84;
-
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-                roundRect(currentX, detailStartY, catW, badgeH, 22);
-                ctx.fill();
-
-                ctx.fillStyle = '#e2e8f0';
-                ctx.textAlign = 'center';
-                ctx.fillText(catText, currentX + catW / 2, detailStartY + 53);
+                ctx.textBaseline = 'middle';
+                ctx.fillText(cityText, imgBoxX + cityW / 2, row2Y + row2H / 2);
                 ctx.restore();
             }
 
-            // Row 2: Listing Title (Multi-line, properly positioned below badges)
-            const titleY = detailStartY + 155; // 1270
+            // ROW 3: Listing Title (Multi-line text, clearly separated)
+            const titleY = row2Y + row2H + 35; // 1273
             ctx.save();
             ctx.fillStyle = '#ffffff';
             ctx.font = '800 48px "Inter", "Segoe UI", sans-serif';
             ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
 
             const maxTitleW = imgBoxW;
             const words = (currentShareData.title || '').split(' ');
@@ -665,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (testWidth > maxTitleW && i > 0) {
                     ctx.fillText(line.trim(), imgBoxX, curY);
                     line = words[i] + ' ';
-                    curY += 64;
+                    curY += 66;
                     linesCount++;
                     if (linesCount >= 3 && i < words.length - 1) {
                         line = line + '...';
@@ -679,10 +694,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.restore();
 
             // 5. Footer Call To Action Box
-            const footY = H - 190;
+            const footY = H - 180;
             ctx.save();
             ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
             ctx.lineWidth = 2.5;
             roundRect(imgBoxX, footY, imgBoxW, 110, 30);
             ctx.fill();
@@ -691,7 +706,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = '#38bdf8';
             ctx.font = '700 32px "Inter", sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('👉 Detaylar & İletişim İçin: cypilan.com', W / 2, footY + 68);
+            ctx.textBaseline = 'middle';
+            ctx.fillText('👉 Detaylar & İletişim İçin: cypilan.com', W / 2, footY + 55);
             ctx.restore();
 
             ctx.restore();
@@ -710,10 +726,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // STEP 2: Asynchronously load image and redraw
         if (currentShareData.image) {
             const img = new Image();
-            // If image is local relative path, do not set crossOrigin
-            const isExternal = currentShareData.image.startsWith('http://') || currentShareData.image.startsWith('https://');
-            if (isExternal) {
-                img.crossOrigin = 'anonymous';
+            if (currentShareData.image.startsWith('http://') || currentShareData.image.startsWith('https://')) {
+                try {
+                    const parsed = new URL(currentShareData.image);
+                    if (parsed.host !== window.location.host) {
+                        img.crossOrigin = 'anonymous';
+                    }
+                } catch(e) {
+                    img.crossOrigin = 'anonymous';
+                }
             }
 
             img.onload = () => {
@@ -721,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             img.onerror = () => {
-                if (isExternal && img.crossOrigin) {
+                if (img.crossOrigin) {
                     const fallbackImg = new Image();
                     fallbackImg.onload = () => drawCanvas(fallbackImg);
                     fallbackImg.onerror = () => drawCanvas(null);
