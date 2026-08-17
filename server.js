@@ -202,6 +202,8 @@ app.use((err, req, res, next) => {
   }
 
   const statusCode = err.status || 500;
+  res.locals.t = res.locals.t || ((k) => (k === 'errors.server_error_title' ? 'Sunucu Hatası' : k === 'errors.server_error_message' ? 'Beklenmeyen bir hata oluştu.' : k));
+  res.locals.lang = res.locals.lang || 'tr';
   res.locals.meta = {
     ...(res.locals.meta || {}),
     title: 'Hata',

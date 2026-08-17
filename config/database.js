@@ -164,6 +164,49 @@ const applyColumnMigrations = (db) => {
     );
     CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id);
     CREATE INDEX IF NOT EXISTS idx_price_alerts_listing ON price_alerts(listing_id);
+
+    CREATE TABLE IF NOT EXISTS feedback (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      type TEXT NOT NULL CHECK(type IN ('bug', 'suggestion', 'other')),
+      message TEXT NOT NULL,
+      contact TEXT,
+      page_url TEXT,
+      user_agent TEXT,
+      status TEXT DEFAULT 'new' CHECK(status IN ('new', 'reviewed', 'archived')),
+      admin_note TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_feedback_queue ON feedback(status, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS broadcasts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      link_url TEXT,
+      target_role TEXT DEFAULT 'all' CHECK(target_role IN ('all', 'user', 'business', 'agent')),
+      recipient_count INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_broadcasts_created ON broadcasts(created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS user_blocks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      blocker_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      blocked_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(blocker_id, blocked_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_user_blocks_blocker ON user_blocks(blocker_id);
+    CREATE INDEX IF NOT EXISTS idx_user_blocks_pair ON user_blocks(blocker_id, blocked_id);
+
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   COLUMN_MIGRATIONS.forEach(({ table, column, ddl }) => {
