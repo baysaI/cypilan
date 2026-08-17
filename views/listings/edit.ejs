@@ -125,11 +125,77 @@
                                     </div>
                                     <div class="col-6 col-md-3">
                                         <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_year') %></label>
-                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="year" value="<%= attrs.year || '' %>" placeholder="2019">
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="year" value="<%= attrs.year || '' %>" placeholder="2020">
                                     </div>
                                     <div class="col-6 col-md-3">
                                         <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_km') %></label>
                                         <input type="text" class="form-control bg-light border-0 shadow-none" name="km" value="<%= attrs.km || '' %>" placeholder="85000">
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_fuel') %></label>
+                                        <select class="form-select form-select-sm bg-light border-0 shadow-none" name="fuel">
+                                            <option value="">Seçiniz</option>
+                                            <% ['Benzin', 'Dizel', 'Hibrit', 'Elektrik', 'LPG'].forEach(function(f) { %>
+                                                <option value="<%= f %>" <%= (attrs.fuel === f) ? 'selected' : '' %>><%= f %></option>
+                                            <% }); %>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_gear') %></label>
+                                        <select class="form-select form-select-sm bg-light border-0 shadow-none" name="gear">
+                                            <option value="">Seçiniz</option>
+                                            <% ['Otomatik', 'Manuel', 'Yarı Otomatik'].forEach(function(g) { %>
+                                                <option value="<%= g %>" <%= (attrs.gear === g) ? 'selected' : '' %>><%= g %></option>
+                                            <% }); %>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_body_type') %></label>
+                                        <select class="form-select form-select-sm bg-light border-0 shadow-none" name="body_type">
+                                            <option value="">Seçiniz</option>
+                                            <% ['Sedan', 'Hatchback', 'SUV', 'Coupe', 'Cabrio', 'Station Wagon', 'Pick-up', 'Minivan'].forEach(function(bt) { %>
+                                                <option value="<%= bt %>" <%= (attrs.body_type === bt) ? 'selected' : '' %>><%= bt %></option>
+                                            <% }); %>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_engine_power') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="engine_power" value="<%= attrs.engine_power || '' %>" placeholder="150 HP">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_engine_size') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="engine_size" value="<%= attrs.engine_size || '' %>" placeholder="1600 cc">
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_drivetrain') %></label>
+                                        <select class="form-select form-select-sm bg-light border-0 shadow-none" name="drivetrain">
+                                            <option value="">Seçiniz</option>
+                                            <% ['Önden Çekiş', 'Arkadan İtiş', '4x4 / AWD (Dört Çeker)'].forEach(function(dt) { %>
+                                                <option value="<%= dt %>" <%= (attrs.drivetrain === dt) ? 'selected' : '' %>><%= dt %></option>
+                                            <% }); %>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_color') %></label>
+                                        <input type="text" class="form-control bg-light border-0 shadow-none" name="color" value="<%= attrs.color || '' %>" placeholder="Beyaz">
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_vehicle_status') %></label>
+                                        <select class="form-select form-select-sm bg-light border-0 shadow-none" name="vehicle_status">
+                                            <option value="">Seçiniz</option>
+                                            <% ['İkinci El', 'Sıfır (0 KM)', 'Hasarsız / Boyasız', 'Boyalı / Değişenli', 'Ağır Hasar Kayıtlı'].forEach(function(vs) { %>
+                                                <option value="<%= vs %>" <%= (attrs.vehicle_status === vs) ? 'selected' : '' %>><%= vs %></option>
+                                            <% }); %>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-md-3">
+                                        <label class="form-label small fw-semibold text-muted mb-1"><%= t('draft.field_swap') %></label>
+                                        <select class="form-select form-select-sm bg-light border-0 shadow-none" name="swap">
+                                            <option value="">Seçiniz</option>
+                                            <% ['Hayır (Takas Yok)', 'Evet (Takasa Uygun)', 'Sadece Araçla Takas', 'Düşük Model Araçla Takas'].forEach(function(sw) { %>
+                                                <option value="<%= sw %>" <%= (attrs.swap === sw) ? 'selected' : '' %>><%= sw %></option>
+                                            <% }); %>
+                                        </select>
                                     </div>
                                 <% } %>
                             </div>

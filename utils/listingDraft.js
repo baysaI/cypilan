@@ -54,6 +54,16 @@ const buildVasita = (facts, t) => {
 
   if (facts.km) parts.push(t('draft.vasita.km', { km: facts.km }));
   if (facts.fuel) parts.push(t('draft.vasita.fuel', { fuel: facts.fuel }));
+  if (facts.gear) parts.push(`Vites: ${facts.gear}.`);
+  if (facts.body_type) parts.push(`Kasa: ${facts.body_type}.`);
+  if (facts.engine_power) parts.push(`Motor Gücü: ${facts.engine_power}.`);
+  if (facts.engine_size) parts.push(`Motor Hacmi: ${facts.engine_size}.`);
+  if (facts.drivetrain) parts.push(`Çekiş: ${facts.drivetrain}.`);
+  if (facts.color) parts.push(`Renk: ${facts.color}.`);
+  if (facts.vehicle_status) parts.push(`Durum: ${facts.vehicle_status}.`);
+  if (facts.swap && (facts.swap.includes('Evet') || facts.swap.includes('Takas') || facts.swap.includes('uygun'))) {
+    parts.push(`Takasa uygundur.`);
+  }
 
   return parts;
 };
@@ -92,6 +102,14 @@ const build = (facts, t) => {
     model: (facts.model || '').trim(),
     km: (facts.km || '').toString().trim(),
     fuel: (facts.fuel || '').trim(),
+    gear: (facts.gear || '').trim(),
+    body_type: (facts.body_type || '').trim(),
+    engine_power: (facts.engine_power || '').trim(),
+    engine_size: (facts.engine_size || '').trim(),
+    drivetrain: (facts.drivetrain || '').trim(),
+    color: (facts.color || '').trim(),
+    vehicle_status: (facts.vehicle_status || '').trim(),
+    swap: (facts.swap || '').trim(),
     features: Array.isArray(facts.features) ? facts.features : []
   };
 

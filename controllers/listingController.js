@@ -364,7 +364,11 @@ const create = async (req, res, next) => {
 
         // Collect and save structured listing attributes (rooms, size, build_year, brand, km, features etc.)
         const attributes = {};
-        const directKeys = ['rooms', 'size', 'floor', 'build_year', 'buildYear', 'brand', 'model', 'year', 'km', 'fuel', 'gear', 'condition'];
+        const directKeys = [
+            'rooms', 'size', 'floor', 'build_year', 'buildYear',
+            'brand', 'model', 'year', 'km', 'fuel', 'gear', 'condition',
+            'body_type', 'engine_power', 'engine_size', 'drivetrain', 'color', 'vehicle_status', 'swap'
+        ];
         directKeys.forEach(k => {
             const v = req.body[k] || (req.body.attributes && req.body.attributes[k]);
             if (v !== undefined && v !== null && String(v).trim() !== '') {
@@ -518,7 +522,11 @@ const update = async (req, res, next) => {
 
         // Update structured attributes
         const attributes = {};
-        const directKeys = ['rooms', 'size', 'floor', 'build_year', 'buildYear', 'brand', 'model', 'year', 'km', 'fuel', 'gear', 'condition'];
+        const directKeys = [
+            'rooms', 'size', 'floor', 'build_year', 'buildYear',
+            'brand', 'model', 'year', 'km', 'fuel', 'gear', 'condition',
+            'body_type', 'engine_power', 'engine_size', 'drivetrain', 'color', 'vehicle_status', 'swap'
+        ];
         directKeys.forEach(k => {
             const v = req.body[k] || (req.body.attributes && req.body.attributes[k]);
             if (v !== undefined && v !== null && String(v).trim() !== '') {

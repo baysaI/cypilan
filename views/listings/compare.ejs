@@ -116,6 +116,13 @@
                             const hasFuel = listings.some(l => l.attributes && l.attributes.fuel);
                             const hasGear = listings.some(l => l.attributes && l.attributes.gear);
                             const hasCondition = listings.some(l => l.attributes && l.attributes.condition);
+                            const hasBodyType = listings.some(l => l.attributes && l.attributes.body_type);
+                            const hasEnginePower = listings.some(l => l.attributes && l.attributes.engine_power);
+                            const hasEngineSize = listings.some(l => l.attributes && l.attributes.engine_size);
+                            const hasDrivetrain = listings.some(l => l.attributes && l.attributes.drivetrain);
+                            const hasColor = listings.some(l => l.attributes && l.attributes.color);
+                            const hasVehicleStatus = listings.some(l => l.attributes && l.attributes.vehicle_status);
+                            const hasSwap = listings.some(l => l.attributes && l.attributes.swap);
                         %>
 
                         <% if (hasRooms) { %>
@@ -187,11 +194,67 @@
                             </tr>
                         <% } %>
 
+                        <% if (hasBodyType) { %>
+                            <tr class="compare-row" data-field="body_type">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Kasa Tipi</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.body_type) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasEnginePower || hasEngineSize) { %>
+                            <tr class="compare-row" data-field="engine">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Motor Gücü &amp; Hacmi</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell">
+                                        <%= (item.attributes && (item.attributes.engine_power || item.attributes.engine_size)) ? ((item.attributes.engine_power || '') + ' ' + (item.attributes.engine_size || '')) : '-' %>
+                                    </td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasDrivetrain) { %>
+                            <tr class="compare-row" data-field="drivetrain">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Çekiş</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.drivetrain) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasColor) { %>
+                            <tr class="compare-row" data-field="color">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Renk</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.color) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasVehicleStatus) { %>
+                            <tr class="compare-row" data-field="vehicle_status">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Araç Durumu</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.vehicle_status) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
                         <% if (hasCondition) { %>
                             <tr class="compare-row" data-field="condition">
                                 <td class="fw-bold text-muted bg-light p-3 border-end">Kullanım Durumu</td>
                                 <% listings.forEach(function(item) { %>
                                     <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.condition) || '-' %></td>
+                                <% }); %>
+                            </tr>
+                        <% } %>
+
+                        <% if (hasSwap) { %>
+                            <tr class="compare-row" data-field="swap">
+                                <td class="fw-bold text-muted bg-light p-3 border-end">Takas</td>
+                                <% listings.forEach(function(item) { %>
+                                    <td class="p-3 text-center border-end compare-cell"><%= (item.attributes && item.attributes.swap) || '-' %></td>
                                 <% }); %>
                             </tr>
                         <% } %>

@@ -598,8 +598,21 @@ document.addEventListener('DOMContentLoaded', function() {
             vasita: [
                 { name: 'brand', label: '<%= t("draft.field_brand") %>', placeholder: 'Örn: BMW' },
                 { name: 'model', label: '<%= t("draft.field_model") %>', placeholder: 'Örn: 320i' },
-                { name: 'year', label: '<%= t("draft.field_year") %>', placeholder: 'Örn: 2019' },
-                { name: 'km', label: '<%= t("draft.field_km") %>', placeholder: 'Örn: 85000' }
+                { name: 'year', label: '<%= t("draft.field_year") %>', placeholder: 'Örn: 2020' },
+                { name: 'km', label: '<%= t("draft.field_km") %>', placeholder: 'Örn: 85000' },
+                { name: 'fuel', label: '<%= t("draft.field_fuel") %>', options: ['', 'Benzin', 'Dizel', 'Hibrit', 'Elektrik', 'LPG'] },
+                { name: 'gear', label: '<%= t("draft.field_gear") %>', options: ['', 'Otomatik', 'Manuel', 'Yarı Otomatik'] },
+                { name: 'body_type', label: '<%= t("draft.field_body_type") %>', options: ['', 'Sedan', 'Hatchback', 'SUV', 'Coupe', 'Cabrio', 'Station Wagon', 'Pick-up', 'Minivan'] },
+                { name: 'engine_power', label: '<%= t("draft.field_engine_power") %>', placeholder: 'Örn: 150 HP' },
+                { name: 'engine_size', label: '<%= t("draft.field_engine_size") %>', placeholder: 'Örn: 1600 cc' },
+                { name: 'drivetrain', label: '<%= t("draft.field_drivetrain") %>', options: ['', 'Önden Çekiş', 'Arkadan İtiş', '4x4 / AWD (Dört Çeker)'] },
+                { name: 'color', label: '<%= t("draft.field_color") %>', placeholder: 'Örn: Beyaz' },
+                { name: 'vehicle_status', label: '<%= t("draft.field_vehicle_status") %>', options: ['', 'İkinci El', 'Sıfır (0 KM)', 'Hasarsız / Boyasız', 'Boyalı / Değişenli', 'Ağır Hasar Kayıtlı'] },
+                { name: 'swap', label: '<%= t("draft.field_swap") %>', options: ['', 'Hayır (Takas Yok)', 'Evet (Takasa Uygun)', 'Sadece Araçla Takas', 'Düşük Model Araçla Takas'] }
+            ],
+            'ikinci-el': [
+                { name: 'condition', label: '<%= t("draft.field_condition") %>', options: ['', 'Sıfır / Kapalı Kutu', 'Çok Az Kullanılmış (Yeni Gibi)', 'İkinci El (Sorunsuz)', 'Kozmetik Kusurlu'] },
+                { name: 'swap', label: '<%= t("draft.field_swap") %>', options: ['', 'Hayır (Takas Yok)', 'Evet (Takasa Uygun)'] }
             ]
         };
 
@@ -621,13 +634,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const fields = FIELDS[root] || [];
             fields.forEach(function (field) {
                 const col = document.createElement('div');
-                col.className = 'col-6 col-md-3';
+                col.className = (field.options ? 'col-12 col-sm-6 col-md-3' : 'col-6 col-md-3');
                 const draftKey = field.draftKey || field.name;
                 const existingVal = savedAttributes[field.name] || savedAttributes[draftKey] || '';
-                col.innerHTML = '<label class="form-label small fw-semibold text-muted mb-1" for="attr_' + field.name + '">' + field.label + '</label>' +
-                    '<input type="text" class="form-control form-control-sm bg-white" name="' + field.name +
-                    '" id="attr_' + field.name + '" data-draft="' + draftKey +
-                    '" placeholder="' + field.placeholder + '" value="' + (existingVal ? String(existingVal).replace(/"/g, '&quot;') : '') + '">';
+
+                let inputHtml = '';
+                if (field.options) {
+                    inputHtml = '<select class="form-select form-select-sm bg-white" name="' + field.name +
+                        '" id="attr_' + field.name + '" data-draft="' + draftKey + '">';
+                    field.options.forEach(function (opt) {
+                        const optVal = opt;
+                        const optLabel = opt === '' ? 'Seçiniz' : opt;
+                        const isSel = String(existingVal) === String(optVal) ? 'selected' : '';
+                        inputHtml += '<option value="' + optVal + '" ' + isSel + '>' + optLabel + '</option>';
+                    });
+                    inputHtml += '</select>';
+                } else {
+                    inputHtml = '<input type="text" class="form-control form-control-sm bg-white" name="' + field.name +
+                        '" id="attr_' + field.name + '" data-draft="' + draftKey +
+                        '" placeholder="' + (field.placeholder || '') + '" value="' + (existingVal ? String(existingVal).replace(/"/g, '&quot;') : '') + '">';
+                }
+
+                col.innerHTML = '<label class="form-label small fw-semibold text-muted mb-1" for="attr_' + field.name + '">' + field.label + '</label>' + inputHtml;
                 draftFields.appendChild(col);
             });
 

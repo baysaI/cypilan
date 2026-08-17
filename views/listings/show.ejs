@@ -209,22 +209,77 @@
 
                         <% if (attrs.fuel) { %>
                             <div class="col">
-                                <div class="text-muted small mb-1">Yakıt Türü</div>
+                                <div class="text-muted small mb-1"><%= t('draft.field_fuel') %></div>
                                 <div class="fw-bold text-dark"><%= attrs.fuel %></div>
                             </div>
                         <% } %>
 
                         <% if (attrs.gear) { %>
                             <div class="col">
-                                <div class="text-muted small mb-1">Vites</div>
+                                <div class="text-muted small mb-1"><%= t('draft.field_gear') %></div>
                                 <div class="fw-bold text-dark"><%= attrs.gear %></div>
+                            </div>
+                        <% } %>
+
+                        <% if (attrs.body_type) { %>
+                            <div class="col">
+                                <div class="text-muted small mb-1"><%= t('draft.field_body_type') %></div>
+                                <div class="fw-bold text-dark"><%= attrs.body_type %></div>
+                            </div>
+                        <% } %>
+
+                        <% if (attrs.engine_power) { %>
+                            <div class="col">
+                                <div class="text-muted small mb-1"><%= t('draft.field_engine_power') %></div>
+                                <div class="fw-bold text-dark"><%= attrs.engine_power %></div>
+                            </div>
+                        <% } %>
+
+                        <% if (attrs.engine_size) { %>
+                            <div class="col">
+                                <div class="text-muted small mb-1"><%= t('draft.field_engine_size') %></div>
+                                <div class="fw-bold text-dark"><%= attrs.engine_size %></div>
+                            </div>
+                        <% } %>
+
+                        <% if (attrs.drivetrain) { %>
+                            <div class="col">
+                                <div class="text-muted small mb-1"><%= t('draft.field_drivetrain') %></div>
+                                <div class="fw-bold text-dark"><%= attrs.drivetrain %></div>
+                            </div>
+                        <% } %>
+
+                        <% if (attrs.color) { %>
+                            <div class="col">
+                                <div class="text-muted small mb-1"><%= t('draft.field_color') %></div>
+                                <div class="fw-bold text-dark"><%= attrs.color %></div>
+                            </div>
+                        <% } %>
+
+                        <% if (attrs.vehicle_status) { %>
+                            <div class="col">
+                                <div class="text-muted small mb-1"><%= t('draft.field_vehicle_status') %></div>
+                                <div class="fw-bold text-dark"><%= attrs.vehicle_status %></div>
                             </div>
                         <% } %>
 
                         <% if (attrs.condition) { %>
                             <div class="col">
-                                <div class="text-muted small mb-1">Durum</div>
+                                <div class="text-muted small mb-1"><%= t('draft.field_condition') %></div>
                                 <div class="fw-bold text-dark"><%= attrs.condition %></div>
+                            </div>
+                        <% } %>
+
+                        <% if (attrs.swap) { %>
+                            <div class="col">
+                                <div class="text-muted small mb-1"><%= t('draft.field_swap') %></div>
+                                <div class="fw-bold text-dark">
+                                    <% if (attrs.swap.includes('Evet') || attrs.swap.includes('Takas') || attrs.swap.includes('uygun') || attrs.swap.includes('Araçla')) { %>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1"><i class="fa-solid fa-arrows-rotate me-1"></i><%= attrs.swap %></span>
+                                    <% } else { %>
+                                        <%= attrs.swap %>
+                                    <% } %>
+                                </div>
                             </div>
                         <% } %>
                     </div>
