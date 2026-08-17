@@ -76,6 +76,8 @@ const login = async (req, res) => {
         const returnTo = req.session.returnTo || '/';
         const rememberMe = Boolean(remember);
 
+        await User.touchLastSeen(user.id);
+
         req.session.regenerate((regenerateErr) => {
             if (regenerateErr) {
                 console.error('Session Regenerate Error:', regenerateErr);
@@ -88,8 +90,6 @@ const login = async (req, res) => {
             req.session.userEmail = user.email;
             req.session.userName = user.full_name;
             req.session.lastSeenTouchedAt = Date.now();
-
-            await User.touchLastSeen(user.id);
 
             if (rememberMe) {
                 req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
