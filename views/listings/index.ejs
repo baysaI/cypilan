@@ -94,16 +94,16 @@
         }
     %>
     <div class="d-flex flex-wrap gap-2 mb-4">
-        <a href="<%= buildTypeUrl('') %>" class="btn btn-sm <%= !currentType ? 'btn-primary text-white shadow-sm' : 'btn-light border text-muted' %> rounded-pill px-3 py-2 fw-medium">
+        <a href="<%= buildTypeUrl('') %>" class="btn btn-sm <%= !currentType ? 'btn-primary text-white shadow-sm fw-bold' : 'btn-light border bg-white text-secondary' %> rounded-pill px-3 py-2">
             <i class="fa-solid fa-list-ul me-1"></i> <%= t('common.all') || 'Tüm İlanlar' %>
         </a>
-        <a href="<%= buildTypeUrl('sale') %>" class="btn btn-sm <%= currentType === 'sale' ? 'btn-primary text-white shadow-sm' : 'btn-light border text-muted' %> rounded-pill px-3 py-2 fw-medium">
-            <i class="fa-solid fa-tag me-1"></i> <%= t('listing.type_sale') || 'Satılık' %>
+        <a href="<%= buildTypeUrl('sale') %>" class="btn btn-sm <%= currentType === 'sale' ? 'btn-primary text-white shadow-sm fw-bold' : 'btn-light border bg-white text-secondary' %> rounded-pill px-3 py-2">
+            <i class="fa-solid fa-tag me-1 <%= currentType === 'sale' ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_sale') || 'Satılık' %>
         </a>
-        <a href="<%= buildTypeUrl('rent') %>" class="btn btn-sm <%= currentType === 'rent' ? 'btn-primary text-white shadow-sm' : 'btn-light border text-muted' %> rounded-pill px-3 py-2 fw-medium">
-            <i class="fa-solid fa-key me-1"></i> <%= t('listing.type_rent') || 'Kiralık' %>
+        <a href="<%= buildTypeUrl('rent') %>" class="btn btn-sm <%= currentType === 'rent' ? 'btn-primary text-white shadow-sm fw-bold' : 'btn-light border bg-white text-secondary' %> rounded-pill px-3 py-2">
+            <i class="fa-solid fa-key me-1 <%= currentType === 'rent' ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_rent') || 'Kiralık' %>
         </a>
-        <a href="<%= buildTypeUrl('wanted') %>" class="btn btn-sm <%= currentType === 'wanted' ? 'btn-warning text-dark fw-bold shadow-sm' : 'btn-light border text-dark' %> rounded-pill px-3 py-2 fw-medium">
+        <a href="<%= buildTypeUrl('wanted') %>" class="btn btn-sm <%= currentType === 'wanted' ? 'btn-warning text-dark shadow-sm fw-bold border border-warning' : 'btn-light border bg-white text-secondary' %> rounded-pill px-3 py-2">
             <i class="fa-solid fa-hand-holding-heart me-1 text-warning"></i> <%= t('listing.type_wanted') || '📢 Arıyorum (Talepler)' %>
         </a>
     </div>
@@ -117,6 +117,9 @@
                     </h5>
                     
                     <form action="/listings" method="GET">
+                        <% if (filters.type) { %>
+                            <input type="hidden" name="type" value="<%= filters.type %>">
+                        <% } %>
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('common.search') %></label>
                             <div class="input-group">
@@ -182,7 +185,10 @@
             <% if (pagination.totalPages > 1) { %>
                 <%
                     const pageQuery = (filters.category ? '&category=' + filters.category : '')
-                        + (filters.city ? '&city=' + filters.city : '');
+                        + (filters.city ? '&city=' + filters.city : '')
+                        + (filters.type ? '&type=' + filters.type : '')
+                        + (filters.badge ? '&badge=' + filters.badge : '')
+                        + (filters.q ? '&q=' + encodeURIComponent(filters.q) : '');
 
                     // A category with 40 pages used to render 40 circles, which is
                     // three screens wide on a phone. Five around the current page
@@ -240,6 +246,9 @@
     </div>
     <div class="offcanvas-body">
         <form action="/listings" method="GET">
+            <% if (filters.type) { %>
+                <input type="hidden" name="type" value="<%= filters.type %>">
+            <% } %>
             <div class="mb-4">
                 <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.category') %></label>
                 <% if (typeof categories !== 'undefined' && categories.length > 0) { %>

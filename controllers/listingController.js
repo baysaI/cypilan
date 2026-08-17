@@ -47,14 +47,23 @@ const index = async (req, res, next) => {
         const smartMode = req.query.smart === '1' && Boolean(rawQuery);
         const parsed = smartMode ? smartSearch.parse(rawQuery) : null;
 
+        const allowedTypes = ['sale', 'rent', 'wanted'];
+        const rawType = req.query.type || req.query.listing_type;
+        const listingType = allowedTypes.includes(rawType) ? rawType : undefined;
+
         const filters = {
             q: smartMode ? (parsed.leftover || undefined) : rawQuery,
             category: req.query.category,
             city: req.query.city,
             minPrice: req.query.minPrice,
             maxPrice: req.query.maxPrice,
-            // Unknown values are dropped here rather than passed down: an
-            // unrecognised badge should widen nothing and narrow nothing.
+            listing_type: listingType,
+            type: listingType,
+            // An unrecognised badge is dropped, so a hand-edited URL falls back to
+            // the unfiltered list with "Tümü" selected — the page then matches what
+            // it is showing, instead of an empty result with a filter nobody can
+            // see. The model refuses to guess for other callers and matches nothing
+            // there; only this entry point is allowed to be forgiving.
             badge: listingBadges.isKnownKey(req.query.badge) ? req.query.badge : undefined,
             sort: req.query.sort || 'newest'
         };
