@@ -515,6 +515,7 @@ class Listing {
       SELECT l.*, c.name_tr as category_name, c.name_en as category_name_en, c.name_el as category_name_el, c.name_ru as category_name_ru, c.name_fa as category_name_fa, c.slug as category_slug,
              u.full_name as seller_name, u.role as seller_role, u.company_name as seller_company, u.avatar_url as seller_avatar, u.last_seen_at as seller_last_seen,
              (SELECT AVG(rating) FROM reviews WHERE reviewed_user_id = u.id) as seller_rating,
+             (SELECT AVG(rating) FROM reviews WHERE reviewed_user_id = u.id) as seller_rating_avg,
              (SELECT COUNT(*) FROM reviews WHERE reviewed_user_id = u.id) as seller_rating_count,
              (SELECT image_url FROM listing_images WHERE listing_id = l.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as primary_image
       FROM listings l

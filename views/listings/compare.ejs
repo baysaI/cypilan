@@ -268,7 +268,7 @@
                                     <div class="small text-muted mb-1"><%= item.seller_role === 'business' ? 'Kurumsal Mağaza' : (item.seller_role === 'agent' ? 'Emlak / Galeri' : 'Bireysel Üye') %></div>
                                     <% if (item.seller_rating_count && item.seller_rating_count > 0) { %>
                                         <div class="small text-warning">
-                                            <i class="fa-solid fa-star"></i> <%= Number(item.seller_rating_avg).toFixed(1) %> (<%= item.seller_rating_count %>)
+                                            <i class="fa-solid fa-star"></i> <%= Number(item.seller_rating || item.seller_rating_avg || 0).toFixed(1) %> (<%= item.seller_rating_count %>)
                                         </div>
                                     <% } else { %>
                                         <div class="small text-muted">Henüz değerlendirilmedi</div>
