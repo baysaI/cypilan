@@ -1,27 +1,20 @@
 <div class="listing-card card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift transition-all <%= (listing.is_premium || listing.isPremium) ? 'premium-card' : '' %>">
     
-    <%# Premium is a paid tier; the badges under it are free flags the seller set
-        themselves. Stacked in one corner so a listing carrying both does not push
-        the favourite button off the card. pe-none keeps the labels from
-        swallowing clicks meant for the photo link underneath. %>
     <% const cardBadges = (typeof listingBadges !== 'undefined' && listingBadges) ? listingBadges.activeFor(listing) : []; %>
-    <% if (listing.is_premium || listing.isPremium || listing.listing_type === 'wanted' || cardBadges.length > 0) { %>
-        <div class="position-absolute top-0 start-0 m-2 z-2 d-flex flex-column align-items-start gap-1 pe-none" style="max-width: 78%;">
+    
+    <%# Top-Left Over Photo: Only high-priority single tier badges (Wanted / Premium) to keep photo clean %>
+    <% if (listing.listing_type === 'wanted' || listing.is_premium || listing.isPremium) { %>
+        <div class="position-absolute top-0 start-0 m-2 z-2 d-flex flex-column align-items-start gap-1 pe-none" style="max-width: 65%;">
             <% if (listing.listing_type === 'wanted') { %>
-                <span class="badge bg-warning text-dark rounded-2 shadow-sm fw-bold px-2 py-1">
+                <span class="badge bg-warning text-dark rounded-pill shadow-sm fw-bold px-2 py-1" style="font-size: 0.72rem;">
                     <i class="fa-solid fa-hand-holding-heart me-1"></i><%= t('listing.badge_wanted') || 'TALEP' %>
                 </span>
             <% } %>
             <% if (listing.is_premium || listing.isPremium) { %>
-                <span class="premium-badge px-2 py-1 rounded-2 shadow-sm fw-bold small text-white bg-gradient-golden">
+                <span class="premium-badge px-2 py-1 rounded-pill shadow-sm fw-bold text-white bg-gradient-golden" style="font-size: 0.72rem;">
                     <i class="fa-solid fa-crown me-1"></i> Premium
                 </span>
             <% } %>
-            <% cardBadges.forEach(function (badge) { %>
-                <span class="badge bg-<%= badge.variant %> text-white rounded-2 shadow-sm fw-bold px-2 py-1">
-                    <i class="fa-solid <%= badge.icon %> me-1"></i><%= t('listing.badge_' + badge.key) %>
-                </span>
-            <% }); %>
         </div>
     <% } %>
 
@@ -42,12 +35,7 @@
              loading="lazy"
              onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800';">
         <div class="image-overlay position-absolute bottom-0 start-0 w-100 p-2 bg-gradient-to-t from-black-60 d-flex justify-content-between align-items-end z-1">
-            <span class="badge bg-primary text-white rounded-pill px-2 py-1 fw-medium shadow-sm"><%= listing['category_name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || listing.category_name || listing.categoryName || t('home.ad_unit') %></span>
-            <%# image_count comes from the queries that feed this card. It used to
-                read `imageCount || 1` — a field no query ever selected — so every
-                card claimed exactly one photo no matter how many were uploaded.
-                A listing with no photo at all shows the placeholder image, and
-                counting that as one would be the same lie in the other direction. %>
+            <span class="badge bg-primary text-white rounded-pill px-2 py-1 fw-medium shadow-sm" style="font-size: 0.72rem;"><%= listing['category_name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || listing.category_name || listing.categoryName || t('home.ad_unit') %></span>
             <% const photoCount = Number(listing.image_count ?? listing.imageCount ?? (Array.isArray(listing.images) ? listing.images.length : 0)) || 0; %>
             <% if (photoCount > 0) { %>
                 <span class="text-white small fw-medium text-shadow"><i class="fa-solid fa-camera me-1"></i> <%= photoCount %></span>
@@ -55,14 +43,25 @@
         </div>
     </a>
 
-    <div class="card-body d-flex flex-column p-3">
-        <div class="d-flex justify-content-between align-items-start mb-2">
+    <div class="card-body d-flex flex-column p-2 p-sm-3">
+        <%# Feature Badges placed cleanly in card body %>
+        <% if (cardBadges.length > 0) { %>
+            <div class="d-flex flex-wrap gap-1 mb-1">
+                <% cardBadges.forEach(function (badge) { %>
+                    <span class="badge bg-<%= badge.variant %>-subtle text-<%= badge.variant %> border border-<%= badge.variant %>-subtle rounded-pill fw-bold" style="font-size: 0.68rem; padding: 2px 7px;">
+                        <i class="fa-solid <%= badge.icon %> me-1"></i><%= t('listing.badge_' + badge.key) %>
+                    </span>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <div class="d-flex justify-content-between align-items-start mb-1">
             <h5 class="card-title fs-6 fw-bold mb-0 text-truncate text-dark" style="max-width: 100%;" title="<%= listing.title %>">
                 <a href="/listings/<%= listing.slug || listing.id %>" class="text-decoration-none text-dark hover-text-primary"><%= listing.title %></a>
             </h5>
         </div>
         
-        <div class="price-tag mb-3">
+        <div class="price-tag mb-2">
             <% if (listing.price && Number(listing.price) > 0) { %>
                 <span class="fs-5 fw-bold text-primary"><%= helpers.formatPrice(listing.price, listing.currency, typeof currency !== 'undefined' ? currency : 'TRY') %></span>
             <% } else { %>
@@ -75,8 +74,6 @@
                 <i class="fa-solid fa-location-dot text-accent me-1"></i>
                 <span class="text-truncate"><%= listing.location_city || listing.city || 'Kıbrıs' %><%= (listing.location_district || listing.district) ? ', ' + (listing.location_district || listing.district) : '' %></span>
             </div>
-            <%# Two cards to a row on a phone leaves ~150px here: the city wins
-                that space and the age of the listing waits for a wider screen. %>
             <div class="date whitespace-nowrap d-none d-sm-block">
                 <i class="fa-regular fa-clock me-1"></i> <%= listing.created_at ? helpers.timeAgo(listing.created_at, lang) : t('common.today') %>
             </div>
