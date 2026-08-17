@@ -400,6 +400,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Direct Story Buttons
+    const directStoryBtns = document.querySelectorAll('.direct-story-btn');
+    directStoryBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const title = btn.getAttribute('data-title') || document.title;
+            const price = btn.getAttribute('data-price') || '';
+            const city = btn.getAttribute('data-city') || '';
+            const category = btn.getAttribute('data-category') || '';
+            const image = btn.getAttribute('data-image') || '';
+            const url = btn.getAttribute('data-url') || window.location.href;
+
+            currentShareData = { title, price, city, category, image, url };
+
+            const storyModalEl = document.getElementById('storyMakerModal');
+            if (storyModalEl && typeof bootstrap !== 'undefined') {
+                const stModal = bootstrap.Modal.getOrCreateInstance(storyModalEl);
+                stModal.show();
+            }
+            renderStoryCard();
+        });
+    });
+
     // Story Maker Modal & Canvas Generator
     const openStoryMakerBtn = document.getElementById('openStoryMakerBtn');
     const storyCanvas = document.getElementById('storyCanvas');

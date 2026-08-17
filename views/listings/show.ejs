@@ -88,6 +88,17 @@
                             data-slug="<%= listing.slug %>">
                         <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                     </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 direct-story-btn"
+                            data-id="<%= listing.id %>"
+                            data-title="<%= listing.title %>"
+                            data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
+                            data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>"
+                            data-category="<%= listing.category_name || '' %>"
+                            data-image="<%= imgs[0] || '/img/logo.png' %>"
+                            data-slug="<%= listing.slug %>"
+                            title="Instagram & WhatsApp Story Görseli Oluştur">
+                        <i class="fa-brands fa-instagram"></i> Story
+                    </button>
                 </div>
             </div>
 
@@ -457,6 +468,17 @@
                         data-image="<%= imgs[0] || '/img/logo.png' %>"
                         data-slug="<%= listing.slug %>">
                     <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
+                </button>
+                <button type="button" class="btn btn-outline-danger rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 direct-story-btn"
+                        data-id="<%= listing.id %>"
+                        data-title="<%= listing.title %>"
+                        data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
+                        data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>"
+                        data-category="<%= listing.category_name || '' %>"
+                        data-image="<%= imgs[0] || '/img/logo.png' %>"
+                        data-slug="<%= listing.slug %>"
+                        title="Instagram & WhatsApp Story Görseli Oluştur">
+                    <i class="fa-brands fa-instagram"></i> Story
                 </button>
             </div>
 
