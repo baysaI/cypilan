@@ -1072,6 +1072,401 @@
   </div>
 </div>
 
+<script>
+(function() {
+    function initCypilanStoryMaker() {
+        const canvas = document.getElementById('storyCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const W = 1080;
+        const H = 1920;
+        canvas.width = W;
+        canvas.height = H;
+
+        let activeData = {
+            title: <%- JSON.stringify(listing.title || '') %>,
+            price: <%- JSON.stringify(listing.price ? helpers.formatPrice(listing.price, listing.currency) : '') %>,
+            city: <%- JSON.stringify(helpers.getCityName(listing.location_city, lang) || '') %>,
+            category: <%- JSON.stringify(listing.category_name || '') %>,
+            image: <%- JSON.stringify(imgs && imgs[0] ? imgs[0] : '/img/logo.png') %>,
+            url: window.location.href
+        };
+
+        let cachedBlob = null;
+
+        function roundRect(ctx, x, y, w, h, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + w - radius, y);
+            ctx.arcTo(x + w, y, x + w, y + radius, radius);
+            ctx.lineTo(x + w, y + h - radius);
+            ctx.arcTo(x + w, y + h, x + w - radius, y + h, radius);
+            ctx.lineTo(x + radius, y + h);
+            ctx.arcTo(x, y + h, x, y + h - radius, radius);
+            ctx.lineTo(x, y + radius);
+            ctx.arcTo(x, y, x + radius, y, radius);
+            ctx.closePath();
+        }
+
+        function drawStory(imgObj) {
+            ctx.save();
+            ctx.clearRect(0, 0, W, H);
+
+            // 1. Background Gradient
+            const bg = ctx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, '#0a0f1d');
+            bg.addColorStop(0.5, '#0f172a');
+            bg.addColorStop(1, '#030712');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, W, H);
+
+            // Ambient Glows
+            const orb1 = ctx.createRadialGradient(250, 200, 30, 250, 200, 450);
+            orb1.addColorStop(0, 'rgba(14, 165, 233, 0.25)');
+            orb1.addColorStop(1, 'rgba(14, 165, 233, 0)');
+            ctx.fillStyle = orb1;
+            ctx.fillRect(0, 0, W, H);
+
+            const orb2 = ctx.createRadialGradient(850, 1300, 30, 850, 1300, 500);
+            orb2.addColorStop(0, 'rgba(234, 179, 8, 0.18)');
+            orb2.addColorStop(1, 'rgba(234, 179, 8, 0)');
+            ctx.fillStyle = orb2;
+            ctx.fillRect(0, 0, W, H);
+
+            // 2. Header Brand
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 64px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('CYPILAN', W / 2, 110);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '700 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText("KIBRIS'IN İLAN PAZARYERİ • cypilan.com", W / 2, 165);
+
+            // 3. Photo Card
+            const photoX = 80;
+            const photoY = 210;
+            const photoW = 920;
+            const photoH = 820;
+
+            ctx.save();
+            roundRect(ctx, photoX, photoY, photoW, photoH, 36);
+            ctx.clip();
+
+            if (imgObj && imgObj.width > 0 && imgObj.height > 0) {
+                const imgAspect = imgObj.width / imgObj.height;
+                const boxAspect = photoW / photoH;
+                let dw, dh, dx, dy;
+
+                if (imgAspect > boxAspect) {
+                    dh = photoH;
+                    dw = photoH * imgAspect;
+                    dx = photoX - (dw - photoW) / 2;
+                    dy = photoY;
+                } else {
+                    dw = photoW;
+                    dh = photoW / imgAspect;
+                    dx = photoX;
+                    dy = photoY - (dh - photoH) / 2;
+                }
+                ctx.drawImage(imgObj, dx, dy, dw, dh);
+
+                const vig = ctx.createLinearGradient(0, photoY + photoH - 240, 0, photoY + photoH);
+                vig.addColorStop(0, 'rgba(0,0,0,0)');
+                vig.addColorStop(1, 'rgba(0,0,0,0.75)');
+                ctx.fillStyle = vig;
+                ctx.fillRect(photoX, photoY + photoH - 240, photoW, 240);
+            } else {
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(photoX, photoY, photoW, photoH);
+                ctx.fillStyle = '#64748b';
+                ctx.font = '600 34px "Inter", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('📷 CYPILAN İLAN GÖRSELİ', W / 2, photoY + photoH / 2);
+            }
+            ctx.restore();
+
+            // Photo Border
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+            ctx.lineWidth = 3;
+            roundRect(ctx, photoX, photoY, photoW, photoH, 36);
+            ctx.stroke();
+            ctx.restore();
+
+            // Top-left Tag on Photo
+            ctx.save();
+            ctx.fillStyle = '#0284c7';
+            roundRect(ctx, photoX + 24, photoY + 24, 220, 52, 26);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 24px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('✨ GÜNCEL İLAN', photoX + 134, photoY + 50);
+            ctx.restore();
+
+            // 4. Details Section (Row 1: Price + Category)
+            const row1Y = photoY + photoH + 40; // 1070
+            const row1H = 84;
+
+            if (activeData.price) {
+                ctx.save();
+                ctx.font = '900 52px "Inter", sans-serif';
+                const pText = activeData.price;
+                const pW = ctx.measureText(pText).width + 60;
+
+                const pGrad = ctx.createLinearGradient(photoX, row1Y, photoX + pW, row1Y + row1H);
+                pGrad.addColorStop(0, '#f59e0b');
+                pGrad.addColorStop(1, '#d97706');
+                ctx.fillStyle = pGrad;
+                roundRect(ctx, photoX, row1Y, pW, row1H, 22);
+                ctx.fill();
+
+                ctx.fillStyle = '#0f172a';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(pText, photoX + pW / 2, row1Y + row1H / 2);
+                ctx.restore();
+            }
+
+            if (activeData.category) {
+                ctx.save();
+                ctx.font = '700 30px "Inter", sans-serif';
+                const catText = '🏷️ ' + activeData.category;
+                const catW = ctx.measureText(catText).width + 44;
+                const catH = 84;
+
+                let catX = photoX;
+                if (activeData.price) {
+                    ctx.font = '900 52px "Inter", sans-serif';
+                    catX = photoX + ctx.measureText(activeData.price).width + 76;
+                }
+
+                if (catX + catW <= photoX + photoW) {
+                    ctx.font = '700 30px "Inter", sans-serif';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                    roundRect(ctx, catX, row1Y, catW, catH, 22);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(catText, catX + catW / 2, row1Y + catH / 2);
+                }
+                ctx.restore();
+            }
+
+            // Row 2: Location
+            const row2Y = row1Y + row1H + 20; // 1174
+            const row2H = 64;
+
+            if (activeData.city) {
+                ctx.save();
+                const cityText = '📍 ' + activeData.city + ', KKTC';
+                ctx.font = '600 30px "Inter", sans-serif';
+                const cityW = ctx.measureText(cityText).width + 44;
+
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+                ctx.lineWidth = 1.5;
+                roundRect(ctx, photoX, row2Y, cityW, row2H, 20);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#38bdf8';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(cityText, photoX + cityW / 2, row2Y + row2H / 2);
+                ctx.restore();
+            }
+
+            // Row 3: Listing Title
+            const titleY = row2Y + row2H + 35; // 1273
+            ctx.save();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '800 48px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+
+            const maxTitleW = photoW;
+            const words = (activeData.title || '').split(' ');
+            let line = '';
+            let curY = titleY;
+            let linesCount = 0;
+
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line + words[i] + ' ';
+                const testWidth = ctx.measureText(testLine).width;
+                if (testWidth > maxTitleW && i > 0) {
+                    ctx.fillText(line.trim(), photoX, curY);
+                    line = words[i] + ' ';
+                    curY += 66;
+                    linesCount++;
+                    if (linesCount >= 3 && i < words.length - 1) {
+                        line = line + '...';
+                        break;
+                    }
+                } else {
+                    line = testLine;
+                }
+            }
+            if (line) ctx.fillText(line.trim(), photoX, curY);
+            ctx.restore();
+
+            // Footer CTA Button
+            const footY = H - 180;
+            ctx.save();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+            ctx.lineWidth = 2.5;
+            roundRect(ctx, photoX, footY, photoW, 110, 30);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = '700 32px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('👉 Detaylar & İletişim İçin: cypilan.com', W / 2, footY + 55);
+            ctx.restore();
+
+            ctx.restore();
+
+            try {
+                canvas.toBlob((blob) => {
+                    cachedBlob = blob;
+                }, 'image/png');
+            } catch(e) {}
+        }
+
+        function triggerRender() {
+            drawStory(null);
+            if (activeData.image) {
+                const img = new Image();
+                if (activeData.image.startsWith('http://') || activeData.image.startsWith('https://')) {
+                    try {
+                        const parsed = new URL(activeData.image);
+                        if (parsed.host !== window.location.host) {
+                            img.crossOrigin = 'anonymous';
+                        }
+                    } catch(e) {
+                        img.crossOrigin = 'anonymous';
+                    }
+                }
+                img.onload = () => drawStory(img);
+                img.onerror = () => {
+                    if (img.crossOrigin) {
+                        const fallback = new Image();
+                        fallback.onload = () => drawStory(fallback);
+                        fallback.onerror = () => drawStory(null);
+                        fallback.src = activeData.image;
+                    } else {
+                        drawStory(null);
+                    }
+                };
+                img.src = activeData.image;
+            }
+        }
+
+        // Direct Story Buttons
+        document.querySelectorAll('.direct-story-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                activeData = {
+                    title: btn.getAttribute('data-title') || activeData.title,
+                    price: btn.getAttribute('data-price') || activeData.price,
+                    city: btn.getAttribute('data-city') || activeData.city,
+                    category: btn.getAttribute('data-category') || activeData.category,
+                    image: btn.getAttribute('data-image') || activeData.image,
+                    url: btn.getAttribute('data-url') || activeData.url
+                };
+                triggerRender();
+            });
+        });
+
+        const openBtn = document.getElementById('openStoryMakerBtn');
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                triggerRender();
+            });
+        }
+
+        const modalEl = document.getElementById('storyMakerModal');
+        if (modalEl) {
+            modalEl.addEventListener('show.bs.modal', triggerRender);
+            modalEl.addEventListener('shown.bs.modal', triggerRender);
+        }
+
+        // Download Button
+        const dlBtn = document.getElementById('downloadStoryBtn');
+        if (dlBtn) {
+            dlBtn.addEventListener('click', () => {
+                try {
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = (activeData.title || 'cypilan-ilan').substring(0, 30).toLowerCase().replace(/[^a-z0-9]/g, '-') + '-story.png';
+                    link.href = dataUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch(e) {
+                    if (cachedBlob) {
+                        const url = URL.createObjectURL(cachedBlob);
+                        const link = document.createElement('a');
+                        link.download = 'cypilan-story.png';
+                        link.href = url;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    }
+                }
+            });
+        }
+
+        // Share Native Button
+        const shareNativeBtn = document.getElementById('shareStoryNativeBtn');
+        if (shareNativeBtn) {
+            shareNativeBtn.addEventListener('click', async () => {
+                if (navigator.share) {
+                    try {
+                        if (cachedBlob && navigator.canShare && navigator.canShare({ files: [new File([cachedBlob], 'cypilan-story.png', { type: 'image/png' })] })) {
+                            const file = new File([cachedBlob], 'cypilan-story.png', { type: 'image/png' });
+                            await navigator.share({
+                                title: activeData.title,
+                                text: (activeData.title || '') + ' - Cypilan.com',
+                                files: [file]
+                            });
+                            return;
+                        }
+                        await navigator.share({
+                            title: activeData.title,
+                            text: (activeData.title || '') + ' • Cypilan.com',
+                            url: activeData.url
+                        });
+                    } catch(err) {}
+                } else if (dlBtn) {
+                    dlBtn.click();
+                }
+            });
+        }
+
+        // Initial Render
+        triggerRender();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCypilanStoryMaker);
+    } else {
+        initCypilanStoryMaker();
+    }
+})();
+</script>
+
 <% if (authUser && authUser.role === 'admin') { %>
 <div class="modal fade" id="adminListingNoticeModal" tabindex="-1" aria-labelledby="adminListingNoticeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">

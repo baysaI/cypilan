@@ -148,6 +148,7 @@ class Broadcast {
         insertNotification.run([userId, sent_by, cleanTitle, cleanMessage, link]);
       });
 
+      ensureTable(db);
       const info = db.prepare(`
         INSERT INTO broadcasts (sent_by, title, message, link_url, audience, audience_detail, recipient_count)
         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -161,13 +162,18 @@ class Broadcast {
 
   static async history(limit = 20) {
     const db = getDb();
-    return db.prepare(`
-      SELECT b.*, u.full_name as sent_by_name
-      FROM broadcasts b
-      LEFT JOIN users u ON b.sent_by = u.id
-      ORDER BY b.created_at DESC, b.id DESC
-      LIMIT ?
-    `).all([limit]);
+    ensureTable(db);
+    try {
+      return db.prepare(`
+        SELECT b.*, u.full_name as sent_by_name
+        FROM broadcasts b
+        LEFT JOIN users u ON b.sent_by = u.id
+        ORDER BY b.created_at DESC, b.id DESC
+        LIMIT ?
+      `).all([limit]);
+    } catch (e) {
+      return [];
+    }
   }
 
   // How many of a past announcement's notifications are still unread, so the

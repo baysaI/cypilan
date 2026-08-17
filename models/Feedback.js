@@ -6,9 +6,34 @@ const STATUSES = ['new', 'read', 'resolved'];
 const MESSAGE_MIN_LENGTH = 5;
 const MESSAGE_MAX_LENGTH = 2000;
 
+let tableEnsured = false;
+function ensureTable(db) {
+  if (tableEnsured) return;
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS feedback (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        type TEXT NOT NULL CHECK(type IN ('bug', 'suggestion', 'other')),
+        message TEXT NOT NULL,
+        contact_email TEXT,
+        page_url TEXT,
+        status TEXT DEFAULT 'new' CHECK(status IN ('new', 'read', 'resolved')),
+        admin_note TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
+    `);
+    tableEnsured = true;
+  } catch (e) {}
+}
+
 class Feedback {
   static async create({ user_id = null, type, message, contact_email = null, page_url = null }) {
     const db = getDb();
+    ensureTable(db);
 
     const result = db.prepare(`
       INSERT INTO feedback (user_id, type, message, contact_email, page_url)
@@ -20,6 +45,7 @@ class Feedback {
 
   static async findAll(filters = {}, page = 1, limit = 30) {
     const db = getDb();
+    ensureTable(db);
     let where = ' WHERE 1=1';
     const params = [];
 
@@ -52,8 +78,13 @@ class Feedback {
 
   static async countNew() {
     const db = getDb();
-    const { count } = db.prepare("SELECT COUNT(*) as count FROM feedback WHERE status = 'new'").get();
-    return count;
+    ensureTable(db);
+    try {
+      const { count } = db.prepare("SELECT COUNT(*) as count FROM feedback WHERE status = 'new'").get();
+      return count || 0;
+    } catch (e) {
+      return 0;
+    }
   }
 
   // Counts per status in one pass, so the filter tabs can show how much is behind
