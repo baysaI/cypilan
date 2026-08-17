@@ -380,6 +380,20 @@ const adminDeleteConversation = async (req, res) => {
   }
 };
 
+const adminHeartbeat = async (req, res) => {
+  try {
+    const waitingCount = await Support.countWaiting();
+    const latest = await Support.getLatestWaiting();
+    return res.json({
+      success: true,
+      waitingCount,
+      latest
+    });
+  } catch (error) {
+    return res.json({ success: false, waitingCount: 0 });
+  }
+};
+
 module.exports = {
   initChat,
   sendMessage,
@@ -391,5 +405,6 @@ module.exports = {
   adminGetMessages,
   adminReply,
   adminSetStatus,
-  adminDeleteConversation
+  adminDeleteConversation,
+  adminHeartbeat
 };

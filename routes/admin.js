@@ -71,6 +71,7 @@ router.get('/hizmet-talepleri', serviceController.adminQueue);
 router.post('/hizmet-talepleri/:id/durum', serviceController.adminSetStatus);
 
 router.get('/canli-destek', supportController.adminPanel);
+router.get('/canli-destek/heartbeat', supportController.adminHeartbeat);
 router.get('/canli-destek/conversations', supportController.adminListConversations);
 router.get('/canli-destek/messages/:id', supportController.adminGetMessages);
 router.post('/canli-destek/reply/:id', supportController.adminReply);

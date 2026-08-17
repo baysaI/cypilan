@@ -78,7 +78,14 @@
                     <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 compare-toggle-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= imgs[0] || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>">
                         <i class="fa-solid fa-code-compare"></i> <%= t('compare.button') || 'Karşılaştır' %>
                     </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 share-btn" data-title="<%= listing.title %>">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill fw-medium d-flex align-items-center gap-1 share-btn"
+                            data-id="<%= listing.id %>"
+                            data-title="<%= listing.title %>"
+                            data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
+                            data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>"
+                            data-category="<%= listing.category_name || '' %>"
+                            data-image="<%= imgs[0] || '/img/logo.png' %>"
+                            data-slug="<%= listing.slug %>">
                         <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                     </button>
                 </div>
@@ -441,7 +448,14 @@
                 <button type="button" class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 compare-toggle-btn" data-id="<%= listing.id %>" data-title="<%= listing.title %>" data-image="<%= imgs[0] || '' %>" data-price="<%= listing.price || 0 %>" data-currency="<%= listing.currency || 'TRY' %>" data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>">
                     <i class="fa-solid fa-code-compare"></i> <%= t('compare.button') || 'Karşılaştır' %>
                 </button>
-                <button type="button" class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 share-btn" data-title="<%= listing.title %>">
+                <button type="button" class="btn btn-outline-secondary rounded-pill flex-fill fw-medium d-flex align-items-center justify-content-center gap-1 share-btn"
+                        data-id="<%= listing.id %>"
+                        data-title="<%= listing.title %>"
+                        data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
+                        data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>"
+                        data-category="<%= listing.category_name || '' %>"
+                        data-image="<%= imgs[0] || '/img/logo.png' %>"
+                        data-slug="<%= listing.slug %>">
                     <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                 </button>
             </div>
@@ -920,34 +934,107 @@
   </div>
 </div>
 
+<!-- Enhanced Share Modal -->
 <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow-lg">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold" id="shareModalLabel"><i class="fa-solid fa-share-nodes text-primary me-2"></i><%= t('common.share') %></h5>
+    <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+      <div class="modal-header border-0 pb-0 pt-4 px-4">
+        <div>
+          <h5 class="modal-title fw-bold" id="shareModalLabel"><i class="fa-solid fa-share-nodes text-primary me-2"></i><%= t('common.share') %></h5>
+          <p class="text-muted small mb-0">İlanı WhatsApp, sosyal medya veya hikayelerinizde paylaşın.</p>
+        </div>
         <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body p-4 text-center">
-        <p class="text-muted small mb-4 fw-medium"><%= listing.title %></p>
-        <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
-            <a href="https://api.whatsapp.com/send?text=<%= encodeURIComponent(listing.title + ' ') %>" id="shareWhatsapp" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 54px; height: 54px; background: #25D366;" title="WhatsApp">
-                <i class="fa-brands fa-whatsapp fs-4"></i>
-            </a>
-            <a href="https://www.facebook.com/sharer/sharer.php" id="shareFacebook" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 54px; height: 54px; background: #1877F2;" title="Facebook">
-                <i class="fa-brands fa-facebook-f fs-4"></i>
-            </a>
-            <a href="https://t.me/share/url" id="shareTelegram" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 54px; height: 54px; background: #0088cc;" title="Telegram">
-                <i class="fa-brands fa-telegram fs-4"></i>
-            </a>
-            <a href="https://twitter.com/intent/tweet" id="shareTwitter" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 54px; height: 54px; background: #000000;" title="X / Twitter">
-                <i class="fa-brands fa-x-twitter fs-4"></i>
-            </a>
+
+      <div class="modal-body p-4">
+        <!-- Listing Mini Preview Card -->
+        <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-4 mb-4 border">
+          <img src="<%= imgs[0] || '/img/logo.png' %>" class="rounded-3 object-fit-cover flex-shrink-0" width="60" height="60" alt="<%= listing.title %>" id="sharePreviewImg">
+          <div class="flex-grow-1 overflow-hidden">
+            <h6 class="fw-bold mb-1 text-truncate text-dark" id="sharePreviewTitle"><%= listing.title %></h6>
+            <div class="d-flex align-items-center gap-2 small">
+              <% if (listing.price) { %>
+                <span class="badge bg-primary rounded-pill fw-bold" id="sharePreviewPrice"><%= helpers.formatPrice(listing.price, listing.currency) %></span>
+              <% } %>
+              <span class="text-muted" id="sharePreviewCity"><i class="fa-solid fa-location-dot me-1"></i><%= helpers.getCityName(listing.location_city, lang) || 'Kıbrıs' %></span>
+            </div>
+          </div>
         </div>
+
+        <!-- 1. Direct WhatsApp Template Button -->
+        <div class="mb-3">
+          <a href="#" id="shareWhatsapp" target="_blank" rel="noopener" class="btn btn-success w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background-color: #25D366; border-color: #25D366;">
+            <i class="fa-brands fa-whatsapp fs-5"></i>
+            <span>WhatsApp ile Paylaş</span>
+          </a>
+        </div>
+
+        <!-- 2. Instagram & WhatsApp Story Generator Button -->
+        <div class="mb-3">
+          <button type="button" id="openStoryMakerBtn" class="btn text-white w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border: none;">
+            <i class="fa-brands fa-instagram fs-5"></i>
+            <span>📸 Instagram / WhatsApp Hikaye (Story) Kartı Oluştur</span>
+          </button>
+        </div>
+
+        <!-- 3. Other Social Networks & Native Share -->
+        <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap pt-2">
+            <a href="#" id="shareTelegram" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 48px; height: 48px; background: #0088cc;" title="Telegram">
+                <i class="fa-brands fa-telegram fs-5"></i>
+            </a>
+            <a href="#" id="shareFacebook" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 48px; height: 48px; background: #1877F2;" title="Facebook">
+                <i class="fa-brands fa-facebook-f fs-5"></i>
+            </a>
+            <a href="#" id="shareTwitter" target="_blank" rel="noopener" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center text-white" style="width: 48px; height: 48px; background: #000000;" title="X / Twitter">
+                <i class="fa-brands fa-x-twitter fs-5"></i>
+            </a>
+            <button type="button" id="nativeShareBtn" class="btn rounded-circle shadow-sm p-3 d-flex align-items-center justify-content-center btn-light border text-dark" style="width: 48px; height: 48px;" title="Diğer Uygulamalar">
+                <i class="fa-solid fa-ellipsis fs-5"></i>
+            </button>
+        </div>
+
+        <!-- 4. Copy Link -->
         <div class="input-group">
             <input type="text" class="form-control bg-light border-end-0 shadow-none small" id="shareUrlInput" readonly>
             <button class="btn btn-primary px-3 fw-bold" type="button" id="copyShareLinkBtn">
                 <i class="fa-regular fa-copy me-1"></i> Kopyala
             </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Instagram / WhatsApp Story Maker Modal -->
+<div class="modal fade" id="storyMakerModal" tabindex="-1" aria-labelledby="storyMakerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content rounded-4 border-0 shadow-2xl bg-dark text-white overflow-hidden">
+      <div class="modal-header border-0 pb-0 pt-3 px-4">
+        <h5 class="modal-title fw-bold text-white fs-6" id="storyMakerModalLabel">
+          <i class="fa-brands fa-instagram text-danger me-2"></i>Hikaye (Story) Görseli Hazır!
+        </h5>
+        <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-3 text-center">
+        <div class="d-flex justify-content-center mb-3">
+          <div class="position-relative shadow-lg rounded-4 overflow-hidden border border-secondary" style="max-width: 290px; max-height: 515px; aspect-ratio: 9/16; background: #000;">
+            <canvas id="storyCanvas" width="1080" height="1920" class="w-100 h-100 d-block object-fit-contain"></canvas>
+            <div id="storyLoadingSpinner" class="position-absolute top-50 start-50 translate-middle text-white d-flex flex-column align-items-center gap-2">
+              <div class="spinner-border text-primary" role="status"></div>
+              <span class="small">Hikaye Kartı Oluşturuluyor...</span>
+            </div>
+          </div>
+        </div>
+        
+        <p class="text-secondary small mb-3">Görseli indirip Instagram veya WhatsApp durumunuzda doğrudan paylaşabilirsiniz.</p>
+
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+          <button type="button" id="downloadStoryBtn" class="btn btn-primary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow">
+            <i class="fa-solid fa-download"></i> Görseli İndir (.PNG)
+          </button>
+          <button type="button" id="shareStoryNativeBtn" class="btn btn-outline-light rounded-pill px-3 py-2 fw-medium d-flex align-items-center gap-2">
+            <i class="fa-solid fa-share-nodes"></i> Paylaş
+          </button>
         </div>
       </div>
     </div>

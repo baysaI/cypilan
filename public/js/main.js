@@ -287,19 +287,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ==========================================
+    // Enhanced Share & Instagram Story Generator
+    // ==========================================
+    let currentShareData = {
+        title: '',
+        url: window.location.href,
+        price: '',
+        city: '',
+        category: '',
+        image: ''
+    };
+
     const shareBtns = document.querySelectorAll('.share-btn');
     shareBtns.forEach(btn => {
-        btn.addEventListener('click', async (e) => {
+        btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
 
             const title = btn.getAttribute('data-title') || document.title;
-            const url = window.location.href;
+            const price = btn.getAttribute('data-price') || '';
+            const city = btn.getAttribute('data-city') || '';
+            const category = btn.getAttribute('data-category') || '';
+            const image = btn.getAttribute('data-image') || '';
+            const url = btn.getAttribute('data-url') || window.location.href;
 
+            currentShareData = { title, price, city, category, image, url };
+
+            // Update preview in share modal
             const shareUrlInput = document.getElementById('shareUrlInput');
             if (shareUrlInput) shareUrlInput.value = url;
 
-            const shareText = `🔥 CYPILAN'da İlan: ${title} 👉 ${url}`;
+            const previewTitle = document.getElementById('sharePreviewTitle');
+            if (previewTitle) previewTitle.textContent = title;
+
+            const previewPrice = document.getElementById('sharePreviewPrice');
+            if (previewPrice) {
+                if (price) {
+                    previewPrice.textContent = price;
+                    previewPrice.style.display = 'inline-block';
+                } else {
+                    previewPrice.style.display = 'none';
+                }
+            }
+
+            const previewCity = document.getElementById('sharePreviewCity');
+            if (previewCity) previewCity.innerHTML = `<i class="fa-solid fa-location-dot me-1"></i>${city || 'Kıbrıs'}`;
+
+            const previewImg = document.getElementById('sharePreviewImg');
+            if (previewImg && image) previewImg.src = image;
+
+            // Formatted WhatsApp message template
+            let shareText = `🔥 *${title}*\n`;
+            if (price) shareText += `💰 *Fiyat:* ${price}\n`;
+            if (city) shareText += `📍 *Konum:* ${city}, KKTC\n`;
+            shareText += `\n👉 İlan detaylarını incelemek için tıklayın:\n${url}\n\nCYPILAN • Kıbrıs'ın İlan Pazaryeri`;
+
             const shareWa = document.getElementById('shareWhatsapp');
             if (shareWa) shareWa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
 
@@ -312,33 +355,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const shareTw = document.getElementById('shareTwitter');
             if (shareTw) shareTw.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
 
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title, url });
-                    return;
-                } catch (err) {
-                    if (err.name !== 'AbortError') {
-                        console.log('Native share error, falling back to modal:', err);
-                    } else {
-                        return;
-                    }
-                }
-            }
-
+            // Open Share Modal directly
             const shareModalEl = document.getElementById('shareModal');
             if (shareModalEl && typeof bootstrap !== 'undefined') {
-                const modal = new bootstrap.Modal(shareModalEl);
+                const modal = bootstrap.Modal.getOrCreateInstance(shareModalEl);
                 modal.show();
-            } else {
-                navigator.clipboard.writeText(url).then(() => {
-                    showToast('İlan bağlantısı panoya kopyalandı!', 'success');
-                }).catch(() => {
-                    showToast(url, 'info');
-                });
             }
         });
     });
 
+    // Native Share Button inside modal
+    const nativeShareBtn = document.getElementById('nativeShareBtn');
+    if (nativeShareBtn) {
+        nativeShareBtn.addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: currentShareData.title,
+                        text: `CYPILAN'da İlan: ${currentShareData.title}`,
+                        url: currentShareData.url
+                    });
+                } catch(e) {}
+            } else {
+                showToast('Tarayıcınız sistem paylaşımını desteklemiyor.', 'info');
+            }
+        });
+    }
+
+    // Copy Link Button
     const copyShareBtn = document.getElementById('copyShareLinkBtn');
     if (copyShareBtn) {
         copyShareBtn.addEventListener('click', () => {
@@ -346,12 +390,338 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = input ? input.value : window.location.href;
             navigator.clipboard.writeText(url).then(() => {
                 showToast('İlan bağlantısı panoya kopyalandı!', 'success');
-                const modalEl = document.getElementById('shareModal');
-                if (modalEl && typeof bootstrap !== 'undefined') {
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
-                }
+                copyShareBtn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Kopyalandı';
+                setTimeout(() => {
+                    copyShareBtn.innerHTML = '<i class="fa-regular fa-copy me-1"></i> Kopyala';
+                }, 2000);
+            }).catch(() => {
+                showToast('Bağlantı kopyalanamadı.', 'error');
             });
+        });
+    }
+
+    // Story Maker Modal & Canvas Generator
+    const openStoryMakerBtn = document.getElementById('openStoryMakerBtn');
+    const storyCanvas = document.getElementById('storyCanvas');
+    const storyLoadingSpinner = document.getElementById('storyLoadingSpinner');
+    let generatedStoryBlob = null;
+
+    if (openStoryMakerBtn && storyCanvas) {
+        openStoryMakerBtn.addEventListener('click', () => {
+            // Close share modal if open
+            const shareModalEl = document.getElementById('shareModal');
+            if (shareModalEl && typeof bootstrap !== 'undefined') {
+                const sm = bootstrap.Modal.getInstance(shareModalEl);
+                if (sm) sm.hide();
+            }
+
+            // Open Story Modal
+            const storyModalEl = document.getElementById('storyMakerModal');
+            if (storyModalEl && typeof bootstrap !== 'undefined') {
+                const stModal = bootstrap.Modal.getOrCreateInstance(storyModalEl);
+                stModal.show();
+            }
+
+            renderStoryCard();
+        });
+    }
+
+    function renderStoryCard() {
+        if (!storyCanvas) return;
+        const ctx = storyCanvas.getContext('2d');
+        if (!ctx) return;
+
+        if (storyLoadingSpinner) storyLoadingSpinner.style.display = 'flex';
+
+        const W = 1080;
+        const H = 1920;
+        storyCanvas.width = W;
+        storyCanvas.height = H;
+
+        // 1. Background Gradient (Luxury Dark Theme)
+        const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+        bgGrad.addColorStop(0, '#0a0f1d');
+        bgGrad.addColorStop(0.5, '#0f172a');
+        bgGrad.addColorStop(1, '#030712');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Ambient Decorative Glow Orbs
+        const orb1 = ctx.createRadialGradient(W * 0.2, H * 0.15, 50, W * 0.2, H * 0.15, 450);
+        orb1.addColorStop(0, 'rgba(14, 165, 233, 0.25)');
+        orb1.addColorStop(1, 'rgba(14, 165, 233, 0)');
+        ctx.fillStyle = orb1;
+        ctx.fillRect(0, 0, W, H);
+
+        const orb2 = ctx.createRadialGradient(W * 0.8, H * 0.7, 50, W * 0.8, H * 0.7, 500);
+        orb2.addColorStop(0, 'rgba(234, 179, 8, 0.18)');
+        orb2.addColorStop(1, 'rgba(234, 179, 8, 0)');
+        ctx.fillStyle = orb2;
+        ctx.fillRect(0, 0, W, H);
+
+        // 2. Header: CYPILAN Logo & Brand Banner
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '900 64px "Inter", "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('CYPILAN', W / 2, 130);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '600 28px "Inter", "Segoe UI", sans-serif';
+        ctx.fillText('KIBRIS\'IN İLAN PAZARYERİ • cypilan.com', W / 2, 180);
+
+        // Helper to draw rounded rectangle
+        function roundRect(x, y, w, h, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + w - radius, y);
+            ctx.arcTo(x + w, y, x + w, y + radius, radius);
+            ctx.lineTo(x + w, y + h - radius);
+            ctx.arcTo(x + w, y + h, x + w - radius, y + h, radius);
+            ctx.lineTo(x + radius, y + h);
+            ctx.arcTo(x, y + h, x, y + h - radius, radius);
+            ctx.lineTo(x, y + radius);
+            ctx.arcTo(x, y, x + radius, y, radius);
+            ctx.closePath();
+        }
+
+        // Draw card and load image
+        const imgBoxX = 70;
+        const imgBoxY = 240;
+        const imgBoxW = W - 140;
+        const imgBoxH = 920;
+
+        const finalizeStoryDrawing = (img) => {
+            // Draw Image Container Card
+            ctx.save();
+            roundRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 40);
+            ctx.clip();
+
+            if (img) {
+                // Cover image scaling
+                const imgAspect = img.width / img.height;
+                const boxAspect = imgBoxW / imgBoxH;
+                let drawW, drawH, drawX, drawY;
+
+                if (imgAspect > boxAspect) {
+                    drawH = imgBoxH;
+                    drawW = imgBoxH * imgAspect;
+                    drawX = imgBoxX - (drawW - imgBoxW) / 2;
+                    drawY = imgBoxY;
+                } else {
+                    drawW = imgBoxW;
+                    drawH = imgBoxW / imgAspect;
+                    drawX = imgBoxX;
+                    drawY = imgBoxY - (drawH - imgBoxH) / 2;
+                }
+                ctx.drawImage(img, drawX, drawY, drawW, drawH);
+            } else {
+                // Fallback elegant box
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH);
+            }
+
+            // Subtle dark bottom gradient on image
+            const imgDarkGrad = ctx.createLinearGradient(0, imgBoxY + imgBoxH - 300, 0, imgBoxY + imgBoxH);
+            imgDarkGrad.addColorStop(0, 'rgba(0,0,0,0)');
+            imgDarkGrad.addColorStop(1, 'rgba(0,0,0,0.8)');
+            ctx.fillStyle = imgDarkGrad;
+            ctx.fillRect(imgBoxX, imgBoxY + imgBoxH - 300, imgBoxW, 300);
+            ctx.restore();
+
+            // Card Border
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 4;
+            roundRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH, 40);
+            ctx.stroke();
+            ctx.restore();
+
+            // Tag Badge (Top Left of image)
+            ctx.save();
+            ctx.fillStyle = '#0284c7';
+            roundRect(imgBoxX + 30, imgBoxY + 30, 240, 56, 28);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 26px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('✨ GÜNCEL İLAN', imgBoxX + 150, imgBoxY + 68);
+            ctx.restore();
+
+            // 3. Info Container (Below Image)
+            const infoY = imgBoxY + imgBoxH + 40;
+
+            // Price Badge if available
+            if (currentShareData.price) {
+                ctx.save();
+                const priceText = currentShareData.price;
+                ctx.font = '900 68px "Inter", sans-serif';
+                ctx.textAlign = 'left';
+                const priceWidth = ctx.measureText(priceText).width + 70;
+
+                // Price badge background
+                const pGrad = ctx.createLinearGradient(imgBoxX, infoY, imgBoxX + priceWidth, infoY + 100);
+                pGrad.addColorStop(0, '#f59e0b');
+                pGrad.addColorStop(1, '#d97706');
+                ctx.fillStyle = pGrad;
+                roundRect(imgBoxX, infoY, priceWidth, 96, 24);
+                ctx.fill();
+
+                // Price Text
+                ctx.fillStyle = '#0f172a';
+                ctx.fillText(priceText, imgBoxX + 35, infoY + 70);
+                ctx.restore();
+            }
+
+            // Location & Category Pills
+            const pillsY = currentShareData.price ? (infoY + 125) : infoY;
+            let pillOffset = imgBoxX;
+
+            if (currentShareData.city) {
+                const cityText = `📍 ${currentShareData.city}, KKTC`;
+                ctx.font = '600 32px "Inter", sans-serif';
+                const cityW = ctx.measureText(cityText).width + 40;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                roundRect(pillOffset, pillsY, cityW, 58, 29);
+                ctx.fill();
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillText(cityText, pillOffset + 20, pillsY + 40);
+                pillOffset += cityW + 16;
+            }
+
+            if (currentShareData.category) {
+                const catText = `🏷️ ${currentShareData.category}`;
+                ctx.font = '600 32px "Inter", sans-serif';
+                const catW = ctx.measureText(catText).width + 40;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                roundRect(pillOffset, pillsY, catW, 58, 29);
+                ctx.fill();
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillText(catText, pillOffset + 20, pillsY + 40);
+            }
+
+            // Title (Wrapped 2 lines)
+            const titleY = pillsY + 95;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '800 48px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+
+            const words = (currentShareData.title || '').split(' ');
+            let line = '';
+            let curY = titleY;
+            let linesDrawn = 0;
+
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line + words[i] + ' ';
+                const testWidth = ctx.measureText(testLine).width;
+                if (testWidth > imgBoxW && i > 0) {
+                    ctx.fillText(line.trim(), imgBoxX, curY);
+                    line = words[i] + ' ';
+                    curY += 60;
+                    linesDrawn++;
+                    if (linesDrawn >= 2 && i < words.length - 1) {
+                        line = line + '...';
+                        break;
+                    }
+                } else {
+                    line = testLine;
+                }
+            }
+            if (line) ctx.fillText(line.trim(), imgBoxX, curY);
+
+            // 4. Footer Call To Action Box
+            const footY = H - 180;
+            ctx.save();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+            ctx.lineWidth = 2;
+            roundRect(imgBoxX, footY, imgBoxW, 110, 30);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = '700 32px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('👉 Detaylar & İletişim İçin İnceleyin: cypilan.com', W / 2, footY + 68);
+            ctx.restore();
+
+            if (storyLoadingSpinner) storyLoadingSpinner.style.display = 'none';
+
+            // Store blob for sharing
+            try {
+                storyCanvas.toBlob((blob) => {
+                    generatedStoryBlob = blob;
+                }, 'image/png');
+            } catch(e) {}
+        };
+
+        // Load image or fallback
+        if (currentShareData.image) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => finalizeStoryDrawing(img);
+            img.onerror = () => finalizeStoryDrawing(null);
+            img.src = currentShareData.image;
+        } else {
+            finalizeStoryDrawing(null);
+        }
+    }
+
+    // Download Story Button
+    const downloadStoryBtn = document.getElementById('downloadStoryBtn');
+    if (downloadStoryBtn && storyCanvas) {
+        downloadStoryBtn.addEventListener('click', () => {
+            try {
+                const dataUrl = storyCanvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `cypilan-hikaye-${Date.now()}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast('Hikaye görseli başarıyla indirildi!', 'success');
+            } catch(e) {
+                showToast('Görsel indirilirken bir hata oluştu.', 'error');
+            }
+        });
+    }
+
+    // Native Share Story Button
+    const shareStoryNativeBtn = document.getElementById('shareStoryNativeBtn');
+    if (shareStoryNativeBtn && storyCanvas) {
+        shareStoryNativeBtn.addEventListener('click', async () => {
+            try {
+                storyCanvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        showToast('Görsel hazırlanamadı.', 'error');
+                        return;
+                    }
+                    const file = new File([blob], `cypilan-ilan-${Date.now()}.png`, { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: currentShareData.title,
+                            text: `CYPILAN İlan: ${currentShareData.title}\n${currentShareData.url}`
+                        });
+                    } else if (navigator.share) {
+                        await navigator.share({
+                            title: currentShareData.title,
+                            text: `CYPILAN İlan: ${currentShareData.title}`,
+                            url: currentShareData.url
+                        });
+                    } else {
+                        // Fallback to download
+                        const link = document.createElement('a');
+                        link.download = `cypilan-hikaye-${Date.now()}.png`;
+                        link.href = storyCanvas.toDataURL('image/png');
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        showToast('Görsel indirildi! Instagram veya WhatsApp hikayenizde paylaşabilirsiniz.', 'success');
+                    }
+                }, 'image/png');
+            } catch(err) {
+                showToast('Paylaşım başlatılamadı.', 'error');
+            }
         });
     }
 

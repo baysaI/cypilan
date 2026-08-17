@@ -296,6 +296,17 @@ class Support {
     return row ? row.count : 0;
   }
 
+  static async getLatestWaiting() {
+    const db = getDb();
+    return db.prepare(`
+      SELECT id, user_name, user_email, last_message, last_message_at, unread_admin_count, status
+      FROM support_conversations
+      WHERE status = 'waiting' OR unread_admin_count > 0
+      ORDER BY last_message_at DESC
+      LIMIT 1
+    `).get() || null;
+  }
+
   static async updateStatus(conversationId, status, adminId = null) {
     if (!['waiting', 'active', 'closed'].includes(status)) {
       throw new Error('Geçersiz durum.');
