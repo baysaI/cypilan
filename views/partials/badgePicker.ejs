@@ -15,22 +15,24 @@
     </div>
     <p class="text-muted small mb-3"><%= t('listing.badge_picker_help') %></p>
 
-    <div class="d-flex flex-wrap gap-2">
+    <div class="row g-2 row-cols-1 row-cols-md-3">
         <% listingBadges.BADGES.forEach(function (badge) { %>
             <% const checked = Boolean(current && (Number(current[badge.column]) === 1 || current['badge_' + badge.key])); %>
             <% const excludedRoots = badge.excludedRoots || []; %>
             <% const isExcluded = (typeof categoryRoot !== 'undefined' && categoryRoot) ? excludedRoots.includes(categoryRoot) : false; %>
-            <div class="form-check form-check-inline bg-white px-3 py-2 rounded-pill border m-0 badge-picker-item <%= isExcluded ? 'd-none' : '' %>"
+            <div class="col badge-picker-item <%= isExcluded ? 'd-none' : '' %>"
                  data-badge-key="<%= badge.key %>"
                  data-excluded-roots="<%= JSON.stringify(excludedRoots) %>">
-                <input class="form-check-input cursor-pointer shadow-none" type="checkbox"
-                       name="badge_<%= badge.key %>" value="1"
-                       id="<%= idPrefix %>badge_<%= badge.key %>" <%= checked ? 'checked' : '' %>>
-                <label class="form-check-label small cursor-pointer ms-1 d-inline-flex align-items-center gap-1"
-                       for="<%= idPrefix %>badge_<%= badge.key %>">
-                    <i class="fa-solid <%= badge.icon %> text-<%= badge.variant %>"></i>
-                    <%= t('listing.badge_' + badge.key) %>
-                </label>
+                <div class="form-check bg-white px-3 py-2 rounded-3 border m-0 h-100 d-flex align-items-center">
+                    <input class="form-check-input cursor-pointer shadow-none me-2 mt-0" type="checkbox"
+                           name="badge_<%= badge.key %>" value="1"
+                           id="<%= idPrefix %>badge_<%= badge.key %>" <%= checked ? 'checked' : '' %>>
+                    <label class="form-check-label small cursor-pointer d-inline-flex align-items-center gap-2 mb-0 flex-grow-1"
+                           for="<%= idPrefix %>badge_<%= badge.key %>">
+                        <i class="fa-solid <%= badge.icon %> text-<%= badge.variant %>"></i>
+                        <span class="fw-medium text-dark"><%= t('listing.badge_' + badge.key) %></span>
+                    </label>
+                </div>
             </div>
         <% }); %>
     </div>

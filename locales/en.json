@@ -715,9 +715,9 @@
     "status_sold": "Sold",
     "title": "Title",
     "total_found": "listings found",
-    "type_rent": "For rent",
-    "type_sale": "For sale",
-    "type_wanted": "📢 I'm looking for (Request)",
+    "type_rent": "For Rent",
+    "type_sale": "For Sale",
+    "type_wanted": "Wanted",
     "unlimited_mode_desc": "You can post unlimited free listings across all categories.",
     "unlimited_mode_title": "Unlimited Listings Mode Active",
     "views": "Views"

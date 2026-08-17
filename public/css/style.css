@@ -1345,3 +1345,38 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     color: #ffffff !important;
 }
 
+/* Wanted purpose radio button styling */
+.wanted-purpose-btn {
+    border-color: #f59e0b !important;
+    color: #b45309 !important;
+    background-color: #fffbeb !important;
+    transition: all 0.15s ease;
+}
+
+.wanted-purpose-btn .wanted-icon {
+    color: #d97706 !important;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.wanted-purpose-btn:hover {
+    background-color: #fef3c7 !important;
+    border-color: #d97706 !important;
+    color: #92400e !important;
+}
+
+.wanted-purpose-btn:hover .wanted-icon {
+    transform: scale(1.15);
+}
+
+.btn-check:checked + .wanted-purpose-btn {
+    background-color: #f59e0b !important;
+    border-color: #d97706 !important;
+    color: #0f172a !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35) !important;
+}
+
+.btn-check:checked + .wanted-purpose-btn .wanted-icon {
+    color: #0f172a !important;
+    transform: scale(1.1);
+}
+
