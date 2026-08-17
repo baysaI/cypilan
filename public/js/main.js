@@ -396,7 +396,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function createToastContainer() {
         const container = document.createElement('div');
         container.id = 'toastContainer';
-        container.className = 'toast-container position-fixed bottom-0 end-0 p-3 z-3';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.cssText = 'top: 75px !important; right: 20px !important; z-index: 1095 !important;';
         document.body.appendChild(container);
         return container;
     }
@@ -578,9 +579,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 3. Price Alert Toggle
+    // 3. Price Alert Toggle & Modal
     // -------------------------------------------------------------
     const priceAlertBtns = document.querySelectorAll('.price-alert-btn');
+    const priceAlertModalEl = document.getElementById('priceAlertModal');
+    const alertTypeAny = document.getElementById('alertTypeAny');
+    const alertTypeTarget = document.getElementById('alertTypeTarget');
+    const targetPriceInputWrapper = document.getElementById('targetPriceInputWrapper');
+    const alertTargetPriceInput = document.getElementById('alertTargetPriceInput');
+    const priceAlertForm = document.getElementById('priceAlertForm');
+
+    if (alertTypeAny && alertTypeTarget && targetPriceInputWrapper) {
+        alertTypeAny.addEventListener('change', () => {
+            if (alertTypeAny.checked) {
+                targetPriceInputWrapper.classList.add('d-none');
+                if (alertTargetPriceInput) alertTargetPriceInput.value = '';
+            }
+        });
+        alertTypeTarget.addEventListener('change', () => {
+            if (alertTypeTarget.checked) {
+                targetPriceInputWrapper.classList.remove('d-none');
+                if (alertTargetPriceInput) alertTargetPriceInput.focus();
+            }
+        });
+    }
+
     if (priceAlertBtns.length > 0) {
         priceAlertBtns.forEach(btn => {
             btn.addEventListener('click', async function(e) {
@@ -589,6 +612,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const listingId = this.getAttribute('data-id');
                 if (!listingId) return;
 
+                const isAlreadyActive = this.classList.contains('active');
+
+                // If not active and modal exists on page, open modal to configure target price
+                if (!isAlreadyActive && priceAlertModalEl && typeof bootstrap !== 'undefined') {
+                    const bsModal = bootstrap.Modal.getInstance(priceAlertModalEl) || new bootstrap.Modal(priceAlertModalEl);
+                    bsModal.show();
+                    return;
+                }
+
+                // If already active or no modal, toggle directly
                 try {
                     const res = await fetch(`/listings/${listingId}/price-alert`, {
                         method: 'POST',
@@ -634,6 +667,58 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast('Bağlantı hatası oluştu.', 'danger');
                 }
             });
+        });
+    }
+
+    if (priceAlertForm) {
+        priceAlertForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const listingIdInput = this.querySelector('input[name="listing_id"]');
+            const listingId = listingIdInput ? listingIdInput.value : '';
+            if (!listingId) return;
+
+            let targetPrice = null;
+            if (alertTypeTarget && alertTypeTarget.checked && alertTargetPriceInput) {
+                targetPrice = alertTargetPriceInput.value ? parseFloat(alertTargetPriceInput.value) : null;
+            }
+
+            try {
+                const res = await fetch(`/listings/${listingId}/price-alert`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ _csrf: csrfToken, target_price: targetPrice })
+                });
+
+                if (res.status === 401) {
+                    showToast('Fiyat alarmı kurmak için lütfen giriş yapın.', 'info');
+                    setTimeout(() => {
+                        window.location.href = '/auth/login';
+                    }, 1200);
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    document.querySelectorAll(`.price-alert-btn[data-id="${listingId}"]`).forEach(btn => {
+                        btn.classList.add('active', 'btn-warning', 'text-dark');
+                        btn.classList.remove('btn-outline-warning');
+                    });
+                    if (priceAlertModalEl && typeof bootstrap !== 'undefined') {
+                        const bsModal = bootstrap.Modal.getInstance(priceAlertModalEl);
+                        if (bsModal) bsModal.hide();
+                    }
+                    showToast(data.message || 'Fiyat alarmı kuruldu! Fiyat düştüğünde size bildireceğiz.', 'success');
+                } else {
+                    showToast(data.error || 'İşlem gerçekleştirilemedi.', 'danger');
+                }
+            } catch (err) {
+                console.error('Save price alert error:', err);
+                showToast('Bağlantı hatası oluştu.', 'danger');
+            }
         });
     }
 

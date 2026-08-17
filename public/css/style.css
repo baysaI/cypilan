@@ -996,7 +996,10 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
 }
 
 .toast-container {
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
+    top: 75px !important;
+    right: 20px !important;
+    bottom: auto !important;
+    z-index: 1095 !important;
     max-width: min(100vw - 1rem, 420px);
 }
 

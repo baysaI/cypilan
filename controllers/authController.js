@@ -87,6 +87,9 @@ const login = async (req, res) => {
             req.session.userRole = user.role;
             req.session.userEmail = user.email;
             req.session.userName = user.full_name;
+            req.session.lastSeenTouchedAt = Date.now();
+
+            await User.touchLastSeen(user.id);
 
             if (rememberMe) {
                 req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;

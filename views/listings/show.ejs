@@ -41,9 +41,9 @@
                     <% } %>
 
                     <div class="d-flex align-items-center text-muted small fw-medium gap-3 flex-wrap">
-                        <span>
-                            <i class="fa-solid fa-location-dot text-primary me-1"></i> <%= helpers.getCityName(listing.location_city, lang) || '-' %><%= listing.location_district ? ', ' + listing.location_district : '' %>
-                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 ms-2 fw-medium" data-bs-toggle="modal" data-bs-target="#listingMapModal" style="font-size: 0.78rem;">
+                        <span class="d-inline-flex align-items-center">
+                            <i class="fa-solid fa-location-dot text-danger me-1"></i> <%= helpers.getCityName(listing.location_city, lang) || '-' %><%= listing.location_district ? ', ' + listing.location_district : '' %>
+                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 ms-2 fw-semibold shadow-xs" data-bs-toggle="modal" data-bs-target="#listingMapModal">
                                 <i class="fa-solid fa-map-location-dot me-1"></i><%= t('map.view_on_map') || 'Haritada Gör' %>
                             </button>
                         </span>
@@ -318,6 +318,39 @@
                 </div>
             </div>
 
+            <%# Prominent Location & Map Section %>
+            <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-primary"></i>
+                            <span><%= t('map.modal_title') || 'İlan Konumu & Harita' %></span>
+                        </h5>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-medium">
+                            <i class="fa-solid fa-location-dot me-1"></i><%= helpers.getCityName(listing.location_city, lang) || '-' %><%= listing.location_district ? ' / ' + listing.location_district : '' %>
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        <%= listing.title %> &mdash; <strong><%= helpers.getCityName(listing.location_city, lang) || '-' %></strong> <%= listing.location_district ? '(' + listing.location_district + ')' : '' %> bölgesindedir.
+                    </p>
+                    <div class="p-3 bg-light rounded-4 border d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                                <i class="fa-solid fa-map-pin text-danger fs-4"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark mb-0">İlanın Konumunu Haritada İnceleyin</div>
+                                <div class="text-muted small">İnteraktif harita, çevre detayları ve Google Maps yol tarifi.</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 shadow-sm flex-shrink-0" data-bs-toggle="modal" data-bs-target="#listingMapModal">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <%= t('map.view_on_map') || 'Haritada Gör' %>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="col-12 col-lg-4">
@@ -386,28 +419,28 @@
                         read today. Deliberately coarse: the exact minute somebody last
                         opened the site is nobody else's business, and "3 gün önce
                         aktif" already answers the only question being asked. %>
-                    <% const sellerSeen = helpers.lastSeenState(listing.seller_last_seen); %>
-                    <% if (sellerSeen.known) { %>
-                        <p class="small mb-2 d-flex align-items-center justify-content-center gap-2">
-                            <span class="d-inline-block rounded-circle flex-shrink-0 <%= sellerSeen.online ? 'bg-success' : 'bg-secondary opacity-50' %>"
-                                  style="width: 8px; height: 8px;" aria-hidden="true"></span>
-                            <span class="<%= sellerSeen.online ? 'text-success fw-semibold' : 'text-muted' %>">
-                                <% if (sellerSeen.online) { %>
-                                    <%= t('user.last_seen_online') %>
-                                <% } else if (sellerSeen.today) { %>
-                                    <%= t('user.last_seen_today') %>
-                                <% } else { %>
-                                    <%= t('user.last_seen_ago', { time: helpers.timeAgo(listing.seller_last_seen, lang) }) %>
-                                <% } %>
+                    <% const sellerSeen = helpers.lastSeenState(listing.seller_last_seen || listing.created_at); %>
+                    <p class="small mb-2 d-flex align-items-center justify-content-center gap-2">
+                        <span class="d-inline-block rounded-circle flex-shrink-0 <%= sellerSeen.online ? 'bg-success' : (sellerSeen.today ? 'bg-success opacity-75' : 'bg-secondary opacity-50') %>"
+                              style="width: 8px; height: 8px;" aria-hidden="true"></span>
+                        <span class="<%= sellerSeen.online ? 'text-success fw-bold' : (sellerSeen.today ? 'text-success fw-medium' : 'text-muted') %>">
+                            <% if (sellerSeen.online) { %>
+                                <%= t('user.last_seen_online') %>
+                            <% } else if (sellerSeen.today) { %>
+                                <%= t('user.last_seen_today') %>
+                            <% } else if (sellerSeen.known) { %>
+                                <%= t('user.last_seen_ago', { time: helpers.timeAgo(listing.seller_last_seen || listing.created_at, lang) }) %>
+                            <% } else { %>
+                                <%= helpers.timeAgo(listing.created_at, lang) %> aktif
+                            <% } %>
+                        </span>
+                    </p>
+                    <% if (sellerSeen.online || sellerSeen.today) { %>
+                        <div class="mb-2">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small fw-medium">
+                                <i class="fa-solid fa-bolt me-1"></i><%= t('user.fast_responder') || 'Hızlı Yanıt Verir' %>
                             </span>
-                        </p>
-                        <% if (sellerSeen.online || sellerSeen.today) { %>
-                            <div class="mb-2">
-                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small fw-medium">
-                                    <i class="fa-solid fa-bolt me-1"></i><%= t('user.fast_responder') || 'Hızlı Yanıt Verir' %>
-                                </span>
-                            </div>
-                        <% } %>
+                        </div>
                     <% } %>
 
                     <% if (authUser && authUser.id === listing.user_id) { %>
@@ -757,6 +790,72 @@
           <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">İptal</button>
           <button type="submit" id="quickOfferSubmitBtn" class="btn btn-success rounded-pill px-4 fw-bold text-white shadow-sm">
             <i class="fa-solid fa-paper-plane me-1"></i> Teklifi İlet
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="priceAlertModal" tabindex="-1" aria-labelledby="priceAlertModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <form id="priceAlertForm">
+        <input type="hidden" name="listing_id" value="<%= listing.id %>">
+        <div class="modal-header border-bottom px-4 py-3 bg-light rounded-top-4">
+          <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="priceAlertModalLabel">
+            <i class="fa-solid fa-bell text-warning fs-5"></i>
+            <span><%= t('alerts.price_alert') || 'Fiyat Alarmı Kur' %></span>
+          </h5>
+          <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-light border rounded-3 p-3 mb-3 d-flex align-items-center gap-3">
+            <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="fa-solid fa-tag fs-5"></i>
+            </div>
+            <div>
+                <small class="text-muted d-block">Mevcut İlan Fiyatı:</small>
+                <strong class="text-primary fs-5"><%= fmt(listing.price, listing.currency) %></strong>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold text-dark small mb-2">Bildirim Tercihiniz:</label>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="alert_type" id="alertTypeAny" value="any" checked>
+                <label class="form-check-label fw-medium text-dark small cursor-pointer" for="alertTypeAny">
+                    ⚡ Herhangi bir fiyat düşüşünde bana haber ver
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="alert_type" id="alertTypeTarget" value="target">
+                <label class="form-check-label fw-medium text-dark small cursor-pointer" for="alertTypeTarget">
+                    🎯 Fiyat belirlediğim tutara veya altına düşerse haber ver
+                </label>
+            </div>
+          </div>
+
+          <div class="mb-3 d-none" id="targetPriceInputWrapper">
+            <label for="alertTargetPriceInput" class="form-label fw-semibold small text-dark">Hedef Fiyatınız (<%= listing.currency || 'TRY' %>)</label>
+            <div class="input-group">
+                <input type="number" id="alertTargetPriceInput" name="target_price" class="form-control rounded-start-3"
+                       placeholder="Örn: <%= listing.price ? Math.round(Number(listing.price) * 0.9) : '' %>"
+                       min="1" max="<%= listing.price || 999999999 %>">
+                <span class="input-group-text bg-light fw-bold"><%= listing.currency || 'TRY' %></span>
+            </div>
+            <div class="form-text small text-muted">Öneri: %10 indirimli hedef <%= listing.price ? fmt(Math.round(Number(listing.price) * 0.9), listing.currency) : '' %></div>
+          </div>
+
+          <div class="p-3 bg-light rounded-3 small text-muted">
+            <i class="fa-solid fa-circle-info text-primary me-1"></i>
+            İlan sahibi fiyatı indirdiğinde bildirim çanınızdan (`/notifications`) ve e-posta ile anında haberdar edilirsiniz.
+          </div>
+        </div>
+        <div class="modal-footer border-top px-4 py-3 bg-light rounded-bottom-4">
+          <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">İptal</button>
+          <button type="submit" id="savePriceAlertSubmitBtn" class="btn btn-warning rounded-pill px-4 fw-bold text-dark shadow-sm">
+            <i class="fa-solid fa-bell me-1"></i> Alarmı Başlat
           </button>
         </div>
       </form>

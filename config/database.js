@@ -173,6 +173,10 @@ const applyColumnMigrations = (db) => {
     }
   });
 
+  try {
+    db.exec("UPDATE users SET last_seen_at = created_at WHERE last_seen_at IS NULL");
+  } catch (e) {}
+
   // Ensure listings table CHECK constraint allows 'wanted'
   try {
     const tableSqlRow = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='listings'").get();
