@@ -1003,6 +1003,46 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     max-width: min(100vw - 1rem, 420px);
 }
 
+@media (max-width: 575.98px) {
+    .toast-container {
+        top: 15px !important;
+        right: 50% !important;
+        left: auto !important;
+        transform: translateX(50%) !important;
+        max-width: calc(100vw - 24px) !important;
+        width: calc(100vw - 24px) !important;
+        padding: 0 !important;
+        z-index: 1095 !important;
+    }
+    .toast-container .toast {
+        margin: 0 auto 8px auto !important;
+        width: 100% !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+    }
+}
+
+/* Floating Compare Drawer (Z-Index and Safe Mobile Elevation) */
+.compare-floating-drawer {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1055 !important;
+    max-width: 94%;
+    width: auto;
+    min-width: 280px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18) !important;
+    transition: all 0.25s ease-in-out;
+}
+
+@media (max-width: 575.98px) {
+    .compare-floating-drawer {
+        bottom: 78px !important; /* Floats safely above the bottom-right Live Support icon */
+        z-index: 1055 !important;
+        max-width: calc(100vw - 24px) !important;
+    }
+}
+
 /* Bootstrap positions the dropdown against its toggle, which pushes the wider
    menus off-screen next to a right-aligned header button on a phone. */
 @media (max-width: 575.98px) {
