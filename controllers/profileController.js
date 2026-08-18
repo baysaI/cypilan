@@ -53,8 +53,11 @@ const show = async (req, res) => {
         delete user.password_hash;
         delete user.email;
 
+        const { formatDisplayName } = require('../utils/helpers');
+        const displayName = user.company_name || formatDisplayName(user.full_name, user.show_surname);
+
         res.locals.meta = res.locals.meta || {};
-        res.locals.meta.title = `${user.full_name} | CYPILAN.COM`;
+        res.locals.meta.title = `${displayName} | CYPILAN.COM`;
 
         res.render('profile/show', {
             profileUser: user,
@@ -65,7 +68,7 @@ const show = async (req, res) => {
             canReview,
             myReview,
             maxCommentLength: reviewController.MAX_COMMENT_LENGTH,
-            title: user.full_name
+            title: displayName
         });
     } catch (error) {
         console.error('Profile Show Error:', error);
@@ -124,6 +127,7 @@ const update = async (req, res) => {
         }
 
         updates.show_phone = req.body.hide_phone ? 0 : 1;
+        updates.show_surname = req.body.hide_surname ? 0 : 1;
 
         if (req.processedAvatar) {
             if (user.avatar_url) {

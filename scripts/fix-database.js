@@ -164,6 +164,7 @@ const columnsOf = (table) => db.pragma(`table_info(${table})`).map((col) => col.
 
 const COLUMN_MIGRATIONS = [
   { table: 'users', column: 'show_phone', ddl: 'ALTER TABLE users ADD COLUMN show_phone INTEGER DEFAULT 1' },
+  { table: 'users', column: 'show_surname', ddl: 'ALTER TABLE users ADD COLUMN show_surname INTEGER DEFAULT 0' },
   { table: 'users', column: 'has_password', ddl: 'ALTER TABLE users ADD COLUMN has_password INTEGER DEFAULT 1' },
   { table: 'users', column: 'password_reset_token', ddl: 'ALTER TABLE users ADD COLUMN password_reset_token TEXT' },
   { table: 'users', column: 'password_reset_expires', ddl: 'ALTER TABLE users ADD COLUMN password_reset_expires DATETIME' },

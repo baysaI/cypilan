@@ -87,6 +87,17 @@
                                 <%= t('profile_edit.hide_phone_help') %>
                             </div>
                         </div>
+
+                        <div class="form-check mt-3 pt-3 border-top">
+                            <input class="form-check-input cursor-pointer" type="checkbox" name="hide_surname" value="1" id="hideSurname"
+                                   <%= (typeof user.show_surname === 'undefined' || Number(user.show_surname) === 0) ? 'checked' : '' %>>
+                            <label class="form-check-label cursor-pointer fw-medium" for="hideSurname">
+                                <%= t('profile_edit.hide_surname') %> (<%= helpers.formatDisplayName(user.full_name, false) %>)
+                            </label>
+                            <div class="form-text small">
+                                <%= t('profile_edit.hide_surname_help') %>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

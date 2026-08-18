@@ -260,6 +260,17 @@
                                     </div>
                                 </div>
 
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input cursor-pointer" type="checkbox" name="hide_surname" value="1" id="hideSurname"
+                                           <%= ((typeof formData !== 'undefined' && typeof formData.hide_surname !== 'undefined') ? Boolean(formData.hide_surname) : (typeof hideSurname !== 'undefined' ? hideSurname : true)) ? 'checked' : '' %>>
+                                    <label class="form-check-label cursor-pointer" for="hideSurname">
+                                        Soyadımı sitede ve ilanlarımda gizle (<%= (typeof currentUser !== 'undefined' && currentUser && currentUser.full_name) ? helpers.formatDisplayName(currentUser.full_name, false) : 'Örn: Ahmet Y.' %>)
+                                    </label>
+                                    <div class="form-text small">
+                                        İlanlarınızda ve satıcı profilinizde soyadınızın yalnızca baş harfi gösterilir. Bu ayar profilinize kaydedilir.
+                                    </div>
+                                </div>
+
                                 <div class="form-check mt-3 border rounded-4 p-3 bg-light" id="collectBidsBox" style="display: none;" hidden>
                                     <input class="form-check-input cursor-pointer" type="checkbox" name="collect_bids" value="1" id="collectBids"
                                            <%= (typeof formData !== 'undefined' && formData.collect_bids) ? 'checked' : '' %>>

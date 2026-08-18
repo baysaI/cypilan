@@ -340,7 +340,7 @@
                             <td class="fw-bold text-muted bg-light p-3 border-end compare-sticky-col">Satıcı &amp; Puan</td>
                             <% listings.forEach(function(item) { %>
                                 <td class="p-3 text-center border-end compare-cell">
-                                    <div class="fw-bold text-dark" style="font-size: 0.85rem;"><%= item.seller_company || item.seller_name || 'Kullanıcı' %></div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.85rem;"><%= item.seller_company || helpers.formatDisplayName(item.seller_name, item.seller_show_surname) || 'Kullanıcı' %></div>
                                     <div class="small text-muted mb-1" style="font-size: 0.72rem;"><%= item.seller_role === 'business' ? 'Kurumsal Mağaza' : (item.seller_role === 'agent' ? 'Emlak / Galeri' : 'Bireysel Üye') %></div>
                                     <% if (item.seller_rating_count && item.seller_rating_count > 0) { %>
                                         <div class="small text-warning" style="font-size: 0.75rem;">

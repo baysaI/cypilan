@@ -1148,6 +1148,8 @@
     "google_email_warning": "E-posta adresinizi değiştirebilmek için önce yukarıdan bir şifre belirlemelisiniz.",
     "hide_phone": "Telefonumu ilanlarımda gösterme",
     "hide_phone_help": "İşaretlerseniz numaranız hiçbir ilanınızda görünmez ve alıcılar size yalnızca site içi mesajla ulaşabilir. Numaranız kayıtlı kalır, sadece gizlenir.",
+    "hide_surname": "Soyadımı sitede ve ilanlarımda gizle",
+    "hide_surname_help": "İşaretlendiğinde ilanlarınızda ve satıcı profilinizde soyadınızın yalnızca baş harfi (Örn: Ahmet Y.) görünür.",
     "new_password": "Yeni Şifre",
     "new_password_help": "En az 8 karakter, 1 büyük harf ve 1 rakam.",
     "phone": "Telefon Numarası",

@@ -45,6 +45,34 @@ function maskPhone(phone) {
   return `${digits.slice(0, 4)} ••• •• ••`;
 }
 
+/**
+ * Format a user's full name based on their surname visibility preference.
+ * If showSurname is false/0 (default), "Ahmet Yılmaz" -> "Ahmet Y."
+ * If "Mehmet Ali Yılmaz" -> "Mehmet Ali Y."
+ * If single word "Ahmet" -> "Ahmet"
+ * If showSurname is true/1, returns full name "Ahmet Yılmaz".
+ */
+function formatDisplayName(fullName, showSurname = false) {
+  if (!fullName || typeof fullName !== 'string') return '';
+  const trimmed = fullName.trim();
+  if (!trimmed) return '';
+
+  if (showSurname === true || Number(showSurname) === 1) {
+    return trimmed;
+  }
+
+  const parts = trimmed.split(/\s+/);
+  if (parts.length <= 1) {
+    return parts[0];
+  }
+
+  const lastName = parts[parts.length - 1];
+  const firstNames = parts.slice(0, -1).join(' ');
+  const initial = lastName.charAt(0).toUpperCase();
+
+  return `${firstNames} ${initial}.`;
+}
+
 function getCurrencySymbol(code) {
   if (!code || typeof code !== 'string') return '₺';
   const upper = code.trim().toUpperCase();
@@ -342,6 +370,7 @@ module.exports = {
   sanitizeHtml,
   getCurrencySymbol,
   maskPhone,
+  formatDisplayName,
   paginationHelper,
   getCityName
 };

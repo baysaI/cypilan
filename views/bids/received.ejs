@@ -51,7 +51,7 @@
                                     <div class="flex-grow-1 min-w-0">
                                         <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                                             <a href="/profile/<%= bid.bidder_id %>" class="fw-semibold text-decoration-none text-body">
-                                                <%= bid.bidder_company || bid.bidder_name %>
+                                                <%= bid.bidder_company || helpers.formatDisplayName(bid.bidder_name, bid.bidder_show_surname) %>
                                             </a>
                                             <span class="badge rounded-pill bg-light text-muted border">
                                                 <%= bid.bidder_role === 'agent' ? t('user.agent_member') : t('user.business_member') %>

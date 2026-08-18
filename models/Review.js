@@ -58,6 +58,7 @@ class Review {
     const db = getDb();
     return db.prepare(`
       SELECT r.*, u.full_name as reviewer_name, u.avatar_url as reviewer_avatar,
+             u.company_name as reviewer_company, COALESCE(u.show_surname, 0) as reviewer_show_surname,
              l.title as listing_title, l.slug as listing_slug
       FROM reviews r
       JOIN users u ON r.reviewer_id = u.id
@@ -71,7 +72,8 @@ class Review {
   static async getByListing(listingId, limit = 20, offset = 0) {
     const db = getDb();
     return db.prepare(`
-      SELECT r.*, u.full_name as reviewer_name, u.avatar_url as reviewer_avatar
+      SELECT r.*, u.full_name as reviewer_name, u.avatar_url as reviewer_avatar,
+             u.company_name as reviewer_company, COALESCE(u.show_surname, 0) as reviewer_show_surname
       FROM reviews r
       JOIN users u ON r.reviewer_id = u.id
       WHERE r.listing_id = ?

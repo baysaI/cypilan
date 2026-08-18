@@ -5,7 +5,7 @@ const Review = require('../models/Review');
 const Bid = require('../models/Bid');
 const Career = require('../models/Career');
 const ServiceRequest = require('../models/ServiceRequest');
-const { generateSlug, maskPhone } = require('../utils/helpers');
+const { generateSlug, maskPhone, formatDisplayName } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
 const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/upload');
 const Setting = require('../models/Setting');
@@ -142,6 +142,7 @@ const show = async (req, res, next) => {
             listing.job_details = await Career.getJobDetails(listing.id);
         }
 
+        listing.seller_name = formatDisplayName(listing.seller_name, listing.seller_show_surname);
         listing.phone_hidden = Number(listing.seller_show_phone) === 0;
         listing.has_phone = Boolean(listing.seller_phone) && !listing.phone_hidden;
         listing.seller_phone_masked = listing.has_phone ? maskPhone(listing.seller_phone) : '';
@@ -248,6 +249,7 @@ const showCreate = async (req, res, next) => {
             formData,
             userPhone: (user && user.phone) || '',
             hidePhone: user ? Number(user.show_phone) === 0 : false,
+            hideSurname: user ? (typeof user.show_surname === 'undefined' || Number(user.show_surname) === 0) : true,
             quota: {
                 limit: isUnlimited ? null : listingPolicy.FREE_LISTING_QUOTA,
                 used: usedQuota,
@@ -335,7 +337,8 @@ const create = async (req, res, next) => {
 
         await User.update(req.session.userId, {
             phone: phone.trim(),
-            show_phone: req.body.hide_phone ? 0 : 1
+            show_phone: req.body.hide_phone ? 0 : 1,
+            show_surname: req.body.hide_surname ? 0 : 1
         });
 
         const status = listingPolicy.initialStatus(req.session.userRole);

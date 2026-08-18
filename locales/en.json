@@ -1148,6 +1148,8 @@
     "google_email_warning": "In order to change your e-mail address, you must first set a password above.",
     "hide_phone": "Don't show my phone in my listings",
     "hide_phone_help": "If you check it, your number will not appear in any of your listings and buyers can only reach you via in-site messages. Your number remains registered, it is just hidden.",
+    "hide_surname": "Hide my surname on the site and listings",
+    "hide_surname_help": "When checked, only the initial of your surname (e.g. John D.) is displayed on your listings and public profile.",
     "new_password": "New Password",
     "new_password_help": "At least 8 characters, 1 uppercase letter and 1 number.",
     "phone": "Phone Number",

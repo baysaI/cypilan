@@ -132,6 +132,7 @@ class Bid {
     return db.prepare(`
       SELECT b.*,
              u.full_name as bidder_name,
+             COALESCE(u.show_surname, 0) as bidder_show_surname,
              u.company_name as bidder_company,
              u.avatar_url as bidder_avatar,
              u.role as bidder_role,
@@ -156,6 +157,7 @@ class Bid {
              l.slug as listing_slug,
              l.status as listing_status,
              u.full_name as bidder_name,
+             COALESCE(u.show_surname, 0) as bidder_show_surname,
              u.company_name as bidder_company,
              u.avatar_url as bidder_avatar,
              u.role as bidder_role,

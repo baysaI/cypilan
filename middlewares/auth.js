@@ -139,9 +139,11 @@ const setUserLocal = async (req, res, next) => {
             id: userId,
             email: (req.session && req.session.userEmail) || (user && user.email),
             name: (req.session && req.session.userName) || (user && user.full_name),
+            full_name: (req.session && req.session.userName) || (user && user.full_name),
             role: (req.session && req.session.userRole) || (user && user.role),
             avatar_url: userAvatar || (user && user.avatar_url) || null,
-            is_verified: isVerified
+            is_verified: isVerified,
+            show_surname: (user && typeof user.show_surname !== 'undefined') ? user.show_surname : 0
         };
         res.locals.user = userData;
         res.locals.currentUser = userData;

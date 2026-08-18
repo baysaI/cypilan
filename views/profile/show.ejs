@@ -4,7 +4,7 @@
             <img src="<%= profileUser.avatar_url || '/img/logo.png' %>" class="rounded-circle border bg-light object-fit-cover flex-shrink-0" width="96" height="96" alt="<%= profileUser.full_name %>">
 
             <div class="text-center text-sm-start flex-grow-1">
-                <h1 class="fs-4 fw-bold mb-1"><%= profileUser.company_name || profileUser.full_name %></h1>
+                <h1 class="fs-4 fw-bold mb-1"><%= profileUser.company_name || helpers.formatDisplayName(profileUser.full_name, profileUser.show_surname) %></h1>
                 <div class="d-flex flex-wrap justify-content-center justify-content-sm-start gap-3 text-muted small align-items-center">
                     <span>
                         <i class="fa-regular fa-user me-1"></i>
@@ -182,7 +182,7 @@
 
                                 <div class="flex-grow-1 min-w-0">
                                     <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <span class="fw-semibold"><%= review.reviewer_name %></span>
+                                        <span class="fw-semibold"><%= review.reviewer_company || helpers.formatDisplayName(review.reviewer_name, review.reviewer_show_surname) %></span>
                                         <span class="text-warning small">
                                             <% for (let star = 1; star <= 5; star++) { %>
                                                 <i class="fa-<%= star <= review.rating ? 'solid' : 'regular' %> fa-star"></i>
