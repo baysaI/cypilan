@@ -750,6 +750,10 @@
     "block_confirm": "Are you sure you want to block this user? You won't be able to send messages to each other.",
     "block_user": "Block User",
     "cannot_message_blocked": "You cannot send messages to this user.",
+    "safety_title": "Safe Communication & Shopping Warning",
+    "safety_rule_1": "Cypilan staff will never ask for your password, SMS verification code, or direct wire transfers.",
+    "safety_rule_2": "Do not send any deposit or advance payment before inspecting the item in person.",
+    "safety_rule_3": "Report suspicious messages or fraudulent attempts using the flag icon at the top right.",
     "unblock_user": "Unblock",
     "you_blocked_user": "You blocked this user. Unblock to message."
   },

@@ -750,6 +750,10 @@
     "block_confirm": "Bu kullanıcıyı engellemek istediğinize emin misiniz? Birbirinize mesaj gönderemeyeceksiniz.",
     "block_user": "Kullanıcıyı Engelle",
     "cannot_message_blocked": "Bu kullanıcıya mesaj gönderemezsiniz.",
+    "safety_title": "Güvenli İletişim & Alışveriş Uyarısı",
+    "safety_rule_1": "Cypilan yöneticileri sizden asla şifre, SMS onay kodu veya doğrudan para transferi talep etmez.",
+    "safety_rule_2": "Ürünü bizzat görmeden veya teslim almadan kapora / ön ödeme göndermeyiniz.",
+    "safety_rule_3": "Şüpheli mesajları ve dolandırıcılık girişimlerini sağ üstteki bayrak simgesinden bize bildirebilirsiniz.",
     "unblock_user": "Engeli Kaldır",
     "you_blocked_user": "Bu kullanıcıyı engellediniz. Mesajlaşmak için engeli kaldırın."
   },
