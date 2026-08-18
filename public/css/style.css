@@ -251,6 +251,15 @@ body {
 .site-logo {
     display: inline-block;
 }
+.site-logo-dark {
+    display: none;
+}
+[data-bs-theme="dark"] .site-logo-light {
+    display: none;
+}
+[data-bs-theme="dark"] .site-logo-dark {
+    display: inline-block;
+}
 
 .text-primary { color: var(--cyp-primary-fg) !important; }
 .bg-primary {
