@@ -248,10 +248,9 @@ body {
     color: var(--bs-secondary-color);
 }
 
-/* Only one image set exists per theme, so swap rather than filter. */
-.site-logo-dark { display: none; }
-[data-bs-theme="dark"] .site-logo-light { display: none; }
-[data-bs-theme="dark"] .site-logo-dark { display: inline-block; }
+.site-logo {
+    display: inline-block;
+}
 
 .text-primary { color: var(--cyp-primary-fg) !important; }
 .bg-primary {
