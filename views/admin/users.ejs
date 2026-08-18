@@ -66,17 +66,11 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                         </a>
                                     </div>
                                     <div class="text-muted small ms-3"><%= u.email %></div>
-                                    <!-- Mobile quick presence summary -->
-                                    <div class="d-md-none mt-1 ms-3" style="font-size: 0.75rem;">
-                                        <i class="fa-regular fa-clock me-1 text-muted"></i>
-                                        <% if (seen.online) { %>
-                                            <span class="text-success fw-bold">Çevrimiçi</span>
-                                        <% } else if (seen.known) { %>
-                                            <span class="text-muted"><%= helpers.timeAgo(u.last_seen_at, lang) %></span>
-                                        <% } else { %>
-                                            <span class="text-muted">Kayıt yok</span>
-                                        <% } %>
-                                    </div>
+                                    <% if (u.created_at) { %>
+                                        <div class="text-muted small ms-3 mt-1" style="font-size: 0.73rem;" title="Kayıt Zamanı: <%= helpers.formatDateTime(u.created_at, lang) %>">
+                                            <i class="fa-regular fa-calendar-plus me-1 text-secondary opacity-75"></i>Kayıt: <%= helpers.formatDate(u.created_at, lang) %>
+                                        </div>
+                                    <% } %>
                                 </td>
                                 <td class="d-none d-md-table-cell small"><%= u.phone || '-' %></td>
                                 <td><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2"><%= u.role %></span></td>
