@@ -522,21 +522,21 @@
                         read today. Deliberately coarse: the exact minute somebody last
                         opened the site is nobody else's business, and "3 gün önce
                         aktif" already answers the only question being asked. %>
-                    <% const sellerSeen = helpers.lastSeenState(listing.seller_last_seen || listing.created_at); %>
+                    <% const sellerSeen = helpers.lastSeenState(listing.seller_last_seen); %>
                     <p class="small mb-2 d-flex align-items-center justify-content-center gap-2">
-                        <span class="d-inline-block rounded-circle flex-shrink-0 <%= sellerSeen.online ? 'bg-success shadow-sm' : (sellerSeen.today ? 'bg-success opacity-75' : 'bg-secondary opacity-50') %>"
+                        <span class="d-inline-block rounded-circle flex-shrink-0 <%= sellerSeen.online ? 'bg-success shadow-sm' : 'bg-secondary opacity-50' %>"
                               style="width: 8px; height: 8px;" aria-hidden="true"></span>
-                        <span class="<%= sellerSeen.online ? 'text-success fw-bold' : (sellerSeen.today ? 'text-success fw-medium' : 'text-muted') %>">
+                        <span class="<%= sellerSeen.online ? 'text-success fw-bold' : 'text-muted' %>">
                             <% if (sellerSeen.online) { %>
-                                <%= t('user.last_seen_online') %>
+                                <%= t('user.last_seen_online') || 'Şu anda çevrimiçi' %>
                             <% } else if (sellerSeen.known) { %>
-                                <%= t('user.last_seen_ago', { time: helpers.timeAgo(listing.seller_last_seen || listing.created_at, lang) }) %>
+                                <%= t('user.last_seen_ago', { time: helpers.timeAgo(listing.seller_last_seen, lang) }) %>
                             <% } else { %>
-                                <%= t('user.last_seen_ago', { time: helpers.timeAgo(listing.created_at, lang) }) %>
+                                <%= helpers.formatDate(listing.created_at, lang) %> katıldı
                             <% } %>
                         </span>
                     </p>
-                    <% if (sellerSeen.online || sellerSeen.today) { %>
+                    <% if (sellerSeen.online) { %>
                         <div class="mb-2">
                             <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small fw-medium">
                                 <i class="fa-solid fa-bolt me-1"></i><%= t('user.fast_responder') || 'Hızlı Yanıt Verir' %>

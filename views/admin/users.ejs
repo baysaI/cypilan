@@ -45,7 +45,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                             <th>Rol</th>
                             <th class="d-none d-sm-table-cell">İlan</th>
                             <th>E-posta Onayı</th>
-                            <th>Durum</th>
+                            <th>Hesap Durumu</th>
                             <th class="d-none d-lg-table-cell">Son Aktiflik</th>
                             <th>Uyarı</th>
                             <th class="pe-3 text-end">İşlem</th>
@@ -53,15 +53,30 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                     </thead>
                     <tbody>
                         <% list.forEach(function(u) { %>
+                            <% const seen = helpers.lastSeenState(u.last_seen_at); %>
                             <tr>
                                 <td class="ps-3">
-                                    <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="d-inline-block rounded-circle flex-shrink-0 <%= seen.online ? 'bg-success shadow-sm' : 'bg-secondary opacity-50' %>"
+                                              style="width: 8px; height: 8px;"
+                                              title="<%= seen.online ? 'Şu anda çevrimiçi' : (seen.known ? 'Son aktiflik: ' + helpers.formatDateTime(u.last_seen_at, lang) : 'Aktiflik kaydı yok') %>"></span>
                                         <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="fw-bold text-dark text-decoration-none d-inline-flex align-items-center gap-1 hover-primary" title="Kullanıcı Profilini Aç">
                                             <span><%= u.company_name || u.full_name %></span>
                                             <i class="fa-solid fa-arrow-up-right-from-square text-primary small" style="font-size: 0.70rem;"></i>
                                         </a>
                                     </div>
-                                    <div class="text-muted small"><%= u.email %></div>
+                                    <div class="text-muted small ms-3"><%= u.email %></div>
+                                    <!-- Mobile only last active line -->
+                                    <div class="d-lg-none mt-1 ms-3" style="font-size: 0.75rem;">
+                                        <i class="fa-regular fa-clock me-1 text-muted"></i>
+                                        <% if (seen.online) { %>
+                                            <span class="text-success fw-bold">Çevrimiçi</span>
+                                        <% } else if (seen.known) { %>
+                                            <span class="text-muted"><%= helpers.timeAgo(u.last_seen_at, lang) %></span>
+                                        <% } else { %>
+                                            <span class="text-muted">Kayıt yok</span>
+                                        <% } %>
+                                    </div>
                                 </td>
                                 <td class="d-none d-md-table-cell small"><%= u.phone || '-' %></td>
                                 <td><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2"><%= u.role %></span></td>
@@ -81,23 +96,22 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                 </td>
                                 <td>
                                     <% if (u.is_active) { %>
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Aktif</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2" title="Hesap Aktif">Aktif Hesap</span>
                                     <% } else { %>
-                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2">Askıda</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2" title="Hesap Askıda">Askıda</span>
                                     <% } %>
                                 </td>
                                 <%# The public listing page shows this coarsely; a moderator
                                     deciding whether an account is dormant needs the clock,
                                     so the exact stamp sits in the tooltip. %>
                                 <td class="d-none d-lg-table-cell small text-nowrap">
-                                    <% const seen = helpers.lastSeenState(u.last_seen_at); %>
                                     <% if (!seen.known) { %>
                                         <span class="text-muted" title="Bu hesap hiç görülmedi (son aktiflik kaydı tutulmaya başlamadan önce oluşturulmuş olabilir)">&mdash;</span>
                                     <% } else { %>
                                         <span title="<%= helpers.formatDateTime(u.last_seen_at, lang) %>">
-                                            <span class="d-inline-block rounded-circle align-middle me-1 <%= seen.online ? 'bg-success' : 'bg-secondary opacity-50' %>"
+                                            <span class="d-inline-block rounded-circle align-middle me-1 <%= seen.online ? 'bg-success shadow-sm' : 'bg-secondary opacity-50' %>"
                                                   style="width: 8px; height: 8px;" aria-hidden="true"></span>
-                                            <%= seen.online ? 'Çevrimiçi' : helpers.timeAgo(u.last_seen_at, lang) %>
+                                            <span class="<%= seen.online ? 'text-success fw-bold' : 'text-muted' %>"><%= seen.online ? 'Çevrimiçi' : helpers.timeAgo(u.last_seen_at, lang) %></span>
                                         </span>
                                     <% } %>
                                 </td>

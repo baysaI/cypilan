@@ -10,11 +10,11 @@
                         <i class="fa-regular fa-user me-1"></i>
                         <%= profileUser.role === 'business' ? t('user.business_member') : (profileUser.role === 'agent' ? t('user.agent_member') : t('user.individual_member')) %>
                     </span>
-                    <% const userSeen = helpers.lastSeenState(profileUser.last_seen_at || profileUser.created_at); %>
+                    <% const userSeen = helpers.lastSeenState(profileUser.last_seen_at); %>
                     <span class="d-inline-flex align-items-center gap-1">
-                        <span class="d-inline-block rounded-circle <%= userSeen.online ? 'bg-success shadow-sm' : (userSeen.today ? 'bg-success opacity-75' : 'bg-secondary opacity-50') %>" style="width: 7px; height: 7px;"></span>
-                        <span class="<%= userSeen.online ? 'text-success fw-bold' : (userSeen.today ? 'text-success fw-medium' : 'text-muted') %>">
-                            <%= userSeen.online ? (t('user.last_seen_online') || 'Çevrimiçi') : (helpers.timeAgo(profileUser.last_seen_at || profileUser.created_at, lang) + ' aktifti') %>
+                        <span class="d-inline-block rounded-circle <%= userSeen.online ? 'bg-success shadow-sm' : 'bg-secondary opacity-50' %>" style="width: 7px; height: 7px;"></span>
+                        <span class="<%= userSeen.online ? 'text-success fw-bold' : 'text-muted' %>">
+                            <%= userSeen.online ? (t('user.last_seen_online') || 'Şu anda çevrimiçi') : (userSeen.known ? (helpers.timeAgo(profileUser.last_seen_at, lang) + ' aktifti') : (helpers.formatDate(profileUser.created_at, lang) + ' katıldı')) %>
                         </span>
                     </span>
                     <% if (profileUser.created_at) { %>

@@ -349,10 +349,10 @@
                                     <% } else { %>
                                         <div class="small text-muted" style="font-size: 0.72rem;">Henüz değerlendirilmedi</div>
                                     <% } %>
-                                    <% const compSellerSeen = helpers.lastSeenState(item.seller_last_seen || item.created_at); %>
-                                    <div class="small mt-1 text-muted d-flex align-items-center justify-content-center gap-1" style="font-size: 0.72rem;">
-                                        <span class="d-inline-block rounded-circle <%= compSellerSeen.online ? 'bg-success' : 'bg-secondary opacity-50' %>" style="width: 6px; height: 6px;"></span>
-                                        <span><%= compSellerSeen.online ? 'Çevrimiçi' : (helpers.timeAgo(item.seller_last_seen || item.created_at, lang) + ' aktifti') %></span>
+                                    <% const compSellerSeen = helpers.lastSeenState(item.seller_last_seen); %>
+                                    <div class="small mt-1 d-flex align-items-center justify-content-center gap-1" style="font-size: 0.72rem;">
+                                        <span class="d-inline-block rounded-circle <%= compSellerSeen.online ? 'bg-success shadow-sm' : 'bg-secondary opacity-50' %>" style="width: 6px; height: 6px;"></span>
+                                        <span class="<%= compSellerSeen.online ? 'text-success fw-semibold' : 'text-muted' %>"><%= compSellerSeen.online ? 'Çevrimiçi' : (compSellerSeen.known ? helpers.timeAgo(item.seller_last_seen, lang) + ' aktifti' : 'Çevrimdışı') %></span>
                                     </div>
                                 </td>
                             <% }); %>
