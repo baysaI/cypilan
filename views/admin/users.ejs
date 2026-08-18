@@ -44,9 +44,9 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                             <th class="d-none d-md-table-cell">Telefon</th>
                             <th>Rol</th>
                             <th class="d-none d-sm-table-cell">İlan</th>
-                            <th>E-posta Onayı</th>
+                            <th class="d-none d-md-table-cell">E-posta Onayı</th>
                             <th>Hesap Durumu</th>
-                            <th class="d-none d-lg-table-cell">Son Aktiflik</th>
+                            <th>Son Aktiflik</th>
                             <th>Uyarı</th>
                             <th class="pe-3 text-end">İşlem</th>
                         </tr>
@@ -66,8 +66,8 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                         </a>
                                     </div>
                                     <div class="text-muted small ms-3"><%= u.email %></div>
-                                    <!-- Mobile only last active line -->
-                                    <div class="d-lg-none mt-1 ms-3" style="font-size: 0.75rem;">
+                                    <!-- Mobile quick presence summary -->
+                                    <div class="d-md-none mt-1 ms-3" style="font-size: 0.75rem;">
                                         <i class="fa-regular fa-clock me-1 text-muted"></i>
                                         <% if (seen.online) { %>
                                             <span class="text-success fw-bold">Çevrimiçi</span>
@@ -83,7 +83,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                 <td class="d-none d-sm-table-cell">
                                     <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="text-decoration-none"><%= u.listing_count || 0 %></a>
                                 </td>
-                                <td>
+                                <td class="d-none d-md-table-cell">
                                     <% if (u.is_verified) { %>
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2" title="E-posta Doğrulanmış">
                                             <i class="fa-solid fa-circle-check me-1"></i>Onaylı
@@ -101,10 +101,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                         <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2" title="Hesap Askıda">Askıda</span>
                                     <% } %>
                                 </td>
-                                <%# The public listing page shows this coarsely; a moderator
-                                    deciding whether an account is dormant needs the clock,
-                                    so the exact stamp sits in the tooltip. %>
-                                <td class="d-none d-lg-table-cell small text-nowrap">
+                                <td class="small text-nowrap">
                                     <% if (!seen.known) { %>
                                         <span class="text-muted" title="Bu hesap hiç görülmedi (son aktiflik kaydı tutulmaya başlamadan önce oluşturulmuş olabilir)">&mdash;</span>
                                     <% } else { %>
