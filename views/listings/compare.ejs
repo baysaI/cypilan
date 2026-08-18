@@ -2,7 +2,7 @@
 .compare-table-container {
     position: relative;
     border-radius: 1rem;
-    background: #ffffff;
+    background: var(--cyp-surface, #ffffff);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -10,7 +10,8 @@
     position: sticky;
     left: 0;
     z-index: 5;
-    background: #f8fafc !important;
+    background-color: var(--cyp-surface-muted, #f8fafc) !important;
+    color: var(--bs-body-color, #334155);
     min-width: 160px;
     width: 200px;
     box-shadow: 2px 0 6px rgba(0,0,0,0.04);
@@ -18,6 +19,33 @@
 .compare-item-col {
     min-width: 230px;
     width: <%= listings ? Math.max(230, Math.floor(75 / listings.length)) : 230 %>px;
+}
+[data-bs-theme="dark"] .compare-table-container {
+    background-color: var(--cyp-surface, #262B31) !important;
+}
+[data-bs-theme="dark"] .compare-sticky-col {
+    background-color: var(--cyp-surface-muted, #1E2328) !important;
+    color: var(--bs-body-color, #E4E7EB) !important;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.4) !important;
+    border-right-color: var(--bs-border-color, #333A42) !important;
+}
+[data-bs-theme="dark"] .compare-table tr.bg-light,
+[data-bs-theme="dark"] .compare-table thead tr {
+    background-color: var(--cyp-surface-muted, #1E2328) !important;
+}
+[data-bs-theme="dark"] .compare-table th,
+[data-bs-theme="dark"] .compare-table td {
+    border-color: var(--bs-border-color, #333A42) !important;
+}
+[data-bs-theme="dark"] .compare-row.table-warning,
+[data-bs-theme="dark"] .compare-row.table-warning td {
+    background-color: rgba(251, 191, 36, 0.12) !important;
+}
+[data-bs-theme="dark"] .compare-img-box {
+    background-color: var(--bs-body-bg, #15181B) !important;
+}
+[data-bs-theme="dark"] .btn-close.remove-compare-item-btn {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }
 @media (max-width: 768px) {
     .compare-sticky-col {
@@ -110,7 +138,7 @@
                 <table class="table table-hover align-middle mb-0 compare-table" id="compareMatrixTable">
                     <thead>
                         <tr class="bg-light">
-                            <th class="p-3 border-end compare-sticky-col">
+                            <th class="p-3 border-end compare-sticky-col bg-light">
                                 <span class="fw-bold text-dark">İlan Özeti</span>
                             </th>
                             <% listings.forEach(function(item) { %>
@@ -370,7 +398,7 @@
 
                         <!-- Aksiyon -->
                         <tr class="bg-light">
-                            <td class="fw-bold text-muted p-3 border-end compare-sticky-col">İşlem</td>
+                            <td class="fw-bold text-muted bg-light p-3 border-end compare-sticky-col">İşlem</td>
                             <% listings.forEach(function(item) { %>
                                 <td class="p-3 text-center border-end">
                                     <a href="/listings/<%= item.slug %>" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-semibold" style="font-size: 0.78rem;">
