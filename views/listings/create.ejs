@@ -641,20 +641,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (purposeHelpText) purposeHelpText.textContent = 'Satılık, kiralık veya gayrimenkul arayışınız için ilan verebilirsiniz.';
                 } else if (root === 'vasita') {
-                    // Vasıta: Sadece Satılık
-                    purposeSaleCol.className = 'col-12';
+                    // Vasıta: Satılık / Kiralık (Rent a Car)
+                    purposeSaleCol.className = 'col-6';
                     purposeSaleCol.hidden = false;
                     typeSale.value = 'sale';
-                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık Araç" %>';
+                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık" %>';
                     if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-car mb-1 fs-5';
 
-                    purposeRentCol.hidden = true;
+                    purposeRentCol.className = 'col-6';
+                    purposeRentCol.hidden = false;
+                    typeRent.value = 'rent';
+                    if (typeRentText) typeRentText.textContent = '<%= t("listing.type_rent") || "Kiralık (Rent a Car)" %>';
+                    if (typeRentIcon) typeRentIcon.className = 'fa-solid fa-key mb-1 fs-5';
+
                     purposeWantedCol.hidden = true;
 
-                    if (!typeSale.checked && !typeRent.checked && !typeWanted.checked) typeSale.checked = true;
-                    if (typeRent.checked || typeWanted.checked) typeSale.checked = true;
+                    if (typeWanted.checked) typeSale.checked = true;
 
-                    if (purposeHelpText) purposeHelpText.textContent = 'Vasıta kategorisinde satılık araç ilanı verebilirsiniz.';
+                    if (purposeHelpText) purposeHelpText.textContent = 'Satılık araç veya araç kiralama (Rent a Car) ilanı verebilirsiniz.';
                 } else if (root === 'is-ilanlari') {
                     // İş İlanları: Eleman Arıyorum (İşveren) / İş Arıyorum (Aday)
                     purposeSaleCol.className = 'col-6';
@@ -694,24 +698,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (purposeHelpText) purposeHelpText.textContent = 'Hizmet sunuyorsanız "Hizmet Veriyorum", usta veya hizmet arıyorsanız "Hizmet Arıyorum" seçin.';
                 } else if (root === 'ikinci-el') {
-                    // İkinci El: Satılık / Arıyorum
-                    purposeSaleCol.className = 'col-6';
+                    // İkinci El: Satılık / Kiralık / Arıyorum
+                    purposeSaleCol.className = 'col-4';
                     purposeSaleCol.hidden = false;
                     typeSale.value = 'sale';
                     if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık" %>';
                     if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-tag mb-1 fs-5';
 
-                    purposeRentCol.hidden = true;
+                    purposeRentCol.className = 'col-4';
+                    purposeRentCol.hidden = false;
+                    typeRent.value = 'rent';
+                    if (typeRentText) typeRentText.textContent = '<%= t("listing.type_rent") || "Kiralık" %>';
+                    if (typeRentIcon) typeRentIcon.className = 'fa-solid fa-key mb-1 fs-5';
 
-                    purposeWantedCol.className = 'col-6';
+                    purposeWantedCol.className = 'col-4';
                     purposeWantedCol.hidden = false;
                     typeWanted.value = 'wanted';
                     if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_wanted") || "Arıyorum" %>';
                     if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
 
-                    if (typeRent.checked) typeSale.checked = true;
-
-                    if (purposeHelpText) purposeHelpText.textContent = 'Satmak istediğiniz ürün için "Satılık", aradığınız ürün için "Arıyorum" seçin.';
+                    if (purposeHelpText) purposeHelpText.textContent = 'Satılık, kiralık ürün veya aradığınız bir eşya/ürün için ilan verebilirsiniz.';
                 } else if (root === 'kurumsal-tedarikci') {
                     // Kurumsal Tedarikçi: Tedarikçi / Talep
                     purposeSaleCol.className = 'col-6';

@@ -128,6 +128,9 @@
             <a href="<%= buildTypeUrl('sale') %>" class="btn btn-sm cyp-type-pill rounded-pill px-3 py-2 <%= currentType === 'sale' ? 'active' : '' %>">
                 <i class="fa-solid fa-car me-1 <%= currentType === 'sale' ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_sale') || 'Satılık' %>
             </a>
+            <a href="<%= buildTypeUrl('rent') %>" class="btn btn-sm cyp-type-pill rounded-pill px-3 py-2 <%= currentType === 'rent' ? 'active' : '' %>">
+                <i class="fa-solid fa-key me-1 <%= currentType === 'rent' ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_rent') || 'Kiralık (Rent a Car)' %>
+            </a>
         <% } else if (rootCategory === 'is-ilanlari') { %>
             <a href="<%= buildTypeUrl('job') %>" class="btn btn-sm cyp-type-pill rounded-pill px-3 py-2 <%= (currentType === 'job' || currentType === 'sale') ? 'active' : '' %>">
                 <i class="fa-solid fa-briefcase me-1 <%= (currentType === 'job' || currentType === 'sale') ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_job_employer') || 'Eleman Arayanlar' %>
@@ -145,6 +148,9 @@
         <% } else if (rootCategory === 'ikinci-el') { %>
             <a href="<%= buildTypeUrl('sale') %>" class="btn btn-sm cyp-type-pill rounded-pill px-3 py-2 <%= currentType === 'sale' ? 'active' : '' %>">
                 <i class="fa-solid fa-tag me-1 <%= currentType === 'sale' ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_sale') || 'Satılık' %>
+            </a>
+            <a href="<%= buildTypeUrl('rent') %>" class="btn btn-sm cyp-type-pill rounded-pill px-3 py-2 <%= currentType === 'rent' ? 'active' : '' %>">
+                <i class="fa-solid fa-key me-1 <%= currentType === 'rent' ? 'text-white' : 'text-primary' %>"></i> <%= t('listing.type_rent') || 'Kiralık' %>
             </a>
             <a href="<%= buildTypeUrl('wanted') %>" class="btn btn-sm cyp-type-pill pill-wanted rounded-pill px-3 py-2 <%= currentType === 'wanted' ? 'active' : '' %>">
                 <i class="fa-solid fa-hand-holding-heart me-1 text-warning"></i> <%= t('listing.type_wanted') || '📢 Arıyorum (Talepler)' %>

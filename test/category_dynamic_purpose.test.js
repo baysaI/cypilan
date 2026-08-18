@@ -21,7 +21,7 @@ t.run('Kategoriye Göre Dinamik İlan Amacı / Filtreleme (Emlak, Vasıta, İş,
   t.assert(emlakHtml.includes('type=rent'), 'Emlak sayfasında Kiralık butonu var');
   t.assert(emlakHtml.includes('type=wanted'), 'Emlak sayfasında Arıyorum butonu var');
 
-  // 2. listings/index.ejs Vasıta Görünümü
+  // 2. listings/index.ejs Vasıta Görünümü (Satılık + Rent a car kiralık)
   const vasitaHtml = await t.render('listings/index.ejs', {
     listings: [],
     pagination: { currentPage: 1, totalPages: 1, totalItems: 0 },
@@ -36,7 +36,7 @@ t.run('Kategoriye Göre Dinamik İlan Amacı / Filtreleme (Emlak, Vasıta, İş,
   });
 
   t.assert(vasitaHtml.includes('type=sale'), 'Vasıta sayfasında Satılık butonu var');
-  t.assert(!vasitaHtml.includes('type=rent'), 'Vasıta sayfasında Kiralık butonu YOK');
+  t.assert(vasitaHtml.includes('type=rent'), 'Vasıta sayfasında Kiralık (Rent a car) butonu var');
   t.assert(!vasitaHtml.includes('type=wanted'), 'Vasıta sayfasında Arıyorum butonu YOK');
 
   // 3. listings/index.ejs İş İlanları Görünümü
@@ -77,7 +77,7 @@ t.run('Kategoriye Göre Dinamik İlan Amacı / Filtreleme (Emlak, Vasıta, İş,
   t.assert(ustaHtml.includes('type=service'), 'Usta & Hizmetler sayfasında Hizmet Verenler butonu var');
   t.assert(ustaHtml.includes('type=wanted'), 'Usta & Hizmetler sayfasında Hizmet Arayanlar butonu var');
 
-  // 5. listings/index.ejs İkinci El Görünümü
+  // 5. listings/index.ejs İkinci El Görünümü (Satılık, Kiralık, Arıyorum)
   const ikinciElHtml = await t.render('listings/index.ejs', {
     listings: [],
     pagination: { currentPage: 1, totalPages: 1, totalItems: 0 },
@@ -92,18 +92,18 @@ t.run('Kategoriye Göre Dinamik İlan Amacı / Filtreleme (Emlak, Vasıta, İş,
   });
 
   t.assert(ikinciElHtml.includes('type=sale'), 'İkinci El sayfasında Satılık butonu var');
-  t.assert(!ikinciElHtml.includes('type=rent'), 'İkinci El sayfasında Kiralık butonu YOK');
+  t.assert(ikinciElHtml.includes('type=rent'), 'İkinci El sayfasında Kiralık butonu var');
   t.assert(ikinciElHtml.includes('type=wanted'), 'İkinci El sayfasında Arıyorum butonu var');
 
-  // 6. listings/edit.ejs Vasıta için sadece Satılık render ediyor
+  // 6. listings/edit.ejs Vasıta için Satılık ve Kiralık render ediyor
   const editVasitaHtml = await t.render('listings/edit.ejs', {
     listing: {
       id: 99,
-      title: 'Satılık Araba',
-      description: 'Temiz araba',
-      price: 100000,
+      title: 'Kiralık Araç',
+      description: 'Rent a car aracı',
+      price: 1500,
       currency: 'TRY',
-      listing_type: 'sale',
+      listing_type: 'rent',
       category_id: 201,
       location_city: 'Girne',
       status: 'active'
@@ -122,6 +122,6 @@ t.run('Kategoriye Göre Dinamik İlan Amacı / Filtreleme (Emlak, Vasıta, İş,
   });
 
   t.assert(editVasitaHtml.includes('value="sale"'), 'Vasıta düzenleme sayfasında Satılık seçeneği var');
-  t.assert(!editVasitaHtml.includes('value="rent"'), 'Vasıta düzenleme sayfasında Kiralık seçeneği yok');
+  t.assert(editVasitaHtml.includes('value="rent"'), 'Vasıta düzenleme sayfasında Kiralık seçeneği var');
   t.assert(!editVasitaHtml.includes('value="wanted"'), 'Vasıta düzenleme sayfasında Arıyorum seçeneği yok');
 });
