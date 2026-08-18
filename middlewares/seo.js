@@ -10,7 +10,7 @@ const seoMiddleware = (req, res, next) => {
         title: `${siteName} - Kıbrıs İlan Platformu`,
         description: 'Kuzey Kıbrıs\'ın en kapsamlı ücretsiz ilan, emlak, oto, alışveriş platformu.',
         keywords: 'kıbrıs ilan, kktc emlak, kıbrıs araba, ikinci el kıbrıs, lefkoşa, girne, mağusa',
-        ogImage: '/img/logo.png',
+        ogImage: '/img/logo.svg',
         canonical: `${baseUrl}${req.originalUrl.split('?')[0]}`,
         robots: 'index, follow',
         siteName: siteName,

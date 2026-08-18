@@ -44,7 +44,7 @@
                             <% const isBest = bid.status === 'pending' && bestAmount !== null && bid.amount === bestAmount; %>
                             <div class="border rounded-4 p-3 <%= isBest ? 'border-success border-2' : '' %>">
                                 <div class="d-flex flex-wrap align-items-start gap-3">
-                                    <img src="<%= bid.bidder_avatar || '/img/logo.png' %>"
+                                    <img src="<%= bid.bidder_avatar || '/img/logo.svg' %>"
                                          class="rounded-circle border bg-light object-fit-cover flex-shrink-0"
                                          width="48" height="48" alt="<%= bid.bidder_name %>">
 

@@ -37,7 +37,7 @@
                         <% group.applications.forEach(function (application) { %>
                             <div class="border rounded-4 p-3 <%= application.status === 'shortlisted' ? 'border-success border-2' : '' %>">
                                 <div class="d-flex flex-wrap align-items-start gap-3">
-                                    <img src="<%= application.applicant_avatar || '/img/logo.png' %>"
+                                    <img src="<%= application.applicant_avatar || '/img/logo.svg' %>"
                                          class="rounded-circle border bg-light object-fit-cover flex-shrink-0"
                                          width="48" height="48" alt="<%= application.applicant_name %>">
 

@@ -18,7 +18,7 @@
                     <div class="card-body p-4">
                         <div class="d-flex flex-column flex-sm-row align-items-center gap-4">
                             <div class="position-relative flex-shrink-0">
-                                <img src="<%= user.avatar_url || '/img/logo.png' %>"
+                                <img src="<%= user.avatar_url || '/img/logo.svg' %>"
                                      id="avatarPreview"
                                      class="rounded-circle border bg-light object-fit-cover shadow-sm"
                                      width="100" height="100"
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const removeAvatarInput = document.getElementById('removeAvatarInput');
     const avatarBtnText = document.getElementById('avatarBtnText');
     const avatarUploadLabel = document.getElementById('avatarUploadLabel');
-    const defaultAvatar = '/img/logo.png';
+    const defaultAvatar = '/img/logo.svg';
 
     if (avatarUploadLabel && avatarInput) {
         avatarUploadLabel.addEventListener('click', function() {

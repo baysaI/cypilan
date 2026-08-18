@@ -86,7 +86,7 @@
                             data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
                             data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>"
                             data-category="<%= listing.category_name || '' %>"
-                            data-image="<%= imgs[0] || '/img/logo.png' %>"
+                            data-image="<%= imgs[0] || '/img/logo.svg' %>"
                             data-slug="<%= listing.slug %>">
                         <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                     </button>
@@ -98,7 +98,7 @@
                             data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
                             data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>"
                             data-category="<%= listing.category_name || '' %>"
-                            data-image="<%= imgs[0] || '/img/logo.png' %>"
+                            data-image="<%= imgs[0] || '/img/logo.svg' %>"
                             data-slug="<%= listing.slug %>"
                             title="Instagram & WhatsApp Story Görseli Oluştur">
                         <i class="fa-brands fa-instagram"></i> Story
@@ -471,7 +471,7 @@
                         data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
                         data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>"
                         data-category="<%= listing.category_name || '' %>"
-                        data-image="<%= imgs[0] || '/img/logo.png' %>"
+                        data-image="<%= imgs[0] || '/img/logo.svg' %>"
                         data-slug="<%= listing.slug %>">
                     <i class="fa-solid fa-share-nodes"></i> <%= t('common.share') %>
                 </button>
@@ -483,7 +483,7 @@
                         data-price="<%= listing.price ? helpers.formatPrice(listing.price, listing.currency) : '' %>"
                         data-city="<%= helpers.getCityName(listing.location_city, lang) || '' %>"
                         data-category="<%= listing.category_name || '' %>"
-                        data-image="<%= imgs[0] || '/img/logo.png' %>"
+                        data-image="<%= imgs[0] || '/img/logo.svg' %>"
                         data-slug="<%= listing.slug %>"
                         title="Instagram & WhatsApp Story Görseli Oluştur">
                     <i class="fa-brands fa-instagram"></i> Story
@@ -512,7 +512,7 @@
             <div class="card border-0 shadow-sm rounded-4 sticky-below-header">
                 <div class="card-body p-4 text-center">
                     <div class="position-relative d-inline-block mb-3">
-                        <img src="<%= listing.seller_avatar || '/img/logo.png' %>" class="rounded-circle border border-3 border-white shadow-sm object-fit-cover bg-light" width="90" height="90" alt="<%= listing.seller_name %>">
+                        <img src="<%= listing.seller_avatar || '/img/logo.svg' %>" class="rounded-circle border border-3 border-white shadow-sm object-fit-cover bg-light" width="90" height="90" alt="<%= listing.seller_name %>">
                     </div>
 
                     <h5 class="fw-bold mb-1"><%= listing.seller_company || listing.seller_name || t('user.member') %></h5>
@@ -979,7 +979,7 @@
       <div class="modal-body p-4">
         <!-- Listing Mini Preview Card -->
         <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-4 mb-4 border">
-          <img src="<%= imgs[0] || '/img/logo.png' %>" class="rounded-3 object-fit-cover flex-shrink-0" width="60" height="60" alt="<%= listing.title %>" id="sharePreviewImg">
+          <img src="<%= imgs[0] || '/img/logo.svg' %>" class="rounded-3 object-fit-cover flex-shrink-0" width="60" height="60" alt="<%= listing.title %>" id="sharePreviewImg">
           <div class="flex-grow-1 overflow-hidden">
             <h6 class="fw-bold mb-1 text-truncate text-dark" id="sharePreviewTitle"><%= listing.title %></h6>
             <div class="d-flex align-items-center gap-2 small">
@@ -1090,7 +1090,7 @@
             price: <%- JSON.stringify(listing.price ? helpers.formatPrice(listing.price, listing.currency) : '') %>,
             city: <%- JSON.stringify(helpers.getCityName(listing.location_city, lang) || '') %>,
             category: <%- JSON.stringify(listing.category_name || '') %>,
-            image: <%- JSON.stringify(imgs && imgs[0] ? imgs[0] : '/img/logo.png') %>,
+            image: <%- JSON.stringify(imgs && imgs[0] ? imgs[0] : '/img/logo.svg') %>,
             url: window.location.href
         };
 

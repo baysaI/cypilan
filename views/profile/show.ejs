@@ -1,7 +1,7 @@
 <div class="bg-white border-bottom py-4">
     <div class="container">
         <div class="d-flex flex-column flex-sm-row align-items-center gap-3 gap-sm-4">
-            <img src="<%= profileUser.avatar_url || '/img/logo.png' %>" class="rounded-circle border bg-light object-fit-cover flex-shrink-0" width="96" height="96" alt="<%= profileUser.full_name %>">
+            <img src="<%= profileUser.avatar_url || '/img/logo.svg' %>" class="rounded-circle border bg-light object-fit-cover flex-shrink-0" width="96" height="96" alt="<%= profileUser.full_name %>">
 
             <div class="text-center text-sm-start flex-grow-1">
                 <h1 class="fs-4 fw-bold mb-1"><%= profileUser.company_name || helpers.formatDisplayName(profileUser.full_name, profileUser.show_surname) %></h1>
@@ -176,7 +176,7 @@
                     <% reviews.forEach(function (review) { %>
                         <div class="bg-white border rounded-3 p-3">
                             <div class="d-flex align-items-start gap-3">
-                                <img src="<%= review.reviewer_avatar || '/img/logo.png' %>"
+                                <img src="<%= review.reviewer_avatar || '/img/logo.svg' %>"
                                      class="rounded-circle border bg-light object-fit-cover flex-shrink-0"
                                      width="44" height="44" alt="<%= review.reviewer_name %>">
 
