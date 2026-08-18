@@ -723,6 +723,12 @@
     "type_rent": "Kiralık",
     "type_sale": "Satılık",
     "type_wanted": "Arıyorum",
+    "type_job_employer": "Eleman Arayanlar",
+    "type_job_seeker": "İş Arayanlar",
+    "type_service_provider": "Hizmet Verenler",
+    "type_service_seeker": "Hizmet Arayanlar",
+    "type_supplier": "Tedarikçiler",
+    "type_supply_request": "Alım Talepleri",
     "unlimited_mode_desc": "Şu an tüm kategorilerde dilediğiniz kadar ücretsiz ilan verebilirsiniz.",
     "unlimited_mode_title": "Sınırsız İlan Modu Aktif",
     "views": "Görüntülenme"

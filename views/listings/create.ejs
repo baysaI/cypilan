@@ -137,35 +137,35 @@
                     </div>
                     <div class="card-body p-4">
                         
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted d-block mb-2">
+                        <div class="mb-4" id="purposeBox">
+                            <label class="form-label fw-bold small text-muted d-block mb-2" id="purposeMainLabel">
                                 <i class="fa-solid fa-layer-group text-primary me-1"></i><%= t('listing.listing_purpose') || 'İlan Amacı / Türü' %> <span class="text-danger">*</span>
                             </label>
-                            <div class="row g-2">
-                                <div class="col-4">
-                                    <input type="radio" class="btn-check" name="listing_type" id="typeSale" value="sale" <%= (!formData.listing_type || formData.listing_type === 'sale') ? 'checked' : '' %>>
-                                    <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeSale">
-                                        <i class="fa-solid fa-tag mb-1 fs-5"></i>
-                                        <span><%= t('listing.type_sale') || 'Satılık' %></span>
+                            <div class="row g-2" id="purposeOptionsRow">
+                                <div class="col-4" id="purposeSaleCol">
+                                    <input type="radio" class="btn-check" name="listing_type" id="typeSale" value="sale" <%= (!formData.listing_type || formData.listing_type === 'sale' || formData.listing_type === 'job' || formData.listing_type === 'service') ? 'checked' : '' %>>
+                                    <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeSale" id="typeSaleLabel">
+                                        <i class="fa-solid fa-tag mb-1 fs-5" id="typeSaleIcon"></i>
+                                        <span id="typeSaleText"><%= t('listing.type_sale') || 'Satılık' %></span>
                                     </label>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-4" id="purposeRentCol">
                                     <input type="radio" class="btn-check" name="listing_type" id="typeRent" value="rent" <%= (formData.listing_type === 'rent') ? 'checked' : '' %>>
-                                    <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeRent">
-                                        <i class="fa-solid fa-key mb-1 fs-5"></i>
-                                        <span><%= t('listing.type_rent') || 'Kiralık' %></span>
+                                    <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeRent" id="typeRentLabel">
+                                        <i class="fa-solid fa-key mb-1 fs-5" id="typeRentIcon"></i>
+                                        <span id="typeRentText"><%= t('listing.type_rent') || 'Kiralık' %></span>
                                     </label>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-4" id="purposeWantedCol">
                                     <input type="radio" class="btn-check" name="listing_type" id="typeWanted" value="wanted" <%= (formData.listing_type === 'wanted') ? 'checked' : '' %>>
-                                    <label class="btn btn-outline-warning w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center wanted-purpose-btn" for="typeWanted">
-                                        <i class="fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon"></i>
-                                        <span><%= t('listing.type_wanted') || 'Arıyorum' %></span>
+                                    <label class="btn btn-outline-warning w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center wanted-purpose-btn" for="typeWanted" id="typeWantedLabel">
+                                        <i class="fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon" id="typeWantedIcon"></i>
+                                        <span id="typeWantedText"><%= t('listing.type_wanted') || 'Arıyorum' %></span>
                                     </label>
                                 </div>
                             </div>
-                            <div class="form-text small text-muted mt-2">
-                                Bir ürün, ev veya araç arıyorsanız <strong>"Arıyorum"</strong> seçeneğini işaretleyerek ihtiyacınızı duyurabilirsiniz.
+                            <div class="form-text small text-muted mt-2" id="purposeHelpText">
+                                İlanınızın amacını belirleyin.
                             </div>
                         </div>
 
@@ -607,6 +607,150 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (cb) cb.checked = false;
                 }
             });
+
+            // Dynamically configure Listing Purpose (Satılık / Kiralık / Arıyorum etc.)
+            const purposeSaleCol = document.getElementById('purposeSaleCol');
+            const purposeRentCol = document.getElementById('purposeRentCol');
+            const purposeWantedCol = document.getElementById('purposeWantedCol');
+            const typeSale = document.getElementById('typeSale');
+            const typeRent = document.getElementById('typeRent');
+            const typeWanted = document.getElementById('typeWanted');
+            const typeSaleText = document.getElementById('typeSaleText');
+            const typeSaleIcon = document.getElementById('typeSaleIcon');
+            const typeWantedText = document.getElementById('typeWantedText');
+            const typeWantedIcon = document.getElementById('typeWantedIcon');
+            const purposeHelpText = document.getElementById('purposeHelpText');
+
+            if (purposeSaleCol && purposeRentCol && purposeWantedCol && typeSale && typeRent && typeWanted) {
+                if (root === 'emlak') {
+                    // Emlak: Satılık / Kiralık / Arıyorum
+                    purposeSaleCol.className = 'col-4';
+                    purposeSaleCol.hidden = false;
+                    typeSale.value = 'sale';
+                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık" %>';
+                    if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-tag mb-1 fs-5';
+
+                    purposeRentCol.className = 'col-4';
+                    purposeRentCol.hidden = false;
+
+                    purposeWantedCol.className = 'col-4';
+                    purposeWantedCol.hidden = false;
+                    typeWanted.value = 'wanted';
+                    if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_wanted") || "Arıyorum" %>';
+                    if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
+
+                    if (purposeHelpText) purposeHelpText.textContent = 'Satılık, kiralık veya gayrimenkul arayışınız için ilan verebilirsiniz.';
+                } else if (root === 'vasita') {
+                    // Vasıta: Sadece Satılık
+                    purposeSaleCol.className = 'col-12';
+                    purposeSaleCol.hidden = false;
+                    typeSale.value = 'sale';
+                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık Araç" %>';
+                    if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-car mb-1 fs-5';
+
+                    purposeRentCol.hidden = true;
+                    purposeWantedCol.hidden = true;
+
+                    if (!typeSale.checked && !typeRent.checked && !typeWanted.checked) typeSale.checked = true;
+                    if (typeRent.checked || typeWanted.checked) typeSale.checked = true;
+
+                    if (purposeHelpText) purposeHelpText.textContent = 'Vasıta kategorisinde satılık araç ilanı verebilirsiniz.';
+                } else if (root === 'is-ilanlari') {
+                    // İş İlanları: Eleman Arıyorum (İşveren) / İş Arıyorum (Aday)
+                    purposeSaleCol.className = 'col-6';
+                    purposeSaleCol.hidden = false;
+                    typeSale.value = 'sale';
+                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_job_employer") || "Eleman Arıyorum (İşveren)" %>';
+                    if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-briefcase mb-1 fs-5';
+
+                    purposeRentCol.hidden = true;
+
+                    purposeWantedCol.className = 'col-6';
+                    purposeWantedCol.hidden = false;
+                    typeWanted.value = 'wanted';
+                    if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_job_seeker") || "İş Arıyorum (Aday)" %>';
+                    if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-user-tie mb-1 fs-5 wanted-icon';
+
+                    if (typeRent.checked) typeSale.checked = true;
+
+                    if (purposeHelpText) purposeHelpText.textContent = 'Eleman arıyorsanız "Eleman Arıyorum", iş arıyorsanız "İş Arıyorum" seçeneğini belirleyin.';
+                } else if (root === 'usta-hizmetler' || root === 'ustalar') {
+                    // Usta & Hizmetler: Hizmet Veriyorum / Hizmet Arıyorum
+                    purposeSaleCol.className = 'col-6';
+                    purposeSaleCol.hidden = false;
+                    typeSale.value = 'sale';
+                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_service_provider") || "Hizmet Veriyorum" %>';
+                    if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-screwdriver-wrench mb-1 fs-5';
+
+                    purposeRentCol.hidden = true;
+
+                    purposeWantedCol.className = 'col-6';
+                    purposeWantedCol.hidden = false;
+                    typeWanted.value = 'wanted';
+                    if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_service_seeker") || "Hizmet Arıyorum" %>';
+                    if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
+
+                    if (typeRent.checked) typeSale.checked = true;
+
+                    if (purposeHelpText) purposeHelpText.textContent = 'Hizmet sunuyorsanız "Hizmet Veriyorum", usta veya hizmet arıyorsanız "Hizmet Arıyorum" seçin.';
+                } else if (root === 'ikinci-el') {
+                    // İkinci El: Satılık / Arıyorum
+                    purposeSaleCol.className = 'col-6';
+                    purposeSaleCol.hidden = false;
+                    typeSale.value = 'sale';
+                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık" %>';
+                    if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-tag mb-1 fs-5';
+
+                    purposeRentCol.hidden = true;
+
+                    purposeWantedCol.className = 'col-6';
+                    purposeWantedCol.hidden = false;
+                    typeWanted.value = 'wanted';
+                    if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_wanted") || "Arıyorum" %>';
+                    if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
+
+                    if (typeRent.checked) typeSale.checked = true;
+
+                    if (purposeHelpText) purposeHelpText.textContent = 'Satmak istediğiniz ürün için "Satılık", aradığınız ürün için "Arıyorum" seçin.';
+                } else if (root === 'kurumsal-tedarikci') {
+                    // Kurumsal Tedarikçi: Tedarikçi / Talep
+                    purposeSaleCol.className = 'col-6';
+                    purposeSaleCol.hidden = false;
+                    typeSale.value = 'sale';
+                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_supplier") || "Tedarikçiyim" %>';
+                    if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-truck-field mb-1 fs-5';
+
+                    purposeRentCol.hidden = true;
+
+                    purposeWantedCol.className = 'col-6';
+                    purposeWantedCol.hidden = false;
+                    typeWanted.value = 'wanted';
+                    if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_supply_request") || "Alım Talebi" %>';
+                    if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
+
+                    if (typeRent.checked) typeSale.checked = true;
+
+                    if (purposeHelpText) purposeHelpText.textContent = 'Tedarikçi olarak teklif vermek için "Tedarikçiyim", toplu alım/ihtiyaç için "Alım Talebi" seçin.';
+                } else {
+                    // Genel
+                    purposeSaleCol.className = 'col-4';
+                    purposeSaleCol.hidden = false;
+                    typeSale.value = 'sale';
+                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık" %>';
+                    if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-tag mb-1 fs-5';
+
+                    purposeRentCol.className = 'col-4';
+                    purposeRentCol.hidden = false;
+
+                    purposeWantedCol.className = 'col-4';
+                    purposeWantedCol.hidden = false;
+                    typeWanted.value = 'wanted';
+                    if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_wanted") || "Arıyorum" %>';
+                    if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
+
+                    if (purposeHelpText) purposeHelpText.textContent = 'İlanınızın amacını belirleyin.';
+                }
+            }
         };
 
         categorySelect.addEventListener('change', syncCategoryOptions);

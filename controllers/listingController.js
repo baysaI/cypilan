@@ -47,7 +47,7 @@ const index = async (req, res, next) => {
         const smartMode = req.query.smart === '1' && Boolean(rawQuery);
         const parsed = smartMode ? smartSearch.parse(rawQuery) : null;
 
-        const allowedTypes = ['sale', 'rent', 'wanted'];
+        const allowedTypes = ['sale', 'rent', 'wanted', 'job', 'service'];
         const rawType = req.query.type || req.query.listing_type;
         const listingType = allowedTypes.includes(rawType) ? rawType : undefined;
 
@@ -69,10 +69,12 @@ const index = async (req, res, next) => {
         };
 
         let currentCategoryName = null;
+        let currentRootSlug = null;
         if (filters.category) {
             const cat = await Category.getBySlug(filters.category);
             if (cat) {
                 currentCategoryName = cat[`name_${res.locals.lang}`] || cat.name_tr;
+                currentRootSlug = await Category.getRootSlug(cat.id);
             }
         }
 
@@ -114,6 +116,7 @@ const index = async (req, res, next) => {
             categories,
             filters,
             currentCategoryName,
+            currentRootSlug,
             userFavoriteIds,
             smartQuery: smartMode ? rawQuery : null,
             smartParsed: parsed,
@@ -356,7 +359,7 @@ const create = async (req, res, next) => {
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : 'TRY',
-            listing_type: collectsBids ? 'bid_request' : (['sale', 'rent', 'wanted'].includes(req.body.listing_type) ? req.body.listing_type : 'sale'),
+            listing_type: collectsBids ? 'bid_request' : (['sale', 'rent', 'wanted', 'job', 'service'].includes(req.body.listing_type) ? req.body.listing_type : 'sale'),
             city,
             district,
             status,
@@ -456,6 +459,8 @@ const showEdit = async (req, res, next) => {
             draftFeatureMap,
             draftFeatureLabels,
             images,
+            rootSlug,
+            currentRootSlug: rootSlug,
             requiresPrice: listingPolicy.requiresPrice(rootSlug),
             requiresPhotos: listingPolicy.requiresPhotos(rootSlug),
             ownerStatuses: OWNER_EDITABLE_STATUSES,
@@ -507,6 +512,7 @@ const update = async (req, res, next) => {
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : listing.currency,
+            listing_type: (req.body.listing_type && ['sale', 'rent', 'wanted', 'job', 'service'].includes(req.body.listing_type)) ? req.body.listing_type : listing.listing_type,
             location_city: cities.isKnown(city) ? city : listing.location_city,
             location_district: district ? district.trim() : null,
             status: nextStatus,

@@ -723,6 +723,12 @@
     "type_rent": "Аренда",
     "type_sale": "Продажа",
     "type_wanted": "Ищу",
+    "type_job_employer": "Работодатели",
+    "type_job_seeker": "Ищут работу",
+    "type_service_provider": "Мастера и услуги",
+    "type_service_seeker": "Заявки на услуги",
+    "type_supplier": "Поставщики",
+    "type_supply_request": "Заявки на закупку",
     "unlimited_mode_desc": "Вы можете публиковать неограниченное количество бесплатных объявлений во всех категориях.",
     "unlimited_mode_title": "Режим неограниченных объявлений активен",
     "views": "Просмотры"

@@ -723,6 +723,12 @@
     "type_rent": "اجاره",
     "type_sale": "فروش",
     "type_wanted": "درخواست",
+    "type_job_employer": "کارفرمایان",
+    "type_job_seeker": "جویندگان کار",
+    "type_service_provider": "ارائه‌دهندگان خدمات",
+    "type_service_seeker": "درخواست خدمات",
+    "type_supplier": "تامین‌کنندگان",
+    "type_supply_request": "درخواست‌های خرید",
     "unlimited_mode_desc": "شما می‌توانید در تمام دسته‌ها آگهی‌های رایگان نامحدود ثبت کنید.",
     "unlimited_mode_title": "حالت آگهی‌های نامحدود فعال است",
     "views": "بازدیدها"

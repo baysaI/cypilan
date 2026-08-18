@@ -723,6 +723,12 @@
     "type_rent": "Ενοικίαση",
     "type_sale": "Πώληση",
     "type_wanted": "Ζήτηση",
+    "type_job_employer": "Εργοδότες",
+    "type_job_seeker": "Αναζήτηση Εργασίας",
+    "type_service_provider": "Πάροχοι Υπηρεσιών",
+    "type_service_seeker": "Αναζήτηση Υπηρεσιών",
+    "type_supplier": "Προμηθευτές",
+    "type_supply_request": "Αιτήματα Προμήθειας",
     "unlimited_mode_desc": "Μπορείτε να δημοσιεύσετε απεριόριστες δωρεάν αγγελίες σε όλες τις κατηγορίες.",
     "unlimited_mode_title": "Ενεργή λειτουργία απεριόριστων αγγελιών",
     "views": "Προβολές"

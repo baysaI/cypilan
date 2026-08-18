@@ -302,8 +302,14 @@ class Listing {
     }
     if (filters.listing_type || filters.type) {
       const targetType = filters.listing_type || filters.type;
-      where += ' AND l.listing_type = ?';
-      params.push(targetType);
+      if (targetType === 'job') {
+        where += " AND (l.listing_type = 'job' OR (l.listing_type = 'sale' AND (c.slug = 'is-ilanlari' OR c.parent_id = 3)))";
+      } else if (targetType === 'service') {
+        where += " AND (l.listing_type = 'service' OR (l.listing_type = 'sale' AND (c.slug = 'usta-hizmetler' OR c.parent_id = 4)))";
+      } else {
+        where += ' AND l.listing_type = ?';
+        params.push(targetType);
+      }
     }
 
     // The column name is looked up from the badge definitions rather than taken

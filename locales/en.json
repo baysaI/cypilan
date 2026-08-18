@@ -723,6 +723,12 @@
     "type_rent": "For Rent",
     "type_sale": "For Sale",
     "type_wanted": "Wanted",
+    "type_job_employer": "Hiring / Employers",
+    "type_job_seeker": "Job Seekers",
+    "type_service_provider": "Service Providers",
+    "type_service_seeker": "Service Requests",
+    "type_supplier": "Suppliers",
+    "type_supply_request": "Supply Requests",
     "unlimited_mode_desc": "You can post unlimited free listings across all categories.",
     "unlimited_mode_title": "Unlimited Listings Mode Active",
     "views": "Views"
