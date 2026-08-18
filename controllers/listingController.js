@@ -353,7 +353,7 @@ const create = async (req, res, next) => {
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : 'TRY',
-            listing_type: collectsBids ? 'bid_request' : 'sale',
+            listing_type: collectsBids ? 'bid_request' : (['sale', 'rent', 'wanted'].includes(req.body.listing_type) ? req.body.listing_type : 'sale'),
             city,
             district,
             status,

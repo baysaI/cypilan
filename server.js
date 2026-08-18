@@ -181,6 +181,26 @@ app.use(maintenanceMiddleware);
 app.use('/', routes);
 
 app.use((req, res, next) => {
+  const fallbackT = (k) => {
+    const map = {
+      'errors.not_found_title': 'Sayfa Bulunamadı',
+      'errors.not_found_message': 'Aradığınız sayfa bulunamadı.',
+      'nav.home': 'Ana Sayfa',
+      'nav.all_listings': 'Tüm İlanlar'
+    };
+    return map[k] || k;
+  };
+
+  const translate = (typeof res.locals.t === 'function') ? res.locals.t : fallbackT;
+  res.locals.t = translate;
+  res.locals.lang = res.locals.lang || 'tr';
+  res.locals.dir = res.locals.dir || 'ltr';
+  res.locals.theme = res.locals.theme || 'light';
+  res.locals.currentUser = res.locals.currentUser || null;
+  res.locals.user = res.locals.user || null;
+  res.locals.helpers = res.locals.helpers || helpers;
+  res.locals.cities = res.locals.cities || cities;
+  res.locals.listingBadges = res.locals.listingBadges || listingBadges;
   res.locals.meta = {
     ...(res.locals.meta || {}),
     title: 'Sayfa Bulunamadı',
@@ -188,13 +208,28 @@ app.use((req, res, next) => {
     robots: 'noindex, nofollow'
   };
 
-  res.status(404).render('errors/404', { title: 'Sayfa Bulunamadı' }, (err, html) => {
+  res.status(404).render('errors/404', {
+    title: 'Sayfa Bulunamadı',
+    t: translate,
+    lang: res.locals.lang,
+    dir: res.locals.dir,
+    theme: res.locals.theme,
+    currentUser: res.locals.currentUser,
+    user: res.locals.user
+  }, (err, html) => {
     if (err) return next(err);
     res.send(html);
   });
 });
 
 app.use((err, req, res, next) => {
+  if (err.code === 'ECONNABORTED' || err.type === 'request.aborted') {
+    if (!res.headersSent) {
+      return res.status(400).send('Request aborted');
+    }
+    return;
+  }
+
   console.error('Server Error:', err);
 
   if (res.headersSent) {
@@ -202,8 +237,26 @@ app.use((err, req, res, next) => {
   }
 
   const statusCode = err.status || 500;
-  res.locals.t = res.locals.t || ((k) => (k === 'errors.server_error_title' ? 'Sunucu Hatası' : k === 'errors.server_error_message' ? 'Beklenmeyen bir hata oluştu.' : k));
+  const fallbackT = (k) => {
+    const map = {
+      'errors.server_error_title': 'Sunucu Hatası',
+      'errors.server_error_message': 'Beklenmeyen bir hata oluştu.',
+      'nav.home': 'Ana Sayfa',
+      'common.try_again': 'Tekrar Dene'
+    };
+    return map[k] || k;
+  };
+
+  const translate = (typeof res.locals.t === 'function') ? res.locals.t : fallbackT;
+  res.locals.t = translate;
   res.locals.lang = res.locals.lang || 'tr';
+  res.locals.dir = res.locals.dir || 'ltr';
+  res.locals.theme = res.locals.theme || 'light';
+  res.locals.currentUser = res.locals.currentUser || null;
+  res.locals.user = res.locals.user || null;
+  res.locals.helpers = res.locals.helpers || helpers;
+  res.locals.cities = res.locals.cities || cities;
+  res.locals.listingBadges = res.locals.listingBadges || listingBadges;
   res.locals.meta = {
     ...(res.locals.meta || {}),
     title: 'Hata',
@@ -211,7 +264,15 @@ app.use((err, req, res, next) => {
     robots: 'noindex, nofollow'
   };
 
-  res.status(statusCode).render('errors/500', { title: 'Hata' }, (renderErr, html) => {
+  res.status(statusCode).render('errors/500', {
+    title: 'Hata',
+    t: translate,
+    lang: res.locals.lang,
+    dir: res.locals.dir,
+    theme: res.locals.theme,
+    currentUser: res.locals.currentUser,
+    user: res.locals.user
+  }, (renderErr, html) => {
     if (renderErr) {
       console.error('Error page render failed:', renderErr);
       return res.type('text/plain').send('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');

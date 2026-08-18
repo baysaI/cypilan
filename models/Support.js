@@ -24,6 +24,45 @@ function pickRandomPersona() {
 }
 
 class Support {
+  static ensureTable(db) {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS support_conversations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_token TEXT NOT NULL UNIQUE,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        user_name TEXT,
+        user_email TEXT,
+        agent_name TEXT,
+        status TEXT DEFAULT 'waiting',
+        assigned_admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        rating INTEGER,
+        rating_comment TEXT,
+        unread_user_count INTEGER DEFAULT 0,
+        unread_admin_count INTEGER DEFAULT 0,
+        last_message TEXT,
+        last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_support_conversations_token ON support_conversations(session_token);
+      CREATE INDEX IF NOT EXISTS idx_support_conversations_status ON support_conversations(status, updated_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_support_conversations_user ON support_conversations(user_id);
+
+      CREATE TABLE IF NOT EXISTS support_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        conversation_id INTEGER NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+        sender_type TEXT NOT NULL,
+        sender_id INTEGER,
+        sender_name TEXT NOT NULL,
+        message TEXT NOT NULL,
+        is_read INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_support_messages_conv ON support_messages(conversation_id, created_at ASC);
+      CREATE INDEX IF NOT EXISTS idx_support_messages_read ON support_messages(conversation_id, is_read);
+    `);
+  }
+
   static getPersonas() {
     return REPRESENTATIVE_PERSONAS;
   }
@@ -34,11 +73,17 @@ class Support {
     }
 
     const db = getDb();
+    this.ensureTable(db);
     let conv = db.prepare('SELECT * FROM support_conversations WHERE session_token = ?').get([sessionToken]);
 
     const userName = (userDetails.name || '').slice(0, 100) || (userDetails.userId ? 'Kullanıcı' : 'Ziyaretçi');
     const userEmail = (userDetails.email || '').slice(0, 150) || null;
-    const userId = userDetails.userId || null;
+    let userId = userDetails.userId || null;
+
+    if (userId) {
+      const userRow = db.prepare('SELECT id FROM users WHERE id = ?').get([userId]);
+      if (!userRow) userId = null;
+    }
 
     if (!conv) {
       const persona = pickRandomPersona();
@@ -102,6 +147,7 @@ class Support {
 
   static async getConversationById(id) {
     const db = getDb();
+    this.ensureTable(db);
     return db.prepare(`
       SELECT c.*,
              u.full_name as registered_user_name, u.email as registered_user_email, u.avatar_url as registered_user_avatar,
@@ -115,6 +161,7 @@ class Support {
 
   static async getConversationByToken(sessionToken) {
     const db = getDb();
+    this.ensureTable(db);
     return db.prepare('SELECT * FROM support_conversations WHERE session_token = ?').get([sessionToken]) || null;
   }
 
@@ -125,6 +172,7 @@ class Support {
     }
 
     const db = getDb();
+    this.ensureTable(db);
     const conv = db.prepare('SELECT * FROM support_conversations WHERE id = ?').get([conversationId]);
     if (!conv) {
       throw new Error('Görüşme bulunamadı.');
@@ -138,10 +186,16 @@ class Support {
       finalSenderName = conv.user_name || 'Ziyaretçi';
     }
 
+    let validSenderId = null;
+    if (senderId) {
+      const userRow = db.prepare('SELECT id FROM users WHERE id = ?').get([senderId]);
+      if (userRow) validSenderId = userRow.id;
+    }
+
     const info = db.prepare(`
       INSERT INTO support_messages (conversation_id, sender_type, sender_id, sender_name, message, is_read)
       VALUES (?, ?, ?, ?, ?, 0)
-    `).run([conversationId, senderType, senderId, finalSenderName, cleanMessage]);
+    `).run([conversationId, senderType, validSenderId, finalSenderName, cleanMessage]);
 
     const messageId = info.lastInsertRowid;
 
@@ -180,7 +234,7 @@ class Support {
             status = 'active',
             assigned_admin_id = COALESCE(assigned_admin_id, ?)
         WHERE id = ?
-      `).run([cleanMessage, senderId, conversationId]);
+      `).run([cleanMessage, validSenderId, conversationId]);
     } else {
       // System / Assistant
       db.prepare(`
@@ -198,6 +252,7 @@ class Support {
 
   static async getMessages(conversationId, afterId = 0) {
     const db = getDb();
+    this.ensureTable(db);
     return db.prepare(`
       SELECT * FROM support_messages
       WHERE conversation_id = ? AND id > ?
@@ -207,6 +262,7 @@ class Support {
 
   static async markMessagesRead(conversationId, readerType) {
     const db = getDb();
+    this.ensureTable(db);
     if (readerType === 'user') {
       db.prepare(`
         UPDATE support_messages
@@ -237,6 +293,7 @@ class Support {
 
   static async listConversations({ status = 'all', page = 1, limit = 20, search = '' } = {}) {
     const db = getDb();
+    this.ensureTable(db);
     const offset = Math.max(0, (page - 1) * limit);
 
     let whereClause = '1=1';
@@ -288,23 +345,33 @@ class Support {
 
   static async countWaiting() {
     const db = getDb();
-    const row = db.prepare(`
-      SELECT COUNT(*) as count
-      FROM support_conversations
-      WHERE status = 'waiting' OR unread_admin_count > 0
-    `).get();
-    return row ? row.count : 0;
+    this.ensureTable(db);
+    try {
+      const row = db.prepare(`
+        SELECT COUNT(*) as count
+        FROM support_conversations
+        WHERE status = 'waiting' OR unread_admin_count > 0
+      `).get();
+      return row ? row.count : 0;
+    } catch (e) {
+      return 0;
+    }
   }
 
   static async getLatestWaiting() {
     const db = getDb();
-    return db.prepare(`
-      SELECT id, user_name, user_email, last_message, last_message_at, unread_admin_count, status
-      FROM support_conversations
-      WHERE status = 'waiting' OR unread_admin_count > 0
-      ORDER BY last_message_at DESC
-      LIMIT 1
-    `).get() || null;
+    this.ensureTable(db);
+    try {
+      return db.prepare(`
+        SELECT id, user_name, user_email, last_message, last_message_at, unread_admin_count, status
+        FROM support_conversations
+        WHERE status = 'waiting' OR unread_admin_count > 0
+        ORDER BY last_message_at DESC
+        LIMIT 1
+      `).get() || null;
+    } catch (e) {
+      return null;
+    }
   }
 
   static async updateStatus(conversationId, status, adminId = null) {
@@ -313,19 +380,29 @@ class Support {
     }
 
     const db = getDb();
+    this.ensureTable(db);
+
+    let validAdminId = null;
+    if (adminId) {
+      const userRow = db.prepare('SELECT id FROM users WHERE id = ?').get([adminId]);
+      if (userRow) validAdminId = userRow.id;
+    }
+
     db.prepare(`
       UPDATE support_conversations
       SET status = ?,
           assigned_admin_id = COALESCE(?, assigned_admin_id),
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run([status, adminId, conversationId]);
+    `).run([status, validAdminId, conversationId]);
 
     if (status === 'closed') {
-      db.prepare(`
-        INSERT INTO support_messages (conversation_id, sender_type, sender_name, message, is_read)
-        VALUES (?, 'system_notice', 'CYPILAN Destek', 'Bu canlı destek görüşmesi sonlandırılmıştır. Deneyiminizi değerlendirmeyi unutmayın!', 0)
-      `).run([conversationId]);
+      try {
+        db.prepare(`
+          INSERT INTO support_messages (conversation_id, sender_type, sender_name, message, is_read)
+          VALUES (?, 'system_notice', 'CYPILAN Destek', 'Bu canlı destek görüşmesi sonlandırılmıştır. Deneyiminizi değerlendirmeyi unutmayın!', 0)
+        `).run([conversationId]);
+      } catch (e) {}
     }
 
     return this.getConversationById(conversationId);
@@ -336,6 +413,7 @@ class Support {
     const cleanComment = comment ? String(comment).trim().slice(0, 500) : null;
 
     const db = getDb();
+    this.ensureTable(db);
     db.prepare(`
       UPDATE support_conversations
       SET rating = ?,
@@ -350,12 +428,14 @@ class Support {
 
   static async deleteConversation(conversationId) {
     const db = getDb();
+    this.ensureTable(db);
     db.prepare('DELETE FROM support_conversations WHERE id = ?').run([conversationId]);
     return true;
   }
 
   static async getStats() {
     const db = getDb();
+    this.ensureTable(db);
     const totalRow = db.prepare('SELECT COUNT(*) as count FROM support_conversations').get();
     const waitingRow = db.prepare("SELECT COUNT(*) as count FROM support_conversations WHERE status = 'waiting'").get();
     const activeRow = db.prepare("SELECT COUNT(*) as count FROM support_conversations WHERE status = 'active'").get();

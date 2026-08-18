@@ -82,9 +82,7 @@ const requireVerifiedEmail = async (req, res, next) => {
 };
 
 // How stale the stored timestamp is allowed to get. Writing on every request
-// would mean an UPDATE per page view per member — for a figure nobody reads to
-// the minute. Five minutes also matches the window the templates call "online",
-// so the label can never be more wrong than its own resolution.
+// Update last seen timestamp at most every 5 minutes per user session
 const LAST_SEEN_TOUCH_INTERVAL_MS = 5 * 60 * 1000;
 
 const touchLastSeen = async (req, userId) => {

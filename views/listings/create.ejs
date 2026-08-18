@@ -260,13 +260,13 @@
                                     </div>
                                 </div>
 
-                                <div class="form-check mt-3 border rounded-4 p-3 bg-light" id="collectBidsBox" hidden>
+                                <div class="form-check mt-3 border rounded-4 p-3 bg-light" id="collectBidsBox" style="display: none;" hidden>
                                     <input class="form-check-input cursor-pointer" type="checkbox" name="collect_bids" value="1" id="collectBids"
                                            <%= (typeof formData !== 'undefined' && formData.collect_bids) ? 'checked' : '' %>>
                                     <label class="form-check-label cursor-pointer fw-semibold" for="collectBids">
-                                        <i class="fa-solid fa-gavel text-primary me-1"></i><%= t('bids.opt_in_label') %>
+                                        <i class="fa-solid fa-gavel text-primary me-1" id="collectBidsIcon"></i><span id="collectBidsLabel"><%= t('bids.opt_in_label') %></span>
                                     </label>
-                                    <div class="form-text small mb-0"><%= t('bids.opt_in_help') %></div>
+                                    <div class="form-text small mb-0" id="collectBidsHelp"><%= t('bids.opt_in_help') %></div>
                                 </div>
 
                                 <div class="mt-3">
@@ -535,8 +535,30 @@ document.addEventListener('DOMContentLoaded', function() {
             const root = option ? option.getAttribute('data-root') : null;
 
             const bidEligible = BID_ROOTS.indexOf(root) > -1;
-            collectBidsBox.hidden = !bidEligible;
-            if (!bidEligible) collectBids.checked = false;
+            if (bidEligible) {
+                collectBidsBox.hidden = false;
+                collectBidsBox.style.display = 'block';
+                collectBids.disabled = false;
+
+                const labelEl = document.getElementById('collectBidsLabel');
+                const helpEl = document.getElementById('collectBidsHelp');
+                const iconEl = document.getElementById('collectBidsIcon');
+
+                if (root === 'emlak') {
+                    if (labelEl) labelEl.textContent = '<%= t("bids.opt_in_label_emlak") || "Emlakçılardan teklif toplansın" %>';
+                    if (helpEl) helpEl.textContent = '<%= t("bids.opt_in_help_emlak") || "İlanınız kayıtlı emlak ofislerine ve danışmanlara açılır, size teklif verirler. Teklifleri karşılaştırıp dilediğinizi seçebilirsiniz." %>';
+                    if (iconEl) iconEl.className = 'fa-solid fa-house-chimney-user text-primary me-1';
+                } else if (root === 'vasita') {
+                    if (labelEl) labelEl.textContent = '<%= t("bids.opt_in_label_vasita") || "Galericilerden teklif toplansın" %>';
+                    if (helpEl) helpEl.textContent = '<%= t("bids.opt_in_help_vasita") || "İlanınız kayıtlı oto galerilerine ve yetkili alıcılara açılır, aracınıza teklif verirler. Teklifleri karşılaştırıp dilediğinizi seçebilirsiniz." %>';
+                    if (iconEl) iconEl.className = 'fa-solid fa-car text-primary me-1';
+                }
+            } else {
+                collectBidsBox.hidden = true;
+                collectBidsBox.style.display = 'none';
+                collectBids.checked = false;
+                collectBids.disabled = true;
+            }
 
             // Pay and requirements only make sense on a job advert.
             if (jobFieldsBox) jobFieldsBox.hidden = root !== 'is-ilanlari';

@@ -4,15 +4,15 @@
             <div class="card border-0 shadow-sm rounded-4 text-center my-4">
                 <div class="card-body p-5">
                     <div class="display-1 fw-bolder text-primary mb-2">404</div>
-                    <h1 class="fs-4 fw-bold text-dark mb-3"><%= t('errors.not_found_title') %></h1>
-                    <p class="text-muted mb-4"><%= t('errors.not_found_message') %></p>
+                    <h1 class="fs-4 fw-bold text-dark mb-3"><%= typeof t === 'function' ? t('errors.not_found_title') : 'Sayfa Bulunamadı' %></h1>
+                    <p class="text-muted mb-4"><%= typeof t === 'function' ? t('errors.not_found_message') : 'Aradığınız sayfa bulunamadı.' %></p>
 
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
                         <a href="/" class="btn btn-primary rounded-pill px-4 fw-bold">
-                            <i class="fa-solid fa-house me-2"></i><%= t('nav.home') %>
+                            <i class="fa-solid fa-house me-2"></i><%= typeof t === 'function' ? t('nav.home') : 'Ana Sayfa' %>
                         </a>
                         <a href="/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium">
-                            <i class="fa-solid fa-magnifying-glass me-2"></i><%= t('nav.all_listings') %>
+                            <i class="fa-solid fa-magnifying-glass me-2"></i><%= typeof t === 'function' ? t('nav.all_listings') : 'Tüm İlanlar' %>
                         </a>
                     </div>
                 </div>

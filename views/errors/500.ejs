@@ -4,15 +4,15 @@
             <div class="card border-0 shadow-sm rounded-4 text-center my-4">
                 <div class="card-body p-5">
                     <div class="display-1 fw-bolder text-danger mb-2">500</div>
-                    <h1 class="fs-4 fw-bold text-dark mb-3"><%= t('errors.server_error_title') %></h1>
-                    <p class="text-muted mb-4"><%= t('errors.server_error_message') %></p>
+                    <h1 class="fs-4 fw-bold text-dark mb-3"><%= typeof t === 'function' ? t('errors.server_error_title') : 'Sunucu Hatası' %></h1>
+                    <p class="text-muted mb-4"><%= typeof t === 'function' ? t('errors.server_error_message') : 'Beklenmeyen bir hata oluştu.' %></p>
 
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
                         <a href="/" class="btn btn-primary rounded-pill px-4 fw-bold">
-                            <i class="fa-solid fa-house me-2"></i><%= t('nav.home') %>
+                            <i class="fa-solid fa-house me-2"></i><%= typeof t === 'function' ? t('nav.home') : 'Ana Sayfa' %>
                         </a>
                         <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-medium" onclick="window.location.reload()">
-                            <i class="fa-solid fa-rotate-right me-2"></i><%= t('common.try_again') %>
+                            <i class="fa-solid fa-rotate-right me-2"></i><%= typeof t === 'function' ? t('common.try_again') : 'Tekrar Dene' %>
                         </button>
                     </div>
                 </div>

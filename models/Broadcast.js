@@ -41,10 +41,28 @@ const parseEmails = (value) => [...new Set(
 )];
 
 class Broadcast {
+  static ensureTable(db) {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS broadcasts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sent_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        link_url TEXT,
+        audience TEXT NOT NULL,
+        audience_detail TEXT,
+        recipient_count INTEGER NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_broadcasts_created ON broadcasts(created_at DESC);
+    `);
+  }
+
   // Who a given filter would reach, resolved before anything is written so the
   // admin sees the real number rather than an estimate.
   static resolveRecipients({ audience, role, language, emails } = {}) {
     const db = getDb();
+    this.ensureTable(db);
 
     if (audience === 'role') {
       if (!ROLES.includes(role)) return { ids: [], unmatched: [] };
@@ -93,6 +111,7 @@ class Broadcast {
   // chosen with its size already visible.
   static async audienceCounts() {
     const db = getDb();
+    this.ensureTable(db);
 
     const counts = { all: 0, roles: {}, languages: {} };
     counts.all = db.prepare('SELECT COUNT(*) as count FROM users WHERE is_active = 1').get().count;
@@ -126,6 +145,7 @@ class Broadcast {
 
     const db = getDb();
     Notification.ensureTable(db);
+    this.ensureTable(db);
 
     const { ids, unmatched } = this.resolveRecipients({ audience, role, language, emails });
     if (ids.length === 0) {
@@ -138,6 +158,12 @@ class Broadcast {
       : audience === 'specific' ? `${ids.length} adres`
       : null;
 
+    let validSentBy = null;
+    if (sent_by) {
+      const userRow = db.prepare('SELECT id FROM users WHERE id = ?').get([sent_by]);
+      if (userRow) validSentBy = userRow.id;
+    }
+
     const deliver = db.transaction(() => {
       const insertNotification = db.prepare(`
         INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
@@ -145,14 +171,13 @@ class Broadcast {
       `);
 
       ids.forEach((userId) => {
-        insertNotification.run([userId, sent_by, cleanTitle, cleanMessage, link]);
+        insertNotification.run([userId, validSentBy, cleanTitle, cleanMessage, link]);
       });
 
-      ensureTable(db);
       const info = db.prepare(`
         INSERT INTO broadcasts (sent_by, title, message, link_url, audience, audience_detail, recipient_count)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run([sent_by, cleanTitle, cleanMessage, link, audience, detail, ids.length]);
+      `).run([validSentBy, cleanTitle, cleanMessage, link, audience, detail, ids.length]);
 
       return Number(info.lastInsertRowid);
     });
@@ -162,7 +187,7 @@ class Broadcast {
 
   static async history(limit = 20) {
     const db = getDb();
-    ensureTable(db);
+    this.ensureTable(db);
     try {
       return db.prepare(`
         SELECT b.*, u.full_name as sent_by_name
@@ -180,16 +205,22 @@ class Broadcast {
   // history can show whether an announcement actually landed.
   static async readStats(broadcast) {
     const db = getDb();
-    const row = db.prepare(`
-      SELECT COUNT(*) as total, SUM(is_read) as read_count
-      FROM notifications
-      WHERE type = 'announcement' AND title = ? AND created_at >= ?
-    `).get([broadcast.title, broadcast.created_at]);
+    Notification.ensureTable(db);
+    this.ensureTable(db);
+    try {
+      const row = db.prepare(`
+        SELECT COUNT(*) as total, SUM(is_read) as read_count
+        FROM notifications
+        WHERE type = 'announcement' AND title = ? AND created_at >= ?
+      `).get([broadcast.title, broadcast.created_at]);
 
-    return {
-      total: row.total || 0,
-      read: row.read_count || 0
-    };
+      return {
+        total: (row && row.total) || 0,
+        read: (row && row.read_count) || 0
+      };
+    } catch (e) {
+      return { total: 0, read: 0 };
+    }
   }
 }
 

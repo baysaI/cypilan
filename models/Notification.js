@@ -26,10 +26,20 @@ class Notification {
 
     const db = getDb();
     this.ensureTable(db);
+
+    const userRow = db.prepare('SELECT id FROM users WHERE id = ?').get([user_id]);
+    if (!userRow) return null;
+
+    let validActorId = null;
+    if (actor_id) {
+      const actorRow = db.prepare('SELECT id FROM users WHERE id = ?').get([actor_id]);
+      if (actorRow) validActorId = actorRow.id;
+    }
+
     const info = db.prepare(`
       INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
       VALUES (?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
-    `).run([user_id, actor_id, type || 'system', title, message, link_url]);
+    `).run([user_id, validActorId, type || 'system', title, message, link_url]);
 
     return this.findById(info.lastInsertRowid);
   }
@@ -146,13 +156,20 @@ class Notification {
     if (!title || !message) return [];
     const db = getDb();
     this.ensureTable(db);
+
+    let validActorId = null;
+    if (actor_id) {
+      const actorRow = db.prepare('SELECT id FROM users WHERE id = ?').get([actor_id]);
+      if (actorRow) validActorId = actorRow.id;
+    }
+
     const adminRows = db.prepare("SELECT id FROM users WHERE role = 'admin' AND is_active = 1").all();
     const notifications = [];
     for (const admin of adminRows) {
       const info = db.prepare(`
         INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
         VALUES (?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
-      `).run([admin.id, actor_id, type, title, message, link_url]);
+      `).run([admin.id, validActorId, type, title, message, link_url]);
       notifications.push(info.lastInsertRowid);
     }
     return notifications;

@@ -117,8 +117,47 @@ db.exec(`
     is_read INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    type TEXT NOT NULL CHECK(type IN ('bug', 'suggestion', 'other')),
+    message TEXT NOT NULL,
+    contact_email TEXT,
+    page_url TEXT,
+    status TEXT DEFAULT 'new' CHECK(status IN ('new', 'read', 'resolved')),
+    admin_note TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status, created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS broadcasts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sent_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    link_url TEXT,
+    audience TEXT NOT NULL,
+    audience_detail TEXT,
+    recipient_count INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_broadcasts_created ON broadcasts(created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS price_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+    target_price REAL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, listing_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id);
+  CREATE INDEX IF NOT EXISTS idx_price_alerts_listing ON price_alerts(listing_id);
 `);
-console.log('  ✅ notifications ve tüm destek tabloları oluşturuldu/doğrulandı.');
+console.log('  ✅ notifications, feedback, broadcasts, price_alerts ve tüm tablolar oluşturuldu/doğrulandı.');
 
 console.log('3️⃣ Sütun migrasyonları kontrol ediliyor...');
 const columnsOf = (table) => db.pragma(`table_info(${table})`).map((col) => col.name);
