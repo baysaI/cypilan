@@ -18,7 +18,8 @@ const index = async (req, res) => {
         }
 
         res.locals.meta = res.locals.meta || {};
-        res.locals.meta.title = 'CYPILAN.COM - Kıbrıs\'ın İlan Sitesi';
+        res.locals.meta.title = 'CYPILAN.COM - Kıbrıs\'ın En Büyük Ücretsiz İlan Sitesi';
+        res.locals.meta.description = 'Kuzey Kıbrıs Türk Cumhuriyeti (KKTC) genelinde satılık ve kiralık emlak, vasıta, ikinci el eşya, iş ilanları ve usta hizmetleri. Hemen ücretsiz ilan verin!';
 
         res.render('home', {
             featuredListings,

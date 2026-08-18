@@ -99,7 +99,20 @@ const index = async (req, res, next) => {
         const categories = await Category.getMainCategoriesWithCount();
 
         res.locals.meta = res.locals.meta || {};
-        res.locals.meta.title = currentCategoryName ? `${currentCategoryName} İlanları` : 'Tüm İlanlar';
+        const cityName = filters.city ? (cities.getName(filters.city, req.lang || 'tr') || filters.city) : null;
+        if (currentCategoryName && cityName) {
+            res.locals.meta.title = `${cityName} ${currentCategoryName} İlanları - Kıbrıs KKTC`;
+            res.locals.meta.description = `${cityName} bölgesindeki en güncel ${currentCategoryName.toLowerCase()} ilanları. Fiyatlar, fotoğraflar ve satıcı iletişim bilgileri CYPILAN'da.`;
+        } else if (currentCategoryName) {
+            res.locals.meta.title = `Kıbrıs ${currentCategoryName} İlanları - KKTC`;
+            res.locals.meta.description = `Kuzey Kıbrıs genelinde satılık ve kiralık ${currentCategoryName.toLowerCase()} ilanları. Lefkoşa, Girne, Mağusa ilanlarını CYPILAN'da keşfedin.`;
+        } else if (cityName) {
+            res.locals.meta.title = `${cityName} İlanları - KKTC Emlak, Vasıta, 2. El`;
+            res.locals.meta.description = `${cityName} şehrindeki satılık emlak, ikinci el araç, iş ilanları ve hizmetler. En yeni ilanları CYPILAN'da inceleyin.`;
+        } else {
+            res.locals.meta.title = 'Kıbrıs İlanları - KKTC Emlak, Vasıta, İkinci El ve İş İlanları';
+            res.locals.meta.description = 'Kuzey Kıbrıs\'ın en büyük ilan platformu CYPILAN.COM ile binlerce satılık ve kiralık ilana hemen ulaşın, ücretsiz ilan verin.';
+        }
 
         let userFavoriteIds = [];
         if (req.session && req.session.userId) {
@@ -153,11 +166,119 @@ const show = async (req, res, next) => {
 
         Listing.incrementViews(listing.id).catch(console.error);
 
-        res.locals.meta.title = listing.title;
-        res.locals.meta.description = listing.description ? listing.description.substring(0, 160) : '';
+        const cityName = cities.getName(listing.location_city, req.lang || 'tr') || listing.location_city || 'Kıbrıs';
+        const categoryName = listing.category_name || 'İlan';
+        const baseUrl = (process.env.SITE_URL || 'https://www.cypilan.com').replace(/\/$/, '');
+        const canonicalUrl = `${baseUrl}/listings/${encodeURIComponent(listing.slug)}`;
+
+        res.locals.meta.title = listing.price 
+            ? `${listing.title} - ${cityName} (${Number(listing.price).toLocaleString('tr-TR')} ${listing.currency})`
+            : `${listing.title} - ${cityName} ${categoryName}`;
+        
+        const cleanDesc = listing.description ? listing.description.replace(/<[^>]*>?/gm, '').trim() : '';
+        res.locals.meta.description = cleanDesc 
+            ? cleanDesc.substring(0, 160) 
+            : `${listing.title} ilan detayları, fiyatı ve özellikleri. ${cityName} ${categoryName} ilanları için Kıbrıs'ın güvenilir platformu CYPILAN'ı ziyaret edin.`;
+        res.locals.meta.canonical = canonicalUrl;
+        res.locals.meta.url = canonicalUrl;
+
         if (listing.images && listing.images.length > 0) {
             res.locals.meta.ogImage = listing.images[0];
         }
+
+        // Schema.org Rich Snippets
+        const sellerObj = {
+            "@type": listing.seller_role === 'business' ? "Organization" : "Person",
+            "name": listing.seller_company || listing.seller_name || "CYPILAN Üyesi"
+        };
+
+        const breadcrumbSchema = {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": baseUrl },
+                { "@type": "ListItem", "position": 2, "name": categoryName, "item": `${baseUrl}/listings?category=${listing.category_slug || ''}` },
+                { "@type": "ListItem", "position": 3, "name": listing.title, "item": canonicalUrl }
+            ]
+        };
+
+        let mainSchema;
+        const catSlug = listing.category_slug || '';
+
+        if (catSlug.startsWith('vasita')) {
+            mainSchema = {
+                "@type": "Car",
+                "@id": `${canonicalUrl}#vehicle`,
+                "name": listing.title,
+                "description": cleanDesc || listing.title,
+                "image": listing.images || [],
+                "vehicleModelDate": listing.attributes && listing.attributes.year ? String(listing.attributes.year) : undefined,
+                "brand": listing.attributes && listing.attributes.brand ? { "@type": "Brand", "name": listing.attributes.brand } : undefined,
+                "model": (listing.attributes && listing.attributes.model) || undefined,
+                "offers": {
+                    "@type": "Offer",
+                    "price": listing.price || 0,
+                    "priceCurrency": listing.currency || "GBP",
+                    "availability": listing.status === 'active' ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
+                    "url": canonicalUrl,
+                    "seller": sellerObj
+                }
+            };
+        } else if (catSlug.startsWith('emlak')) {
+            mainSchema = {
+                "@type": "RealEstateListing",
+                "@id": `${canonicalUrl}#realestate`,
+                "name": listing.title,
+                "description": cleanDesc || listing.title,
+                "image": listing.images || [],
+                "offers": {
+                    "@type": "Offer",
+                    "price": listing.price || 0,
+                    "priceCurrency": listing.currency || "GBP",
+                    "availability": listing.status === 'active' ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
+                    "url": canonicalUrl,
+                    "seller": sellerObj
+                }
+            };
+        } else if (catSlug.startsWith('is-ilanlari')) {
+            mainSchema = {
+                "@type": "JobPosting",
+                "@id": `${canonicalUrl}#job`,
+                "title": listing.title,
+                "description": cleanDesc || listing.title,
+                "datePosted": listing.created_at ? new Date(listing.created_at).toISOString() : new Date().toISOString(),
+                "hiringOrganization": sellerObj,
+                "jobLocation": {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": cityName,
+                        "addressCountry": "CY"
+                    }
+                },
+                "employmentType": (listing.attributes && listing.attributes.employment_type) || "FULL_TIME"
+            };
+        } else {
+            mainSchema = {
+                "@type": "Product",
+                "@id": `${canonicalUrl}#product`,
+                "name": listing.title,
+                "description": cleanDesc || listing.title,
+                "image": listing.images || [],
+                "offers": {
+                    "@type": "Offer",
+                    "price": listing.price || 0,
+                    "priceCurrency": listing.currency || "TRY",
+                    "availability": listing.status === 'active' ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
+                    "url": canonicalUrl,
+                    "seller": sellerObj
+                }
+            };
+        }
+
+        res.locals.schemaOrg = {
+            "@context": "https://schema.org",
+            "@graph": [mainSchema, breadcrumbSchema]
+        };
 
         let isFavorited = false;
         let isPriceAlertActive = false;

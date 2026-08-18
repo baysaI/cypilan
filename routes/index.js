@@ -17,6 +17,11 @@ const careerRoutes = require('./career');
 const notificationsRoutes = require('./notifications');
 const supportRoutes = require('./support');
 
+const seoController = require('../controllers/seoController');
+
+router.get('/sitemap.xml', seoController.sitemap);
+router.get('/robots.txt', seoController.robots);
+
 router.get('/', homeController.index);
 
 router.get('/search', searchController.search);

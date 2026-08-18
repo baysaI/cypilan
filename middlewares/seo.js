@@ -7,9 +7,9 @@ const seoMiddleware = (req, res, next) => {
     const baseUrl = (process.env.SITE_URL || DEFAULT_SITE_URL).replace(/\/$/, '');
 
     res.locals.meta = {
-        title: `${siteName} - Kıbrıs İlan Platformu`,
-        description: 'Kuzey Kıbrıs\'ın en kapsamlı ücretsiz ilan, emlak, oto, alışveriş platformu.',
-        keywords: 'kıbrıs ilan, kktc emlak, kıbrıs araba, ikinci el kıbrıs, lefkoşa, girne, mağusa',
+        title: `${siteName} - Kıbrıs'ın En Büyük İlan ve Pazaryeri Platformu`,
+        description: 'Kuzey Kıbrıs (KKTC) genelinde emlak, vasıta, ikinci el eşya, iş ilanları ve usta hizmetleri. Lefkoşa, Girne, Mağusa ve tüm Kıbrıs\'ta ücretsiz ilan verin.',
+        keywords: 'cypilan, cypilan kıbrıs, cypilan kktc, cyp ilan, kıbrıs ilan, kktc ilan, kıbrıs satılık, kıbrıs kiralık, kıbrıs emlak, kıbrıs araba, kıbrıs iş ilanları, lefkoşa emlak, girne satılık ev, mağusa araba',
         ogImage: '/img/logo.svg',
         canonical: `${baseUrl}${req.originalUrl.split('?')[0]}`,
         robots: 'index, follow',
@@ -19,14 +19,44 @@ const seoMiddleware = (req, res, next) => {
 
     res.locals.schemaOrg = {
         "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": siteName,
-        "url": baseUrl,
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": `${baseUrl}/search?q={search_term_string}`,
-            "query-input": "required name=search_term_string"
-        }
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": `${baseUrl}/#organization`,
+                "name": "Cypilan",
+                "legalName": "CYPILAN.COM",
+                "alternateName": ["cypilan", "cyp ilan", "CypIlan", "cypilan kktc", "cypilan kıbrıs", "Kıbrıs İlan"],
+                "url": baseUrl,
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": `${baseUrl}/img/logo.svg`,
+                    "caption": "CYPILAN.COM - Kıbrıs İlan Sitesi"
+                },
+                "description": "Kuzey Kıbrıs Türk Cumhuriyeti (KKTC) dijital pazaryeri ve ücretsiz seri ilan platformu.",
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "email": "info@cypilan.com",
+                    "contactType": "customer support",
+                    "areaServed": "CY",
+                    "availableLanguage": ["Turkish", "English", "Greek", "Russian", "Persian"]
+                }
+            },
+            {
+                "@type": "WebSite",
+                "@id": `${baseUrl}/#website`,
+                "url": baseUrl,
+                "name": siteName,
+                "alternateName": "Cypilan",
+                "publisher": {
+                    "@id": `${baseUrl}/#organization`
+                },
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": `${baseUrl}/search?q={search_term_string}`,
+                    "query-input": "required name=search_term_string"
+                }
+            }
+        ]
     };
 
     next();
