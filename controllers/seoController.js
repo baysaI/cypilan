@@ -1,6 +1,7 @@
 const Category = require('../models/Category');
 const cities = require('../config/cities');
 const { getDb } = require('../config/database');
+const guidesConfig = require('../config/guides');
 
 const DEFAULT_SITE_URL = 'https://www.cypilan.com';
 let sitemapCache = null;
@@ -10,6 +11,7 @@ const SITEMAP_CACHE_TTL = 30 * 60 * 1000; // 30 mins cache
 const staticPages = [
     { url: '/', priority: '1.0', changefreq: 'daily' },
     { url: '/listings', priority: '0.9', changefreq: 'hourly' },
+    { url: '/rehber', priority: '0.85', changefreq: 'daily' },
     { url: '/sss', priority: '0.6', changefreq: 'weekly' },
     { url: '/nasil-ilan-verilir', priority: '0.7', changefreq: 'weekly' },
     { url: '/ilan-paketleri', priority: '0.6', changefreq: 'weekly' },
@@ -134,6 +136,17 @@ const seoController = {
                 urlsXml += '    <lastmod>' + dateStr + '</lastmod>\n';
                 urlsXml += '    <changefreq>weekly</changefreq>\n';
                 urlsXml += '    <priority>0.70</priority>\n';
+                urlsXml += '  </url>\n';
+            }
+
+            // 6. Cyprus Life & Guides / Articles
+            const guides = guidesConfig.getAllGuides();
+            for (const guide of guides) {
+                urlsXml += '  <url>\n';
+                urlsXml += '    <loc>' + baseUrl + '/rehber/' + encodeURIComponent(guide.slug) + '</loc>\n';
+                urlsXml += '    <lastmod>' + guide.publishedAt + '</lastmod>\n';
+                urlsXml += '    <changefreq>weekly</changefreq>\n';
+                urlsXml += '    <priority>0.80</priority>\n';
                 urlsXml += '  </url>\n';
             }
 

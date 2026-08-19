@@ -1,0 +1,142 @@
+<div class="container py-4 py-lg-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="fa-solid fa-house me-1"></i>Ana Sayfa</a></li>
+            <li class="breadcrumb-item"><a href="/rehber" class="text-decoration-none text-muted">Kıbrıs Rehberi</a></li>
+            <li class="breadcrumb-item active text-truncate" style="max-width: 350px;" aria-current="page"><%= guide.title %></li>
+        </ol>
+    </nav>
+
+    <div class="row g-4 g-lg-5">
+        <!-- Main Content Area -->
+        <div class="col-12 col-lg-8">
+            <article class="card border-0 rounded-4 shadow-sm bg-white p-4 p-md-5 mb-4">
+                <!-- Header -->
+                <div class="mb-4 pb-3 border-bottom">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold">
+                            <i class="fa-solid <%= guide.icon %> me-1"></i> <%= guide.categoryName %>
+                        </span>
+                        <span class="text-muted small">
+                            <i class="fa-regular fa-clock me-1"></i> <%= guide.readTime %> okuma
+                        </span>
+                        <span class="text-muted small">
+                            <i class="fa-regular fa-calendar me-1"></i> <%= guide.publishedAt %>
+                        </span>
+                    </div>
+
+                    <h1 class="h2 fw-bold text-dark mb-3"><%= guide.title %></h1>
+                    <p class="text-secondary lead fs-6 mb-3"><%= guide.summary %></p>
+
+                    <div class="d-flex align-items-center justify-content-between pt-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px; font-size: 14px;">
+                                CY
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark small"><%= guide.author %></div>
+                                <div class="text-muted" style="font-size: 11px;">Doğrulanmış İçerik</div>
+                            </div>
+                        </div>
+
+                        <!-- Share Buttons -->
+                        <div class="d-flex align-items-center gap-1">
+                            <a href="https://api.whatsapp.com/send?text=<%= encodeURIComponent(guide.title + ' ' + canonicalUrl) %>" target="_blank" rel="noopener" class="btn btn-sm btn-light rounded-circle text-success" title="WhatsApp'ta Paylaş" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
+                                <i class="fa-brands fa-whatsapp fs-6"></i>
+                            </a>
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(canonicalUrl) %>" target="_blank" rel="noopener" class="btn btn-sm btn-light rounded-circle text-primary" title="Facebook'ta Paylaş" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
+                                <i class="fa-brands fa-facebook fs-6"></i>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(guide.title) %>&url=<%= encodeURIComponent(canonicalUrl) %>" target="_blank" rel="noopener" class="btn btn-sm btn-light rounded-circle text-dark" title="Twitter'da Paylaş" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
+                                <i class="fa-brands fa-x-twitter fs-6"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Article Body -->
+                <div class="guide-article-body text-secondary line-height-lg fs-6">
+                    <%- guide.content %>
+                </div>
+
+                <!-- Tags -->
+                <div class="pt-4 mt-4 border-top">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="text-muted small fw-bold me-1"><i class="fa-solid fa-tags me-1"></i>Etiketler:</span>
+                        <% guide.tags.forEach(function(tag) { %>
+                            <span class="badge bg-light text-secondary rounded-pill px-3 py-2 fw-normal small">#<%= tag %></span>
+                        <% }); %>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Call to action Banner -->
+            <div class="card border-0 rounded-4 shadow-sm text-white p-4 mb-4" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Kıbrıs'ta İlan Vermek Çok Kolay!</h4>
+                        <p class="mb-0 text-white-50 small">Emlak, araç, iş veya ikinci el eşyanızı dakikalar içinde binlerce alıcıya ücretsiz ulaştırın.</p>
+                    </div>
+                    <a href="/listings/create" class="btn btn-white text-dark rounded-pill fw-bold px-4 py-2 text-nowrap shadow-sm">
+                        <i class="fa-solid fa-plus text-success me-1"></i> Ücretsiz İlan Ver
+                    </a>
+                </div>
+            </div>
+
+            <!-- Related Active Listings from Cypilan -->
+            <% if (relatedListings && relatedListings.length > 0) { %>
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h3 class="h5 fw-bold text-dark mb-0">
+                            <i class="fa-solid fa-fire text-danger me-2"></i>İlgili Güncel İlanlar
+                        </h3>
+                        <a href="/listings?category=<%= guide.relatedCategorySlug %>" class="small text-primary text-decoration-none fw-bold">
+                            Tümünü Gör <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="row g-3">
+                        <% relatedListings.forEach(function(item) { %>
+                            <div class="col-12 col-sm-6">
+                                <%- include('../partials/listingCard', { listing: item }) %>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-12 col-lg-4">
+            <!-- Other Guides Card -->
+            <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4 position-sticky" style="top: 90px;">
+                <h3 class="h6 fw-bold text-dark mb-3 pb-2 border-bottom">
+                    <i class="fa-solid fa-newspaper text-primary me-2"></i>Diğer Kıbrıs Rehberleri
+                </h3>
+                <div class="d-flex flex-column gap-3">
+                    <% otherGuides.forEach(function(item) { %>
+                        <article class="p-2 rounded-3 hover-bg-light transition-all">
+                            <span class="badge bg-light text-primary rounded-pill px-2 py-1 small mb-1">
+                                <i class="fa-solid <%= item.icon %> me-1"></i><%= item.categoryName %>
+                            </span>
+                            <h4 class="fs-6 fw-bold mb-1">
+                                <a href="/rehber/<%= item.slug %>" class="text-dark text-decoration-none hover-text-primary">
+                                    <%= item.title %>
+                                </a>
+                            </h4>
+                            <span class="text-muted" style="font-size: 12px;">
+                                <i class="fa-regular fa-clock me-1"></i><%= item.readTime %> okuma
+                            </span>
+                        </article>
+                    <% }); %>
+                </div>
+
+                <div class="mt-4 pt-3 border-top text-center">
+                    <a href="/rehber" class="btn btn-outline-primary btn-sm rounded-pill fw-bold w-100">
+                        Tüm Rehberleri İncele
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

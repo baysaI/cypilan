@@ -18,9 +18,13 @@ const notificationsRoutes = require('./notifications');
 const supportRoutes = require('./support');
 
 const seoController = require('../controllers/seoController');
+const guideController = require('../controllers/guideController');
 
 router.get('/sitemap.xml', seoController.sitemap);
 router.get('/robots.txt', seoController.robots);
+
+router.get('/rehber', guideController.index);
+router.get('/rehber/:slug', guideController.show);
 
 router.get('/', homeController.index);
 
