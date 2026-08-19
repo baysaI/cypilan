@@ -303,9 +303,9 @@ class Listing {
     if (filters.listing_type || filters.type) {
       const targetType = filters.listing_type || filters.type;
       if (targetType === 'job') {
-        where += " AND (l.listing_type = 'job' OR (l.listing_type = 'sale' AND (c.slug = 'is-ilanlari' OR c.parent_id = 3)))";
+        where += " AND (l.listing_type = 'job' OR (l.listing_type = 'sale' AND l.category_id IN (SELECT id FROM categories WHERE slug = 'is-ilanlari' OR parent_id = 3)))";
       } else if (targetType === 'service') {
-        where += " AND (l.listing_type = 'service' OR (l.listing_type = 'sale' AND (c.slug = 'usta-hizmetler' OR c.parent_id = 4)))";
+        where += " AND (l.listing_type = 'service' OR (l.listing_type = 'sale' AND l.category_id IN (SELECT id FROM categories WHERE slug IN ('usta-hizmetler', 'ustalar') OR parent_id = 4)))";
       } else {
         where += ' AND l.listing_type = ?';
         params.push(targetType);
@@ -342,8 +342,8 @@ class Listing {
     }
     const orderBy = ' ORDER BY ' + orderClauses.join(', ');
 
-    // The count is unaffected by ordering, so it never needs the seller join.
-    const { total } = db.prepare(`SELECT COUNT(*) as total FROM listings l${where}`).get(params);
+    // Categories are joined so any category-related WHERE clause is always valid for count
+    const { total } = db.prepare(`SELECT COUNT(*) as total FROM listings l LEFT JOIN categories c ON l.category_id = c.id ${where}`).get(params);
 
     // Joined only where the ordering reads it, so an ordinary search keeps the
     // query plan it had.
