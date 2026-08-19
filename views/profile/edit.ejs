@@ -7,6 +7,16 @@
                 <a href="/profile/<%= user.id %>" class="btn btn-light border btn-sm"><%= t('profile_edit.view_profile') %></a>
             </div>
 
+            <% if (user && user.corporate_status === 'pending') { %>
+                <div class="alert alert-warning border-warning d-flex align-items-center gap-3 rounded-4 p-3 mb-4 shadow-sm">
+                    <i class="fa-solid fa-clock-rotate-left fs-3 text-warning"></i>
+                    <div>
+                        <div class="fw-bold"><%= t('auth.corporate_approval_notice_title') %></div>
+                        <div class="small text-muted"><%= t('auth.corporate_approval_notice_body') %></div>
+                    </div>
+                </div>
+            <% } %>
+
             <form action="/profile" method="POST" enctype="multipart/form-data" id="profileEditForm">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="hidden" name="remove_avatar" id="removeAvatarInput" value="0">

@@ -122,16 +122,23 @@ const setUserLocal = async (req, res, next) => {
         let userAvatar = req.session && typeof req.session.userAvatar !== 'undefined'
             ? req.session.userAvatar
             : undefined;
+        let corporateStatus = req.session && typeof req.session.userCorporateStatus !== 'undefined'
+            ? req.session.userCorporateStatus
+            : undefined;
 
-        if (isVerified === null || userAvatar === undefined) {
+        if (isVerified === null || userAvatar === undefined || corporateStatus === undefined) {
             const uData = await User.findById(userId);
-            if (isVerified === null) {
-                isVerified = Boolean(uData && uData.is_verified);
-                if (req.session) req.session.userIsVerified = isVerified;
-            }
-            if (userAvatar === undefined) {
-                userAvatar = (uData && uData.avatar_url) || null;
-                if (req.session) req.session.userAvatar = userAvatar;
+            if (uData) {
+                isVerified = Boolean(uData.is_verified);
+                userAvatar = uData.avatar_url || null;
+                corporateStatus = uData.corporate_status || 'none';
+                if (req.session) {
+                    req.session.userIsVerified = isVerified;
+                    req.session.userAvatar = userAvatar;
+                    req.session.userCorporateStatus = corporateStatus;
+                    req.session.userCompanyName = uData.company_name || null;
+                    req.session.userRole = uData.role;
+                }
             }
         }
 
@@ -141,13 +148,17 @@ const setUserLocal = async (req, res, next) => {
             name: (req.session && req.session.userName) || (user && user.full_name),
             full_name: (req.session && req.session.userName) || (user && user.full_name),
             role: (req.session && req.session.userRole) || (user && user.role),
+            company_name: (req.session && req.session.userCompanyName) || (user && user.company_name) || null,
+            corporate_status: corporateStatus || (user && user.corporate_status) || 'none',
             avatar_url: userAvatar || (user && user.avatar_url) || null,
             is_verified: isVerified,
             show_surname: (user && typeof user.show_surname !== 'undefined') ? user.show_surname : 0
         };
         res.locals.user = userData;
         res.locals.currentUser = userData;
+        res.locals.authUser = userData;
         res.locals.isEmailUnverified = !isVerified;
+        res.locals.isCorporatePending = userData.corporate_status === 'pending';
 
         try {
             res.locals.unreadMessages = await Message.getUnreadCount(userId);

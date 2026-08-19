@@ -547,12 +547,21 @@ const updateUser = async (req, res) => {
         const allowedRoles = ['user', 'business', 'agent', 'admin'];
         const targetRole = allowedRoles.includes(role) ? role : user.role;
 
+        const allowedCorporateStatuses = ['none', 'pending', 'approved', 'rejected'];
+        let targetCorporateStatus = user.corporate_status || 'none';
+        if (req.body.corporateStatus && allowedCorporateStatuses.includes(req.body.corporateStatus)) {
+            targetCorporateStatus = req.body.corporateStatus;
+        } else if (targetRole === 'business' || targetRole === 'agent') {
+            targetCorporateStatus = 'approved';
+        }
+
         const updateData = {
             full_name: String(fullName || user.full_name).trim(),
             email,
             phone: phone ? String(phone).trim() : null,
             role: targetRole,
             company_name: companyName ? String(companyName).trim() : null,
+            corporate_status: targetCorporateStatus,
             is_verified: (isVerified === '1' || isVerified === 1 || isVerified === 'on' || isVerified === true) ? 1 : 0
         };
 
@@ -571,6 +580,67 @@ const updateUser = async (req, res) => {
         res.redirect(req.get('referer') || '/admin/users');
     } catch (error) {
         console.error('Admin Update User Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/users');
+    }
+};
+
+const approveCorporate = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const targetRole = req.body.role === 'agent' ? 'agent' : 'business';
+        const user = await User.findById(id);
+
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        await User.approveCorporate(id, targetRole);
+
+        const notifyT = translatorFor(user);
+        await Notification.create({
+            user_id: id,
+            type: 'system',
+            title: notifyT('notifications.corporate_approved_title') || 'Kurumsal Hesabınız Onaylandı 🎉',
+            message: notifyT('notifications.corporate_approved_msg') || 'Kurumsal hesap başvurunuz yönetici tarafından onaylandı. Artık ilanlarınızı oluşturabilir ve kurumsal mağazanızı yönetebilirsiniz.',
+            link_url: '/listings/create'
+        });
+
+        req.flash('success', 'flash.corporate_approved_success');
+        res.redirect(req.get('referer') || '/admin/users');
+    } catch (error) {
+        console.error('Approve corporate error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/users');
+    }
+};
+
+const rejectCorporate = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const user = await User.findById(id);
+
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        await User.rejectCorporate(id);
+
+        const notifyT = translatorFor(user);
+        await Notification.create({
+            user_id: id,
+            type: 'system',
+            title: notifyT('notifications.corporate_rejected_title') || 'Kurumsal Başvurunuz Hakkında',
+            message: notifyT('notifications.corporate_rejected_msg') || 'Kurumsal hesap başvurunuz onaylanmadı. Detaylı bilgi almak için Canlı Destek ile iletişime geçebilirsiniz.',
+            link_url: '/profile'
+        });
+
+        req.flash('info', 'flash.corporate_rejected_notice');
+        res.redirect(req.get('referer') || '/admin/users');
+    } catch (error) {
+        console.error('Reject corporate error:', error);
         req.flash('error', 'flash.action_failed');
         res.redirect('/admin/users');
     }
@@ -672,5 +742,7 @@ module.exports = {
     revokeWarning,
     deleteWarning,
     analytics,
-    sendListingNotice
+    sendListingNotice,
+    approveCorporate,
+    rejectCorporate
 };

@@ -353,6 +353,11 @@ const showCreate = async (req, res, next) => {
             User.findById(req.session.userId)
         ]);
 
+        if (user && user.corporate_status === 'pending') {
+            req.flash('error', 'flash.corporate_pending_approval');
+            return res.redirect('/profile');
+        }
+
         const isUnlimitedSetting = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
         const isCorporate = listingPolicy.isCorporateRole(req.session.userRole);
         const isUnlimited = isUnlimitedSetting || isCorporate;
@@ -408,6 +413,11 @@ const create = async (req, res, next) => {
     const backToForm = '/listings/create';
 
     try {
+        const user = await User.findById(req.session.userId);
+        if (user && user.corporate_status === 'pending') {
+            return abort(req, res, 'flash.corporate_pending_approval', '/profile');
+        }
+
         const { title, description, category_id, price, currency, city, district, phone } = req.body;
 
         if (!title || !title.trim() || !category_id || !city) {

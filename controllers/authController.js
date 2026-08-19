@@ -20,6 +20,8 @@ const startAuthenticatedSession = (req, user, redirectTo, successMessage, res) =
         req.session.userRole = user.role;
         req.session.userEmail = user.email;
         req.session.userName = user.full_name;
+        req.session.userCorporateStatus = user.corporate_status || 'none';
+        req.session.userCompanyName = user.company_name || null;
         req.session.userIsVerified = Boolean(user.is_verified);
 
         req.session.save((saveErr) => {
@@ -115,6 +117,10 @@ const showRegister = (req, res) => {
     const formData = req.session.registerFormData || {};
     delete req.session.registerFormData;
 
+    if (req.query.type === 'corporate' && !formData.accountType) {
+        formData.accountType = 'corporate';
+    }
+
     res.locals.meta.title = 'Kayıt Ol';
     res.render('auth/register', { title: 'Kayıt Ol', formData });
 };
@@ -125,6 +131,8 @@ const register = async (req, res) => {
             email: String(req.body.email || '').trim(),
             fullName: String(req.body.fullName || '').trim(),
             phone: String(req.body.phone || '').trim(),
+            companyName: String(req.body.companyName || '').trim(),
+            taxNo: String(req.body.taxNo || '').trim(),
             accountType: req.body.accountType || 'individual'
         };
         req.flash('error', errorKey);
@@ -136,9 +144,16 @@ const register = async (req, res) => {
         const email = String(req.body.email || '').trim().toLowerCase();
         const fullName = String(req.body.fullName || '').trim();
         const phone = String(req.body.phone || '').trim();
+        const companyName = String(req.body.companyName || '').trim();
+        const taxNo = String(req.body.taxNo || '').trim();
+        const isCorporate = accountType === 'corporate';
 
         if (!email || !password || !fullName) {
             return saveFormAndRedirect('flash.fill_required_fields');
+        }
+
+        if (isCorporate && !companyName) {
+            return saveFormAndRedirect('flash.company_name_required');
         }
 
         if (!isValidEmail(email)) {
@@ -172,8 +187,11 @@ const register = async (req, res) => {
             password_hash,
             full_name: fullName,
             phone: phone || null,
-            role: 'user',
-            company_name: accountType === 'corporate' ? fullName : null
+            role: 'user', // Remains regular user until approved
+            company_name: isCorporate ? (companyName || fullName) : null,
+            corporate_status: isCorporate ? 'pending' : 'none',
+            corporate_tax_no: isCorporate ? (taxNo || null) : null,
+            corporate_applied_at: isCorporate ? new Date().toISOString() : null
         });
 
         const user = await User.findById(userId);
@@ -193,11 +211,15 @@ const register = async (req, res) => {
         // Send welcome email asynchronously
         mailer.sendWelcomeEmail({ to: user.email, name: user.full_name, baseUrl: mailer.baseUrlFor(req) }).catch(err => console.error('Welcome email error:', err));
 
+        const successNotice = isCorporate 
+            ? 'flash.register_corporate_pending_notice'
+            : 'flash.register_success_verify_notice';
+
         startAuthenticatedSession(
             req,
             user,
-            '/',
-            'flash.register_success_verify_notice',
+            isCorporate ? '/profile' : '/',
+            successNotice,
             res
         );
     } catch (error) {

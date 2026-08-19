@@ -99,9 +99,42 @@
         </div>
     </div>
 
-    <div class="bg-light rounded-4 p-4 p-md-5 text-center">
+    <div class="bg-light rounded-4 p-4 p-md-5 text-center shadow-sm">
         <h3 class="fw-bold mb-2"><%= t('pages.corporate.apply_title') %></h3>
-        <p class="text-muted mb-4"><%= t('pages.corporate.apply_body') %></p>
-        <a href="mailto:kurumsal@cypilan.com" class="btn btn-primary btn-lg rounded-pill px-4 px-sm-5 fw-bold mw-100 text-break-anywhere"><i class="fa-solid fa-envelope me-2"></i>kurumsal@cypilan.com</a>
+        <p class="text-muted mb-4 max-w-600 mx-auto"><%= t('pages.corporate.apply_body') %></p>
+        
+        <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) { %>
+            <% if (currentUser.role === 'business' || currentUser.role === 'agent') { %>
+                <div class="d-inline-flex align-items-center gap-2 alert alert-success rounded-pill px-4 py-2 mb-3">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <strong><%= t('user.business_member') %></strong> &mdash; <%= t('pages.corporate.active_status_desc') %>
+                </div>
+                <div class="mt-2">
+                    <a href="/listings/create" class="btn btn-primary rounded-pill px-4 fw-bold hover-lift">
+                        <i class="fa-solid fa-plus me-1"></i><%= t('home.cta_button') %>
+                    </a>
+                </div>
+            <% } else if (currentUser.corporate_status === 'pending') { %>
+                <div class="d-inline-flex align-items-center gap-2 alert alert-warning rounded-pill px-4 py-2 mb-0">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <strong><%= t('auth.corporate_approval_notice_title') %></strong> &mdash; <%= t('pages.corporate.pending_status_desc') %>
+                </div>
+            <% } else { %>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="/profile/edit" class="btn btn-primary btn-lg rounded-pill px-4 px-sm-5 fw-bold shadow-sm hover-lift">
+                        <i class="fa-solid fa-building-circle-arrow-right me-2"></i><%= t('pages.corporate.upgrade_btn') %>
+                    </a>
+                </div>
+            <% } %>
+        <% } else { %>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="/auth/register?type=corporate" class="btn btn-primary btn-lg rounded-pill px-4 px-sm-5 fw-bold shadow-sm hover-lift">
+                    <i class="fa-solid fa-store me-2"></i><%= t('pages.corporate.register_btn') %>
+                </a>
+                <a href="/auth/login" class="btn btn-outline-dark btn-lg rounded-pill px-4 fw-medium">
+                    <%= t('nav.login') %>
+                </a>
+            </div>
+        <% } %>
     </div>
 </div>

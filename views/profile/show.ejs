@@ -35,8 +35,19 @@
                 <% } %>
             </div>
         </div>
-    </div>
 </div>
+
+<% if (typeof currentUser !== 'undefined' && currentUser && currentUser.id === profileUser.id && (currentUser.corporate_status === 'pending' || profileUser.corporate_status === 'pending')) { %>
+    <div class="container mt-4">
+        <div class="alert alert-warning border-warning d-flex align-items-center gap-3 rounded-4 p-3 mb-0 shadow-sm">
+            <i class="fa-solid fa-clock-rotate-left fs-3 text-warning"></i>
+            <div>
+                <div class="fw-bold"><%= t('auth.corporate_approval_notice_title') %></div>
+                <div class="small text-muted"><%= t('auth.corporate_approval_notice_body') %></div>
+            </div>
+        </div>
+    </div>
+<% } %>
 
 <div class="container py-4 py-md-5">
     <h2 class="fs-5 fw-bold mb-3"><%= t('home.recent_listings') %></h2>

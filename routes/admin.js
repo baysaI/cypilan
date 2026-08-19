@@ -12,18 +12,21 @@ router.use(isAuthenticated, isAdmin);
 // rather than being remembered in each controller action.
 router.use(async (req, res, next) => {
     try {
+        const User = require('../models/User');
         const ServiceRequest = require('../models/ServiceRequest');
         const Support = require('../models/Support');
         const Feedback = require('../models/Feedback');
         const Setting = require('../models/Setting');
-        const [pendingServices, pendingSupport, pendingFeedback] = await Promise.all([
+        const [pendingServices, pendingSupport, pendingFeedback, pendingCorporate] = await Promise.all([
             ServiceRequest.countPending(),
             Support.countWaiting(),
-            Feedback.countNew()
+            Feedback.countNew(),
+            User.countPendingCorporate()
         ]);
         res.locals.pendingServices = pendingServices;
         res.locals.pendingSupport = pendingSupport;
         res.locals.pendingFeedback = pendingFeedback;
+        res.locals.pendingCorporate = pendingCorporate;
         res.locals.maintenanceOn = Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false);
         res.locals.unlimitedOn = Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false);
     } catch (error) {
@@ -31,6 +34,7 @@ router.use(async (req, res, next) => {
         res.locals.pendingServices = 0;
         res.locals.pendingSupport = 0;
         res.locals.pendingFeedback = 0;
+        res.locals.pendingCorporate = 0;
     }
     next();
 });
@@ -48,6 +52,8 @@ router.delete('/listings/:id', adminController.deleteListing);
 router.put('/users/:id/status', adminController.toggleUserStatus);
 router.put('/users/:id', adminController.updateUser);
 router.post('/users/:id/duzenle', adminController.updateUser);
+router.post('/users/:id/kurumsal-onayla', adminController.approveCorporate);
+router.post('/users/:id/kurumsal-reddet', adminController.rejectCorporate);
 router.put('/reports/:id', adminController.resolveReport);
 
 router.post('/users/:id/uyari', adminController.issueWarning);

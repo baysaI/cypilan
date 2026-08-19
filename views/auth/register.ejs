@@ -40,8 +40,25 @@ const fData = (typeof formData !== 'undefined' && formData) ? formData : {};
                             </div>
                         </div>
 
+                        <div id="corporateFields" class="<%= fData.accountType === 'corporate' ? '' : 'd-none' %>">
+                            <div class="alert alert-warning border-warning-subtle py-2 px-3 small rounded-3 mb-3">
+                                <i class="fa-solid fa-clock-rotate-left me-1 text-warning"></i>
+                                <strong><%= t('auth.corporate_approval_notice_title') %>:</strong> <%= t('auth.corporate_approval_notice_body') %>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="companyName" class="form-label fw-medium small"><%= t('auth.company_name') %> <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="companyName" name="companyName" placeholder="<%= t('auth.company_name_placeholder') %>" value="<%= fData.companyName || '' %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="taxNo" class="form-label fw-medium small"><%= t('auth.tax_no') %> <span class="text-muted small">(<%= t('common.optional') %>)</span></label>
+                                <input type="text" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="taxNo" name="taxNo" placeholder="<%= t('auth.tax_no_placeholder') %>" value="<%= fData.taxNo || '' %>">
+                            </div>
+                        </div>
+
                         <div class="mb-3">
-                            <label for="fullName" class="form-label fw-medium small"><%= t('auth.full_name') %></label>
+                            <label for="fullName" class="form-label fw-medium small"><%= t('auth.full_name') %> / <%= t('auth.authorized_person') %></label>
                             <input type="text" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="fullName" name="fullName" value="<%= fData.fullName || '' %>" required>
                         </div>
 
@@ -147,5 +164,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     passwordInput.addEventListener('input', validatePassword);
     confirmInput.addEventListener('input', validatePassword);
+
+    const typeIndividual = document.getElementById('typeIndividual');
+    const typeCorporate = document.getElementById('typeCorporate');
+    const corporateFields = document.getElementById('corporateFields');
+    const companyNameInput = document.getElementById('companyName');
+
+    function toggleAccountType() {
+        if (typeCorporate && typeCorporate.checked) {
+            corporateFields.classList.remove('d-none');
+            if (companyNameInput) companyNameInput.required = true;
+        } else if (corporateFields) {
+            corporateFields.classList.add('d-none');
+            if (companyNameInput) companyNameInput.required = false;
+        }
+    }
+
+    if (typeIndividual) typeIndividual.addEventListener('change', toggleAccountType);
+    if (typeCorporate) typeCorporate.addEventListener('change', toggleAccountType);
+    toggleAccountType();
 });
 </script>

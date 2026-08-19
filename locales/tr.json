@@ -45,10 +45,15 @@
   },
   "auth": {
     "account_type": "Hesap Türü",
+    "authorized_person": "Yetkili Kişi",
     "back_to_login": "Giriş Sayfasına Dön",
     "back_to_profile": "Profilime Dön",
     "business": "Kurumsal",
+    "company_name": "Firma / İşletme Adı",
+    "company_name_placeholder": "Örn: Akdeniz Gayrimenkul & Yatırım",
     "confirm_password": "Şifre Tekrar",
+    "corporate_approval_notice_body": "Kurumsal hesap başvurunuz site yöneticisi tarafından incelenip onaylandıktan sonra aktifleşecektir. Onaylanana kadar ilan oluşturamazsınız.",
+    "corporate_approval_notice_title": "Kurumsal Onay Süreci",
     "email": "E-posta",
     "forgot_password": "Şifremi Unuttum",
     "forgot_password_desc": "E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.",
@@ -77,6 +82,8 @@
     "rule_uppercase": "En az 1 büyük harf (A-Z)",
     "save_new_password": "Yeni Şifreyi Kaydet",
     "send_reset_link": "Sıfırlama Bağlantısı Gönder",
+    "tax_no": "Vergi No / Sicil No",
+    "tax_no_placeholder": "Varsa şirket sicil veya vergi numaranız",
     "terms_agree": "Kullanım koşullarını kabul ediyorum",
     "verify_pending_desc": "Hesabınızı doğrulamak için e-posta adresinize bir onay bağlantısı gönderdik.",
     "verify_pending_instructions": "E-posta kutunuzdaki doğrulama bağlantısına tıkladıktan sonra aşağıdaki 'E-postamı Doğruladım, Sayfayı Yenile' butonuna basabilirsiniz.",
@@ -265,6 +272,7 @@
     "error": "Bir hata oluştu",
     "filter": "Filtrele",
     "language": "Dil",
+    "language_currency": "Dil ve para birimi",
     "loading": "Yükleniyor...",
     "next": "İleri",
     "no": "Hayır",
@@ -285,8 +293,7 @@
     "today": "Bugün",
     "try_again": "Tekrar Dene",
     "unverified_email_banner": "E-posta adresiniz henüz doğrulanmadı. İlan yayınlamak ve mesajlaşmak için lütfen e-postanızı doğrulayın.",
-    "yes": "Evet",
-    "language_currency": "Dil ve para birimi"
+    "yes": "Evet"
   },
   "compare": {
     "button": "Karşılaştır",
@@ -385,6 +392,19 @@
     "server_error_message": "Beklenmedik bir hata oluştu. Lütfen birazdan tekrar deneyin.",
     "server_error_title": "Bir Şeyler Ters Gitti"
   },
+  "feedback": {
+    "email_help": "Yalnızca size geri dönmemiz gerekirse kullanılır.",
+    "email_label": "E-posta (opsiyonel)",
+    "intro": "Site yeni; gözden kaçan bir hata veya eksik gördüyseniz bize yazın. Her mesaj okunuyor.",
+    "message_label": "Mesajınız",
+    "message_placeholder": "Ne oldu, hangi sayfada ve ne olmasını beklerdiniz?",
+    "submit": "Gönder",
+    "title": "Öneri / Hata Bildir",
+    "type_bug": "Hata",
+    "type_label": "Konu",
+    "type_other": "Diğer",
+    "type_suggestion": "Öneri"
+  },
   "flash": {
     "account_suspended": "Hesabınız askıya alınmış veya henüz onaylanmamış.",
     "action_failed": "İşlem başarısız.",
@@ -416,7 +436,11 @@
     "cannot_review_self": "Kendini değerlendiremezsin.",
     "cannot_suspend_self": "Kendi hesabınızı askıya alamazsınız.",
     "cannot_warn_self": "Kendine uyarı gönderemezsin.",
+    "company_name_required": "Kurumsal üyelik için lütfen firma / işletme adınızı girin.",
     "conversation_load_failed": "Sohbet yüklenemedi.",
+    "corporate_approved_success": "Kullanıcı kurumsal hesaba başarıyla geçirildi ve onaylandı.",
+    "corporate_pending_approval": "Kurumsal hesap başvurunuz henüz yönetici tarafından onaylanmamıştır. Onaylandıktan sonra yeni ilan oluşturabilirsiniz.",
+    "corporate_rejected_notice": "Kurumsal başvuru reddedildi.",
     "csrf_failed": "Güvenlik doğrulaması başarısız oldu. Lütfen formu tekrar gönderin.",
     "csrf_failed_json": "Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.",
     "current_password_required": "Mevcut şifrenizi girin.",
@@ -439,6 +463,12 @@
     "email_updated": "E-posta adresiniz güncellendi. Bundan sonra bu adresle giriş yapacaksınız.",
     "email_verification_required_action": "İlan yayınlamak ve mesaj gönderebilmek için önce e-posta adresinizi doğrulamanız gerekmektedir.",
     "email_verified_success": "E-posta adresiniz başarıyla doğrulandı! Artık ilan verebilir ve mesajlaşabilirsiniz.",
+    "feedback_deleted": "Bildirim silindi.",
+    "feedback_failed": "Bildiriminiz kaydedilemedi. Lütfen tekrar deneyin.",
+    "feedback_rate_limited": "Çok fazla bildirim gönderdiniz. Lütfen bir süre sonra tekrar deneyin.",
+    "feedback_received": "Bildiriminiz için teşekkürler! Ekibimiz mesajınızı okuyacak.",
+    "feedback_too_short": "Lütfen en az {min} karakter yazın.",
+    "feedback_updated": "Bildirim durumu güncellendi.",
     "fill_all_fields": "Lütfen tüm alanları doldurun.",
     "fill_mandatory_fields": "Lütfen zorunlu alanları doldurun.",
     "fill_required_fields": "Lütfen gerekli alanları doldurun.",
@@ -512,6 +542,7 @@
     "rate_limit_report": "Saatlik şikayet sınırına ulaştınız. Lütfen daha sonra tekrar deneyin.",
     "rate_limit_verification": "Çok fazla doğrulama e-postası talebinde bulundunuz. Lütfen 15 dakika sonra tekrar deneyin.",
     "recipient_not_found": "Alıcı bulunamadı.",
+    "register_corporate_pending_notice": "Kurumsal hesap kaydınız alındı! Güvenlik ve kalite standartlarımız gereği hesabınız yönetici onayına sunulmuştur. Onaylanana kadar ilan oluşturulamaz. Lütfen e-postanızı da doğrulayınız.",
     "register_failed": "Kayıt sırasında bir hata oluştu.",
     "register_success": "Hesabınız başarıyla oluşturuldu ve giriş yapıldı.",
     "register_success_verify_notice": "Kayıt işleminiz gerçekleşti! İlan yayınlamak ve mesajlaşmak için e-posta adresinize gönderdiğimiz doğrulama bağlantısına tıklayın.",
@@ -558,13 +589,7 @@
     "warning_issued": "Uyarı gönderildi.",
     "warning_issued_suspended": "Uyarı gönderildi ve sınıra ulaşıldığı için hesap askıya alındı.",
     "warning_revoked": "Uyarı kaldırıldı.",
-    "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.",
-    "feedback_received": "Bildiriminiz için teşekkürler! Ekibimiz mesajınızı okuyacak.",
-    "feedback_too_short": "Lütfen en az {min} karakter yazın.",
-    "feedback_failed": "Bildiriminiz kaydedilemedi. Lütfen tekrar deneyin.",
-    "feedback_rate_limited": "Çok fazla bildirim gönderdiniz. Lütfen bir süre sonra tekrar deneyin.",
-    "feedback_updated": "Bildirim durumu güncellendi.",
-    "feedback_deleted": "Bildirim silindi."
+    "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir."
   },
   "footer": {
     "about": "Hakkımızda",
@@ -659,8 +684,8 @@
     "badge_picker_help": "İlanınız arama sonuçlarında bu etiketlerle öne çıkar ve alıcılar etikete göre filtreleyebilir. Ücretsizdir.",
     "badge_picker_title": "Dikkat Çekici Etiketler",
     "badge_picker_warning": "Yalnızca gerçekten geçerli olanları işaretleyin; her ilanda her etiket varsa hiçbiri dikkat çekmez.",
-    "badge_urgent": "Acil Satılık",
     "badge_swap": "Takaslı",
+    "badge_urgent": "Acil Satılık",
     "badge_wanted": "TALEP",
     "call_whatsapp": "WhatsApp İle Ara",
     "category": "Kategori",
@@ -720,15 +745,15 @@
     "status_sold": "Satıldı",
     "title": "Başlık",
     "total_found": "ilan bulundu",
-    "type_rent": "Kiralık",
-    "type_sale": "Satılık",
-    "type_wanted": "Arıyorum",
     "type_job_employer": "Eleman Arayanlar",
     "type_job_seeker": "İş Arayanlar",
+    "type_rent": "Kiralık",
+    "type_sale": "Satılık",
     "type_service_provider": "Hizmet Verenler",
     "type_service_seeker": "Hizmet Arayanlar",
     "type_supplier": "Tedarikçiler",
     "type_supply_request": "Alım Talepleri",
+    "type_wanted": "Arıyorum",
     "unlimited_mode_desc": "Şu an tüm kategorilerde dilediğiniz kadar ücretsiz ilan verebilirsiniz.",
     "unlimited_mode_title": "Sınırsız İlan Modu Aktif",
     "views": "Görüntülenme"
@@ -750,10 +775,10 @@
     "block_confirm": "Bu kullanıcıyı engellemek istediğinize emin misiniz? Birbirinize mesaj gönderemeyeceksiniz.",
     "block_user": "Kullanıcıyı Engelle",
     "cannot_message_blocked": "Bu kullanıcıya mesaj gönderemezsiniz.",
-    "safety_title": "Güvenli İletişim & Alışveriş Uyarısı",
     "safety_rule_1": "Cypilan yöneticileri sizden asla şifre, SMS onay kodu veya doğrudan para transferi talep etmez.",
     "safety_rule_2": "Ürünü bizzat görmeden veya teslim almadan kapora / ön ödeme göndermeyiniz.",
     "safety_rule_3": "Şüpheli mesajları ve dolandırıcılık girişimlerini sağ üstteki bayrak simgesinden bize bildirebilirsiniz.",
+    "safety_title": "Güvenli İletişim & Alışveriş Uyarısı",
     "unblock_user": "Engeli Kaldır",
     "you_blocked_user": "Bu kullanıcıyı engellediniz. Mesajlaşmak için engeli kaldırın."
   },
@@ -781,6 +806,10 @@
   "notifications": {
     "all": "Tümü",
     "browse_listings": "İlanları Keşfet",
+    "corporate_approved_msg": "Kurumsal hesap başvurunuz yönetici tarafından onaylandı. Artık ilanlarınızı oluşturabilir ve kurumsal mağazanızı yönetebilirsiniz.",
+    "corporate_approved_title": "Kurumsal Hesabınız Onaylandı 🎉",
+    "corporate_rejected_msg": "Kurumsal hesap başvurunuz onaylanmadı. Detaylı bilgi almak için Canlı Destek ile iletişime geçebilirsiniz.",
+    "corporate_rejected_title": "Kurumsal Başvurunuz Hakkında",
     "empty_desc": "İlanlarınız favoriye eklendiğinde veya önemli sistem bildirimleri geldiğinde burada görüntülenecektir.",
     "favorite_message": "«{title}» başlıklı ilanınız bir kullanıcı tarafından favorilere eklendi.",
     "favorite_title": "İlanınız Favorilere Eklendi",
@@ -826,7 +855,8 @@
       "section3_title": "3. Çerez Yönetimi"
     },
     "corporate": {
-      "apply_body": "Ekibimiz işletmenize özel fırsatlar sunmak için sizinle iletişime geçsin.",
+      "active_status_desc": "Hesabınız kurumsal üye olarak aktiftir.",
+      "apply_body": "Kıbrıs genelinde emlak ofisinizi, oto galerinizi veya işletmenizi Cypilan kurumsal avantajlarıyla hemen büyütün.",
       "apply_title": "Kurumsal Üyelik Başvurusu",
       "badge": "İşletmenizi Büyütün",
       "feature1_body": "Firmanızın logosu, açıklaması ve iletişim bilgileriyle markanıza özel dijital mağaza sayfasına sahip olun.",
@@ -835,7 +865,10 @@
       "feature2_title": "Yüksek İlan Limiti",
       "feature3_body": "Kurumsal müşteri temsilciniz ile tüm sorularınıza hızlı çözümler ve teknik destek alın.",
       "feature3_title": "Öncelikli Destek",
-      "subtitle": "Emlak ofisleri, oto galeriler, yapı firmaları ve hizmet sağlayıcıları için özel geliştirilmiş kurumsal üyelik paketleri."
+      "pending_status_desc": "Kurumsal başvurunuz yönetici incelemesindedir.",
+      "register_btn": "Kurumsal Hesap Oluştur",
+      "subtitle": "Emlak ofisleri, oto galeriler, yapı firmaları ve hizmet sağlayıcıları için özel geliştirilmiş kurumsal üyelik paketleri.",
+      "upgrade_btn": "Kurumsal Hesaba Yükselt"
     },
     "faq": {
       "a1": "Evet! Bireysel kullanıcılarımız Emlak, Vasıta, İkinci El ve diğer tüm kategorilerde temel ilanlarını tamamen ücretsiz olarak verebilirler. İlanınızın daha hızlı satılması veya kiralanması için dilerseniz \"Vitrin İlanı\" gibi premium özelliklerden yararlanabilirsiniz.",
@@ -1328,18 +1361,5 @@
     "remaining_body": "{remaining} uyarı daha alırsan hesabın otomatik olarak askıya alınır.",
     "suspended_body": "Uyarı sınırına ulaştığın için hesabın askıya alındı. İtiraz için destek ekibiyle iletişime geç.",
     "title": "Hesabında {count}/{threshold} uyarı var"
-  },
-  "feedback": {
-    "title": "Öneri / Hata Bildir",
-    "intro": "Site yeni; gözden kaçan bir hata veya eksik gördüyseniz bize yazın. Her mesaj okunuyor.",
-    "type_label": "Konu",
-    "type_bug": "Hata",
-    "type_suggestion": "Öneri",
-    "type_other": "Diğer",
-    "message_label": "Mesajınız",
-    "message_placeholder": "Ne oldu, hangi sayfada ve ne olmasını beklerdiniz?",
-    "email_label": "E-posta (opsiyonel)",
-    "email_help": "Yalnızca size geri dönmemiz gerekirse kullanılır.",
-    "submit": "Gönder"
   }
 }
