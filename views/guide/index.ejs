@@ -1,16 +1,16 @@
 <div class="container py-4 py-lg-5">
     <!-- Hero Banner -->
-    <div class="card border-0 rounded-4 shadow-sm bg-gradient text-white p-4 p-md-5 mb-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+    <div class="rounded-4 shadow-sm text-white p-4 p-md-5 mb-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%) !important; color: #ffffff !important;">
         <div class="row align-items-center position-relative z-1">
             <div class="col-lg-8">
                 <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 mb-3 fw-semibold">
                     <i class="fa-solid fa-compass me-1"></i> CYPILAN Yaşam & Bilgi Masası
                 </span>
-                <h1 class="display-6 fw-bold mb-3">Kıbrıs Yaşam, Emlak & Yatırım Rehberi</h1>
-                <p class="lead opacity-90 mb-0">Kuzey Kıbrıs'ta ev alımından araç devir işlemlerine, kiralık daire fiyatlarından çalışma izinlerine kadar aradığınız tüm güncel ve güvenilir bilgiler.</p>
+                <h1 class="display-6 fw-bold mb-3 text-white">Kıbrıs Yaşam, Emlak & Yatırım Rehberi</h1>
+                <p class="lead text-white-50 mb-0">Kuzey Kıbrıs'ta ev alımından araç devir işlemlerine, kiralık daire fiyatlarından çalışma izinlerine kadar aradığınız tüm güncel ve güvenilir bilgiler.</p>
             </div>
             <div class="col-lg-4 d-none d-lg-flex justify-content-end">
-                <i class="fa-solid fa-book-open-reader opacity-25" style="font-size: 130px;"></i>
+                <i class="fa-solid fa-book-open-reader text-white opacity-25" style="font-size: 130px;"></i>
             </div>
         </div>
     </div>
@@ -20,7 +20,7 @@
         <% categories.forEach(function(cat) { %>
             <% const isActive = (activeCategory === cat.slug); %>
             <a href="/rehber<%= cat.slug === 'all' ? '' : '?cat=' + cat.slug %>" 
-               class="btn rounded-pill px-4 py-2 fw-semibold d-flex align-items-center gap-2 transition-all <%= isActive ? 'btn-primary shadow-sm' : 'btn-white border text-secondary hover-lift' %>">
+               class="btn rounded-pill px-4 py-2 fw-semibold d-flex align-items-center gap-2 transition-all <%= isActive ? 'btn-primary shadow-sm text-white' : 'btn-light border text-body hover-lift' %>">
                 <i class="fa-solid <%= cat.icon %>"></i>
                 <span><%= cat.name %></span>
             </a>
@@ -32,7 +32,7 @@
         <div class="row g-4">
             <% guides.forEach(function(guide) { %>
                 <div class="col-12 col-md-6 col-lg-4">
-                    <article class="card h-100 border-0 rounded-4 shadow-sm hover-lift overflow-hidden bg-white d-flex flex-column">
+                    <article class="card h-100 border-0 rounded-4 shadow-sm hover-lift overflow-hidden d-flex flex-column">
                         <div class="p-4 flex-grow-1 d-flex flex-column">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold small">
@@ -43,19 +43,19 @@
                                 </span>
                             </div>
 
-                            <h2 class="h5 fw-bold text-dark mb-3">
-                                <a href="/rehber/<%= guide.slug %>" class="text-dark text-decoration-none hover-text-primary">
+                            <h2 class="h5 fw-bold mb-3">
+                                <a href="/rehber/<%= guide.slug %>" class="text-body text-decoration-none hover-text-primary">
                                     <%= guide.title %>
                                 </a>
                             </h2>
 
-                            <p class="text-secondary small line-clamp-3 mb-4 flex-grow-1">
+                            <p class="text-muted small line-clamp-3 mb-4 flex-grow-1">
                                 <%= guide.summary %>
                             </p>
 
                             <div class="d-flex flex-wrap gap-1 mb-3">
                                 <% guide.tags.slice(0, 3).forEach(function(tag) { %>
-                                    <span class="badge bg-light text-muted fw-normal rounded-pill px-2 py-1 small">#<%= tag %></span>
+                                    <span class="badge bg-body-secondary text-secondary fw-normal rounded-pill px-2 py-1 small">#<%= tag %></span>
                                 <% }); %>
                             </div>
 
