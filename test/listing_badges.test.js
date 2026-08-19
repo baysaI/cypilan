@@ -75,27 +75,30 @@ t.run('Acil / Fırsat / Pazarlıklı rozetleri', async (db) => {
   t.assertEqual(injection.total, 0, 'Enjeksiyon denemesi sonuç döndürmüyor');
   t.assert(!listingBadges.isKnownKey('is_premium'), 'is_premium geçerli rozet anahtarı değil');
 
-  // Fiyatsiz bir ilan pazarlikli isaretlense de o filtreye dusmemeli
+  // İş ilanları ve Ustalar/Hizmetler kategorileri ticari rozetlerden (Acil Satılık, Fırsat, Pazarlık) tamamen muaftır
   const jobListing = await Listing.create({
-    user_id: seller, category_id: 301, title: 'Acil Personel', slug: 'acil-personel',
-    description: 'Acil olarak personel aranıyor.', status: 'active', city: 'Lefkoşa',
-    ...listingBadges.fromBody({ badge_negotiable: '1', badge_urgent: '1' })
+    user_id: seller, category_id: 301, title: 'Yazılım Geliştirici', slug: 'yazilim-gelistirici',
+    description: 'Yazılım ekibimize geliştirici aranıyor.', status: 'active', city: 'Lefkoşa',
+    ...listingBadges.fromBody({ badge_negotiable: '1', badge_urgent: '1' }, 'is-ilanlari')
   });
-  const negotiableAgain = await Listing.search({ badge: 'negotiable' }, 1, 20);
-  t.assert(
-    !negotiableAgain.data.some((row) => row.id === jobListing.id),
-    'Fiyatsız ilan pazarlıklı filtresine düşmüyor (rozeti gösterilmediği için)'
-  );
-  const urgentAgain = await Listing.search({ badge: 'urgent' }, 1, 20);
-  t.assert(
-    urgentAgain.data.some((row) => row.id === jobListing.id),
-    'Fiyatsız ilan acil filtresine düşüyor (iş ilanı da acil olabilir)'
-  );
+  t.assertEqual(Number(jobListing.is_urgent), 0, 'İş ilanı kategorisinde acil rozeti 0 olarak kaydediliyor');
+  t.assertEqual(Number(jobListing.is_negotiable), 0, 'İş ilanı kategorisinde pazarlık rozeti 0 olarak kaydediliyor');
+  t.assertEqual(listingBadges.activeFor(jobListing).length, 0, 'İş ilanında activeFor boş dizi dönüyor');
 
-  // --- Siralamayi degistirmemeli
-  // Rozetli iki ilan rozetsizden daha ESKI: rozet bir siralama avantaji olsaydi
-  // yine de basa gecerlerdi.
-  db.prepare("UPDATE listings SET created_at = '2026-01-01 00:00:00' WHERE slug = 'acil-personel'").run();
+  const ustaListing = await Listing.create({
+    user_id: seller, category_id: 401, title: 'Ev Temizliği Hizmeti', slug: 'ev-temizligi-hizmeti',
+    description: 'Profesyonel temizlik hizmeti verilir.', status: 'active', city: 'Girne',
+    ...listingBadges.fromBody({ badge_opportunity: '1', badge_urgent: '1' }, 'usta-hizmetler')
+  });
+  t.assertEqual(Number(ustaListing.is_opportunity), 0, 'Usta/Hizmet kategorisinde fırsat rozeti 0 kaydediliyor');
+  t.assertEqual(listingBadges.activeFor(ustaListing).length, 0, 'Usta/Hizmet ilanında activeFor boş dizi dönüyor');
+
+  const urgentSearch = await Listing.search({ badge: 'urgent' }, 1, 20);
+  t.assert(!urgentSearch.data.some(row => row.id === jobListing.id || row.id === ustaListing.id), 'İş ve usta ilanları acil filtresine düşmüyor');
+
+  // --- Sıralamayı değiştirmemeli
+  db.prepare("UPDATE listings SET created_at = '2026-01-01 00:00:00' WHERE slug = 'yazilim-gelistirici'").run();
+  db.prepare("UPDATE listings SET created_at = '2026-01-02 00:00:00' WHERE slug = 'ev-temizligi-hizmeti'").run();
   db.prepare("UPDATE listings SET created_at = '2026-02-01 00:00:00' WHERE slug = 'acil-kiralik'").run();
   db.prepare("UPDATE listings SET created_at = '2026-06-01 00:00:00' WHERE slug = 'siradan-kiralik'").run();
 

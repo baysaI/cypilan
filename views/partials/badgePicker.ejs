@@ -8,7 +8,8 @@
 
     Callers pass `idPrefix` because create and edit use different id namespaces.
 %>
-<div class="border rounded-4 p-3 bg-light">
+<% const isCategoryExcluded = (typeof categoryRoot !== 'undefined' && categoryRoot) ? (typeof listingBadges !== 'undefined' && listingBadges.isExcludedCategory ? listingBadges.isExcludedCategory(categoryRoot) : ['is-ilanlari', 'usta-hizmetler', 'ustalar'].includes(categoryRoot)) : false; %>
+<div class="border rounded-4 p-3 bg-light <%= isCategoryExcluded ? 'd-none' : '' %>" id="<%= idPrefix %>badgePickerWrapper">
     <div class="d-flex align-items-center gap-2 mb-1">
         <i class="fa-solid fa-bullhorn text-primary"></i>
         <span class="fw-semibold small text-dark"><%= t('listing.badge_picker_title') %></span>
@@ -18,8 +19,8 @@
     <div class="row g-2 row-cols-1 row-cols-md-3">
         <% listingBadges.BADGES.forEach(function (badge) { %>
             <% const checked = Boolean(current && (Number(current[badge.column]) === 1 || current['badge_' + badge.key])); %>
-            <% const excludedRoots = badge.excludedRoots || []; %>
-            <% const isExcluded = (typeof categoryRoot !== 'undefined' && categoryRoot) ? excludedRoots.includes(categoryRoot) : false; %>
+            <% const excludedRoots = badge.excludedRoots || ['is-ilanlari', 'usta-hizmetler', 'ustalar']; %>
+            <% const isExcluded = isCategoryExcluded || ((typeof categoryRoot !== 'undefined' && categoryRoot) ? excludedRoots.includes(categoryRoot) : false); %>
             <div class="col badge-picker-item <%= isExcluded ? 'd-none' : '' %>"
                  data-badge-key="<%= badge.key %>"
                  data-excluded-roots="<%= JSON.stringify(excludedRoots) %>">

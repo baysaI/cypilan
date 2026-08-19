@@ -320,6 +320,7 @@ class Listing {
       const badge = listingBadges.byKey(String(filters.badge));
       if (badge) {
         where += ` AND l.${badge.column} = 1`;
+        where += ` AND l.listing_type NOT IN ('job', 'service') AND l.category_id NOT IN (SELECT id FROM categories WHERE slug IN ('is-ilanlari', 'usta-hizmetler', 'ustalar') OR parent_id IN (SELECT id FROM categories WHERE slug IN ('is-ilanlari', 'usta-hizmetler', 'ustalar')))`;
         // "Negotiable" is only meaningful against a real number, and it is only
         // shown on such listings — so it must not match ones without a price.
         if (badge.requiresPrice) where += ' AND l.price > 0';

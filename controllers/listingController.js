@@ -485,7 +485,7 @@ const create = async (req, res, next) => {
             district,
             status,
             expires_at: listingPolicy.expiresAt(),
-            ...listingBadges.fromBody(req.body),
+            ...listingBadges.fromBody(req.body, rootSlug),
             images
         });
 
@@ -639,7 +639,7 @@ const update = async (req, res, next) => {
             status: nextStatus,
             // Unticking a badge has to clear it, so these are always written —
             // fromBody returns 0 for anything absent from the form.
-            ...listingBadges.fromBody(req.body)
+            ...listingBadges.fromBody(req.body, rootSlug)
         };
 
         // Reviving an expired listing without a fresh deadline would just let the

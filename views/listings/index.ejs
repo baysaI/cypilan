@@ -246,10 +246,13 @@
                             <%- include('../partials/citySelect', { selectedCity: filters.city }) %>
                         </div>
 
+                        <% const isExcludedBadgeCat = (typeof currentRootSlug !== 'undefined' && ['is-ilanlari', 'usta-hizmetler', 'ustalar'].includes(currentRootSlug)) || (typeof rootCategory !== 'undefined' && ['is-ilanlari', 'usta-hizmetler', 'ustalar'].includes(rootCategory)); %>
+                        <% if (!isExcludedBadgeCat) { %>
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.badge_filter_label') %></label>
                             <%- include('../partials/badgeFilter', { selectedBadge: filters.badge || '', idPrefix: 'd_' }) %>
                         </div>
+                        <% } %>
 
                         <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift"><%= t('listing.apply_filters') %></button>
                         <a href="/listings" class="btn btn-link w-100 text-muted small text-decoration-none mt-2"><%= t('listing.clear_filters') %></a>
@@ -380,10 +383,12 @@
                 <%- include('../partials/citySelect', { selectedCity: filters.city }) %>
             </div>
 
+            <% if (!isExcludedBadgeCat) { %>
             <div class="mb-4">
                 <label class="form-label fw-bold small text-muted text-uppercase letter-spacing-1"><%= t('listing.badge_filter_label') %></label>
                 <%- include('../partials/badgeFilter', { selectedBadge: filters.badge || '', idPrefix: 'm_' }) %>
             </div>
+            <% } %>
 
             <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold hover-lift"><%= t('listing.apply_filters') %></button>
             <a href="/listings" class="btn btn-link w-100 text-muted small text-decoration-none mt-2"><%= t('listing.clear_filters') %></a>

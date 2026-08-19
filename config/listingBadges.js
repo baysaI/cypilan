@@ -14,20 +14,24 @@
 //
 // One place decides what a badge is, because five places render one.
 
+const EXCLUDED_ROOTS = ['is-ilanlari', 'usta-hizmetler', 'ustalar'];
+
 const BADGES = [
   {
     key: 'urgent',
     column: 'is_urgent',
     icon: 'fa-bolt',
     variant: 'danger',
-    requiresPrice: false
+    requiresPrice: false,
+    excludedRoots: EXCLUDED_ROOTS
   },
   {
     key: 'opportunity',
     column: 'is_opportunity',
     icon: 'fa-tags',
     variant: 'success',
-    requiresPrice: false
+    requiresPrice: false,
+    excludedRoots: EXCLUDED_ROOTS
   },
   {
     key: 'negotiable',
@@ -37,7 +41,8 @@ const BADGES = [
     // "Negotiable" is a claim about a number, so it is only shown where there is
     // one. A job advert with no salary has nothing to haggle over, and the badge
     // would read as noise rather than an invitation.
-    requiresPrice: true
+    requiresPrice: true,
+    excludedRoots: EXCLUDED_ROOTS
   }
 ];
 
@@ -48,19 +53,40 @@ const byKey = (key) => BADGES.find((badge) => badge.key === key) || null;
 
 const isKnownKey = (key) => KEYS.includes(key);
 
+const isExcludedCategory = (root) => {
+  if (!root) return false;
+  const normalized = String(root).toLowerCase().trim();
+  return EXCLUDED_ROOTS.some(ex => normalized === ex || normalized.startsWith(ex + '-'));
+};
+
 // Form body → column values. Only the keys on the list above are read, so a
 // hand-made POST cannot reach is_premium or is_featured through this door.
-const fromBody = (body = {}) => BADGES.reduce((values, badge) => {
-  values[badge.column] = body[`badge_${badge.key}`] ? 1 : 0;
-  return values;
-}, {});
+// Excluded categories (jobs, services) never receive commercial attention badges.
+const fromBody = (body = {}, categoryRoot = null) => {
+  const isExcluded = categoryRoot && isExcludedCategory(categoryRoot);
+  return BADGES.reduce((values, badge) => {
+    values[badge.column] = (!isExcluded && body[`badge_${badge.key}`]) ? 1 : 0;
+    return values;
+  }, {});
+};
 
 // Which badges a listing actually carries, in display order.
-const activeFor = (listing = {}) => BADGES.filter((badge) => {
-  if (Number(listing[badge.column]) !== 1) return false;
-  if (badge.requiresPrice && !(Number(listing.price) > 0)) return false;
-  return true;
-});
+const activeFor = (listing = {}) => {
+  const root = String(listing.root_slug || listing.rootCategory || listing.category_slug || listing.categorySlug || '').toLowerCase().trim();
+  if (isExcludedCategory(root) || listing.listing_type === 'job' || listing.listing_type === 'service') {
+    return [];
+  }
+  if (listing.category_id === 3 || listing.category_id === 4 || (listing.category_id >= 300 && listing.category_id < 500)) {
+    return [];
+  }
+
+  return BADGES.filter((badge) => {
+    if (Number(listing[badge.column]) !== 1) return false;
+    if (badge.requiresPrice && !(Number(listing.price) > 0)) return false;
+    if (badge.excludedRoots && isExcludedCategory(root)) return false;
+    return true;
+  });
+};
 
 // Whether anything is ticked, so a form can be reasoned about without knowing
 // the column names.
@@ -70,8 +96,10 @@ module.exports = {
   BADGES,
   KEYS,
   COLUMNS,
+  EXCLUDED_ROOTS,
   byKey,
   isKnownKey,
+  isExcludedCategory,
   fromBody,
   activeFor,
   anyActive
