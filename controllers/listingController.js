@@ -15,6 +15,7 @@ const listingBadges = require('../config/listingBadges');
 const smartSearch = require('../utils/smartSearch');
 const cities = require('../config/cities');
 const listingDraft = require('../utils/listingDraft');
+const seoContent = require('../config/seoContent');
 
 const ALLOWED_CURRENCIES = ['TRY', 'GBP'];
 const OWNER_EDITABLE_STATUSES = ['active', 'sold'];
@@ -119,6 +120,14 @@ const index = async (req, res, next) => {
             userFavoriteIds = await Listing.getUserFavoriteIds(req.session.userId);
         }
 
+        const categoryTarget = currentRootSlug || filters.category;
+        const seoBlock = seoContent.getSeoBlock(categoryTarget, filters.city);
+        const faqSchema = seoContent.getFaqSchema(categoryTarget);
+        if (faqSchema) {
+            res.locals.schemaOrg = res.locals.schemaOrg || [];
+            res.locals.schemaOrg.push(faqSchema);
+        }
+
         res.render('listings/index', {
             listings: result.data,
             pagination: {
@@ -133,6 +142,7 @@ const index = async (req, res, next) => {
             userFavoriteIds,
             smartQuery: smartMode ? rawQuery : null,
             smartParsed: parsed,
+            seoBlock,
             title: currentCategoryName ? `${currentCategoryName} İlanları` : 'İlanlar'
         });
     } catch (error) {

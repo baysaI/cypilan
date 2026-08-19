@@ -51,4 +51,21 @@ t.run('SEO, Dinamik Sitemap, Robots.txt ve Schema.org Zengin Veri Yapısı', asy
   t.assert(org && org.name === 'Cypilan', 'Organization schema Cypilan adını taşıyor');
   t.assert(org && org.legalName === 'CYPILAN.COM', 'Organization legalName doğru');
   t.assert(org && Array.isArray(org.alternateName) && org.alternateName.includes('cypilan'), 'Organization alternateName varyasyonları içeriyor');
+
+  // 4. Kategori ve Şehir Zengin SEO Blokları & FAQ Schema Testi
+  const seoContent = require('../config/seoContent');
+  const emlakBlock = seoContent.getSeoBlock('emlak', 'Girne');
+  t.assert(emlakBlock.category && emlakBlock.category.title.includes('Emlak'), 'Emlak kategorisi için SEO bloğu dönüyor');
+  t.assert(emlakBlock.category.faqs && emlakBlock.category.faqs.length > 0, 'Emlak kategorisi için SSS listesi mevcut');
+  t.assert(emlakBlock.city && emlakBlock.city.title.includes('Girne'), 'Girne şehri için SEO bloğu dönüyor');
+
+  const faqSchema = seoContent.getFaqSchema('emlak');
+  t.assert(faqSchema && faqSchema['@type'] === 'FAQPage', 'FAQPage schema tipi doğru');
+  t.assert(faqSchema.mainEntity && faqSchema.mainEntity.length > 0, 'FAQPage mainEntity soruları içeriyor');
+  t.assertEqual(faqSchema.mainEntity[0]['@type'], 'Question', 'İlk varlık Question tipinde');
+
+  const guideHtml = await t.render('partials/seoGuideBlock.ejs', { seoBlock: emlakBlock });
+  t.assert(guideHtml.includes('Kuzey Kıbrıs (KKTC) Emlak'), 'seoGuideBlock.ejs başlığı render ediyor');
+  t.assert(guideHtml.includes('Sıkça Sorulan Sorular'), 'seoGuideBlock.ejs SSS akordiyonunu render ediyor');
+  t.assert(guideHtml.includes('Girne İlanları'), 'seoGuideBlock.ejs şehir kartını render ediyor');
 });
