@@ -40,12 +40,35 @@ const getCoordinates = (cityName, customLat = null, customLng = null) => {
   return { lat: 35.1856, lng: 33.3823, zoom: 10, isExact: false };
 };
 
+const CITY_TRANSLATIONS = {
+  'Lefkoşa': { tr: 'Lefkoşa', en: 'Nicosia', el: 'Λευκωσία', ru: 'Никосия', fa: 'نیکوزیا' },
+  'Girne': { tr: 'Girne', en: 'Kyrenia', el: 'Κερύνεια', ru: 'Кирения', fa: 'گیرنه' },
+  'Gazimağusa': { tr: 'Gazimağusa', en: 'Famagusta', el: 'Αμμόχωστος', ru: 'Фамагуста', fa: 'فاماگوستا' },
+  'İskele': { tr: 'İskele', en: 'Trikomo', el: 'Τρίκωμο', ru: 'Искеле', fa: 'اسکله' },
+  'Güzelyurt': { tr: 'Güzelyurt', en: 'Morphou', el: 'Μόρφου', ru: 'Гюзельюрт', fa: 'گوزلیورت' },
+  'Lefke': { tr: 'Lefke', en: 'Lefka', el: 'Λεύκα', ru: 'Лефка', fa: 'لفکه' },
+  'Larnaka': { tr: 'Larnaka', en: 'Larnaca', el: 'Λάρνακα', ru: 'Ларнака', fa: 'لارناکا' },
+  'Limasol': { tr: 'Limasol', en: 'Limassol', el: 'Λεμεσός', ru: 'Лимасол', fa: 'لیماسول' },
+  'Baf': { tr: 'Baf', en: 'Paphos', el: 'Πάφος', ru: 'Пафос', fa: 'پافوس' },
+  'Larnaka Kırsal': { tr: 'Larnaka Kırsal', en: 'Larnaca Rural', el: 'Επαρχία Λάρνακας', ru: 'Ларнака (район)', fa: 'حومه لارناکا' }
+};
+
+const getName = (cityName, lang = 'tr') => {
+  if (!cityName) return '';
+  const cityObj = CITY_TRANSLATIONS[cityName];
+  if (cityObj) {
+    return cityObj[lang] || cityObj.tr || cityName;
+  }
+  return cityName;
+};
+
 module.exports = {
   CITIES,
   names,
   byRegion,
   isKnown,
   grouped,
-  getCoordinates
+  getCoordinates,
+  getName
 };
 

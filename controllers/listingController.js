@@ -5,7 +5,7 @@ const Review = require('../models/Review');
 const Bid = require('../models/Bid');
 const Career = require('../models/Career');
 const ServiceRequest = require('../models/ServiceRequest');
-const { generateSlug, maskPhone, formatDisplayName } = require('../utils/helpers');
+const { generateSlug, maskPhone, formatDisplayName, getCityName } = require('../utils/helpers');
 const { isValidPhone } = require('../utils/validators');
 const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/upload');
 const Setting = require('../models/Setting');
@@ -99,7 +99,7 @@ const index = async (req, res, next) => {
         const categories = await Category.getMainCategoriesWithCount();
 
         res.locals.meta = res.locals.meta || {};
-        const cityName = filters.city ? (cities.getName(filters.city, req.lang || 'tr') || filters.city) : null;
+        const cityName = filters.city ? (getCityName(filters.city, req.lang || 'tr') || filters.city) : null;
         if (currentCategoryName && cityName) {
             res.locals.meta.title = `${cityName} ${currentCategoryName} İlanları - Kıbrıs KKTC`;
             res.locals.meta.description = `${cityName} bölgesindeki en güncel ${currentCategoryName.toLowerCase()} ilanları. Fiyatlar, fotoğraflar ve satıcı iletişim bilgileri CYPILAN'da.`;
@@ -166,7 +166,7 @@ const show = async (req, res, next) => {
 
         Listing.incrementViews(listing.id).catch(console.error);
 
-        const cityName = cities.getName(listing.location_city, req.lang || 'tr') || listing.location_city || 'Kıbrıs';
+        const cityName = getCityName(listing.location_city, req.lang || 'tr') || listing.location_city || 'Kıbrıs';
         const categoryName = listing.category_name || 'İlan';
         const baseUrl = (process.env.SITE_URL || 'https://www.cypilan.com').replace(/\/$/, '');
         const canonicalUrl = `${baseUrl}/listings/${encodeURIComponent(listing.slug)}`;
