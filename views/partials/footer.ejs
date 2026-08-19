@@ -1,14 +1,14 @@
 <footer class="site-footer bg-primary text-white pt-5 mt-5">
     <div class="container">
         <div class="row g-4">
-            <div class="col-12 col-lg-4 mb-4 mb-lg-0">
-                <a class="navbar-brand d-inline-flex align-items-center mb-3 bg-white theme-fixed p-3 rounded-4 shadow-sm" href="/" style="max-width: 260px;">
-                    <img src="/img/logo.svg" alt="CypIlan" style="height: 80px; width: auto; max-width: 100%; object-fit: contain;">
+            <div class="col-12 col-lg-3 mb-4 mb-lg-0">
+                <a class="navbar-brand d-inline-flex align-items-center mb-3 bg-white theme-fixed p-3 rounded-4 shadow-sm" href="/" style="max-width: 240px;">
+                    <img src="/img/logo.svg" alt="CypIlan" style="height: 75px; width: auto; max-width: 100%; object-fit: contain;">
                 </a>
-                <p class="text-white-50 pe-lg-4 lh-lg mb-4">
+                <p class="text-white-50 lh-lg mb-4 small">
                     <%= t('footer.about_text') %>
                 </p>
-                <div class="social-icons d-flex gap-3">
+                <div class="social-icons d-flex gap-2">
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle shadow-sm hover-lift" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle shadow-sm hover-lift" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle shadow-sm hover-lift" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
@@ -16,9 +16,9 @@
                 </div>
             </div>
 
-            <div class="col-6 col-md-4 col-lg-2 mb-4 mb-md-0">
-                <h5 class="fw-bold mb-4 text-white"><%= t('footer.categories') %></h5>
-                <ul class="list-unstyled footer-links">
+            <div class="col-6 col-md-3 col-lg-2 mb-4 mb-md-0">
+                <h5 class="fw-bold mb-3 text-white fs-6"><%= t('footer.categories') %></h5>
+                <ul class="list-unstyled footer-links small">
                     <li class="mb-2"><a href="/listings?category=emlak" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.real_estate') %></a></li>
                     <li class="mb-2"><a href="/listings?category=vasita" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.vehicles') %></a></li>
                     <li class="mb-2"><a href="/listings?category=is-ilanlari" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('categories.jobs') %></a></li>
@@ -28,19 +28,24 @@
                 </ul>
             </div>
 
-            <div class="col-6 col-md-4 col-lg-3 mb-4 mb-md-0">
-                <h5 class="fw-bold mb-4 text-white"><%= t('footer.support') %></h5>
-                <ul class="list-unstyled footer-links">
+            <div class="col-6 col-md-3 col-lg-2 mb-4 mb-md-0">
+                <h5 class="fw-bold mb-3 text-white fs-6"><%= t('footer.support') %></h5>
+                <ul class="list-unstyled footer-links small">
                     <li class="mb-2"><a href="/sss" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.faq') %></a></li>
                     <li class="mb-2"><a href="/nasil-ilan-verilir" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.how_to_post') %></a></li>
                     <li class="mb-2"><a href="/ilan-paketleri" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.pricing') %></a></li>
                     <li class="mb-2"><a href="/guvenlik" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.safety_tips') %></a></li>
                     <li class="mb-2"><a href="/kurumsal" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.corporate_membership') %></a></li>
                     <li class="mb-2"><a href="/reklam" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('footer.advertise') %></a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-2 mb-4 mb-md-0">
+                <h5 class="fw-bold mb-3 text-white fs-6">Keşfet & Rehber</h5>
+                <ul class="list-unstyled footer-links small">
                     <li class="mb-2"><a href="/rehber" class="text-white-50 text-decoration-none hover-text-white transition-all">Kıbrıs Rehberi</a></li>
                     <li class="mb-2"><a href="/ogrenci" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('students.title') %></a></li>
                     <li class="mb-2"><a href="/yatirimci" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('investors.title') %></a></li>
-                    <li class="mb-2"><a href="/panel" class="text-white-50 text-decoration-none hover-text-white transition-all"><%= t('panel.title') %></a></li>
                     <li class="mb-2">
                         <a href="/yakinda" class="text-white-50 text-decoration-none hover-text-white transition-all">
                             <%= t('footer.soon') %>
@@ -48,7 +53,7 @@
                         </a>
                     </li>
                     <li class="mb-2">
-                        <button type="button" class="btn btn-link p-0 text-white-50 text-decoration-none hover-text-white transition-all border-0 align-baseline"
+                        <button type="button" class="btn btn-link p-0 text-white-50 text-decoration-none hover-text-white transition-all border-0 align-baseline small"
                                 data-bs-toggle="modal" data-bs-target="#feedbackModal">
                             <%= t('feedback.title') %>
                             <span class="badge rounded-pill bg-accent text-white ms-1" style="font-size: .6rem;"><%= t('pages.soon.badge_short') %></span>
@@ -57,19 +62,19 @@
                 </ul>
             </div>
 
-            <div class="col-12 col-md-4 col-lg-3">
-                <h5 class="fw-bold mb-4 text-white"><%= t('footer.contact') %></h5>
-                <ul class="list-unstyled contact-info">
+            <div class="col-6 col-md-3 col-lg-3">
+                <h5 class="fw-bold mb-3 text-white fs-6"><%= t('footer.contact') %></h5>
+                <ul class="list-unstyled contact-info small">
                     <li class="mb-3 d-flex align-items-start text-white-50">
-                        <i class="fa-solid fa-location-dot mt-1 me-3 text-accent"></i>
+                        <i class="fa-solid fa-location-dot mt-1 me-2 text-accent"></i>
                         <span><%= t('footer.address_text') %></span>
                     </li>
                     <li class="mb-3 d-flex align-items-center text-white-50">
-                        <i class="fa-solid fa-phone me-3 text-accent"></i>
+                        <i class="fa-solid fa-phone me-2 text-accent"></i>
                         <a href="tel:+905550000000" class="text-white-50 text-decoration-none hover-text-white">+90 555 000 00 00</a>
                     </li>
                     <li class="mb-3 d-flex align-items-center text-white-50">
-                        <i class="fa-solid fa-envelope me-3 text-accent"></i>
+                        <i class="fa-solid fa-envelope me-2 text-accent"></i>
                         <a href="mailto:info@cypilan.com" class="text-white-50 text-decoration-none hover-text-white">info@cypilan.com</a>
                     </li>
                 </ul>
