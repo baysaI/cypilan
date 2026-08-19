@@ -68,4 +68,11 @@ t.run('SEO, Dinamik Sitemap, Robots.txt ve Schema.org Zengin Veri Yapısı', asy
   t.assert(guideHtml.includes('Kuzey Kıbrıs (KKTC) Emlak'), 'seoGuideBlock.ejs başlığı render ediyor');
   t.assert(guideHtml.includes('Sıkça Sorulan Sorular'), 'seoGuideBlock.ejs SSS akordiyonunu render ediyor');
   t.assert(guideHtml.includes('Girne İlanları'), 'seoGuideBlock.ejs şehir kartını render ediyor');
+
+  // 5. Favicon & Web Manifest Testleri
+  const fs = require('fs');
+  const path = require('path');
+  t.assert(fs.existsSync(path.join(__dirname, '../public/favicon.ico')), 'public/favicon.ico mevcut');
+  t.assert(fs.existsSync(path.join(__dirname, '../public/img/favicon-48x48.png')), 'public/img/favicon-48x48.png (Google standart) mevcut');
+  t.assert(fs.existsSync(path.join(__dirname, '../public/site.webmanifest')), 'public/site.webmanifest mevcut');
 });
