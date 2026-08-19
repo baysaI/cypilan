@@ -12,14 +12,20 @@ const index = async (req, res, next) => {
     res.locals.meta.description = 'Kuzey Kıbrıs’ta ev alımı, araç devir işlemleri, kiralık daireler, çalışma izni ve Kıbrıs yaşam maliyetleri hakkında en güncel ve kapsamlı rehberler.';
 
     const baseUrl = (process.env.SITE_URL || 'https://www.cypilan.com').replace(/\/$/, '');
-    res.locals.schemaOrg = res.locals.schemaOrg || [];
-    res.locals.schemaOrg.push({
+    const breadcrumbs = {
       "@type": "BreadcrumbList",
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": baseUrl },
         { "@type": "ListItem", "position": 2, "name": "Kıbrıs Rehberi", "item": `${baseUrl}/rehber` }
       ]
-    });
+    };
+
+    res.locals.schemaOrg = res.locals.schemaOrg || { "@context": "https://schema.org", "@graph": [] };
+    if (Array.isArray(res.locals.schemaOrg['@graph'])) {
+      res.locals.schemaOrg['@graph'].push(breadcrumbs);
+    } else if (Array.isArray(res.locals.schemaOrg)) {
+      res.locals.schemaOrg.push(breadcrumbs);
+    }
 
     res.render('guide/index', {
       guides,
@@ -62,8 +68,7 @@ const show = async (req, res, next) => {
     res.locals.meta.description = guide.summary;
     res.locals.meta.canonicalUrl = canonicalUrl;
 
-    res.locals.schemaOrg = res.locals.schemaOrg || [];
-    res.locals.schemaOrg.push({
+    const articleSchema = {
       "@type": "Article",
       "@id": `${canonicalUrl}#article`,
       "headline": guide.title,
@@ -87,16 +92,23 @@ const show = async (req, res, next) => {
         "@type": "WebPage",
         "@id": canonicalUrl
       }
-    });
+    };
 
-    res.locals.schemaOrg.push({
+    const breadcrumbs = {
       "@type": "BreadcrumbList",
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": baseUrl },
         { "@type": "ListItem", "position": 2, "name": "Kıbrıs Rehberi", "item": `${baseUrl}/rehber` },
         { "@type": "ListItem", "position": 3, "name": guide.title, "item": canonicalUrl }
       ]
-    });
+    };
+
+    res.locals.schemaOrg = res.locals.schemaOrg || { "@context": "https://schema.org", "@graph": [] };
+    if (Array.isArray(res.locals.schemaOrg['@graph'])) {
+      res.locals.schemaOrg['@graph'].push(articleSchema, breadcrumbs);
+    } else if (Array.isArray(res.locals.schemaOrg)) {
+      res.locals.schemaOrg.push(articleSchema, breadcrumbs);
+    }
 
     res.render('guide/show', {
       guide,

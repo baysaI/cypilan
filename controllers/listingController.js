@@ -124,8 +124,11 @@ const index = async (req, res, next) => {
         const seoBlock = seoContent.getSeoBlock(categoryTarget, filters.city);
         const faqSchema = seoContent.getFaqSchema(categoryTarget);
         if (faqSchema) {
-            res.locals.schemaOrg = res.locals.schemaOrg || [];
-            res.locals.schemaOrg.push(faqSchema);
+            if (res.locals.schemaOrg && Array.isArray(res.locals.schemaOrg['@graph'])) {
+                res.locals.schemaOrg['@graph'].push(faqSchema);
+            } else if (Array.isArray(res.locals.schemaOrg)) {
+                res.locals.schemaOrg.push(faqSchema);
+            }
         }
 
         res.render('listings/index', {

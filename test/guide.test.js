@@ -36,7 +36,7 @@ t.run('Kıbrıs Yaşam & Rehber (Blog) Sistemi ve SEO Entegrasyonu', async (db) 
   t.assertEqual(renderedView, 'guide/index', 'guideController.index doğru şablonu render ediyor');
   t.assert(renderedData.guides && renderedData.guides.length > 0, 'Rehber listesi gönderiliyor');
   t.assert(mockRes.locals.meta && mockRes.locals.meta.title.includes('Rehber'), 'Rehber meta başlığı ayarlanıyor');
-  t.assert(mockRes.locals.schemaOrg.some(s => s['@type'] === 'BreadcrumbList'), 'BreadcrumbList şeması ekleniyor');
+  t.assert(mockRes.locals.schemaOrg['@graph'].some(s => s['@type'] === 'BreadcrumbList'), 'BreadcrumbList şeması ekleniyor');
 
   // Detay Sayfası Testi
   const mockShowRes = {
@@ -50,8 +50,8 @@ t.run('Kıbrıs Yaşam & Rehber (Blog) Sistemi ve SEO Entegrasyonu', async (db) 
   await guideController.show({ params: { slug: 'kktc-ev-alirken-bilinmesi-gerekenler' } }, mockShowRes, () => {});
   t.assertEqual(renderedView, 'guide/show', 'guideController.show doğru şablonu render ediyor');
   t.assertEqual(renderedData.guide.slug, 'kktc-ev-alirken-bilinmesi-gerekenler', 'Doğru makale verisi aktarılıyor');
-  t.assert(mockShowRes.locals.schemaOrg.some(s => s['@type'] === 'Article'), 'Article şeması ekleniyor');
-  const articleSchema = mockShowRes.locals.schemaOrg.find(s => s['@type'] === 'Article');
+  t.assert(mockShowRes.locals.schemaOrg['@graph'].some(s => s['@type'] === 'Article'), 'Article şeması ekleniyor');
+  const articleSchema = mockShowRes.locals.schemaOrg['@graph'].find(s => s['@type'] === 'Article');
   t.assert(articleSchema.headline.includes('Ev Alırken'), 'Article şemasında headline doğru');
 
   // 3. Şablon Render Testleri
