@@ -5,6 +5,34 @@ const list = (typeof users !== 'undefined' && users) ? users : [];
 const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : ((typeof user !== 'undefined' && user) ? user : {});
 %>
 
+<style>
+.user-row-pending {
+    background-color: rgba(245, 158, 11, 0.08) !important;
+    border-left: 4px solid #f59e0b !important;
+}
+.user-row-pending td {
+    background-color: transparent !important;
+    color: #1e293b !important;
+}
+.user-row-pending a.user-name-link {
+    color: #0f172a !important;
+}
+.user-row-pending .user-email-text {
+    color: #334155 !important;
+}
+[data-bs-theme="dark"] .user-row-pending {
+    background-color: rgba(245, 158, 11, 0.16) !important;
+    border-left: 4px solid #f59e0b !important;
+}
+[data-bs-theme="dark"] .user-row-pending td,
+[data-bs-theme="dark"] .user-row-pending a.user-name-link {
+    color: #f8fafc !important;
+}
+[data-bs-theme="dark"] .user-row-pending .user-email-text {
+    color: #cbd5e1 !important;
+}
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="fs-4 fw-bold mb-0">Kullanıcılar <span class="text-muted fw-normal fs-6">(<%= pag.totalItems %>)</span></h1>
 </div>
@@ -55,48 +83,48 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                     <tbody>
                         <% list.forEach(function(u) { %>
                             <% const seen = helpers.lastSeenState(u.last_seen_at); %>
-                            <tr class="<%= u.corporate_status === 'pending' ? 'table-warning bg-opacity-25' : '' %>">
+                            <tr class="<%= u.corporate_status === 'pending' ? 'user-row-pending' : '' %>">
                                 <td class="ps-3">
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="d-inline-block rounded-circle flex-shrink-0 <%= seen.online ? 'bg-success shadow-sm' : 'bg-secondary opacity-50' %>"
                                               style="width: 8px; height: 8px;"
                                               title="<%= seen.online ? 'Şu anda çevrimiçi' : (seen.known ? 'Son aktiflik: ' + helpers.formatDateTime(u.last_seen_at, lang) : 'Aktiflik kaydı yok') %>"></span>
-                                        <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="fw-bold text-dark text-decoration-none d-inline-flex align-items-center gap-1 hover-primary" title="Kullanıcı Profilini Aç">
+                                        <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="fw-bold text-decoration-none d-inline-flex align-items-center gap-1 hover-primary user-name-link" title="Kullanıcı Profilini Aç">
                                             <span><%= u.company_name || u.full_name %></span>
                                             <i class="fa-solid fa-arrow-up-right-from-square text-primary small" style="font-size: 0.70rem;"></i>
                                         </a>
                                     </div>
-                                    <div class="text-muted small ms-3"><%= u.email %></div>
+                                    <div class="user-email-text small ms-3 fw-medium"><%= u.email %></div>
                                     <% if (u.company_name && u.company_name !== u.full_name) { %>
-                                        <div class="text-muted small ms-3" style="font-size: 0.73rem;">
+                                        <div class="text-secondary small ms-3" style="font-size: 0.73rem;">
                                             <i class="fa-regular fa-id-card me-1"></i><%= u.full_name %>
                                         </div>
                                     <% } %>
                                     <% if (u.created_at) { %>
-                                        <div class="text-muted small ms-3 mt-1" style="font-size: 0.73rem;" title="Kayıt Zamanı: <%= helpers.formatDateTime(u.created_at, lang) %>">
-                                            <i class="fa-regular fa-calendar-plus me-1 text-secondary opacity-75"></i>Kayıt: <%= helpers.formatDate(u.created_at, lang) %>
+                                        <div class="text-secondary opacity-75 small ms-3 mt-1" style="font-size: 0.73rem;" title="Kayıt Zamanı: <%= helpers.formatDateTime(u.created_at, lang) %>">
+                                            <i class="fa-regular fa-calendar-plus me-1"></i>Kayıt: <%= helpers.formatDate(u.created_at, lang) %>
                                         </div>
                                     <% } %>
                                 </td>
                                 <td class="d-none d-md-table-cell small"><%= u.phone || '-' %></td>
                                 <td>
-                                    <span class="badge <%= (u.role === 'business' || u.role === 'agent') ? 'bg-primary bg-opacity-10 text-primary' : (u.role === 'admin' ? 'bg-danger bg-opacity-10 text-danger' : 'bg-secondary bg-opacity-10 text-secondary') %> rounded-pill px-2"><%= u.role %></span>
-                                    <% if (u.corporate_status === 'pending') { %>
-                                        <div>
-                                            <span class="badge bg-warning text-dark rounded-pill px-2 py-1 mt-1 d-inline-flex align-items-center gap-1 shadow-sm" style="font-size: 0.72rem;" title="Kurumsal Başvuru">
-                                                <i class="fa-solid fa-hourglass-half"></i> Onay Bekliyor
+                                    <div class="d-flex flex-column gap-1 align-items-start">
+                                        <span class="badge <%= (u.role === 'business' || u.role === 'agent') ? 'bg-primary bg-opacity-10 text-primary border border-primary-subtle' : (u.role === 'admin' ? 'bg-danger bg-opacity-10 text-danger border border-danger-subtle' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle') %> rounded-pill px-2 py-0.5">
+                                            <%= u.role === 'business' ? 'Kurumsal' : (u.role === 'agent' ? 'Emlakçı' : (u.role === 'admin' ? 'Yönetici' : 'Bireysel')) %>
+                                        </span>
+                                        <% if (u.corporate_status === 'pending') { %>
+                                            <span class="badge bg-warning text-dark border border-warning-subtle rounded-pill px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1" style="font-size: 0.72rem;" title="Kurumsal Hesap Başvurusu">
+                                                <i class="fa-solid fa-hourglass-half text-dark"></i> Onay Bekliyor
                                             </span>
                                             <% if (u.corporate_tax_no) { %>
-                                                <div class="text-muted small mt-1" style="font-size: 0.70rem;">No: <%= u.corporate_tax_no %></div>
+                                                <span class="text-secondary small" style="font-size: 0.70rem;">VKN: <%= u.corporate_tax_no %></span>
                                             <% } %>
-                                        </div>
-                                    <% } else if (u.corporate_status === 'approved') { %>
-                                        <div>
-                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 mt-1" style="font-size: 0.70rem;">
+                                        <% } else if (u.corporate_status === 'approved') { %>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-2" style="font-size: 0.70rem;">
                                                 <i class="fa-solid fa-check me-1"></i>Kurumsal Onaylı
                                             </span>
-                                        </div>
-                                    <% } %>
+                                        <% } %>
+                                    </div>
                                 </td>
                                 <td class="d-none d-sm-table-cell">
                                     <a href="/profile/<%= u.id %>" target="_blank" rel="noopener" class="text-decoration-none"><%= u.listing_count || 0 %></a>
@@ -178,6 +206,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                             data-company="<%= u.company_name || '' %>"
                                             data-corporate-status="<%= u.corporate_status || 'none' %>"
                                             data-is-verified="<%= u.is_verified ? '1' : '0' %>"
+                                            data-listings="<%= u.listing_count || 0 %>"
                                             title="Düzenle">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
@@ -196,12 +225,14 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                                 <%= u.is_active ? 'Askıya Al' : 'Aktifleştir' %>
                                             </button>
                                         </form>
-                                        <form action="/admin/users/<%= u.id %>/sil" method="POST" class="d-inline" onsubmit="return confirm('<%= (u.company_name || u.full_name) %> adlı kullanıcıyı ve tüm ilanlarını/verilerini kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz!');">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Kullanıcıyı ve Tüm Verilerini Kalıcı Olarak Sil">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-delete-user"
+                                                data-id="<%= u.id %>"
+                                                data-name="<%= (u.company_name || u.full_name || '') %>"
+                                                data-email="<%= u.email || '' %>"
+                                                data-listings="<%= u.listing_count || 0 %>"
+                                                title="Kullanıcıyı ve Tüm Verilerini Kalıcı Olarak Sil">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
                                     <% } %>
                                 </td>
                             </tr>
@@ -396,9 +427,57 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
     </div>
 </div>
 
-<form id="adminDeleteUserForm" action="" method="POST" class="d-none">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-</form>
+<!-- Admin Delete User Confirmation Modal -->
+<div class="modal fade" id="adminDeleteConfirmModal" tabindex="-1" aria-labelledby="adminDeleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-danger text-white border-0 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation fs-5"></i>
+                    <h5 class="modal-title fw-bold fs-6 mb-0" id="adminDeleteConfirmModalLabel">Kullanıcıyı Kalıcı Olarak Sil</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle p-3 mb-2" style="width: 64px; height: 64px;">
+                        <i class="fa-solid fa-trash-can fs-2"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1 fs-5 text-dark" id="delModalUserName">Kullanıcı Adı</h6>
+                    <div class="text-secondary small fw-medium" id="delModalUserEmail">kullanici@eposta.com</div>
+                </div>
+
+                <div class="alert alert-danger border-danger-subtle bg-danger bg-opacity-10 p-3 rounded-3 small text-danger-emphasis mb-3">
+                    <div class="d-flex gap-2">
+                        <i class="fa-solid fa-circle-exclamation flex-shrink-0 mt-0.5 fs-6"></i>
+                        <div>
+                            <strong>DİKKAT: Bu işlem geri alınamaz!</strong><br>
+                            Bu kullanıcı sistemden silindiğinde:
+                            <ul class="mb-0 mt-1 ps-3">
+                                <li>Yayındaki ve taslaktaki <strong>tüm ilanları (<span id="delModalListingCount">0</span> ilan)</strong> ve fotoğrafları sunucudan silinir.</li>
+                                <li>Gelen/giden tüm mesajları, favorileri ve bildirimleri silinir.</li>
+                                <li>Kayıtlı CV, özgeçmiş ve profil verileri kalıcı olarak yok edilir.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-muted small text-center mb-0">
+                    Hesabı ve tüm verilerini kalıcı olarak silmek istediğinize emin misiniz?
+                </p>
+            </div>
+            <div class="modal-footer bg-light border-0 py-3 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Vazgeç</button>
+                <form id="adminConfirmDeleteForm" action="" method="POST" class="d-inline m-0">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn btn-danger fw-bold px-3 shadow-sm">
+                        <i class="fa-solid fa-trash-can me-1"></i>Evet, Kullanıcıyı Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -413,21 +492,46 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const editModalEl = document.getElementById('editUserModal');
-    if (!editModalEl) return;
-    const editModal = new bootstrap.Modal(editModalEl);
+    const editModal = editModalEl ? new bootstrap.Modal(editModalEl) : null;
     const editForm = document.getElementById('editUserForm');
-    const deleteForm = document.getElementById('adminDeleteUserForm');
-    const btnModalDelete = document.getElementById('btnModalDeleteUser');
+
+    const deleteModalEl = document.getElementById('adminDeleteConfirmModal');
+    const deleteModal = deleteModalEl ? new bootstrap.Modal(deleteModalEl) : null;
+    const confirmDeleteForm = document.getElementById('adminConfirmDeleteForm');
+    const delModalUserName = document.getElementById('delModalUserName');
+    const delModalUserEmail = document.getElementById('delModalUserEmail');
+    const delModalListingCount = document.getElementById('delModalListingCount');
+
     let currentEditUserId = null;
     let currentEditUserName = '';
+    let currentEditUserEmail = '';
+    let currentEditUserListings = '0';
 
-    if (btnModalDelete && deleteForm) {
+    function openDeleteModal(id, name, email, listingCount) {
+        if (!deleteModal || !confirmDeleteForm) return;
+        confirmDeleteForm.action = '/admin/users/' + id + '/sil';
+        if (delModalUserName) delModalUserName.textContent = name || 'Kullanıcı #' + id;
+        if (delModalUserEmail) delModalUserEmail.textContent = email || '';
+        if (delModalListingCount) delModalListingCount.textContent = listingCount || '0';
+        deleteModal.show();
+    }
+
+    document.querySelectorAll('.btn-delete-user').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            const email = this.getAttribute('data-email');
+            const listings = this.getAttribute('data-listings') || '0';
+            openDeleteModal(id, name, email, listings);
+        });
+    });
+
+    const btnModalDelete = document.getElementById('btnModalDeleteUser');
+    if (btnModalDelete) {
         btnModalDelete.addEventListener('click', function () {
             if (!currentEditUserId) return;
-            if (confirm((currentEditUserName || 'Bu kullanıcı') + ' ve tüm verileri kalıcı olarak silinecek. Emin misiniz?')) {
-                deleteForm.action = '/admin/users/' + currentEditUserId + '/sil';
-                deleteForm.submit();
-            }
+            if (editModal) editModal.hide();
+            openDeleteModal(currentEditUserId, currentEditUserName, currentEditUserEmail, currentEditUserListings);
         });
     }
 
@@ -441,23 +545,26 @@ document.addEventListener('DOMContentLoaded', function () {
             const company = this.getAttribute('data-company');
             const corporateStatus = this.getAttribute('data-corporate-status') || 'none';
             const isVerified = this.getAttribute('data-is-verified') === '1';
+            const listings = this.getAttribute('data-listings') || '0';
 
             currentEditUserId = id;
             currentEditUserName = company || name;
+            currentEditUserEmail = email;
+            currentEditUserListings = listings;
 
-            editForm.action = '/admin/users/' + id;
-            document.getElementById('editFullName').value = name;
-            document.getElementById('editEmail').value = email;
-            document.getElementById('editPhone').value = phone;
-            document.getElementById('editRole').value = role;
-            document.getElementById('editCompanyName').value = company;
+            if (editForm) editForm.action = '/admin/users/' + id;
+            if (document.getElementById('editFullName')) document.getElementById('editFullName').value = name;
+            if (document.getElementById('editEmail')) document.getElementById('editEmail').value = email;
+            if (document.getElementById('editPhone')) document.getElementById('editPhone').value = phone;
+            if (document.getElementById('editRole')) document.getElementById('editRole').value = role;
+            if (document.getElementById('editCompanyName')) document.getElementById('editCompanyName').value = company;
             if (document.getElementById('editCorporateStatus')) {
                 document.getElementById('editCorporateStatus').value = corporateStatus;
             }
-            document.getElementById('editIsVerified').checked = isVerified;
-            document.getElementById('editPassword').value = '';
+            if (document.getElementById('editIsVerified')) document.getElementById('editIsVerified').checked = isVerified;
+            if (document.getElementById('editPassword')) document.getElementById('editPassword').value = '';
 
-            editModal.show();
+            if (editModal) editModal.show();
         });
     });
 });
