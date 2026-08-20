@@ -1433,3 +1433,53 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     transform: scale(1.1);
 }
 
+/* -------------------------------------------------------------
+   Admin Moderation Notice Card (Light & Dark Mode)
+------------------------------------------------------------- */
+.admin-moderation-card {
+    background-color: #fffbeb !important;
+    border-left: 4px solid #f59e0b !important;
+    border: 1px solid #fde68a !important;
+}
+.admin-moderation-card .admin-mod-title {
+    color: #92400e !important;
+}
+.admin-moderation-card .admin-mod-desc {
+    color: #78350f !important;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+.admin-moderation-card .btn-admin-mod-action {
+    background-color: #f59e0b !important;
+    border-color: #d97706 !important;
+    color: #0f172a !important;
+}
+.admin-moderation-card .btn-admin-mod-action:hover {
+    background-color: #d97706 !important;
+    border-color: #b45309 !important;
+    color: #0f172a !important;
+}
+
+[data-bs-theme="dark"] .admin-moderation-card {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    border: 1px solid rgba(245, 158, 11, 0.25) !important;
+    border-left: 4px solid #f59e0b !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+[data-bs-theme="dark"] .admin-moderation-card .admin-mod-title {
+    color: #fbbf24 !important;
+}
+[data-bs-theme="dark"] .admin-moderation-card .admin-mod-desc {
+    color: #f1f5f9 !important;
+}
+[data-bs-theme="dark"] .admin-moderation-card .btn-admin-mod-action {
+    background-color: #f59e0b !important;
+    border-color: #d97706 !important;
+    color: #0f172a !important;
+}
+[data-bs-theme="dark"] .admin-moderation-card .btn-admin-mod-action:hover {
+    background-color: #fbbf24 !important;
+    border-color: #f59e0b !important;
+    color: #0f172a !important;
+}
+

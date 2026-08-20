@@ -491,18 +491,18 @@
             </div>
 
             <% if (authUser && authUser.role === 'admin') { %>
-                <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-4 border-warning" style="background: #fffbeb;">
+                <div class="card admin-moderation-card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="fw-bold small text-dark d-flex align-items-center gap-1">
+                            <span class="admin-mod-title fw-bold small d-flex align-items-center gap-2">
                                 <i class="fa-solid fa-shield-halved text-warning"></i> Yönetici Denetimi
                             </span>
-                            <span class="badge bg-warning text-dark fw-bold font-monospace" style="font-size: 0.65rem;">ADMIN</span>
+                            <span class="badge bg-warning text-dark fw-bold font-monospace px-2 py-1" style="font-size: 0.65rem;">ADMIN</span>
                         </div>
-                        <p class="small text-muted mb-2" style="font-size: 0.78rem;">
+                        <p class="admin-mod-desc small mb-3">
                             Bu ilanda tespit ettiğiniz hatalar için ilan sahibine düzeltme uyarısı gönderebilirsiniz.
                         </p>
-                        <button type="button" class="btn btn-warning btn-sm rounded-pill fw-bold w-100 shadow-sm text-dark d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#adminListingNoticeModal">
+                        <button type="button" class="btn btn-warning btn-sm rounded-pill fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center gap-2 py-2 btn-admin-mod-action" data-bs-toggle="modal" data-bs-target="#adminListingNoticeModal">
                             <i class="fa-solid fa-triangle-exclamation"></i> İlan Sahibine Düzeltme Bildirimi Gönder
                         </button>
                     </div>
