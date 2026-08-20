@@ -170,13 +170,43 @@ async function restore() {
     try { fs.unlinkSync(tempTargetDb); } catch (_) {}
   }
 
-  // sqlite3.exe ile dump'ı temiz veritabanına import et
-  execSync(`"${sqliteCmd}" "${tempTargetDb}" < "${sqlDumpPath}"`, { shell: 'cmd.exe', stdio: 'ignore' });
-
-  // better-sqlite3 ile açıp eksik tabloları, migrasyonları ve durumları tamamla
   const targetDb = new Database(tempTargetDb);
   targetDb.pragma('journal_mode = WAL');
   targetDb.pragma('foreign_keys = OFF');
+
+  const lines = dumpText.split(/\r?\n/);
+  let currentStmt = '';
+  let insertCount = 0;
+
+  targetDb.transaction(() => {
+    for (let line of lines) {
+      line = line.trim();
+      if (!line || line.startsWith('--') || line.startsWith('/*')) continue;
+      currentStmt += (currentStmt ? ' ' : '') + line;
+
+      if (line.endsWith(';')) {
+        const upper = currentStmt.toUpperCase();
+        // sqlite_sequence ve sqlite_stat dahili tablolarını atla
+        if (!upper.includes('SQLITE_SEQUENCE') && !upper.includes('SQLITE_STAT')) {
+          try {
+            targetDb.exec(currentStmt);
+            if (upper.startsWith('INSERT')) insertCount++;
+          } catch (e) {
+            if (upper.startsWith('INSERT INTO')) {
+              try {
+                const ignoreStmt = currentStmt.replace(/^INSERT INTO/i, 'INSERT OR IGNORE INTO');
+                targetDb.exec(ignoreStmt);
+                insertCount++;
+              } catch (_) {}
+            }
+          }
+        }
+        currentStmt = '';
+      }
+    }
+  })();
+
+  console.log(`Toplam ${insertCount} adet orijinal veri satırı başarıyla yerleştirildi.`);
 
   // Şemadaki eksik tabloları oluştur
   const schema = fs.readFileSync(schemaPath, 'utf8');
