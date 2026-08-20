@@ -42,8 +42,6 @@ const handleCorruptDatabase = (err, db) => {
   console.warn(`[SQLite Auto-Recovery] Corrupted database backed up to: ${backupBase} and a fresh database is initialized.`);
 };
 
-// Synchronous, but callers may still await it: the models were written against
-// a promise-returning getDb and awaiting a plain value is harmless.
 const getDb = () => {
   if (dbInstance) return dbInstance;
 
@@ -52,53 +50,22 @@ const getDb = () => {
     fs.mkdirSync(dbDir, { recursive: true });
   }
 
-  let db = null;
-  try {
-    db = new Database(dbPath);
-    db.pragma('journal_mode = WAL');
-    db.pragma('foreign_keys = ON');
-    const check = db.pragma('quick_check');
-    if (check && check.length > 0 && check[0].quick_check !== 'ok') {
-      throw new Error('quick_check failed: ' + JSON.stringify(check));
-    }
-  } catch (err) {
-    if (err.code === 'SQLITE_CORRUPT' || String(err.message).includes('malformed') || String(err.message).includes('corrupt') || String(err.message).includes('quick_check failed')) {
-      handleCorruptDatabase(err, db);
-      db = new Database(dbPath);
-      db.pragma('journal_mode = WAL');
-      db.pragma('foreign_keys = ON');
-    } else {
-      throw err;
-    }
-  }
-
-  dbInstance = db;
+  dbInstance = new Database(dbPath);
+  dbInstance.pragma('journal_mode = WAL');
+  dbInstance.pragma('foreign_keys = ON');
 
   try {
     const schema = fs.readFileSync(schemaPath, 'utf8');
     dbInstance.exec(schema);
     applyColumnMigrations(dbInstance);
 
-    // If categories table is empty (e.g. fresh or recovered DB), seed default categories
     const catCount = dbInstance.prepare("SELECT COUNT(*) as count FROM categories").get();
     if (!catCount || catCount.count === 0) {
       const seedData = fs.readFileSync(seedPath, 'utf8');
       dbInstance.exec(seedData);
     }
   } catch (schemaErr) {
-    if (schemaErr.code === 'SQLITE_CORRUPT' || String(schemaErr.message).includes('malformed')) {
-      handleCorruptDatabase(schemaErr, dbInstance);
-      dbInstance = new Database(dbPath);
-      dbInstance.pragma('journal_mode = WAL');
-      dbInstance.pragma('foreign_keys = ON');
-      const schema = fs.readFileSync(schemaPath, 'utf8');
-      dbInstance.exec(schema);
-      applyColumnMigrations(dbInstance);
-      const seedData = fs.readFileSync(seedPath, 'utf8');
-      dbInstance.exec(seedData);
-    } else {
-      throw schemaErr;
-    }
+    console.error('Database schema initialization warning:', schemaErr.message);
   }
 
   return dbInstance;
