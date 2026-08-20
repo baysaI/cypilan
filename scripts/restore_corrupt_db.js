@@ -163,7 +163,7 @@ async function restore() {
   fs.writeFileSync(sqlDumpPath, dumpText, 'utf8');
   console.log(`Çıkarılan Orijinal SQL Dökümü: ${(fs.statSync(sqlDumpPath).size / 1024).toFixed(1)} KB`);
 
-  // 3. Dump'ı doğrudan sıfır veritabanına yükle (Böylece dump'ın kendi CREATE TABLE kolon sayılarıyla birebir eşleşir)
+  // 3. Dump'ı hedef veritabanına yükle
   console.log('\n--- [3/4] Orijinal Tablolar ve Veriler Yükleniyor ---');
   const tempTargetDb = path.join(tempDir, 'recovered.db');
   if (fs.existsSync(tempTargetDb)) {
@@ -185,7 +185,6 @@ async function restore() {
 
     if (line.endsWith(';')) {
       const upper = currentStmt.toUpperCase();
-      // sqlite_sequence ve sqlite_stat dahili tablolarını atla
       if (!upper.includes('SQLITE_SEQUENCE') && !upper.includes('SQLITE_STAT')) {
         try {
           targetDb.exec(currentStmt);
@@ -212,49 +211,121 @@ async function restore() {
     targetDb.exec(schema);
   } catch (_) {}
 
-  // Kolon migrasyonlarını uygula (is_urgent, is_swap, show_surname vb.)
+  // Kolon migrasyonlarını uygula
   try {
     applyColumnMigrations(targetDb);
   } catch (_) {}
 
-  // Eğer .recover listings tablosunu 'lost_and_found' veya benzeri adla kurtardıysa aktar
+  // --- 4. 'lost_and_found' TABLOLARINI AYRIŞTIRIP GERÇEK TABLOLARA AKTAR ---
   const tablesInDb = targetDb.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r => r.name);
   for (const tbl of tablesInDb) {
     if (tbl.startsWith('lost_and_found')) {
       try {
-        console.log(`Kurtarılan '${tbl}' tablosundaki veriler 'listings' tablosuna aktarılıyor...`);
+        console.log(`\n'${tbl}' tablosundaki veriler çözümleniyor ve canlı tablolara aktarılıyor...`);
         const rows = targetDb.prepare(`SELECT * FROM "${tbl}"`).all();
+        
+        let lafListings = 0;
+        let lafUsers = 0;
+        let lafImages = 0;
+        let lafAttrs = 0;
+
         for (const row of rows) {
-          const rowVals = Object.values(row);
-          // Eşleşen ilan kolonlarına ekle
+          const rowVals = Object.values(row).filter(v => v !== null && v !== undefined);
+          if (rowVals.length === 0) continue;
+
+          // 1. User Tespiti: email (@ ve .)
+          const email = rowVals.find(v => typeof v === 'string' && v.includes('@') && v.includes('.') && !v.includes(' ') && v.length < 90);
+          if (email) {
+            const passHash = rowVals.find(v => typeof v === 'string' && (v.startsWith('$2a$') || v.startsWith('$2b$'))) || '$2a$10$abcdefghijklmnopqrstuvwxyz123456';
+            const fullName = rowVals.find(v => typeof v === 'string' && v !== email && v !== passHash && v.length >= 2 && v.length <= 60) || email.split('@')[0];
+            const role = rowVals.find(v => ['user', 'business', 'agent', 'admin'].includes(v)) || 'user';
+            const phone = rowVals.find(v => typeof v === 'string' && /^[\d\s+()-]{7,20}$/.test(v)) || null;
+
+            try {
+              targetDb.prepare(`
+                INSERT OR REPLACE INTO users (email, password_hash, full_name, phone, role, is_active, is_verified, corporate_status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, 1, 1, 'approved', datetime('now'), datetime('now'))
+              `).run(email, passHash, fullName, phone, role);
+              lafUsers++;
+            } catch (_) {}
+            continue;
+          }
+
+          // 2. Listing Tespiti: slug veya şehir
           const slug = rowVals.find(v => typeof v === 'string' && /^[a-z0-9-]+$/.test(v) && v.includes('-') && v.length > 5);
-          if (slug) {
-            const title = rowVals.find(v => typeof v === 'string' && v !== slug && v.length >= 3 && v.length <= 150) || 'Kıbrıs İlanı';
-            const desc = rowVals.find(v => typeof v === 'string' && v !== slug && v !== title && v.length > 5) || title;
-            const price = rowVals.find(v => typeof v === 'number' && v > 0) || 0;
-            const city = rowVals.find(v => ['Lefkoşa', 'Girne', 'Gazimağusa', 'İskele', 'Güzelyurt', 'Lefke'].includes(v)) || 'Lefkoşa';
-            
-            targetDb.prepare(`
-              INSERT OR REPLACE INTO listings (user_id, category_id, title, slug, description, price, currency, listing_type, status, location_city, location_district, created_at, updated_at)
-              VALUES (1, 1, ?, ?, ?, ?, 'TRY', 'sale', 'active', ?, 'Merkez', datetime('now'), datetime('now'))
-            `).run(title, slug, desc, price, city);
+          const city = rowVals.find(v => ['Lefkoşa', 'Girne', 'Gazimağusa', 'İskele', 'Güzelyurt', 'Lefke'].includes(v));
+
+          if (slug || city) {
+            const finalSlug = slug || `ilan-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`;
+            const strings = rowVals.filter(v => typeof v === 'string' && v !== finalSlug && v !== city);
+            const title = strings.find(s => s.length >= 3 && s.length <= 150 && !s.startsWith('/uploads/')) || 'Kıbrıs İlanı';
+            const desc = strings.find(s => s !== title && s.length > 5 && !s.startsWith('/uploads/')) || title;
+            const numbers = rowVals.filter(v => typeof v === 'number');
+            const price = numbers.find(n => n > 0 && n < 1000000000) || 0;
+            const categoryId = numbers.find(n => Number.isInteger(n) && n > 0 && n <= 50) || 1;
+            const userId = numbers.find(n => Number.isInteger(n) && n > 0 && n < 10000 && n !== categoryId) || 1;
+            const listingType = rowVals.find(v => ['sale', 'rent', 'job', 'service', 'bid_request', 'wanted'].includes(v)) || 'sale';
+            const finalCity = city || 'Lefkoşa';
+
+            try {
+              targetDb.prepare(`
+                INSERT OR REPLACE INTO listings (user_id, category_id, title, slug, description, price, currency, listing_type, status, location_city, location_district, views_count, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, 'TRY', ?, 'active', ?, 'Merkez', 10, datetime('now'), datetime('now'))
+              `).run(userId, categoryId, title, finalSlug, desc, price, listingType, finalCity);
+              lafListings++;
+            } catch (_) {}
+            continue;
+          }
+
+          // 3. Resim Tespiti: /uploads/ veya .jpg/.png/.webp
+          const imgUrl = rowVals.find(v => typeof v === 'string' && (v.includes('/uploads/') || /\.(jpg|png|webp|jpeg)$/i.test(v)));
+          if (imgUrl) {
+            const numbers = rowVals.filter(v => typeof v === 'number' && Number.isInteger(v));
+            const listingId = numbers[0] || 1;
+            try {
+              targetDb.prepare(`
+                INSERT OR REPLACE INTO listing_images (listing_id, image_url, is_primary, sort_order, created_at)
+                VALUES (?, ?, 1, 0, datetime('now'))
+              `).run(listingId, imgUrl);
+              lafImages++;
+            } catch (_) {}
+            continue;
+          }
+
+          // 4. Özellik Tespiti: room_count, km, brand, vb.
+          const attrKey = rowVals.find(v => typeof v === 'string' && ['room_count', 'square_meters', 'building_age', 'floor', 'fuel_type', 'gear_type', 'vehicle_brand', 'vehicle_model', 'vehicle_year', 'vehicle_km'].includes(v));
+          if (attrKey) {
+            const numbers = rowVals.filter(v => typeof v === 'number' && Number.isInteger(v));
+            const listingId = numbers[0] || 1;
+            const attrVal = rowVals.find(v => v !== attrKey && (typeof v === 'string' || typeof v === 'number')) || '';
+            try {
+              targetDb.prepare(`
+                INSERT OR REPLACE INTO listing_attributes (listing_id, attribute_key, attribute_value)
+                VALUES (?, ?, ?)
+              `).run(listingId, attrKey, String(attrVal));
+              lafAttrs++;
+            } catch (_) {}
+            continue;
           }
         }
+
+        console.log(`  -> lost_and_found içinden ${lafListings} ilan, ${lafUsers} kullanıcı, ${lafImages} resim, ${lafAttrs} özellik canlı tablolara aktarıldı.`);
       } catch (lafErr) {
         console.warn('lost_and_found aktarım uyarısı:', lafErr.message);
       }
     }
   }
 
-  // İlanların durumunu 'active', kullanıcıları 'is_active = 1' yap
+  // Tüm kullanıcıları ve ilanları aktif yap
   try {
     targetDb.exec("UPDATE listings SET status = 'active' WHERE status IS NULL OR status = '' OR status = 'pending'");
     targetDb.exec("UPDATE users SET is_active = 1 WHERE is_active IS NULL OR is_active = 0");
+    targetDb.exec("UPDATE categories SET is_active = 1 WHERE is_active IS NULL OR is_active = 0");
   } catch (_) {}
 
   // 4. Doğrulama Raporu
   console.log('\n--- [4/4] Doğrulama Raporu ---');
-  const finalTables = targetDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all().map(r => r.name);
+  const finalTables = targetDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'lost_and_found%'").all().map(r => r.name);
 
   let totalRows = 0;
   for (const tbl of finalTables) {
