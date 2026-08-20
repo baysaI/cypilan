@@ -67,6 +67,35 @@
                                    value="<%= user.full_name || '' %>" required maxlength="120">
                         </div>
 
+                        <% if (user.company_name || user.corporate_status !== 'none' || user.role === 'business' || user.role === 'agent') { %>
+                            <div class="p-3 bg-light rounded-3 mb-3 border">
+                                <h6 class="fw-bold mb-3 small text-primary d-flex align-items-center">
+                                    <i class="fa-solid fa-building me-2"></i>Kurumsal Firma Bilgileri
+                                </h6>
+                                <div class="mb-3">
+                                    <label for="companyName" class="form-label fw-medium small"><%= t('auth.company_name') %></label>
+                                    <input type="text" class="form-control" id="companyName" name="company_name"
+                                           value="<%= user.company_name || '' %>" maxlength="150" placeholder="<%= t('auth.company_name_placeholder') %>">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="corporateType" class="form-label fw-medium small"><%= t('auth.corporate_type') || 'Faaliyet Alanı / Kurumsal Grubu' %></label>
+                                    <select class="form-select cursor-pointer" id="corporateType" name="corporate_type">
+                                        <option value="real_estate" <%= user.corporate_type === 'real_estate' ? 'selected' : '' %>>🏡 <%= t('auth.corporate_type_real_estate') || 'Emlak & Gayrimenkul Ofisi' %></option>
+                                        <option value="auto" <%= user.corporate_type === 'auto' ? 'selected' : '' %>>🚗 <%= t('auth.corporate_type_auto') || 'Oto Galeri & Araç Satışı' %></option>
+                                        <option value="service" <%= user.corporate_type === 'service' ? 'selected' : '' %>>🛠️ <%= t('auth.corporate_type_service') || 'Usta & Hizmet Servisi' %></option>
+                                        <option value="construction" <%= user.corporate_type === 'construction' ? 'selected' : '' %>>🏗️ <%= t('auth.corporate_type_construction') || 'İnşaat & Kurumsal Tedarikçi' %></option>
+                                        <option value="shopping" <%= user.corporate_type === 'shopping' ? 'selected' : '' %>>🛍️ <%= t('auth.corporate_type_shopping') || 'Mağaza & Perakende / 2. El' %></option>
+                                        <option value="other" <%= (!user.corporate_type || user.corporate_type === 'other') ? 'selected' : '' %>>🏢 <%= t('auth.corporate_type_other') || 'Diğer Kurumsal İşletme' %></option>
+                                    </select>
+                                </div>
+                                <div class="mb-0">
+                                    <label for="corporateTaxNo" class="form-label fw-medium small"><%= t('auth.tax_no') %></label>
+                                    <input type="text" class="form-control" id="corporateTaxNo" name="corporate_tax_no"
+                                           value="<%= user.corporate_tax_no || '' %>" maxlength="50" placeholder="<%= t('auth.tax_no_placeholder') %>">
+                                </div>
+                            </div>
+                        <% } %>
+
                         <div class="mb-0">
                             <label for="bio" class="form-label fw-medium small"><%= t('profile_edit.bio') %></label>
                             <textarea class="form-control" id="bio" name="bio" rows="3" maxlength="500"

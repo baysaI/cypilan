@@ -126,6 +126,19 @@ const update = async (req, res) => {
             updates.phone = trimmed || null;
         }
 
+        if (req.body.company_name !== undefined) {
+            updates.company_name = req.body.company_name.trim() || null;
+        }
+
+        if (req.body.corporate_type !== undefined) {
+            const allowed = ['real_estate', 'auto', 'service', 'construction', 'shopping', 'other'];
+            updates.corporate_type = allowed.includes(req.body.corporate_type) ? req.body.corporate_type : null;
+        }
+
+        if (req.body.corporate_tax_no !== undefined) {
+            updates.corporate_tax_no = req.body.corporate_tax_no.trim() || null;
+        }
+
         updates.show_phone = req.body.hide_phone ? 0 : 1;
         updates.show_surname = req.body.hide_surname ? 0 : 1;
 

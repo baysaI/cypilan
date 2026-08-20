@@ -40,10 +40,10 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
         <form method="GET" action="/admin/users" class="row g-2 align-items-center">
-            <div class="col-12 col-md-5">
+            <div class="col-12 col-md-4">
                 <input type="text" name="q" class="form-control" placeholder="Ad veya e-posta" value="<%= f.q || '' %>">
             </div>
-            <div class="col-8 col-md-4">
+            <div class="col-6 col-md-3">
                 <select name="role" class="form-select">
                     <option value="">Tüm roller</option>
                     <option value="pending_corporate" <%= f.role === 'pending_corporate' ? 'selected' : '' %>>⏳ Kurumsal Onay Bekleyenler</option>
@@ -53,7 +53,18 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                     <option value="admin" <%= f.role === 'admin' ? 'selected' : '' %>>Yönetici</option>
                 </select>
             </div>
-            <div class="col-4 col-md-3 d-grid">
+            <div class="col-6 col-md-3">
+                <select name="corporateType" class="form-select">
+                    <option value="">Tüm Kurumsal Gruplar</option>
+                    <option value="real_estate" <%= (f.corporate_type === 'real_estate' || f.corporateType === 'real_estate') ? 'selected' : '' %>>🏡 Emlak Ofisleri</option>
+                    <option value="auto" <%= (f.corporate_type === 'auto' || f.corporateType === 'auto') ? 'selected' : '' %>>🚗 Oto Galerileri</option>
+                    <option value="service" <%= (f.corporate_type === 'service' || f.corporateType === 'service') ? 'selected' : '' %>>🛠️ Usta & Hizmet</option>
+                    <option value="construction" <%= (f.corporate_type === 'construction' || f.corporateType === 'construction') ? 'selected' : '' %>>🏗️ İnşaat / Tedarik</option>
+                    <option value="shopping" <%= (f.corporate_type === 'shopping' || f.corporateType === 'shopping') ? 'selected' : '' %>>🛍️ Mağaza & Perakende</option>
+                    <option value="other" <%= (f.corporate_type === 'other' || f.corporateType === 'other') ? 'selected' : '' %>>🏢 Diğer İşletme</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2 d-grid">
                 <button class="btn btn-primary">Filtrele</button>
             </div>
         </form>
@@ -109,9 +120,27 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                 <td class="d-none d-md-table-cell small"><%= u.phone || '-' %></td>
                                 <td>
                                     <div class="d-flex flex-column gap-1 align-items-start">
-                                        <span class="badge <%= (u.role === 'business' || u.role === 'agent') ? 'bg-primary bg-opacity-10 text-primary border border-primary-subtle' : (u.role === 'admin' ? 'bg-danger bg-opacity-10 text-danger border border-danger-subtle' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle') %> rounded-pill px-2 py-0.5">
-                                            <%= u.role === 'business' ? 'Kurumsal' : (u.role === 'agent' ? 'Emlakçı' : (u.role === 'admin' ? 'Yönetici' : 'Bireysel')) %>
-                                        </span>
+                                        <div class="d-flex flex-wrap gap-1 align-items-center">
+                                            <span class="badge <%= (u.role === 'business' || u.role === 'agent') ? 'bg-primary bg-opacity-10 text-primary border border-primary-subtle' : (u.role === 'admin' ? 'bg-danger bg-opacity-10 text-danger border border-danger-subtle' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle') %> rounded-pill px-2 py-0.5">
+                                                <%= u.role === 'business' ? 'Kurumsal' : (u.role === 'agent' ? 'Emlakçı' : (u.role === 'admin' ? 'Yönetici' : 'Bireysel')) %>
+                                            </span>
+                                            <% if (u.corporate_type) { %>
+                                                <%
+                                                    const corpTypeMap = {
+                                                        real_estate: { label: 'Emlak Ofisi', icon: 'fa-house-chimney-user', cls: 'badge bg-info bg-opacity-10 text-info border border-info-subtle' },
+                                                        auto: { label: 'Oto Galeri', icon: 'fa-car', cls: 'badge bg-warning bg-opacity-10 text-warning border border-warning-subtle' },
+                                                        service: { label: 'Usta & Hizmet', icon: 'fa-screwdriver-wrench', cls: 'badge bg-primary bg-opacity-10 text-primary border border-primary-subtle' },
+                                                        construction: { label: 'İnşaat/Tedarik', icon: 'fa-trowel-bricks', cls: 'badge bg-success bg-opacity-10 text-success border border-success-subtle' },
+                                                        shopping: { label: 'Mağaza/2.El', icon: 'fa-bag-shopping', cls: 'badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle' },
+                                                        other: { label: 'Kurumsal', icon: 'fa-building', cls: 'badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle' }
+                                                    };
+                                                    const cBadge = corpTypeMap[u.corporate_type] || corpTypeMap.other;
+                                                %>
+                                                <span class="<%= cBadge.cls %> rounded-pill px-2 py-0.5" style="font-size: 0.70rem;">
+                                                    <i class="fa-solid <%= cBadge.icon %> me-1"></i><%= cBadge.label %>
+                                                </span>
+                                            <% } %>
+                                        </div>
                                         <% if (u.corporate_status === 'pending') { %>
                                             <span class="badge bg-warning text-dark border border-warning-subtle rounded-pill px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1" style="font-size: 0.72rem;" title="Kurumsal Hesap Başvurusu">
                                                 <i class="fa-solid fa-hourglass-half text-dark"></i> Onay Bekliyor
@@ -205,6 +234,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                             data-role="<%= u.role || 'user' %>"
                                             data-company="<%= u.company_name || '' %>"
                                             data-corporate-status="<%= u.corporate_status || 'none' %>"
+                                            data-corporate-type="<%= u.corporate_type || '' %>"
                                             data-is-verified="<%= u.is_verified ? '1' : '0' %>"
                                             data-listings="<%= u.listing_count || 0 %>"
                                             title="Düzenle">
@@ -396,6 +426,18 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                             </select>
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">Kurumsal Sektör / Grubu</label>
+                        <select name="corporateType" id="editCorporateType" class="form-select">
+                            <option value="">Belirtilmemiş / Genel</option>
+                            <option value="real_estate">🏡 Emlak & Gayrimenkul Ofisi</option>
+                            <option value="auto">🚗 Oto Galeri & Vasıta</option>
+                            <option value="service">🛠️ Usta & Hizmet Servisi</option>
+                            <option value="construction">🏗️ İnşaat & Kurumsal Tedarikçi</option>
+                            <option value="shopping">🛍️ Mağaza & Perakende / 2. El</option>
+                            <option value="other">🏢 Diğer Kurumsal İşletme</option>
+                        </select>
+                    </div>
 
                     <!-- Email Verification Toggle -->
                     <div class="mb-3 form-check form-switch bg-light rounded p-3 border ms-0">
@@ -544,6 +586,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const role = this.getAttribute('data-role');
             const company = this.getAttribute('data-company');
             const corporateStatus = this.getAttribute('data-corporate-status') || 'none';
+            const corporateType = this.getAttribute('data-corporate-type') || '';
             const isVerified = this.getAttribute('data-is-verified') === '1';
             const listings = this.getAttribute('data-listings') || '0';
 
@@ -560,6 +603,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (document.getElementById('editCompanyName')) document.getElementById('editCompanyName').value = company;
             if (document.getElementById('editCorporateStatus')) {
                 document.getElementById('editCorporateStatus').value = corporateStatus;
+            }
+            if (document.getElementById('editCorporateType')) {
+                document.getElementById('editCorporateType').value = corporateType;
             }
             if (document.getElementById('editIsVerified')) document.getElementById('editIsVerified').checked = isVerified;
             if (document.getElementById('editPassword')) document.getElementById('editPassword').value = '';

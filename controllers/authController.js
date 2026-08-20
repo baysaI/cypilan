@@ -21,6 +21,7 @@ const startAuthenticatedSession = (req, user, redirectTo, successMessage, res) =
         req.session.userEmail = user.email;
         req.session.userName = user.full_name;
         req.session.userCorporateStatus = user.corporate_status || 'none';
+        req.session.userCorporateType = user.corporate_type || null;
         req.session.userCompanyName = user.company_name || null;
         req.session.userIsVerified = Boolean(user.is_verified);
 
@@ -146,7 +147,10 @@ const register = async (req, res) => {
         const phone = String(req.body.phone || '').trim();
         const companyName = String(req.body.companyName || '').trim();
         const taxNo = String(req.body.taxNo || '').trim();
+        const corporateType = String(req.body.corporateType || '').trim();
         const isCorporate = accountType === 'corporate';
+        const allowedCorporateTypes = ['real_estate', 'auto', 'service', 'construction', 'shopping', 'other'];
+        const validCorporateType = allowedCorporateTypes.includes(corporateType) ? corporateType : 'other';
 
         if (!email || !password || !fullName) {
             return saveFormAndRedirect('flash.fill_required_fields');
@@ -191,6 +195,7 @@ const register = async (req, res) => {
             company_name: isCorporate ? (companyName || fullName) : null,
             corporate_status: isCorporate ? 'pending' : 'none',
             corporate_tax_no: isCorporate ? (taxNo || null) : null,
+            corporate_type: isCorporate ? validCorporateType : null,
             corporate_applied_at: isCorporate ? new Date().toISOString() : null
         });
 

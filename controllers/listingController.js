@@ -438,9 +438,10 @@ const create = async (req, res, next) => {
             return abort(req, res, 'flash.listing_phone_required', backToForm);
         }
 
-        const rootSlug = await Category.getRootSlug(parseInt(category_id, 10));
+        const category = await Category.getBySlug(parseInt(category_id, 10));
+        const rootSlug = category ? await Category.getRootSlug(category.id) : null;
 
-        if (!rootSlug) {
+        if (!rootSlug || !category) {
             return abort(req, res, 'flash.select_valid_category', backToForm);
         }
 
@@ -495,6 +496,12 @@ const create = async (req, res, next) => {
         // the flag is ignored elsewhere even if the form is bypassed.
         const collectsBids = Boolean(req.body.collect_bids) && BID_ELIGIBLE_ROOTS.includes(rootSlug);
 
+        const NO_RENT_SLUGS = ['mobilya', 'giyim', 'mobilya-dekorasyon-toptan'];
+        let selectedType = req.body.listing_type;
+        if (category && NO_RENT_SLUGS.includes(category.slug) && selectedType === 'rent') {
+            selectedType = 'sale';
+        }
+
         const listing = await Listing.create({
             user_id: req.session.userId,
             category_id,
@@ -503,7 +510,7 @@ const create = async (req, res, next) => {
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : 'TRY',
-            listing_type: collectsBids ? 'bid_request' : (['sale', 'rent', 'wanted', 'job', 'service'].includes(req.body.listing_type) ? req.body.listing_type : 'sale'),
+            listing_type: collectsBids ? 'bid_request' : (['sale', 'rent', 'wanted', 'job', 'service'].includes(selectedType) ? selectedType : 'sale'),
             city,
             district,
             status,
@@ -511,6 +518,29 @@ const create = async (req, res, next) => {
             ...listingBadges.fromBody(req.body, rootSlug),
             images
         });
+
+        // Broadcast targeted notification to matching corporate businesses if user opted in for bids
+        if (collectsBids) {
+            let targetCorporateType = null;
+            if (rootSlug === 'emlak') targetCorporateType = 'real_estate';
+            else if (rootSlug === 'vasita') targetCorporateType = 'auto';
+            else if (rootSlug === 'usta-hizmetler' || rootSlug === 'ustalar') targetCorporateType = 'service';
+
+            const groupName = rootSlug === 'emlak' ? 'Emlakçılardan' : (rootSlug === 'vasita' ? 'Galericilerden' : 'Kurumsal İşletmelerden');
+            try {
+                const Notification = require('../models/Notification');
+                await Notification.notifyCorporateGroup({
+                    corporate_type: targetCorporateType,
+                    actor_id: req.session.userId,
+                    exclude_user_id: req.session.userId,
+                    title: rootSlug === 'emlak' ? 'Yeni Emlak Teklif Talebi 🏡' : (rootSlug === 'vasita' ? 'Yeni Araç Teklif Talebi 🚗' : 'Yeni Teklif Talebi 🤝'),
+                    message: `"${listing.title}" ilanı için kullanıcı ${groupName} teklif bekliyor. Hemen teklifinizi sunun!`,
+                    link_url: '/teklifler'
+                });
+            } catch (notifyErr) {
+                console.error('Notify corporate group error:', notifyErr);
+            }
+        }
 
         // Collect and save structured listing attributes (rooms, size, build_year, brand, km, features etc.)
         const attributes = {};
@@ -651,12 +681,18 @@ const update = async (req, res, next) => {
 
         const nextStatus = OWNER_EDITABLE_STATUSES.includes(status) ? status : listing.status;
 
+        const NO_RENT_SLUGS = ['mobilya', 'giyim', 'mobilya-dekorasyon-toptan'];
+        let updatedType = req.body.listing_type;
+        if (listing.category_slug && NO_RENT_SLUGS.includes(listing.category_slug) && updatedType === 'rent') {
+            updatedType = 'sale';
+        }
+
         const updates = {
             title: title.trim(),
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
             currency: ALLOWED_CURRENCIES.includes(currency) ? currency : listing.currency,
-            listing_type: (req.body.listing_type && ['sale', 'rent', 'wanted', 'job', 'service'].includes(req.body.listing_type)) ? req.body.listing_type : listing.listing_type,
+            listing_type: (updatedType && ['sale', 'rent', 'wanted', 'job', 'service'].includes(updatedType)) ? updatedType : listing.listing_type,
             location_city: cities.isKnown(city) ? city : listing.location_city,
             location_district: district ? district.trim() : null,
             status: nextStatus,

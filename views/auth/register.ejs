@@ -52,6 +52,18 @@ const fData = (typeof formData !== 'undefined' && formData) ? formData : {};
                             </div>
 
                             <div class="mb-3">
+                                <label for="corporateType" class="form-label fw-medium small"><%= t('auth.corporate_type') || 'Faaliyet Alanı / Kurumsal Grubu' %> <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary cursor-pointer" id="corporateType" name="corporateType">
+                                    <option value="real_estate" <%= fData.corporateType === 'real_estate' ? 'selected' : '' %>>🏡 <%= t('auth.corporate_type_real_estate') || 'Emlak & Gayrimenkul Ofisi' %></option>
+                                    <option value="auto" <%= fData.corporateType === 'auto' ? 'selected' : '' %>>🚗 <%= t('auth.corporate_type_auto') || 'Oto Galeri & Araç Satışı' %></option>
+                                    <option value="service" <%= fData.corporateType === 'service' ? 'selected' : '' %>>🛠️ <%= t('auth.corporate_type_service') || 'Usta & Hizmet Servisi' %></option>
+                                    <option value="construction" <%= fData.corporateType === 'construction' ? 'selected' : '' %>>🏗️ <%= t('auth.corporate_type_construction') || 'İnşaat & Kurumsal Tedarikçi' %></option>
+                                    <option value="shopping" <%= fData.corporateType === 'shopping' ? 'selected' : '' %>>🛍️ <%= t('auth.corporate_type_shopping') || 'Mağaza & Perakende / 2. El' %></option>
+                                    <option value="other" <%= fData.corporateType === 'other' ? 'selected' : '' %>>🏢 <%= t('auth.corporate_type_other') || 'Diğer Kurumsal İşletme' %></option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="taxNo" class="form-label fw-medium small"><%= t('auth.tax_no') %> <span class="text-muted small">(<%= t('common.optional') %>)</span></label>
                                 <input type="text" class="form-control form-control-lg rounded-3 bg-light border-0 shadow-none focus-ring-primary" id="taxNo" name="taxNo" placeholder="<%= t('auth.tax_no_placeholder') %>" value="<%= fData.taxNo || '' %>">
                             </div>

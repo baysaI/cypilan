@@ -44,6 +44,47 @@ class Notification {
     return this.findById(info.lastInsertRowid);
   }
 
+  /**
+   * Broadcasts a notification to an entire corporate category / group (e.g. real_estate, auto).
+   */
+  static async notifyCorporateGroup({ corporate_type = null, exclude_user_id = null, actor_id = null, title, message, link_url = null }) {
+    if (!title || !message) return;
+    const db = getDb();
+    this.ensureTable(db);
+
+    let where = "WHERE role IN ('business', 'agent') AND is_active = 1 AND corporate_status = 'approved'";
+    const params = [];
+
+    if (corporate_type) {
+      where += " AND (corporate_type = ? OR (corporate_type IS NULL AND role IN ('business', 'agent')))";
+      params.push(corporate_type);
+    }
+    if (exclude_user_id) {
+      where += " AND id != ?";
+      params.push(exclude_user_id);
+    }
+
+    let validActorId = null;
+    if (actor_id) {
+      const actorRow = db.prepare('SELECT id FROM users WHERE id = ?').get([actor_id]);
+      if (actorRow) validActorId = actorRow.id;
+    }
+
+    const recipients = db.prepare(`SELECT id FROM users ${where}`).all(params);
+    const stmt = db.prepare(`
+      INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
+      VALUES (?, ?, 'bid', ?, ?, ?, 0, CURRENT_TIMESTAMP)
+    `);
+
+    for (const r of recipients) {
+      try {
+        stmt.run([r.id, validActorId, title, message, link_url]);
+      } catch (err) {
+        console.error('Notify corporate user error:', err);
+      }
+    }
+  }
+
   static async findById(id, userId = null) {
     const db = getDb();
     this.ensureTable(db);

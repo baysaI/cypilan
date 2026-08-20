@@ -112,13 +112,13 @@
                                 <% if (mainCat.children && mainCat.children.length > 0) { %>
                                     <optgroup label="<%= mainName %>">
                                         <% mainCat.children.forEach(function(subCat) { %>
-                                            <option value="<%= subCat.id %>" data-root="<%= mainCat.slug %>" <%= (typeof formData !== 'undefined' && String(formData.category_id) === String(subCat.id)) ? 'selected' : '' %>>
+                                            <option value="<%= subCat.id %>" data-root="<%= mainCat.slug %>" data-slug="<%= subCat.slug %>" <%= (typeof formData !== 'undefined' && String(formData.category_id) === String(subCat.id)) ? 'selected' : '' %>>
                                                 <%= subCat['name_' + (typeof lang !== 'undefined' ? lang : 'tr')] || subCat.name_tr %>
                                             </option>
                                         <% }); %>
                                     </optgroup>
                                 <% } else { %>
-                                    <option value="<%= mainCat.id %>" data-root="<%= mainCat.slug %>" <%= (typeof formData !== 'undefined' && String(formData.category_id) === String(mainCat.id)) ? 'selected' : '' %>>
+                                    <option value="<%= mainCat.id %>" data-root="<%= mainCat.slug %>" data-slug="<%= mainCat.slug %>" <%= (typeof formData !== 'undefined' && String(formData.category_id) === String(mainCat.id)) ? 'selected' : '' %>>
                                         <%= mainName %>
                                     </option>
                                 <% } %>
@@ -544,6 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const syncCategoryOptions = function () {
             const option = categorySelect.options[categorySelect.selectedIndex];
             const root = option ? option.getAttribute('data-root') : null;
+            const slug = option ? option.getAttribute('data-slug') : null;
 
             const bidEligible = BID_ROOTS.indexOf(root) > -1;
             if (bidEligible) {
@@ -703,26 +704,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (purposeHelpText) purposeHelpText.textContent = 'Hizmet sunuyorsanız "Hizmet Veriyorum", usta veya hizmet arıyorsanız "Hizmet Arıyorum" seçin.';
                 } else if (root === 'ikinci-el') {
-                    // İkinci El: Satılık / Kiralık / Arıyorum
-                    purposeSaleCol.className = 'col-4';
-                    purposeSaleCol.hidden = false;
-                    typeSale.value = 'sale';
-                    if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık" %>';
-                    if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-tag mb-1 fs-5';
+                    const isNoRent = (slug === 'mobilya' || slug === 'giyim' || slug === 'mobilya-dekorasyon-toptan');
+                    if (isNoRent) {
+                        // Mobilya & Giyim: Kiralama seçeneği devre dışı -> Satılık / Arıyorum (2 kolon)
+                        purposeSaleCol.className = 'col-6';
+                        purposeSaleCol.hidden = false;
+                        typeSale.value = 'sale';
+                        if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık" %>';
+                        if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-tag mb-1 fs-5';
 
-                    purposeRentCol.className = 'col-4';
-                    purposeRentCol.hidden = false;
-                    typeRent.value = 'rent';
-                    if (typeRentText) typeRentText.textContent = '<%= t("listing.type_rent") || "Kiralık" %>';
-                    if (typeRentIcon) typeRentIcon.className = 'fa-solid fa-key mb-1 fs-5';
+                        purposeRentCol.hidden = true;
+                        if (typeRent.checked) typeSale.checked = true;
 
-                    purposeWantedCol.className = 'col-4';
-                    purposeWantedCol.hidden = false;
-                    typeWanted.value = 'wanted';
-                    if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_wanted") || "Arıyorum" %>';
-                    if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
+                        purposeWantedCol.className = 'col-6';
+                        purposeWantedCol.hidden = false;
+                        typeWanted.value = 'wanted';
+                        if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_wanted") || "Arıyorum" %>';
+                        if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
 
-                    if (purposeHelpText) purposeHelpText.textContent = 'Satılık, kiralık ürün veya aradığınız bir eşya/ürün için ilan verebilirsiniz.';
+                        if (purposeHelpText) purposeHelpText.textContent = 'Satılık ürün veya aradığınız bir eşya/ürün için ilan verebilirsiniz.';
+                    } else {
+                        // İkinci El: Satılık / Kiralık / Arıyorum (3 kolon)
+                        purposeSaleCol.className = 'col-4';
+                        purposeSaleCol.hidden = false;
+                        typeSale.value = 'sale';
+                        if (typeSaleText) typeSaleText.textContent = '<%= t("listing.type_sale") || "Satılık" %>';
+                        if (typeSaleIcon) typeSaleIcon.className = 'fa-solid fa-tag mb-1 fs-5';
+
+                        purposeRentCol.className = 'col-4';
+                        purposeRentCol.hidden = false;
+                        typeRent.value = 'rent';
+                        if (typeRentText) typeRentText.textContent = '<%= t("listing.type_rent") || "Kiralık" %>';
+                        if (typeRentIcon) typeRentIcon.className = 'fa-solid fa-key mb-1 fs-5';
+
+                        purposeWantedCol.className = 'col-4';
+                        purposeWantedCol.hidden = false;
+                        typeWanted.value = 'wanted';
+                        if (typeWantedText) typeWantedText.textContent = '<%= t("listing.type_wanted") || "Arıyorum" %>';
+                        if (typeWantedIcon) typeWantedIcon.className = 'fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon';
+
+                        if (purposeHelpText) purposeHelpText.textContent = 'Satılık, kiralık ürün veya aradığınız bir eşya/ürün için ilan verebilirsiniz.';
+                    }
                 } else if (root === 'kurumsal-tedarikci') {
                     // Kurumsal Tedarikçi: Tedarikçi / Talep
                     purposeSaleCol.className = 'col-6';

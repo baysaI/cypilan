@@ -65,6 +65,7 @@ const COLUMN_MIGRATIONS = [
   { table: 'support_conversations', column: 'agent_name', ddl: 'ALTER TABLE support_conversations ADD COLUMN agent_name TEXT' },
   { table: 'users', column: 'corporate_status', ddl: "ALTER TABLE users ADD COLUMN corporate_status TEXT DEFAULT 'none'" },
   { table: 'users', column: 'corporate_tax_no', ddl: 'ALTER TABLE users ADD COLUMN corporate_tax_no TEXT' },
+  { table: 'users', column: 'corporate_type', ddl: 'ALTER TABLE users ADD COLUMN corporate_type TEXT' },
   { table: 'users', column: 'corporate_applied_at', ddl: 'ALTER TABLE users ADD COLUMN corporate_applied_at DATETIME' },
   { table: 'users', column: 'corporate_reviewed_at', ddl: 'ALTER TABLE users ADD COLUMN corporate_reviewed_at DATETIME' }
 ];

@@ -21,6 +21,11 @@ CREATE TABLE IF NOT EXISTS users (
   email_verification_token TEXT,
   email_verification_expires DATETIME,
   last_seen_at DATETIME,
+  corporate_status TEXT DEFAULT 'none',
+  corporate_tax_no TEXT,
+  corporate_type TEXT,
+  corporate_applied_at DATETIME,
+  corporate_reviewed_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

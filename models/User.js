@@ -26,6 +26,7 @@ class User {
       company_name = null,
       corporate_status = 'none',
       corporate_tax_no = null,
+      corporate_type = null,
       corporate_applied_at = null,
       language_pref = 'tr',
       currency_pref = 'TRY',
@@ -42,9 +43,9 @@ class User {
     }
 
     const result = db.prepare(`
-      INSERT INTO users (email, password_hash, full_name, phone, role, company_name, corporate_status, corporate_tax_no, corporate_applied_at, language_pref, currency_pref, has_password)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run([email, password_hash, full_name, phone, role, company_name, corporate_status, corporate_tax_no, corporate_applied_at, language_pref, currency_pref, has_password]);
+      INSERT INTO users (email, password_hash, full_name, phone, role, company_name, corporate_status, corporate_tax_no, corporate_type, corporate_applied_at, language_pref, currency_pref, has_password)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run([email, password_hash, full_name, phone, role, company_name, corporate_status, corporate_tax_no, corporate_type, corporate_applied_at, language_pref, currency_pref, has_password]);
 
     return Number(result.lastInsertRowid);
   }
@@ -152,6 +153,10 @@ class User {
       where += ' AND u.corporate_status = ?';
       params.push(filters.corporate_status);
     }
+    if (filters.corporate_type) {
+      where += ' AND u.corporate_type = ?';
+      params.push(filters.corporate_type);
+    }
     if (filters.q) {
       where += ' AND (u.full_name LIKE ? OR u.email LIKE ? OR u.company_name LIKE ?)';
       params.push(`%${filters.q}%`, `%${filters.q}%`, `%${filters.q}%`);
@@ -162,7 +167,7 @@ class User {
     const offset = (page - 1) * limit;
     const data = db.prepare(`
       SELECT u.id, u.email, u.full_name, u.phone, u.role, u.is_active, u.is_verified,
-             u.company_name, u.corporate_status, u.corporate_tax_no, u.corporate_applied_at,
+             u.company_name, u.corporate_status, u.corporate_tax_no, u.corporate_type, u.corporate_applied_at,
              u.corporate_reviewed_at, u.created_at, u.last_seen_at,
              (SELECT COUNT(*) FROM listings WHERE user_id = u.id) as listing_count
       FROM users u${where}
@@ -178,15 +183,22 @@ class User {
     return row ? row.total : 0;
   }
 
-  static async approveCorporate(id, role = 'business') {
+  static async approveCorporate(id, role = 'business', corporateType = null) {
     const allowed = ['business', 'agent'];
     const targetRole = allowed.includes(role) ? role : 'business';
     const db = getDb();
-    const result = db.prepare(`
+    let query = `
       UPDATE users 
-      SET role = ?, corporate_status = 'approved', corporate_reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
-      WHERE id = ?
-    `).run([targetRole, id]);
+      SET role = ?, corporate_status = 'approved', corporate_reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+    `;
+    const params = [targetRole];
+    if (corporateType) {
+      query += ', corporate_type = ?';
+      params.push(corporateType);
+    }
+    query += ' WHERE id = ?';
+    params.push(id);
+    const result = db.prepare(query).run(params);
     return result.changes > 0;
   }
 
@@ -200,17 +212,18 @@ class User {
     return result.changes > 0;
   }
 
-  static async applyForCorporate(id, { companyName, taxNo } = {}) {
+  static async applyForCorporate(id, { companyName, taxNo, corporateType } = {}) {
     const db = getDb();
     const result = db.prepare(`
       UPDATE users 
       SET company_name = COALESCE(?, company_name), 
           corporate_tax_no = COALESCE(?, corporate_tax_no), 
+          corporate_type = COALESCE(?, corporate_type),
           corporate_status = 'pending', 
           corporate_applied_at = CURRENT_TIMESTAMP, 
           updated_at = CURRENT_TIMESTAMP 
       WHERE id = ?
-    `).run([companyName || null, taxNo || null, id]);
+    `).run([companyName || null, taxNo || null, corporateType || null, id]);
     return result.changes > 0;
   }
 

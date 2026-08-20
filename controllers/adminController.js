@@ -68,7 +68,11 @@ const dashboard = async (req, res) => {
 const users = async (req, res) => {
     try {
         const page = parseInt(req.query.page, 10) || 1;
-        const filters = { role: req.query.role, q: req.query.q };
+        const filters = {
+            role: req.query.role,
+            q: req.query.q,
+            corporate_type: req.query.corporate_type || req.query.corporateType
+        };
         const result = await User.findAll(page, PAGE_SIZE, filters);
         const pendingReports = await Report.countPending();
 
@@ -592,6 +596,12 @@ const updateUser = async (req, res) => {
             targetCorporateStatus = 'approved';
         }
 
+        const allowedCorporateTypes = ['real_estate', 'auto', 'service', 'construction', 'shopping', 'other'];
+        let targetCorporateType = user.corporate_type || null;
+        if (req.body.corporateType !== undefined) {
+            targetCorporateType = allowedCorporateTypes.includes(req.body.corporateType) ? req.body.corporateType : null;
+        }
+
         const updateData = {
             full_name: String(fullName || user.full_name).trim(),
             email,
@@ -599,6 +609,7 @@ const updateUser = async (req, res) => {
             role: targetRole,
             company_name: companyName ? String(companyName).trim() : null,
             corporate_status: targetCorporateStatus,
+            corporate_type: targetCorporateType,
             is_verified: (isVerified === '1' || isVerified === 1 || isVerified === 'on' || isVerified === true) ? 1 : 0
         };
 
@@ -633,7 +644,8 @@ const approveCorporate = async (req, res) => {
             return res.redirect('/admin/users');
         }
 
-        await User.approveCorporate(id, targetRole);
+        const corporateType = req.body.corporateType || user.corporate_type || null;
+        await User.approveCorporate(id, targetRole, corporateType);
 
         const notifyT = translatorFor(user);
         await Notification.create({

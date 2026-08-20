@@ -70,27 +70,45 @@
                                         </label>
                                     </div>
                                 <% } else if (activeRoot === 'ikinci-el') { %>
-                                    <div class="col-4">
-                                        <input type="radio" class="btn-check" name="listing_type" id="typeSale" value="sale" <%= (!listing.listing_type || listing.listing_type === 'sale') ? 'checked' : '' %>>
-                                        <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeSale">
-                                            <i class="fa-solid fa-tag mb-1 fs-5"></i>
-                                            <span><%= t('listing.type_sale') || 'Satılık' %></span>
-                                        </label>
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="radio" class="btn-check" name="listing_type" id="typeRent" value="rent" <%= (listing.listing_type === 'rent') ? 'checked' : '' %>>
-                                        <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeRent">
-                                            <i class="fa-solid fa-key mb-1 fs-5"></i>
-                                            <span><%= t('listing.type_rent') || 'Kiralık' %></span>
-                                        </label>
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="radio" class="btn-check" name="listing_type" id="typeWanted" value="wanted" <%= (listing.listing_type === 'wanted') ? 'checked' : '' %>>
-                                        <label class="btn btn-outline-warning w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center wanted-purpose-btn" for="typeWanted">
-                                            <i class="fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon"></i>
-                                            <span><%= t('listing.type_wanted') || 'Arıyorum' %></span>
-                                        </label>
-                                    </div>
+                                    <% const isNoRentCat = (listing.category_slug === 'mobilya' || listing.category_slug === 'giyim' || listing.category_slug === 'mobilya-dekorasyon-toptan'); %>
+                                    <% if (isNoRentCat) { %>
+                                        <div class="col-6">
+                                            <input type="radio" class="btn-check" name="listing_type" id="typeSale" value="sale" <%= (!listing.listing_type || listing.listing_type === 'sale' || listing.listing_type === 'rent') ? 'checked' : '' %>>
+                                            <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeSale">
+                                                <i class="fa-solid fa-tag mb-1 fs-5"></i>
+                                                <span><%= t('listing.type_sale') || 'Satılık' %></span>
+                                            </label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="radio" class="btn-check" name="listing_type" id="typeWanted" value="wanted" <%= (listing.listing_type === 'wanted') ? 'checked' : '' %>>
+                                            <label class="btn btn-outline-warning w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center wanted-purpose-btn" for="typeWanted">
+                                                <i class="fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon"></i>
+                                                <span><%= t('listing.type_wanted') || 'Arıyorum' %></span>
+                                            </label>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="col-4">
+                                            <input type="radio" class="btn-check" name="listing_type" id="typeSale" value="sale" <%= (!listing.listing_type || listing.listing_type === 'sale') ? 'checked' : '' %>>
+                                            <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeSale">
+                                                <i class="fa-solid fa-tag mb-1 fs-5"></i>
+                                                <span><%= t('listing.type_sale') || 'Satılık' %></span>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="radio" class="btn-check" name="listing_type" id="typeRent" value="rent" <%= (listing.listing_type === 'rent') ? 'checked' : '' %>>
+                                            <label class="btn btn-outline-primary w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center" for="typeRent">
+                                                <i class="fa-solid fa-key mb-1 fs-5"></i>
+                                                <span><%= t('listing.type_rent') || 'Kiralık' %></span>
+                                            </label>
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="radio" class="btn-check" name="listing_type" id="typeWanted" value="wanted" <%= (listing.listing_type === 'wanted') ? 'checked' : '' %>>
+                                            <label class="btn btn-outline-warning w-100 h-100 rounded-3 py-2 px-1 fw-semibold small d-flex flex-column align-items-center justify-content-center wanted-purpose-btn" for="typeWanted">
+                                                <i class="fa-solid fa-hand-holding-heart mb-1 fs-5 wanted-icon"></i>
+                                                <span><%= t('listing.type_wanted') || 'Arıyorum' %></span>
+                                            </label>
+                                        </div>
+                                    <% } %>
                                 <% } else { %>
                                     <div class="col-4">
                                         <input type="radio" class="btn-check" name="listing_type" id="typeSale" value="sale" <%= (!listing.listing_type || listing.listing_type === 'sale') ? 'checked' : '' %>>

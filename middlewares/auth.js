@@ -136,6 +136,7 @@ const setUserLocal = async (req, res, next) => {
                     req.session.userIsVerified = isVerified;
                     req.session.userAvatar = userAvatar;
                     req.session.userCorporateStatus = corporateStatus;
+                    req.session.userCorporateType = uData.corporate_type || null;
                     req.session.userCompanyName = uData.company_name || null;
                     req.session.userRole = uData.role;
                 }
@@ -150,6 +151,7 @@ const setUserLocal = async (req, res, next) => {
             role: (req.session && req.session.userRole) || (user && user.role),
             company_name: (req.session && req.session.userCompanyName) || (user && user.company_name) || null,
             corporate_status: corporateStatus || (user && user.corporate_status) || 'none',
+            corporate_type: (req.session && req.session.userCorporateType) || (user && user.corporate_type) || null,
             avatar_url: userAvatar || (user && user.avatar_url) || null,
             is_verified: isVerified,
             show_surname: (user && typeof user.show_surname !== 'undefined') ? user.show_surname : 0
