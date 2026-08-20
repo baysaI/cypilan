@@ -4,8 +4,8 @@ const User = require('../models/User');
 
 const index = async (req, res) => {
     try {
-        const featuredListings = await Listing.getFeatured(8);
-        const recentListings = await Listing.getRecent(12);
+        const featuredListings = await Listing.getFeatured(24);
+        const recentListings = await Listing.getRecent(24);
         const categories = await Category.getMainCategoriesWithCount();
 
         const totalListings = await Listing.countAll();

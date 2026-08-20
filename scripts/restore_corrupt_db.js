@@ -334,6 +334,9 @@ async function restore() {
     }
   } catch (_) {}
 
+  // Bütün aktif ilanları vitrine (is_featured = 1) ekle
+  targetDb.exec("UPDATE listings SET is_featured = 1 WHERE status = 'active'");
+
   // C. GERÇEK İLAN RESİMLERİ (Zaman damgasıyla %100 KUSURSUZ EŞLEME)
   const insertImageStmt = targetDb.prepare(`
     INSERT INTO listing_images (listing_id, image_url, is_primary, sort_order, created_at)
@@ -474,11 +477,24 @@ async function restore() {
   const currentWalPath = path.join(dbDir, 'cypilan.db-wal');
   const currentShmPath = path.join(dbDir, 'cypilan.db-shm');
 
-  if (fs.existsSync(currentDbPath)) try { fs.unlinkSync(currentDbPath); } catch (_) {}
-  if (fs.existsSync(currentWalPath)) try { fs.unlinkSync(currentWalPath); } catch (_) {}
-  if (fs.existsSync(currentShmPath)) try { fs.unlinkSync(currentShmPath); } catch (_) {}
+  try {
+    if (fs.existsSync(currentWalPath)) fs.unlinkSync(currentWalPath);
+  } catch (_) {}
+  try {
+    if (fs.existsSync(currentShmPath)) fs.unlinkSync(currentShmPath);
+  } catch (_) {}
 
-  fs.copyFileSync(tempTargetDb, currentDbPath);
+  try {
+    fs.copyFileSync(tempTargetDb, currentDbPath);
+    console.log('cypilan.db başarıyla güncellendi.');
+  } catch (err) {
+    console.error('\n⚠️ HATA: cypilan.db dosyası kilitli olduğu için üzerine yazılamadı!');
+    console.error('Lütfen şu komutları sırasıyla çalıştırın:');
+    console.error('  1. pm2 stop all');
+    console.error('  2. node scripts/restore_corrupt_db.js');
+    console.error('  3. pm2 start all\n');
+    throw err;
+  }
 
   console.log('\n================================================================');
   console.log('🎉 TÜM İLANLAR VE HENA\'NIN İLANI VİTRİNE VE ANA SAYFAYA EKLENDİ!');
