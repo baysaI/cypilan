@@ -1,0 +1,247 @@
+<%
+const c = (typeof counts !== 'undefined' && counts) ? counts : { all: 0, roles: {}, languages: {} };
+const d = (typeof draft !== 'undefined' && draft) ? draft : {};
+const past = (typeof history !== 'undefined' && history) ? history : [];
+
+const ROLE_LABELS = {
+    user: 'Bireysel kullanıcılar',
+    business: 'Kurumsal hesaplar',
+    agent: 'Emlak / acente danışmanları',
+    admin: 'Yöneticiler'
+};
+const LANG_LABELS = {
+    tr: '🇹🇷 Türkçe okuyanlar',
+    en: '🇬🇧 İngilizce okuyanlar',
+    el: '🇬🇷 Yunanca okuyanlar',
+    ru: '🇷🇺 Rusça okuyanlar',
+    fa: '🇮🇷 Farsça okuyanlar'
+};
+const AUDIENCE_LABELS = { all: 'Tüm aktif üyeler', role: 'Hesap türüne göre', language: 'Dile göre', specific: 'Belirli e-postalar' };
+
+const selectedAudience = d.audience || 'all';
+%>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="fs-4 fw-bold mb-0"><i class="fa-solid fa-bullhorn text-primary me-2"></i>Duyuru Gönder</h1>
+</div>
+
+<div class="alert alert-warning border-0 shadow-sm d-flex gap-3 align-items-start">
+    <i class="fa-solid fa-triangle-exclamation fs-5 mt-1"></i>
+    <div class="small">
+        <strong class="d-block">Gönderilen duyuru geri alınamaz.</strong>
+        Her alıcının bildirim listesine ayrı bir kayıt düşer. Askıya alınmış hesaplar
+        listeye dahil edilmez — giriş yapamadıkları için okuyamazlar.
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-xl-7">
+        <form action="/admin/duyuru" method="POST" id="broadcastForm" class="card border-0 shadow-sm">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label for="bTitle" class="form-label small fw-semibold text-muted">
+                        Başlık <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="bTitle" name="title" required
+                           maxlength="<%= limits.titleMax %>" value="<%= d.title || '' %>"
+                           placeholder="Örn: Yeni kategori: Kurumsal Tedarikçi Ağı">
+                </div>
+
+                <div class="mb-3">
+                    <label for="bMessage" class="form-label small fw-semibold text-muted">
+                        Mesaj <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control" id="bMessage" name="message" rows="6" required
+                              minlength="<%= limits.messageMin %>" maxlength="<%= limits.messageMax %>"
+                              placeholder="Kullanıcılara ne söylemek istiyorsunuz?"><%= d.message || '' %></textarea>
+                    <div class="form-text small d-flex justify-content-between">
+                        <span>
+                            Bu metin yazdığınız dilde gönderilir; kullanıcı diline göre çevrilmez.
+                            Çok dilli duyuru için aşağıdan <strong>dile göre</strong> gönderim yapın.
+                        </span>
+                        <span id="bMessageCount" class="text-nowrap ms-2">0/<%= limits.messageMax %></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="bLink" class="form-label small fw-semibold text-muted">Bağlantı (opsiyonel)</label>
+                    <input type="text" class="form-control" id="bLink" name="link_url"
+                           value="<%= d.link_url || '' %>" placeholder="/listings?category=kurumsal-tedarikci">
+                    <div class="form-text small">
+                        Bildirimdeki "Detayları Gör" butonu buraya gider. Yalnızca site içi
+                        yol kabul edilir (<code>/</code> ile başlamalı).
+                    </div>
+                </div>
+
+                <hr>
+
+                <label class="form-label small fw-semibold text-muted d-block mb-2">Kimlere gidecek?</label>
+
+                <div class="form-check border rounded-3 p-3 mb-2 bg-light">
+                    <input class="form-check-input audience-radio" type="radio" name="audience" value="all"
+                           id="audAll" <%= selectedAudience === 'all' ? 'checked' : '' %>>
+                    <label class="form-check-label w-100" for="audAll">
+                        <span class="fw-semibold">Tüm aktif üyeler</span>
+                        <span class="badge bg-primary rounded-pill ms-1"><%= c.all %></span>
+                    </label>
+                </div>
+
+                <div class="form-check border rounded-3 p-3 mb-2">
+                    <input class="form-check-input audience-radio" type="radio" name="audience" value="role"
+                           id="audRole" <%= selectedAudience === 'role' ? 'checked' : '' %>>
+                    <label class="form-check-label w-100 fw-semibold" for="audRole">Hesap türüne göre</label>
+                    <div class="mt-2 audience-panel" data-for="role" hidden>
+                        <% roles.forEach(function (role) { %>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="role" value="<%= role %>"
+                                       id="role_<%= role %>" <%= (d.role || 'user') === role ? 'checked' : '' %>>
+                                <label class="form-check-label small" for="role_<%= role %>">
+                                    <%= ROLE_LABELS[role] || role %>
+                                    <span class="badge bg-secondary bg-opacity-25 text-dark rounded-pill ms-1"><%= c.roles[role] || 0 %></span>
+                                </label>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <div class="form-check border rounded-3 p-3 mb-2">
+                    <input class="form-check-input audience-radio" type="radio" name="audience" value="language"
+                           id="audLang" <%= selectedAudience === 'language' ? 'checked' : '' %>>
+                    <label class="form-check-label w-100 fw-semibold" for="audLang">
+                        Dile göre
+                        <span class="text-muted fw-normal small">— duyuruyu o dilde yazdıysanız</span>
+                    </label>
+                    <div class="mt-2 audience-panel" data-for="language" hidden>
+                        <% languages.forEach(function (lang) { %>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="language" value="<%= lang %>"
+                                       id="lang_<%= lang %>" <%= (d.language || 'tr') === lang ? 'checked' : '' %>>
+                                <label class="form-check-label small" for="lang_<%= lang %>">
+                                    <%= LANG_LABELS[lang] || lang %>
+                                    <span class="badge bg-secondary bg-opacity-25 text-dark rounded-pill ms-1"><%= c.languages[lang] || 0 %></span>
+                                </label>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <div class="form-check border rounded-3 p-3 mb-3">
+                    <input class="form-check-input audience-radio" type="radio" name="audience" value="specific"
+                           id="audSpecific" <%= selectedAudience === 'specific' ? 'checked' : '' %>>
+                    <label class="form-check-label w-100 fw-semibold" for="audSpecific">Belirli e-postalar</label>
+                    <div class="mt-2 audience-panel" data-for="specific" hidden>
+                        <textarea class="form-control form-control-sm" name="emails" rows="3"
+                                  placeholder="ornek@eposta.com, ikinci@eposta.com"><%= d.emails || '' %></textarea>
+                        <div class="form-text small">
+                            Virgül, boşluk veya satır sonu ile ayırın. Eşleşmeyen adresler
+                            gönderimden sonra bildirilir.
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary fw-medium">
+                    <i class="fa-solid fa-paper-plane me-1"></i>Duyuruyu Gönder
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-12 col-xl-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="fs-6 fw-bold mb-3">
+                    <i class="fa-solid fa-clock-rotate-left text-secondary me-1"></i>Gönderim Geçmişi
+                </h2>
+
+                <% if (past.length === 0) { %>
+                    <p class="text-muted small mb-0">Henüz duyuru gönderilmemiş.</p>
+                <% } else { %>
+                    <div class="d-flex flex-column gap-3">
+                        <% past.forEach(function (item) { %>
+                            <div class="border-start border-3 border-primary ps-3">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <strong class="small text-break-anywhere"><%= item.title %></strong>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill text-nowrap">
+                                        <%= item.recipient_count %> kişi
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-1 mt-1 text-break-anywhere" style="white-space: pre-wrap;"><%= helpers.truncate(item.message, 140) %></p>
+                                <div class="small text-muted d-flex flex-wrap gap-2">
+                                    <span><%= helpers.formatDateTime(item.created_at, lang) %></span>
+                                    <span>&middot; <%= AUDIENCE_LABELS[item.audience] || item.audience %><%= item.audience_detail ? ' (' + item.audience_detail + ')' : '' %></span>
+                                    <% if (item.sent_by_name) { %><span>&middot; <%= item.sent_by_name %></span><% } %>
+                                </div>
+                                <%# Okunma oranı, duyurunun gerçekten ulaşıp ulaşmadığını gösterir. %>
+                                <% if (item.stats && item.stats.total > 0) { %>
+                                    <div class="small text-muted mt-1">
+                                        <i class="fa-regular fa-eye me-1"></i>
+                                        <%= item.stats.read %>/<%= item.stats.total %> okundu
+                                    </div>
+                                <% } %>
+                                <% if (item.link_url) { %>
+                                    <a href="<%= item.link_url %>" class="small text-decoration-none" target="_blank" rel="noopener">
+                                        <i class="fa-solid fa-link me-1"></i><%= item.link_url %>
+                                    </a>
+                                <% } %>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('broadcastForm');
+    if (!form) return;
+
+    // Yalnızca seçili hedef kitlenin alt seçenekleri açık kalır; kapalı panellerdeki
+    // alanlar devre dışı bırakılır ki gönderimde yanlış hedef okunmasın.
+    const radios = Array.from(form.querySelectorAll('.audience-radio'));
+    const panels = Array.from(form.querySelectorAll('.audience-panel'));
+
+    const syncPanels = function () {
+        const chosen = (radios.find(function (r) { return r.checked; }) || {}).value;
+        panels.forEach(function (panel) {
+            const active = panel.getAttribute('data-for') === chosen;
+            panel.hidden = !active;
+            panel.querySelectorAll('input, textarea').forEach(function (field) {
+                field.disabled = !active;
+            });
+        });
+    };
+
+    radios.forEach(function (radio) { radio.addEventListener('change', syncPanels); });
+    syncPanels();
+
+    const message = document.getElementById('bMessage');
+    const counter = document.getElementById('bMessageCount');
+    const max = message.getAttribute('maxlength');
+    const syncCount = function () { counter.textContent = message.value.length + '/' + max; };
+    message.addEventListener('input', syncCount);
+    syncCount();
+
+    // Kaç kişiye gittiğini söyleyen tek onay. Sayı, seçili seçeneğin yanındaki
+    // rozetten okunur, böylece onay metni ekranda görünenle aynı sayıyı taşır.
+    form.addEventListener('submit', function (event) {
+        const chosen = radios.find(function (r) { return r.checked; });
+        const label = form.querySelector('label[for="' + chosen.id + '"]');
+        let audienceText = label ? label.textContent.trim().replace(/\s+/g, ' ') : 'seçili kitle';
+
+        if (chosen.value === 'role' || chosen.value === 'language') {
+            const sub = form.querySelector('input[name="' + chosen.value + '"]:checked');
+            const subLabel = sub ? form.querySelector('label[for="' + sub.id + '"]') : null;
+            if (subLabel) audienceText = subLabel.textContent.trim().replace(/\s+/g, ' ');
+        }
+
+        const title = document.getElementById('bTitle').value.trim();
+        if (!confirm('"' + title + '" duyurusu şu kitleye gönderilecek:\n\n' + audienceText + '\n\nBu işlem geri alınamaz. Onaylıyor musunuz?')) {
+            event.preventDefault();
+        }
+    });
+});
+</script>

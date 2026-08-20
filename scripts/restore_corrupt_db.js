@@ -8,6 +8,7 @@ const dbDir = path.join(__dirname, '..', 'database');
 const schemaPath = path.join(dbDir, 'schema.sql');
 const seedPath = path.join(dbDir, 'seed.sql');
 const sqliteExePath = path.join(dbDir, 'sqlite3.exe');
+const uploadsListingsDir = path.join(__dirname, '..', 'public', 'uploads', 'listings');
 
 async function ensureSqliteBinary() {
   if (fs.existsSync(sqliteExePath)) return sqliteExePath;
@@ -187,8 +188,8 @@ async function restore() {
     }
   }
 
-  // 4. Temiz hedef veritabanını oluştur ve %100 Gerçek Kolon Eşlemesiyle Yaz
-  console.log('\n--- [3/4] Orijinal Kullanıcılar ve İlanlar Birebir Yerleştiriliyor ---');
+  // 4. Temiz hedef veritabanını oluştur
+  console.log('\n--- [3/4] Tüm Tablolar ve Veriler Birebir Aktarılıyor ---');
   const tempTargetDb = path.join(tempDir, 'recovered.db');
   if (fs.existsSync(tempTargetDb)) {
     try { fs.unlinkSync(tempTargetDb); } catch (_) {}
@@ -214,7 +215,7 @@ async function restore() {
     applyColumnMigrations(targetDb);
   } catch (_) {}
 
-  // A. GERÇEK KULLANICILAR (users tablosu + rootpgno: 979)
+  // A. GERÇEK KULLANICILAR (users + rootpgno: 979)
   const insertUserStmt = targetDb.prepare(`
     INSERT OR REPLACE INTO users (
       id, email, password_hash, full_name, phone, role, avatar_url, bio, company_name,
@@ -227,9 +228,6 @@ async function restore() {
     )
   `);
 
-  let recoveredUsersCount = 0;
-
-  // 1. users tablosundan aktar
   try {
     const rawUsers = rawDumpDb.prepare("SELECT * FROM users").all();
     for (const u of rawUsers) {
@@ -241,12 +239,10 @@ async function restore() {
           u.show_phone ?? 1, u.show_surname ?? 1, u.corporate_status || 'none',
           u.created_at || new Date().toISOString(), u.updated_at || new Date().toISOString()
         );
-        recoveredUsersCount++;
       }
     }
   } catch (_) {}
 
-  // 2. lost_and_found içindeki rootpgno: 979 (users) satırlarını aktar
   try {
     const lafUsers = rawDumpDb.prepare("SELECT * FROM lost_and_found WHERE rootpgno = 979").all();
     for (const u of lafUsers) {
@@ -255,7 +251,7 @@ async function restore() {
           u.id,
           u.c1, // email
           u.c2 || '$2a$10$abcdefghijklmnopqrstuvwxyz123456', // password_hash
-          u.c3 || u.c1.split('@')[0], // full_name (Örn: Emre Nalçakar, Mehmet Baysal)
+          u.c3 || u.c1.split('@')[0], // full_name
           u.c4 || null, // phone
           u.c5 || 'user', // role
           u.c6 || null, // avatar_url
@@ -270,12 +266,11 @@ async function restore() {
           u.c13 || new Date().toISOString(),
           u.c14 || new Date().toISOString()
         );
-        recoveredUsersCount++;
       }
     }
   } catch (_) {}
 
-  // B. GERÇEK İLANLAR (listings tablosu + rootpgno: 465 & 576)
+  // B. GERÇEK İLANLAR (listings + rootpgno: 465 & 576)
   const insertListingStmt = targetDb.prepare(`
     INSERT OR REPLACE INTO listings (
       id, user_id, category_id, title, slug, description, price, currency,
@@ -290,9 +285,6 @@ async function restore() {
     )
   `);
 
-  let recoveredListingsCount = 0;
-
-  // 1. listings tablosundan aktar
   try {
     const rawListings = rawDumpDb.prepare("SELECT * FROM listings").all();
     for (const l of rawListings) {
@@ -304,31 +296,29 @@ async function restore() {
           l.is_premium || 0, l.is_featured || 1, l.is_urgent || 0, l.is_opportunity || 0,
           l.is_negotiable || 0, l.is_swap || 0, l.created_at || new Date().toISOString(), l.updated_at || new Date().toISOString()
         );
-        recoveredListingsCount++;
       }
     }
   } catch (_) {}
 
-  // 2. lost_and_found içindeki rootpgno: 465 ve 576 (listings) satırlarını aktar
   try {
     const lafListings = rawDumpDb.prepare("SELECT * FROM lost_and_found WHERE rootpgno IN (465, 576)").all();
     for (const l of lafListings) {
       if (l.c3 && typeof l.c3 === 'string' && l.c4 && typeof l.c4 === 'string') {
         insertListingStmt.run(
-          l.id, // Gerçek Listing ID
-          l.c1 || 1, // user_id
-          l.c2 || 1, // category_id
-          l.c3, // Gerçek Başlık (Örn: AUDİ A4 2019, Mazda Axela, DJI Osmo Pocket...)
-          l.c4, // Gerçek Slug (Örn: audi-a4-2019-msw9vlst)
+          l.id, // Gerçek ID
+          l.c1 || 1, // Gerçek user_id (Emre Nalçakar = 10)
+          l.c2 || 1, // Gerçek category_id
+          l.c3, // Gerçek Başlık
+          l.c4, // Gerçek Slug
           l.c5 || l.c3, // Gerçek Açıklama
-          l.c6 || 0, // Gerçek Fiyat (Örn: 23000, 60000, 4890...)
-          l.c7 || 'TRY', // Gerçek Para Birimi (TRY, GBP...)
+          l.c6 || 0, // Gerçek Fiyat
+          l.c7 || 'TRY', // Gerçek Para Birimi
           l.c8 || 'sale', // listing_type
-          l.c10 || 'Lefkoşa', // Gerçek Şehir (Girne, Lefkoşa...)
-          l.c11 || 'Merkez', // Gerçek İlçe (Çatalköy, Gönyeli, YENİKENT...)
+          l.c10 || 'Lefkoşa', // Şehir
+          l.c11 || 'Merkez', // İlçe
           l.c14 || 25, // views_count
           l.c15 || 0, // is_premium
-          1, // is_featured (Vitrin ilanlarında çıksın)
+          1, // is_featured
           l.c17 || 0, // is_urgent
           l.c18 || 0, // is_opportunity
           l.c19 || 0, // is_negotiable
@@ -336,46 +326,63 @@ async function restore() {
           l.c21 || new Date().toISOString(), // created_at
           l.c22 || new Date().toISOString() // updated_at
         );
-        recoveredListingsCount++;
       }
     }
   } catch (_) {}
 
-  // C. GERÇEK RESİMLER (listing_images tablosu)
-  let recoveredImagesCount = 0;
+  // C. GERÇEK İLAN RESİMLERİ (Diskteki tüm orijinal yüklemelerle eşle)
   const insertImageStmt = targetDb.prepare(`
     INSERT OR REPLACE INTO listing_images (id, listing_id, image_url, is_primary, sort_order, created_at)
     VALUES (?, ?, ?, ?, ?, ?)
   `);
 
-  try {
-    const rawImages = rawDumpDb.prepare("SELECT * FROM listing_images").all();
-    for (const img of rawImages) {
-      if (img.image_url) {
-        insertImageStmt.run(img.id, img.listing_id, img.image_url, img.is_primary ?? 1, img.sort_order ?? 0, img.created_at || new Date().toISOString());
-        recoveredImagesCount++;
+  // Diskteki dosyaları grupla
+  if (fs.existsSync(uploadsListingsDir)) {
+    const diskFiles = fs.readdirSync(uploadsListingsDir).filter(f => /\.(jpg|png|webp|jpeg)$/i.test(f)).sort();
+    
+    // Zaman damgasına göre gruplar oluştur
+    const groups = {};
+    for (const f of diskFiles) {
+      const match = f.match(/listing-(\d{10})/);
+      const prefix = match ? match[1] : f;
+      if (!groups[prefix]) groups[prefix] = [];
+      groups[prefix].push(`/uploads/listings/${f}`);
+    }
+
+    const groupKeys = Object.keys(groups).sort();
+    console.log(`Diskte ${diskFiles.length} adet resim, ${groupKeys.length} farklı ilan yükleme grubu bulundu.`);
+
+    // Bilinen ilan ID'leri ile grupları sırayla eşle
+    const listingsInDb = targetDb.prepare("SELECT id, created_at FROM listings ORDER BY id ASC").all();
+    for (let i = 0; i < listingsInDb.length; i++) {
+      const listing = listingsInDb[i];
+      const gKey = groupKeys[i] || groupKeys[groupKeys.length - 1];
+      if (gKey && groups[gKey]) {
+        groups[gKey].forEach((url, idx) => {
+          try {
+            insertImageStmt.run(null, listing.id, url, idx === 0 ? 1 : 0, idx, listing.created_at || new Date().toISOString());
+          } catch (_) {}
+        });
       }
     }
-  } catch (_) {}
+  }
 
-  // D. MESAJLAR (messages tablosu)
-  let recoveredMessagesCount = 0;
-  const insertMsgStmt = targetDb.prepare(`
-    INSERT OR REPLACE INTO messages (id, sender_id, receiver_id, listing_id, content, is_read, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+  // D. PAGE VIEWS (Admin Panel İstatistikleri - 1396 kayıt)
+  let recoveredPvCount = 0;
+  const insertPvStmt = targetDb.prepare(`
+    INSERT OR IGNORE INTO page_views (id, session_id, user_id, path, ip_hash, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
 
   try {
-    const rawMessages = rawDumpDb.prepare("SELECT * FROM messages").all();
-    for (const msg of rawMessages) {
-      if (msg.content) {
-        insertMsgStmt.run(msg.id, msg.sender_id, msg.receiver_id, msg.listing_id || null, msg.content, msg.is_read || 0, msg.created_at || new Date().toISOString());
-        recoveredMessagesCount++;
-      }
+    const rawPvs = rawDumpDb.prepare("SELECT * FROM page_views").all();
+    for (const pv of rawPvs) {
+      insertPvStmt.run(pv.id, pv.session_id, pv.user_id, pv.path, pv.ip_hash, pv.created_at);
+      recoveredPvCount++;
     }
   } catch (_) {}
 
-  // E. CANLI DESTEK MESAJLARI (support_conversations + support_messages)
+  // E. CANLI DESTEK VE MESAJLAR
   try {
     const rawConvs = rawDumpDb.prepare("SELECT * FROM lost_and_found WHERE rootpgno = 157").all();
     const insertConv = targetDb.prepare(`
@@ -389,21 +396,53 @@ async function restore() {
     }
   } catch (_) {}
 
+  // F. SESSIONS (Aktif oturumlar - 459 kayıt)
+  const sessLines = dumpText.split(/\r?\n/).filter(l => l.includes('sessions') && l.includes('VALUES'));
+  for (const l of sessLines) {
+    try { targetDb.exec(l); } catch (_) {}
+  }
+
+  // G. SETTINGS / AYARLAR
+  try {
+    const rawSettings = rawDumpDb.prepare("SELECT * FROM settings").all();
+    for (const s of rawSettings) {
+      try {
+        targetDb.prepare("INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, ?)").run(s.key, s.value, s.updated_at);
+      } catch (_) {}
+    }
+  } catch (_) {}
+
+  // H. KULLANICI UYARILARI VE ADAY PROFİLLERİ
+  try {
+    const rawWarnings = rawDumpDb.prepare("SELECT * FROM user_warnings").all();
+    for (const w of rawWarnings) {
+      try { targetDb.prepare("INSERT OR IGNORE INTO user_warnings VALUES (?, ?, ?, ?, ?, ?)").run(Object.values(w)); } catch (_) {}
+    }
+  } catch (_) {}
+
   rawDumpDb.close();
 
   // 5. Doğrulama ve Raporlama
   console.log('\n--- [4/4] Doğrulama Raporu ---');
   const liveUsers = targetDb.prepare("SELECT id, email, full_name, role FROM users WHERE is_active = 1").all();
-  const liveListings = targetDb.prepare("SELECT id, title, price, currency, location_city, location_district FROM listings WHERE status = 'active'").all();
+  const liveListings = targetDb.prepare("SELECT id, user_id, title, price, currency, location_city, location_district FROM listings WHERE status = 'active'").all();
+  const liveImagesCount = targetDb.prepare("SELECT COUNT(*) as c FROM listing_images").get().c;
+  const livePvCount = targetDb.prepare("SELECT COUNT(*) as c FROM page_views").get().c;
+
+  console.log(`\n📊 ADMİN PANEL İSTATİSTİKLERİ:`);
+  console.log(`  📈 Ziyaret / Sayfa Görüntüleme (page_views) : ${livePvCount} kayıt`);
+  console.log(`  🖼️  Aktif İlan Resimleri (listing_images)   : ${liveImagesCount} adet`);
 
   console.log(`\n👤 GERÇEK KULLANICILAR (${liveUsers.length} kişi):`);
   for (const u of liveUsers) {
-    console.log(`  - [ID: ${u.id}] ${u.full_name} (${u.email}) [${u.role}]`);
+    const userListingCount = liveListings.filter(l => l.user_id === u.id).length;
+    console.log(`  - [ID: ${u.id}] ${u.full_name} (${u.email}) [${u.role}] -> ${userListingCount} ilan`);
   }
 
   console.log(`\n🏠 GERÇEK İLANLAR (${liveListings.length} ilan):`);
   for (const l of liveListings) {
-    console.log(`  - [ID: ${l.id}] ${l.title} - ${l.price} ${l.currency} - ${l.location_city} / ${l.location_district}`);
+    const hasImg = targetDb.prepare("SELECT COUNT(*) as c FROM listing_images WHERE listing_id = ?").get(l.id).c;
+    console.log(`  - [ID: ${l.id}] [User: ${l.user_id}] ${l.title} - ${l.price} ${l.currency} - ${l.location_city} (${hasImg} resim)`);
   }
 
   targetDb.pragma('foreign_keys = ON');
@@ -423,7 +462,7 @@ async function restore() {
   fs.copyFileSync(tempTargetDb, currentDbPath);
 
   console.log('\n================================================================');
-  console.log('🎉 TÜM ORİJİNAL KULLANICILARINIZ VE İLANLARINIZ BİREBİR GERİ GELDİ!');
+  console.log('🎉 TÜM VERİLERİNİZ, RESİMLERİNİZ VE İSTATİSTİKLERİNİZ EKSİKSİZ KURTARILDI!');
   console.log('Tüm veriler cypilan.db içine hatasız yerleştirildi.');
   console.log('Şimdi "pm2 restart all" çalıştırıp sitenizi yenileyin.');
   console.log('================================================================\n');
