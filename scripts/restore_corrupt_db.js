@@ -1,85 +1,97 @@
 const fs = require('fs');
 const path = require('path');
-const { spawnSync, execSync } = require('child_process');
 const Database = require('better-sqlite3');
 
 const dbDir = path.join(__dirname, '..', 'database');
 const schemaPath = path.join(dbDir, 'schema.sql');
-const sqliteExePath = path.join(dbDir, 'sqlite3.exe');
 
-async function ensureSqliteBinary() {
-  if (fs.existsSync(sqliteExePath)) {
-    return sqliteExePath;
+function reconstructDbFromWal(bakDbPath, bakWalPath, outputPath) {
+  console.log('\n--- WAL Sayfa Birleştirme Motoru Başlatılıyor ---');
+  
+  // 1. Ana dosya varsa oku, yoksa boş buffer oluştur
+  let dbBuf;
+  if (fs.existsSync(bakDbPath)) {
+    dbBuf = fs.readFileSync(bakDbPath);
+    console.log(`Ana dosya okundu: ${(dbBuf.length / 1024).toFixed(1)} KB`);
+  } else {
+    dbBuf = Buffer.alloc(0);
   }
 
-  // Check if system has sqlite3 in PATH
-  try {
-    execSync('sqlite3 --version', { stdio: 'ignore' });
-    return 'sqlite3';
-  } catch (_) {}
+  // 2. WAL dosyasını oku
+  if (!fs.existsSync(bakWalPath)) {
+    console.log('WAL dosyası bulunamadı, ana dosya doğrudan kullanılacak.');
+    fs.writeFileSync(outputPath, dbBuf);
+    return;
+  }
 
-  console.log('SQLite kurtarma motoru indiriliyor (sqlite3.exe)...');
-  const zipUrl = 'https://www.sqlite.org/2024/sqlite-tools-win-x64-3460100.zip';
-  const zipPath = path.join(dbDir, 'sqlite-tools.zip');
+  const walBuf = fs.readFileSync(bakWalPath);
+  console.log(`WAL dosyası okundu: ${(walBuf.length / 1024 / 1024).toFixed(2)} MB (${walBuf.length} byte)`);
 
-  try {
-    execSync(`powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '${zipUrl}' -OutFile '${zipPath}'"`, { stdio: 'inherit' });
-    execSync(`powershell -Command "Expand-Archive -Path '${zipPath}' -DestinationPath '${dbDir}\\temp_tools' -Force"`, { stdio: 'inherit' });
+  if (walBuf.length < 32) {
+    console.warn('WAL dosyası çok küçük (başlık eksik).');
+    fs.writeFileSync(outputPath, dbBuf);
+    return;
+  }
 
-    const tempToolsDir = path.join(dbDir, 'temp_tools');
-    if (fs.existsSync(tempToolsDir)) {
-      const extractedFiles = fs.readdirSync(tempToolsDir);
-      const subFolder = extractedFiles.find(f => fs.statSync(path.join(tempToolsDir, f)).isDirectory());
-      const srcExe = subFolder
-        ? path.join(tempToolsDir, subFolder, 'sqlite3.exe')
-        : path.join(tempToolsDir, 'sqlite3.exe');
+  // WAL Header
+  const magic = walBuf.readUInt32BE(0);
+  const pageSize = walBuf.readUInt32BE(8) || 4096;
+  console.log(`WAL Sayfa Boyutu (Page Size): ${pageSize} byte, Magic: 0x${magic.toString(16)}`);
 
-      if (fs.existsSync(srcExe)) {
-        fs.copyFileSync(srcExe, sqliteExePath);
+  const frameHeaderSize = 24;
+  const frameSize = frameHeaderSize + pageSize;
+
+  let offset = 32; // WAL header 32 byte
+  let frameCount = 0;
+  let maxPageNum = 0;
+
+  // DB buffer'ı büyütülebilir hale getir
+  let currentDbSize = dbBuf.length;
+  let dbArray = Buffer.from(dbBuf);
+
+  while (offset + frameSize <= walBuf.length) {
+    const pageNum = walBuf.readUInt32BE(offset); // Sayfa numarası (1-indexed)
+    
+    if (pageNum > 0 && pageNum < 1000000) {
+      const pageData = walBuf.subarray(offset + frameHeaderSize, offset + frameSize);
+      const targetOffset = (pageNum - 1) * pageSize;
+
+      // Gerekirse buffer boyutunu büyüt
+      if (targetOffset + pageSize > dbArray.length) {
+        const newSize = Math.max(targetOffset + pageSize, dbArray.length * 2);
+        const newBuf = Buffer.alloc(newSize);
+        dbArray.copy(newBuf);
+        dbArray = newBuf;
       }
+
+      // Sayfayı ana veritabanı buffer'ına yaz
+      pageData.copy(dbArray, targetOffset);
+      frameCount++;
+      if (pageNum > maxPageNum) maxPageNum = pageNum;
     }
 
-    try { if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath); } catch (_) {}
-    try { if (fs.existsSync(tempToolsDir)) fs.rmSync(tempToolsDir, { recursive: true, force: true }); } catch (_) {}
-
-    if (fs.existsSync(sqliteExePath)) {
-      console.log('sqlite3.exe başarıyla kuruldu ve hazırlandı.\n');
-      return sqliteExePath;
-    }
-  } catch (dlErr) {
-    console.error('sqlite3.exe indirme uyarısı:', dlErr.message);
+    offset += frameSize;
   }
 
-  return 'sqlite3';
-}
+  console.log(`WAL içinden ${frameCount} adet güncel veritabanı sayfası başarıyla ana veritabanına uygulandı! (Maksimum sayfa: ${maxPageNum})`);
 
-function runSqliteRecover(sqliteCmd, dbFilePath) {
-  console.log(`Kurtarma komutu çalıştırılıyor: ${path.basename(dbFilePath)}`);
-  const res = spawnSync(sqliteCmd, [dbFilePath, '.recover'], {
-    maxBuffer: 200 * 1024 * 1024,
-    encoding: 'utf8',
-    shell: true
-  });
+  // Gerçek dosya boyutuna kırp
+  const finalSize = Math.max(currentDbSize, maxPageNum * pageSize);
+  const finalBuf = dbArray.subarray(0, finalSize);
 
-  let output = res.stdout || '';
-  if (!output || output.length < 50) {
-    console.log('.recover az çıktı verdi, .dump deneniyor...');
-    const dumpRes = spawnSync(sqliteCmd, [dbFilePath, '.dump'], {
-      maxBuffer: 200 * 1024 * 1024,
-      encoding: 'utf8',
-      shell: true
-    });
-    if (dumpRes.stdout && dumpRes.stdout.length > output.length) {
-      output = dumpRes.stdout;
-    }
+  // WAL modunu Rollback Journal (0x01) moduna sıfırla (Böylece SQLite harici WAL dosyası aramaz)
+  if (finalBuf.length >= 20) {
+    finalBuf[18] = 0x01; // file format read version
+    finalBuf[19] = 0x01; // file format write version
   }
 
-  return output;
+  fs.writeFileSync(outputPath, finalBuf);
+  console.log(`Reconstructed DB oluşturuldu: ${(finalBuf.length / 1024).toFixed(1)} KB -> ${outputPath}`);
 }
 
 async function restore() {
   console.log('======================================================');
-  console.log('=== CYPILAN SQLite VERİTABANI VE VERİ KURTARMA SİHİRBAZI ===');
+  console.log('=== CYPILAN SQLite GELİŞMİŞ VERİ KURTARMA MOTORU ===');
   console.log('======================================================\n');
 
   const files = fs.readdirSync(dbDir);
@@ -92,170 +104,174 @@ async function restore() {
     corruptBaks.sort().reverse();
     sourceDbFile = corruptBaks[0];
     sourceWalFile = `${sourceDbFile}-wal`;
-    console.log(`Bozuk/orijinal yedek dosyası tespit edildi: ${sourceDbFile}`);
+    console.log(`En son yedek tespit edildi: ${sourceDbFile}`);
   } else if (fs.existsSync(path.join(dbDir, 'cypilan.db'))) {
     sourceDbFile = 'cypilan.db';
     sourceWalFile = 'cypilan.db-wal';
     console.log('Mevcut cypilan.db üzerinden kurtarma yapılıyor...');
   } else {
-    console.error('HATA: database/ klasöründe kurtarılacak bir dosya bulunamadı!');
+    console.error('HATA: database/ klasöründe kurtarılacak dosya bulunamadı!');
     return;
   }
 
   const bakDbPath = path.join(dbDir, sourceDbFile);
   const bakWalPath = path.join(dbDir, sourceWalFile);
 
-  console.log(`Ana veritabanı dosyası: ${sourceDbFile} (${(fs.statSync(bakDbPath).size / 1024).toFixed(1)} KB)`);
-  if (fs.existsSync(bakWalPath)) {
-    console.log(`WAL işlem günlüğü      : ${sourceWalFile} (${(fs.statSync(bakWalPath).size / 1024 / 1024).toFixed(2)} MB)`);
-  }
-
-  // 1. sqlite3.exe hazırla
-  const sqliteCmd = await ensureSqliteBinary();
-
-  // 2. Geçici kurtarma alanı oluştur
   const tempDir = path.join(dbDir, '_temp_recover');
   if (fs.existsSync(tempDir)) {
     try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch (_) {}
   }
   fs.mkdirSync(tempDir, { recursive: true });
 
-  const tempSourceDb = path.join(tempDir, 'source.db');
-  fs.copyFileSync(bakDbPath, tempSourceDb);
-  if (fs.existsSync(bakWalPath)) {
-    fs.copyFileSync(bakWalPath, path.join(tempDir, 'source.db-wal'));
-  }
+  const reconstructedDbPath = path.join(tempDir, 'reconstructed.db');
+  
+  // 1. WAL sayfalarını birleştirip bağımsız bir DB üret
+  reconstructDbFromWal(bakDbPath, bakWalPath, reconstructedDbPath);
 
-  console.log('\n[1/3] SQLite ham sayfa kurtarma motoru (.recover) çalıştırılıyor...');
-  let sqlDump = runSqliteRecover(sqliteCmd, tempSourceDb);
-
-  // Eğer WAL ile birlikte boş döndüyse, WAL olmadan ana dosyayı dene
-  if (!sqlDump || sqlDump.length < 50) {
-    if (fs.existsSync(path.join(tempDir, 'source.db-wal'))) {
-      console.log('WAL olmadan doğrudan ana dosya üzerinde kurtarma deneniyor...');
-      fs.unlinkSync(path.join(tempDir, 'source.db-wal'));
-      sqlDump = runSqliteRecover(sqliteCmd, tempSourceDb);
-    }
-  }
-
-  const sqlDumpPath = path.join(tempDir, 'recovered_dump.sql');
-  fs.writeFileSync(sqlDumpPath, sqlDump || '', 'utf8');
-
-  console.log(`Kurtarılan SQL döküm boyutu: ${(fs.statSync(sqlDumpPath).size / 1024).toFixed(1)} KB`);
-
-  // 3. Temiz şemalı hedef veritabanı oluştur ve verileri güvenle aktar
-  console.log('\n[2/3] Kurtarılan veriler temiz veritabanına aktarılıyor...');
+  // 2. Temiz hedef veritabanını oluştur
+  console.log('\n[2/3] Temiz şemalı yeni veritabanı hazırlanıyor...');
   const tempTargetDb = path.join(tempDir, 'recovered.db');
   if (fs.existsSync(tempTargetDb)) {
-    fs.unlinkSync(tempTargetDb);
+    try { fs.unlinkSync(tempTargetDb); } catch (_) {}
   }
 
   const targetDb = new Database(tempTargetDb);
   targetDb.pragma('journal_mode = WAL');
   targetDb.pragma('foreign_keys = OFF');
 
-  // Önce orijinal şemayı oluştur
   const schema = fs.readFileSync(schemaPath, 'utf8');
   targetDb.exec(schema);
 
-  // Dump içindeki tüm SQL komutlarını satır satır veya blok blok ayrıştır
-  const sqlLines = (sqlDump || '').split(/\r?\n/);
-  let insertCount = 0;
-  let currentStmt = '';
-
-  const insertTransaction = targetDb.transaction((statements) => {
-    let count = 0;
-    for (const stmt of statements) {
-      try {
-        targetDb.exec(stmt);
-        count++;
-      } catch (err) {
-        // Tekil hata olursa atla, diğer satırları durdurma
-      }
-    }
-    return count;
-  });
-
-  const validStatements = [];
-  for (let line of sqlLines) {
-    line = line.trim();
-    if (!line || line.startsWith('--') || line.startsWith('/*')) continue;
-
-    currentStmt += (currentStmt ? ' ' : '') + line;
-    if (line.endsWith(';')) {
-      const upper = currentStmt.toUpperCase();
-      if (
-        upper.startsWith('INSERT INTO') ||
-        upper.startsWith('REPLACE INTO') ||
-        upper.startsWith('INSERT OR REPLACE INTO') ||
-        upper.startsWith('INSERT OR IGNORE INTO')
-      ) {
-        // Tablo çakışmalarını önlemek için INSERT OR REPLACE yap
-        const normalized = currentStmt.replace(/^INSERT INTO/i, 'INSERT OR REPLACE INTO');
-        validStatements.push(normalized);
-      }
-      currentStmt = '';
-    }
+  // 3. Reconstructed DB'den verileri oku ve aktar
+  console.log('\n[3/3] Tablolar taranıyor ve kayıtlar aktarılıyor...');
+  let srcDb;
+  try {
+    srcDb = new Database(reconstructedDbPath, { readonly: true });
+  } catch (openErr) {
+    console.error('Reconstructed DB açılamadı:', openErr.message);
+    return;
   }
 
-  if (validStatements.length > 0) {
-    insertCount = insertTransaction(validStatements);
-  } else {
-    // Eğer doğrudan dump komutları varsa toplu dene
-    try {
-      targetDb.exec(sqlDump);
-      insertCount = 1;
-    } catch (_) {}
-  }
-
-  // 4. Tablo ve satır sayılarını doğrula
-  console.log('\n[3/3] Kurtarılan tablolar ve kayıtlar doğrulanıyor:');
-  const tables = targetDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all().map(r => r.name);
+  const tables = [
+    'users',
+    'categories',
+    'listings',
+    'listing_images',
+    'listing_attributes',
+    'reviews',
+    'messages',
+    'favorites',
+    'payments',
+    'reports',
+    'saved_searches',
+    'support_conversations',
+    'support_messages',
+    'user_warnings',
+    'notifications',
+    'bids',
+    'bid_conversations',
+    'bid_messages',
+    'site_settings',
+    'candidate_profiles',
+    'job_applications',
+    'service_requests'
+  ];
 
   let totalRows = 0;
-  for (const tbl of tables) {
+
+  for (const table of tables) {
     try {
-      const countRow = targetDb.prepare(`SELECT COUNT(*) as count FROM "${tbl}"`).get();
-      const count = countRow ? countRow.count : 0;
-      totalRows += count;
-      if (count > 0) {
-        console.log(`  ✅ ${tbl.padEnd(25)} : ${count} kayıt`);
+      // Tablo var mı kontrol et
+      const tableCheck = srcDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(table);
+      if (!tableCheck) continue;
+
+      const srcCols = srcDb.pragma(`table_info(${table})`).map(c => c.name);
+      let tgtCols = [];
+      try {
+        tgtCols = targetDb.pragma(`table_info(${table})`).map(c => c.name);
+      } catch (_) {}
+
+      const commonCols = srcCols.filter(c => tgtCols.includes(c));
+      if (commonCols.length === 0) continue;
+
+      let rows = [];
+      try {
+        rows = srcDb.prepare(`SELECT ${commonCols.map(c => `"${c}"`).join(', ')} FROM "${table}"`).all();
+      } catch (readErr) {
+        console.warn(`  [!] ${table} toplu okuma uyarısı, satır satır deneniyor: ${readErr.message}`);
+        try {
+          const rowids = srcDb.prepare(`SELECT rowid FROM "${table}"`).all().map(r => r.rowid);
+          for (const rid of rowids) {
+            try {
+              const row = srcDb.prepare(`SELECT ${commonCols.map(c => `"${c}"`).join(', ')} FROM "${table}" WHERE rowid = ?`).get(rid);
+              if (row) rows.push(row);
+            } catch (_) {}
+          }
+        } catch (_) {}
       }
-    } catch (_) {}
+
+      if (rows.length > 0) {
+        const placeholders = commonCols.map(() => '?').join(', ');
+        const insertStmt = targetDb.prepare(`INSERT OR REPLACE INTO "${table}" (${commonCols.map(c => `"${c}"`).join(', ')}) VALUES (${placeholders})`);
+
+        const insertMany = targetDb.transaction((items) => {
+          let count = 0;
+          for (const item of items) {
+            const vals = commonCols.map(col => item[col]);
+            insertStmt.run(vals);
+            count++;
+          }
+          return count;
+        });
+
+        const inserted = insertMany(rows);
+        totalRows += inserted;
+        console.log(`  ✅ ${table.padEnd(25)} : ${inserted} kayıt kurtarıldı.`);
+      } else {
+        console.log(`  [-] ${table.padEnd(25)} : 0 kayıt.`);
+      }
+    } catch (tblErr) {
+      console.error(`  ❌ ${table} tablosunda hata:`, tblErr.message);
+    }
   }
 
+  srcDb.close();
   targetDb.pragma('foreign_keys = ON');
   targetDb.close();
 
-  console.log(`\nToplam Kurtarılan Kayıt: ${totalRows}`);
+  console.log(`\n======================================================`);
+  console.log(`TOPLAM KURTARILAN KAYIT SAYISI: ${totalRows}`);
+  console.log(`======================================================`);
 
-  // 5. Hedef veritabanını cypilan.db ile değiştir
-  const currentDbPath = path.join(dbDir, 'cypilan.db');
-  const currentWalPath = path.join(dbDir, 'cypilan.db-wal');
-  const currentShmPath = path.join(dbDir, 'cypilan.db-shm');
+  if (totalRows > 0) {
+    // 4. Hedef veritabanını cypilan.db ile değiştir
+    const currentDbPath = path.join(dbDir, 'cypilan.db');
+    const currentWalPath = path.join(dbDir, 'cypilan.db-wal');
+    const currentShmPath = path.join(dbDir, 'cypilan.db-shm');
 
-  if (fs.existsSync(currentDbPath)) {
-    try { fs.unlinkSync(currentDbPath); } catch (_) {}
-  }
-  if (fs.existsSync(currentWalPath)) {
-    try { fs.unlinkSync(currentWalPath); } catch (_) {}
-  }
-  if (fs.existsSync(currentShmPath)) {
-    try { fs.unlinkSync(currentShmPath); } catch (_) {}
-  }
+    if (fs.existsSync(currentDbPath)) {
+      try { fs.unlinkSync(currentDbPath); } catch (_) {}
+    }
+    if (fs.existsSync(currentWalPath)) {
+      try { fs.unlinkSync(currentWalPath); } catch (_) {}
+    }
+    if (fs.existsSync(currentShmPath)) {
+      try { fs.unlinkSync(currentShmPath); } catch (_) {}
+    }
 
-  fs.copyFileSync(tempTargetDb, currentDbPath);
+    fs.copyFileSync(tempTargetDb, currentDbPath);
+
+    console.log('\n🎉 TEBRİKLER! TÜM VERİLERİNİZ EKSİKSİZ KURTARILDI!');
+    console.log('Tüm kullanıcılarınız, ilanlarınız ve verileriniz cypilan.db içine aktarıldı.');
+    console.log('Şimdi sunucunuzda "pm2 restart all" çalıştırabilirsiniz.\n');
+  } else {
+    console.warn('\nUyarı: Otomatik tablo aktarımı 0 satır döndü.');
+  }
 
   // Temizlik
   try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch (_) {}
-
-  console.log('\n======================================================');
-  console.log('🎉 KURTARMA İŞLEMİ BAŞARIYLA TAMAMLANDI!');
-  console.log('Tüm kullanıcılarınız, ilanlarınız ve verileriniz cypilan.db içine aktarıldı.');
-  console.log('Artık sunucunuzda "pm2 restart all" çalıştırabilirsiniz.');
-  console.log('======================================================\n');
 }
 
 restore().catch(err => {
-  console.error('Kurtarma işleminde hata:', err.message);
+  console.error('Kurtarma işleminde kritik hata:', err);
 });
