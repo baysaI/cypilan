@@ -178,33 +178,31 @@ async function restore() {
   let currentStmt = '';
   let insertCount = 0;
 
-  targetDb.transaction(() => {
-    for (let line of lines) {
-      line = line.trim();
-      if (!line || line.startsWith('--') || line.startsWith('/*')) continue;
-      currentStmt += (currentStmt ? ' ' : '') + line;
+  for (let line of lines) {
+    line = line.trim();
+    if (!line || line.startsWith('--') || line.startsWith('/*')) continue;
+    currentStmt += (currentStmt ? ' ' : '') + line;
 
-      if (line.endsWith(';')) {
-        const upper = currentStmt.toUpperCase();
-        // sqlite_sequence ve sqlite_stat dahili tablolarını atla
-        if (!upper.includes('SQLITE_SEQUENCE') && !upper.includes('SQLITE_STAT')) {
-          try {
-            targetDb.exec(currentStmt);
-            if (upper.startsWith('INSERT')) insertCount++;
-          } catch (e) {
-            if (upper.startsWith('INSERT INTO')) {
-              try {
-                const ignoreStmt = currentStmt.replace(/^INSERT INTO/i, 'INSERT OR IGNORE INTO');
-                targetDb.exec(ignoreStmt);
-                insertCount++;
-              } catch (_) {}
-            }
+    if (line.endsWith(';')) {
+      const upper = currentStmt.toUpperCase();
+      // sqlite_sequence ve sqlite_stat dahili tablolarını atla
+      if (!upper.includes('SQLITE_SEQUENCE') && !upper.includes('SQLITE_STAT')) {
+        try {
+          targetDb.exec(currentStmt);
+          if (upper.startsWith('INSERT')) insertCount++;
+        } catch (e) {
+          if (upper.startsWith('INSERT INTO')) {
+            try {
+              const ignoreStmt = currentStmt.replace(/^INSERT INTO/i, 'INSERT OR IGNORE INTO');
+              targetDb.exec(ignoreStmt);
+              insertCount++;
+            } catch (_) {}
           }
         }
-        currentStmt = '';
       }
+      currentStmt = '';
     }
-  })();
+  }
 
   console.log(`Toplam ${insertCount} adet orijinal veri satırı başarıyla yerleştirildi.`);
 
