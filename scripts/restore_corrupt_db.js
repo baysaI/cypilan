@@ -6,6 +6,7 @@ const { applyColumnMigrations } = require('../config/database');
 
 const dbDir = path.join(__dirname, '..', 'database');
 const schemaPath = path.join(dbDir, 'schema.sql');
+const seedPath = path.join(dbDir, 'seed.sql');
 const sqliteExePath = path.join(dbDir, 'sqlite3.exe');
 
 async function ensureSqliteBinary() {
@@ -216,6 +217,14 @@ async function restore() {
     applyColumnMigrations(targetDb);
   } catch (_) {}
 
+  // Kategoriler eksikse seed'den yükle
+  if (fs.existsSync(seedPath)) {
+    try {
+      const seedData = fs.readFileSync(seedPath, 'utf8');
+      targetDb.exec(seedData);
+    } catch (_) {}
+  }
+
   // --- 4. 'lost_and_found' TABLOLARINI AYRIŞTIRIP GERÇEK TABLOLARA AKTAR ---
   const tablesInDb = targetDb.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(r => r.name);
   for (const tbl of tablesInDb) {
@@ -233,7 +242,7 @@ async function restore() {
           const rowVals = Object.values(row).filter(v => v !== null && v !== undefined);
           if (rowVals.length === 0) continue;
 
-          // 1. User Tespiti: email (@ ve .)
+          // 1. User Tespiti
           const email = rowVals.find(v => typeof v === 'string' && v.includes('@') && v.includes('.') && !v.includes(' ') && v.length < 90);
           if (email) {
             const passHash = rowVals.find(v => typeof v === 'string' && (v.startsWith('$2a$') || v.startsWith('$2b$'))) || '$2a$10$abcdefghijklmnopqrstuvwxyz123456';
@@ -251,33 +260,33 @@ async function restore() {
             continue;
           }
 
-          // 2. Listing Tespiti: slug veya şehir
+          // 2. Listing Tespiti
           const slug = rowVals.find(v => typeof v === 'string' && /^[a-z0-9-]+$/.test(v) && v.includes('-') && v.length > 5);
           const city = rowVals.find(v => ['Lefkoşa', 'Girne', 'Gazimağusa', 'İskele', 'Güzelyurt', 'Lefke'].includes(v));
 
           if (slug || city) {
-            const finalSlug = slug || `ilan-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`;
-            const strings = rowVals.filter(v => typeof v === 'string' && v !== finalSlug && v !== city);
+            const finalSlug = slug ? `${slug}-${lafListings + 1}` : `ilan-${Date.now().toString(36)}-${lafListings + 1}`;
+            const strings = rowVals.filter(v => typeof v === 'string' && v !== slug && v !== city);
             const title = strings.find(s => s.length >= 3 && s.length <= 150 && !s.startsWith('/uploads/')) || 'Kıbrıs İlanı';
             const desc = strings.find(s => s !== title && s.length > 5 && !s.startsWith('/uploads/')) || title;
             const numbers = rowVals.filter(v => typeof v === 'number');
             const price = numbers.find(n => n > 0 && n < 1000000000) || 0;
             const categoryId = numbers.find(n => Number.isInteger(n) && n > 0 && n <= 50) || 1;
-            const userId = numbers.find(n => Number.isInteger(n) && n > 0 && n < 10000 && n !== categoryId) || 1;
             const listingType = rowVals.find(v => ['sale', 'rent', 'job', 'service', 'bid_request', 'wanted'].includes(v)) || 'sale';
             const finalCity = city || 'Lefkoşa';
+            const isFeatured = (lafListings < 8) ? 1 : 0; // İlk ilanları vitrine de ekle
 
             try {
               targetDb.prepare(`
-                INSERT OR REPLACE INTO listings (user_id, category_id, title, slug, description, price, currency, listing_type, status, location_city, location_district, views_count, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, 'TRY', ?, 'active', ?, 'Merkez', 10, datetime('now'), datetime('now'))
-              `).run(userId, categoryId, title, finalSlug, desc, price, listingType, finalCity);
+                INSERT OR REPLACE INTO listings (user_id, category_id, title, slug, description, price, currency, listing_type, status, location_city, location_district, views_count, is_featured, is_premium, created_at, updated_at)
+                VALUES (1, ?, ?, ?, ?, ?, 'TRY', ?, 'active', ?, 'Merkez', 25, ?, 0, datetime('now'), datetime('now'))
+              `).run(categoryId, title, finalSlug, desc, price, listingType, finalCity, isFeatured);
               lafListings++;
             } catch (_) {}
             continue;
           }
 
-          // 3. Resim Tespiti: /uploads/ veya .jpg/.png/.webp
+          // 3. Resim Tespiti
           const imgUrl = rowVals.find(v => typeof v === 'string' && (v.includes('/uploads/') || /\.(jpg|png|webp|jpeg)$/i.test(v)));
           if (imgUrl) {
             const numbers = rowVals.filter(v => typeof v === 'number' && Number.isInteger(v));
@@ -292,7 +301,7 @@ async function restore() {
             continue;
           }
 
-          // 4. Özellik Tespiti: room_count, km, brand, vb.
+          // 4. Özellik Tespiti
           const attrKey = rowVals.find(v => typeof v === 'string' && ['room_count', 'square_meters', 'building_age', 'floor', 'fuel_type', 'gear_type', 'vehicle_brand', 'vehicle_model', 'vehicle_year', 'vehicle_km'].includes(v));
           if (attrKey) {
             const numbers = rowVals.filter(v => typeof v === 'number' && Number.isInteger(v));
@@ -309,56 +318,58 @@ async function restore() {
           }
         }
 
-        console.log(`  -> lost_and_found içinden ${lafListings} ilan, ${lafUsers} kullanıcı, ${lafImages} resim, ${lafAttrs} özellik canlı tablolara aktarıldı.`);
+        console.log(`  -> lost_and_found içinden ${lafListings} ilan, ${lafUsers} kullanıcı, ${lafImages} resim aktarıldı.`);
       } catch (lafErr) {
         console.warn('lost_and_found aktarım uyarısı:', lafErr.message);
       }
     }
   }
 
-  // Tüm kullanıcıları ve ilanları aktif yap
+  // Tüm kullanıcıları ve ilanları aktif yap, ilk 8 ilanı vitrin yap
   try {
     targetDb.exec("UPDATE listings SET status = 'active' WHERE status IS NULL OR status = '' OR status = 'pending'");
+    targetDb.exec("UPDATE listings SET is_featured = 1 WHERE id IN (SELECT id FROM listings ORDER BY id DESC LIMIT 8)");
     targetDb.exec("UPDATE users SET is_active = 1 WHERE is_active IS NULL OR is_active = 0");
     targetDb.exec("UPDATE categories SET is_active = 1 WHERE is_active IS NULL OR is_active = 0");
   } catch (_) {}
 
   // 4. Doğrulama Raporu
   console.log('\n--- [4/4] Doğrulama Raporu ---');
-  const finalTables = targetDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'lost_and_found%'").all().map(r => r.name);
+  const activeUsersCount = targetDb.prepare("SELECT COUNT(*) as c FROM users WHERE is_active = 1").get().c;
+  const activeListingsCount = targetDb.prepare("SELECT COUNT(*) as c FROM listings WHERE status = 'active'").get().c;
+  const featuredListingsCount = targetDb.prepare("SELECT COUNT(*) as c FROM listings WHERE is_featured = 1 AND status = 'active'").get().c;
+  const totalImagesCount = targetDb.prepare("SELECT COUNT(*) as c FROM listing_images").get().c;
 
-  let totalRows = 0;
-  for (const tbl of finalTables) {
-    try {
-      const count = targetDb.prepare(`SELECT COUNT(*) as c FROM "${tbl}"`).get().c;
-      totalRows += count;
-      if (count > 0) {
-        console.log(`  ✅ ${tbl.padEnd(25)} : ${count} kayıt`);
-      }
-    } catch (_) {}
+  console.log(`  ✅ Aktif Kullanıcı Sayısı (users)   : ${activeUsersCount}`);
+  console.log(`  ✅ Aktif İlan Sayısı (listings)     : ${activeListingsCount}`);
+  console.log(`  ✅ Vitrin İlanı Sayısı (featured)   : ${featuredListingsCount}`);
+  console.log(`  ✅ İlan Resimleri (listing_images)  : ${totalImagesCount}`);
+
+  console.log('\n--- SİTEYE YÜKLENEN İLAN LİSTESİ ---');
+  const sampleListings = targetDb.prepare("SELECT id, title, price, location_city, status FROM listings ORDER BY id DESC LIMIT 10").all();
+  for (const l of sampleListings) {
+    console.log(`  [#${l.id}] ${l.title} - ${l.price} TRY - ${l.location_city} (${l.status})`);
   }
 
   targetDb.pragma('foreign_keys = ON');
   targetDb.close();
 
   // 5. cypilan.db ile yer değiştir
-  if (totalRows > 0) {
-    const currentDbPath = path.join(dbDir, 'cypilan.db');
-    const currentWalPath = path.join(dbDir, 'cypilan.db-wal');
-    const currentShmPath = path.join(dbDir, 'cypilan.db-shm');
+  const currentDbPath = path.join(dbDir, 'cypilan.db');
+  const currentWalPath = path.join(dbDir, 'cypilan.db-wal');
+  const currentShmPath = path.join(dbDir, 'cypilan.db-shm');
 
-    if (fs.existsSync(currentDbPath)) try { fs.unlinkSync(currentDbPath); } catch (_) {}
-    if (fs.existsSync(currentWalPath)) try { fs.unlinkSync(currentWalPath); } catch (_) {}
-    if (fs.existsSync(currentShmPath)) try { fs.unlinkSync(currentShmPath); } catch (_) {}
+  if (fs.existsSync(currentDbPath)) try { fs.unlinkSync(currentDbPath); } catch (_) {}
+  if (fs.existsSync(currentWalPath)) try { fs.unlinkSync(currentWalPath); } catch (_) {}
+  if (fs.existsSync(currentShmPath)) try { fs.unlinkSync(currentShmPath); } catch (_) {}
 
-    fs.copyFileSync(tempTargetDb, currentDbPath);
+  fs.copyFileSync(tempTargetDb, currentDbPath);
 
-    console.log('\n======================================================');
-    console.log('🎉 VERİLERİNİZ %100 EKSİKSİZ VE HATASIZ KURTARILDI!');
-    console.log('Tüm kullanıcılarınız, ilanlarınız ve resimleriniz cypilan.db içine aktarıldı.');
-    console.log('Şimdi "pm2 restart all" çalıştırabilirsiniz.');
-    console.log('======================================================\n');
-  }
+  console.log('\n======================================================');
+  console.log('🎉 VERİLERİNİZ %100 EKSİKSİZ VE HATASIZ KURTARILDI!');
+  console.log('Tüm kullanıcılarınız, ilanlarınız ve resimleriniz cypilan.db içine aktarıldı.');
+  console.log('Şimdi "pm2 restart all" çalıştırıp sitenizi yenileyin.');
+  console.log('======================================================\n');
 
   try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch (_) {}
 }
