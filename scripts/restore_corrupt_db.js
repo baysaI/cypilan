@@ -6,8 +6,6 @@ const dbDir = path.join(__dirname, '..', 'database');
 const schemaPath = path.join(dbDir, 'schema.sql');
 const seedPath = path.join(dbDir, 'seed.sql');
 
-// --- SQLite Low-Level Record & Varint Parser ---
-
 function readVarint(buf, offset) {
   let result = 0;
   let len = 0;
@@ -115,7 +113,6 @@ function scanRawPagesForRecords(dbBuffer, pageSize = 4096) {
     if (pageOffset + headerOffset >= dbBuffer.length) continue;
 
     const pageType = dbBuffer[pageOffset + headerOffset];
-    // 0x0D: Table B-Tree Leaf Page
     if (pageType === 0x0d) {
       try {
         const numCells = dbBuffer.readUInt16BE(pageOffset + headerOffset + 3);
@@ -154,7 +151,7 @@ function scanRawPagesForRecords(dbBuffer, pageSize = 4096) {
 }
 
 function reconstructDbFromWal(bakDbPath, bakWalPath, outputPath) {
-  console.log('\n--- WAL Sayfa Birleştirme Motoru Başlatılıyor ---');
+  console.log('\n--- 1. WAL Sayfa Birleştirme Motoru ---');
   let dbBuf = fs.existsSync(bakDbPath) ? fs.readFileSync(bakDbPath) : Buffer.alloc(0);
   console.log(`Ana dosya okundu: ${(dbBuf.length / 1024).toFixed(1)} KB`);
 
@@ -164,7 +161,7 @@ function reconstructDbFromWal(bakDbPath, bakWalPath, outputPath) {
   }
 
   const walBuf = fs.readFileSync(bakWalPath);
-  console.log(`WAL dosyası okundu: ${(walBuf.length / 1024 / 1024).toFixed(2)} MB (${walBuf.length} byte)`);
+  console.log(`WAL dosyası okundu: ${(walBuf.length / 1024 / 1024).toFixed(2)} MB`);
 
   const pageSize = (walBuf.length >= 12 ? walBuf.readUInt32BE(8) : null) || 4096;
   const frameHeaderSize = 24;
@@ -197,12 +194,11 @@ function reconstructDbFromWal(bakDbPath, bakWalPath, outputPath) {
     offset += frameSize;
   }
 
-  console.log(`WAL içinden ${frameCount} adet güncel veritabanı sayfası başarıyla ana veritabanına uygulandı! (Maksimum sayfa: ${maxPageNum})`);
+  console.log(`WAL içinden ${frameCount} adet sayfa ana veritabanına uygulandı (Maks sayfa: ${maxPageNum})`);
 
   const finalSize = Math.max(currentDbSize, maxPageNum * pageSize);
   const finalBuf = dbArray.subarray(0, finalSize);
 
-  // WAL modunu Rollback Journal moduna sıfırla
   if (finalBuf.length >= 100) {
     finalBuf[18] = 0x01;
     finalBuf[19] = 0x01;
@@ -216,13 +212,12 @@ function reconstructDbFromWal(bakDbPath, bakWalPath, outputPath) {
 
 async function restore() {
   console.log('======================================================');
-  console.log('=== CYPILAN SQLite GELİŞMİŞ DERİN VERİ KURTARMA MOTORU ===');
+  console.log('=== CYPILAN BİREBİR ŞEMA UYUMLU VERİ GERİ YÜKLEME ===');
   console.log('======================================================\n');
 
   const files = fs.readdirSync(dbDir);
   const corruptBaks = files.filter(f => f.startsWith('cypilan.db.corrupt.') && f.endsWith('.bak'));
 
-  // En BÜYÜK yedek dosyasını bul (içinde gerçek verilerin olduğu dosya)
   let bestBak = null;
   let maxTotalSize = 0;
 
@@ -246,7 +241,7 @@ async function restore() {
     return;
   }
 
-  console.log(`En zengin/büyük yedek dosyası seçildi: ${sourceDbFile} (Toplam: ${(maxTotalSize / 1024 / 1024).toFixed(2)} MB)`);
+  console.log(`Kaynak dosya: ${sourceDbFile} (Boyut: ${(maxTotalSize / 1024 / 1024).toFixed(2)} MB)`);
 
   const bakDbPath = path.join(dbDir, sourceDbFile);
   const bakWalPath = path.join(dbDir, sourceWalFile);
@@ -258,12 +253,9 @@ async function restore() {
   fs.mkdirSync(tempDir, { recursive: true });
 
   const reconstructedDbPath = path.join(tempDir, 'reconstructed.db');
-  
-  // 1. WAL sayfalarını birleştirip bağımsız bir DB üret
   const reconstructedBuffer = reconstructDbFromWal(bakDbPath, bakWalPath, reconstructedDbPath);
 
-  // 2. Temiz hedef veritabanını oluştur
-  console.log('\n[2/3] Temiz şemalı yeni veritabanı hazırlanıyor...');
+  console.log('\n--- 2. Temiz Şema ve Kategorilerin Hazırlanması ---');
   const tempTargetDb = path.join(tempDir, 'recovered.db');
   if (fs.existsSync(tempTargetDb)) {
     try { fs.unlinkSync(tempTargetDb); } catch (_) {}
@@ -283,200 +275,205 @@ async function restore() {
     } catch (_) {}
   }
 
-  // 3. Ham Sayfa Tarayıcısı
-  console.log('\n[3/3] Ham veritabanı sayfaları taranıyor ve kayıtlar sınıflandırılıyor...');
+  console.log('\n--- 3. Ham Veritabanı Sayfalarının Birebir Çıkarılması ---');
   const rawRecords = scanRawPagesForRecords(reconstructedBuffer);
-  console.log(`Toplam ${rawRecords.length} adet ham B-Tree veri satırı çıkarıldı!`);
+  console.log(`Toplam ${rawRecords.length} adet ham B-Tree satırı tarandı.`);
 
-  let recoveredCounts = {
+  let counts = {
     users: 0,
     listings: 0,
     listing_images: 0,
     listing_attributes: 0,
     messages: 0,
     reviews: 0,
-    favorites: 0,
     notifications: 0
   };
 
-  const insertUserStmt = targetDb.prepare(`
+  const usersMap = new Map();
+  const listingsMap = new Map();
+  const imagesList = [];
+  const attributesList = [];
+  const messagesList = [];
+  const reviewsList = [];
+
+  for (const item of rawRecords) {
+    const vals = item.values;
+    const rowId = item.rowId;
+    if (!vals || vals.length === 0) continue;
+
+    // --- A. USER IDENTIFICATION ---
+    // User row schema: email, password_hash, full_name, phone, role, avatar_url, bio, company_name...
+    const emailIdx = vals.findIndex(v => typeof v === 'string' && v.includes('@') && v.includes('.') && !v.includes(' '));
+    if (emailIdx !== -1 && emailIdx <= 1) {
+      const email = vals[emailIdx];
+      const passwordHash = vals[emailIdx + 1] || '$2a$10$abcdefghijklmnopqrstuvwxyz123456';
+      const fullName = vals[emailIdx + 2] || email.split('@')[0];
+      const phone = vals[emailIdx + 3] || null;
+      const role = vals[emailIdx + 4] || 'user';
+      const company = vals[emailIdx + 7] || null;
+
+      if (!usersMap.has(email)) {
+        usersMap.set(email, {
+          id: rowId,
+          email,
+          password_hash: typeof passwordHash === 'string' ? passwordHash : '$2a$10$abcdefghijklmnopqrstuvwxyz123456',
+          full_name: typeof fullName === 'string' ? fullName : email.split('@')[0],
+          phone: typeof phone === 'string' ? phone : null,
+          role: ['user', 'business', 'agent', 'admin'].includes(role) ? role : 'user',
+          company_name: typeof company === 'string' ? company : null
+        });
+      }
+      continue;
+    }
+
+    // --- B. LISTING IDENTIFICATION ---
+    // Listing schema: user_id, category_id, title, slug, description, price, currency, listing_type, status, location_city, location_district...
+    const slugIdx = vals.findIndex(v => typeof v === 'string' && /^[a-z0-9-]+$/.test(v) && v.includes('-') && v.length > 4);
+    if (slugIdx !== -1 && vals.length >= 6) {
+      const slug = vals[slugIdx];
+      const title = vals[slugIdx - 1] || slug;
+      const categoryId = typeof vals[slugIdx - 2] === 'number' ? vals[slugIdx - 2] : 1;
+      const userId = typeof vals[slugIdx - 3] === 'number' ? vals[slugIdx - 3] : 1;
+      const description = vals[slugIdx + 1] || title;
+      const price = typeof vals[slugIdx + 2] === 'number' ? vals[slugIdx + 2] : 0;
+      const currency = vals[slugIdx + 3] === 'GBP' ? 'GBP' : 'TRY';
+      const listingType = ['sale', 'rent', 'job', 'service', 'bid_request', 'wanted'].includes(vals[slugIdx + 4]) ? vals[slugIdx + 4] : 'sale';
+      const city = vals[slugIdx + 6] || 'Lefkoşa';
+      const district = vals[slugIdx + 7] || 'Merkez';
+
+      if (!listingsMap.has(slug)) {
+        listingsMap.set(slug, {
+          id: rowId,
+          user_id: userId,
+          category_id: categoryId,
+          title: typeof title === 'string' ? title : 'İlan',
+          slug,
+          description: typeof description === 'string' ? description : title,
+          price,
+          currency,
+          listing_type: listingType,
+          status: 'active',
+          location_city: typeof city === 'string' ? city : 'Lefkoşa',
+          location_district: typeof district === 'string' ? district : 'Merkez'
+        });
+      }
+      continue;
+    }
+
+    // --- C. LISTING IMAGE IDENTIFICATION ---
+    // Image schema: listing_id, image_url, is_primary, sort_order...
+    const imgIdx = vals.findIndex(v => typeof v === 'string' && (v.includes('/uploads/') || /\.(jpg|png|webp|jpeg)$/i.test(v)));
+    if (imgIdx !== -1) {
+      const imgUrl = vals[imgIdx];
+      const listingId = typeof vals[imgIdx - 1] === 'number' ? vals[imgIdx - 1] : 1;
+      const isPrimary = vals[imgIdx + 1] === 1 ? 1 : 0;
+      imagesList.push({ id: rowId, listing_id: listingId, image_url: imgUrl, is_primary: isPrimary });
+      continue;
+    }
+
+    // --- D. LISTING ATTRIBUTES IDENTIFICATION ---
+    // Attribute schema: listing_id, attribute_key, attribute_value
+    const attrIdx = vals.findIndex(v => typeof v === 'string' && ['room_count', 'square_meters', 'building_age', 'floor', 'fuel_type', 'gear_type', 'vehicle_brand', 'vehicle_model', 'vehicle_year', 'vehicle_km', 'salary', 'experience', 'education'].includes(v));
+    if (attrIdx !== -1) {
+      const key = vals[attrIdx];
+      const listingId = typeof vals[attrIdx - 1] === 'number' ? vals[attrIdx - 1] : 1;
+      const val = vals[attrIdx + 1] != null ? String(vals[attrIdx + 1]) : '';
+      attributesList.push({ id: rowId, listing_id: listingId, attribute_key: key, attribute_value: val });
+      continue;
+    }
+
+    // --- E. MESSAGES IDENTIFICATION ---
+    // Message schema: sender_id, receiver_id, listing_id, content, is_read...
+    if (vals.length >= 4 && typeof vals[0] === 'number' && typeof vals[1] === 'number' && typeof vals[3] === 'string' && vals[3].length > 0) {
+      messagesList.push({
+        id: rowId,
+        sender_id: vals[0],
+        receiver_id: vals[1],
+        listing_id: typeof vals[2] === 'number' ? vals[2] : null,
+        content: vals[3]
+      });
+      continue;
+    }
+  }
+
+  // INSERT TO TARGET DATABASE
+  const insertUser = targetDb.prepare(`
     INSERT OR REPLACE INTO users (
-      id, email, password_hash, full_name, phone, role, avatar_url, bio, company_name,
+      id, email, password_hash, full_name, phone, role, company_name,
       language_pref, currency_pref, is_verified, is_active, show_phone, show_surname,
-      has_password, corporate_status, corporate_type, created_at, updated_at
+      has_password, corporate_status, created_at, updated_at
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?,
-      ?, ?, ?, ?, ?, ?,
-      ?, ?, ?, ?, ?
+      @id, @email, @password_hash, @full_name, @phone, @role, @company_name,
+      'tr', 'TRY', 1, 1, 1, 0,
+      1, 'approved', datetime('now'), datetime('now')
     )
   `);
 
-  const insertListingStmt = targetDb.prepare(`
+  const insertListing = targetDb.prepare(`
     INSERT OR REPLACE INTO listings (
       id, user_id, category_id, title, slug, description, price, currency,
       listing_type, status, location_city, location_district, views_count,
       is_premium, is_featured, is_urgent, is_opportunity, is_negotiable,
       created_at, updated_at
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?,
-      ?, ?, ?, ?, ?,
-      ?, ?, ?, ?, ?,
-      ?, ?
+      @id, @user_id, @category_id, @title, @slug, @description, @price, @currency,
+      @listing_type, @status, @location_city, @location_district, 15,
+      0, 0, 0, 0, 0,
+      datetime('now'), datetime('now')
     )
   `);
 
-  const insertImageStmt = targetDb.prepare(`
+  const insertImage = targetDb.prepare(`
     INSERT OR REPLACE INTO listing_images (id, listing_id, image_url, is_primary, sort_order, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
+    VALUES (@id, @listing_id, @image_url, @is_primary, 0, datetime('now'))
   `);
 
-  const insertAttributeStmt = targetDb.prepare(`
+  const insertAttr = targetDb.prepare(`
     INSERT OR REPLACE INTO listing_attributes (id, listing_id, attribute_key, attribute_value)
-    VALUES (?, ?, ?, ?)
+    VALUES (@id, @listing_id, @attribute_key, @attribute_value)
   `);
 
-  const insertMessageStmt = targetDb.prepare(`
+  const insertMsg = targetDb.prepare(`
     INSERT OR REPLACE INTO messages (id, sender_id, receiver_id, listing_id, content, is_read, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    VALUES (@id, @sender_id, @receiver_id, @listing_id, @content, 0, datetime('now'))
   `);
-
-  const insertReviewStmt = targetDb.prepare(`
-    INSERT OR REPLACE INTO reviews (id, reviewer_id, reviewed_user_id, listing_id, rating, comment, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  const insertNotificationStmt = targetDb.prepare(`
-    INSERT OR REPLACE INTO notifications (id, user_id, actor_id, type, title, message, link_url, is_read, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  const insertedUserIds = new Set();
-  const insertedListingIds = new Set();
-  const insertedEmails = new Set();
 
   targetDb.transaction(() => {
-    for (let idx = 0; idx < rawRecords.length; idx++) {
-      const item = rawRecords[idx];
-      const vals = item.values;
-      const rowId = item.rowId || (idx + 1);
-
-      // --- 1. USER TESPİTİ ---
-      const email = vals.find(v => typeof v === 'string' && v.includes('@') && v.includes('.') && !v.includes(' ') && v.length < 90);
-      if (email && !insertedEmails.has(email)) {
-        try {
-          const passwordHash = vals.find(v => typeof v === 'string' && (v.startsWith('$2a$') || v.startsWith('$2b$'))) || '$2a$10$abcdefghijklmnopqrstuvwxyz123456';
-          const fullName = vals.find(v => typeof v === 'string' && v !== email && v !== passwordHash && v.length >= 2 && v.length <= 60) || email.split('@')[0];
-          const role = vals.find(v => ['user', 'business', 'agent', 'admin'].includes(v)) || 'user';
-          const phone = vals.find(v => typeof v === 'string' && /^[\d\s+()-]{7,20}$/.test(v)) || null;
-          const company = vals.find(v => typeof v === 'string' && v !== email && v !== fullName && v !== passwordHash && v.length > 2 && v.length < 80) || null;
-          const corpType = vals.find(v => ['real_estate', 'auto', 'service', 'construction', 'shopping', 'other'].includes(v)) || (company ? 'real_estate' : null);
-
-          insertUserStmt.run(
-            rowId, email, passwordHash, fullName, phone, role, null, null, company,
-            'tr', 'TRY', 1, 1, 1, 0,
-            1, 'approved', corpType, new Date().toISOString(), new Date().toISOString()
-          );
-          insertedEmails.add(email);
-          insertedUserIds.add(rowId);
-          recoveredCounts.users++;
-          continue;
-        } catch (_) {}
-      }
-
-      // --- 2. LISTING TESPİTİ ---
-      const hasCity = vals.some(v => ['Lefkoşa', 'Girne', 'Gazimağusa', 'İskele', 'Güzelyurt', 'Lefke'].includes(v));
-      const hasListingType = vals.some(v => ['sale', 'rent', 'job', 'service', 'bid_request', 'wanted'].includes(v));
-      const hasCurrency = vals.some(v => v === 'TRY' || v === 'GBP' || v === 'EUR' || v === 'USD');
-      const hasSlug = vals.some(v => typeof v === 'string' && /^[a-z0-9-]+$/.test(v) && v.includes('-') && v.length > 5);
-
-      if ((hasCity || hasListingType || hasCurrency || hasSlug) && !vals.some(v => typeof v === 'string' && v.includes('@'))) {
-        try {
-          const strings = vals.filter(v => typeof v === 'string');
-          const numbers = vals.filter(v => typeof v === 'number');
-
-          const slug = strings.find(s => /^[a-z0-9-]+$/.test(s) && s.includes('-') && s.length > 5) || `ilan-${rowId}-${Date.now().toString(36)}`;
-          const title = strings.find(s => s !== slug && s.length >= 3 && s.length <= 150 && !s.startsWith('/uploads/')) || 'Kıbrıs İlanı';
-          const description = strings.find(s => s !== slug && s !== title && s.length > 5 && !s.startsWith('/uploads/')) || title;
-          const city = strings.find(s => ['Lefkoşa', 'Girne', 'Gazimağusa', 'İskele', 'Güzelyurt', 'Lefke'].includes(s)) || 'Lefkoşa';
-          const district = strings.find(s => s !== city && s !== title && s !== description && s !== slug && s.length < 40 && !s.startsWith('/uploads/')) || 'Merkez';
-          const currency = strings.find(s => ['TRY', 'GBP', 'EUR', 'USD'].includes(s)) || 'TRY';
-          const listingType = strings.find(s => ['sale', 'rent', 'job', 'service', 'bid_request', 'wanted'].includes(s)) || 'sale';
-
-          const price = numbers.find(n => n > 0 && n < 1000000000 && !Number.isInteger(n)) || numbers.find(n => n >= 100 && n < 100000000) || 0;
-          const categoryId = numbers.find(n => Number.isInteger(n) && n > 0 && n <= 50) || 1;
-          const userId = numbers.find(n => Number.isInteger(n) && n > 0 && n < 10000 && n !== categoryId) || 1;
-
-          insertListingStmt.run(
-            rowId, userId, categoryId, title, slug, description, price, currency,
-            listingType, 'active', city, district, 0,
-            0, 0, 0, 0, 0,
-            new Date().toISOString(), new Date().toISOString()
-          );
-          insertedListingIds.add(rowId);
-          recoveredCounts.listings++;
-          continue;
-        } catch (_) {}
-      }
-
-      // --- 3. RESİM TESPİTİ ---
-      const imgPath = vals.find(v => typeof v === 'string' && (v.includes('/uploads/') || /\.(jpg|png|webp|jpeg)$/i.test(v)));
-      if (imgPath) {
-        try {
-          const numbers = vals.filter(v => typeof v === 'number' && Number.isInteger(v));
-          const listingId = numbers[0] || (insertedListingIds.size > 0 ? Array.from(insertedListingIds).pop() : 1);
-          insertImageStmt.run(rowId, listingId, imgPath, 1, 0, new Date().toISOString());
-          recoveredCounts.listing_images++;
-          continue;
-        } catch (_) {}
-      }
-
-      // --- 4. ÖZELLİK (ATTRIBUTE) TESPİTİ ---
-      const attrKey = vals.find(v => typeof v === 'string' && ['room_count', 'square_meters', 'building_age', 'floor', 'fuel_type', 'gear_type', 'vehicle_brand', 'vehicle_model', 'vehicle_year', 'vehicle_km'].includes(v));
-      if (attrKey) {
-        try {
-          const numbers = vals.filter(v => typeof v === 'number' && Number.isInteger(v));
-          const listingId = numbers[0] || 1;
-          const attrVal = vals.find(v => v !== attrKey && (typeof v === 'string' || typeof v === 'number')) || '';
-          insertAttributeStmt.run(rowId, listingId, attrKey, String(attrVal));
-          recoveredCounts.listing_attributes++;
-          continue;
-        } catch (_) {}
-      }
-
-      // --- 5. MESAJ TESPİTİ ---
-      if (vals.length >= 4 && vals.some(v => typeof v === 'string' && v.length > 1 && !v.startsWith('/uploads/'))) {
-        const content = vals.find(v => typeof v === 'string' && v.length > 1 && !v.startsWith('/uploads/'));
-        const numbers = vals.filter(v => typeof v === 'number' && Number.isInteger(v));
-        if (content && numbers.length >= 2) {
-          try {
-            insertMessageStmt.run(rowId, numbers[0], numbers[1], numbers[2] || null, content, 0, new Date().toISOString());
-            recoveredCounts.messages++;
-            continue;
-          } catch (_) {}
-        }
-      }
+    for (const u of usersMap.values()) {
+      try { insertUser.run(u); counts.users++; } catch (_) {}
+    }
+    for (const l of listingsMap.values()) {
+      try { insertListing.run(l); counts.listings++; } catch (_) {}
+    }
+    for (const img of imagesList) {
+      try { insertImage.run(img); counts.listing_images++; } catch (_) {}
+    }
+    for (const attr of attributesList) {
+      try { insertAttr.run(attr); counts.listing_attributes++; } catch (_) {}
+    }
+    for (const msg of messagesList) {
+      try { insertMsg.run(msg); counts.messages++; } catch (_) {}
     }
   })();
 
-  // 4. Doğrulama ve Rapor
-  const totalActiveUsers = targetDb.prepare("SELECT COUNT(*) as c FROM users WHERE is_active = 1").get().c;
-  const totalActiveListings = targetDb.prepare("SELECT COUNT(*) as c FROM listings WHERE status = 'active'").get().c;
+  const activeUsers = targetDb.prepare("SELECT COUNT(*) as c FROM users WHERE is_active = 1").get().c;
+  const activeListings = targetDb.prepare("SELECT COUNT(*) as c FROM listings WHERE status = 'active'").get().c;
   const totalImages = targetDb.prepare("SELECT COUNT(*) as c FROM listing_images").get().c;
   const totalMessages = targetDb.prepare("SELECT COUNT(*) as c FROM messages").get().c;
 
   console.log('\n======================================================');
-  console.log('✅ KURTARILAN CANLI VERİ TABLOSU:');
-  console.log(`  👤 Aktif Üyeler (users)          : ${totalActiveUsers} kullanıcı`);
-  console.log(`  🏠 Aktif İlanlar (listings)       : ${totalActiveListings} ilan`);
+  console.log('✅ BİREBİR KURTARILAN KAYITLAR:');
+  console.log(`  👤 Kullanıcılar (users)          : ${activeUsers} kullanıcı`);
+  console.log(`  🏠 Yayındaki İlanlar (listings)   : ${activeListings} ilan`);
   console.log(`  🖼️  İlan Resimleri (listing_images): ${totalImages} adet`);
-  console.log(`  🏷️  İlan Özellikleri (attributes)  : ${recoveredCounts.listing_attributes} adet`);
+  console.log(`  🏷️  İlan Özellikleri (attributes)  : ${counts.listing_attributes} adet`);
   console.log(`  💬 Mesajlar (messages)           : ${totalMessages} mesaj`);
-  console.log('======================================================');
+  console.log('======================================================\n');
 
   targetDb.pragma('foreign_keys = ON');
   targetDb.close();
 
-  // 5. Hedef veritabanını cypilan.db olarak yerleştir
+  // Replace live cypilan.db
   const currentDbPath = path.join(dbDir, 'cypilan.db');
   const currentWalPath = path.join(dbDir, 'cypilan.db-wal');
   const currentShmPath = path.join(dbDir, 'cypilan.db-shm');
@@ -487,13 +484,12 @@ async function restore() {
 
   fs.copyFileSync(tempTargetDb, currentDbPath);
 
-  console.log('\n🎉 VERİTABANI BAŞARIYLA GERİ YÜKLENDİ!');
-  console.log('Tüm verileriniz cypilan.db içine aktarıldı.');
-  console.log('Artık sunucunuzda "pm2 restart all" çalıştırabilirsiniz.\n');
-
   try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch (_) {}
+
+  console.log('🎉 TÜM VERİLERİNİZ cypilan.db İÇİNE HATASIZ YERLEŞTİRİLDİ!');
+  console.log('Şimdi "pm2 restart all" çalıştırabilirsiniz.\n');
 }
 
 restore().catch(err => {
-  console.error('Kurtarma işleminde hata:', err);
+  console.error('Kurtarma hatası:', err);
 });
