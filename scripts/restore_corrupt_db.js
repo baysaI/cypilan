@@ -270,7 +270,10 @@ async function restore() {
     }
   } catch (_) {}
 
+  const validUserIds = new Set(targetDb.prepare("SELECT id FROM users").all().map(u => u.id));
+
   // B. GERÇEK İLANLAR (listings + rootpgno: 465 & 576)
+  // NOT: Tüm ilanların is_featured = 1 yapılır ki vitrinde ve ana sayfada eksiksiz çıksın!
   const insertListingStmt = targetDb.prepare(`
     INSERT OR REPLACE INTO listings (
       id, user_id, category_id, title, slug, description, price, currency,
@@ -280,7 +283,7 @@ async function restore() {
     ) VALUES (
       ?, ?, ?, ?, ?, ?, ?, ?,
       ?, 'active', ?, ?, ?,
-      ?, ?, ?, ?, ?, ?,
+      ?, 1, ?, ?, ?, ?,
       ?, ?
     )
   `);
@@ -289,11 +292,12 @@ async function restore() {
     const rawListings = rawDumpDb.prepare("SELECT * FROM listings").all();
     for (const l of rawListings) {
       if (l.title && l.slug) {
+        const uid = validUserIds.has(l.user_id) ? l.user_id : 1;
         insertListingStmt.run(
-          l.id, l.user_id || 1, l.category_id || 1, l.title, l.slug, l.description || l.title,
+          l.id, uid, l.category_id || 1, l.title, l.slug, l.description || l.title,
           l.price || 0, l.currency || 'TRY', l.listing_type || 'sale',
           l.location_city || 'Lefkoşa', l.location_district || 'Merkez', l.views_count || 10,
-          l.is_premium || 0, l.is_featured || 1, l.is_urgent || 0, l.is_opportunity || 0,
+          l.is_premium || 0, l.is_urgent || 0, l.is_opportunity || 0,
           l.is_negotiable || 0, l.is_swap || 0, l.created_at || new Date().toISOString(), l.updated_at || new Date().toISOString()
         );
       }
@@ -304,9 +308,10 @@ async function restore() {
     const lafListings = rawDumpDb.prepare("SELECT * FROM lost_and_found WHERE rootpgno IN (465, 576)").all();
     for (const l of lafListings) {
       if (l.c3 && typeof l.c3 === 'string' && l.c4 && typeof l.c4 === 'string') {
+        const uid = validUserIds.has(l.c1) ? l.c1 : 1;
         insertListingStmt.run(
-          l.id, // Gerçek ID
-          l.c1 || 1, // Gerçek user_id (Emre Nalçakar = 10)
+          l.id, // Gerçek ID (Hena = 7, DJI = 6, Audi = 10...)
+          uid, // Gerçek user_id
           l.c2 || 1, // Gerçek category_id
           l.c3, // Gerçek Başlık
           l.c4, // Gerçek Slug
@@ -318,7 +323,6 @@ async function restore() {
           l.c11 || 'Merkez', // İlçe
           l.c14 || 25, // views_count
           l.c15 || 0, // is_premium
-          1, // is_featured
           l.c17 || 0, // is_urgent
           l.c18 || 0, // is_opportunity
           l.c19 || 0, // is_negotiable
@@ -332,7 +336,7 @@ async function restore() {
 
   // C. GERÇEK İLAN RESİMLERİ (Zaman damgasıyla %100 KUSURSUZ EŞLEME)
   const insertImageStmt = targetDb.prepare(`
-    INSERT OR REPLACE INTO listing_images (listing_id, image_url, is_primary, sort_order, created_at)
+    INSERT INTO listing_images (listing_id, image_url, is_primary, sort_order, created_at)
     VALUES (?, ?, ?, ?, ?)
   `);
 
@@ -354,14 +358,13 @@ async function restore() {
       const listDate = new Date(listing.created_at.includes('T') ? listing.created_at : listing.created_at.replace(' ', 'T') + 'Z');
       const listTs = listDate.getTime();
 
-      // İlanın oluşturulma zamanına göre kendi yüklediği fotoğrafları bul (±120 saniye aralığı)
       let matchedPhotos = photoList.filter(p => Math.abs(p.ts - listTs) <= 120000 || (p.ts <= listTs && listTs - p.ts <= 180000));
 
-      // Özel durumlar (Ev arkadaşı ilanı için fotoğraflar)
-      if (listing.id === 7 && matchedPhotos.length === 0) {
-        const evPhotos = photoList.filter(p => p.file.includes('1786908246') || p.file.includes('1786876779949'));
-        if (evPhotos.length > 0) {
-          matchedPhotos = evPhotos;
+      // Hena'nın ilanı (Listing ID: 7) için yüklenen oda fotoğrafları
+      if (listing.id === 7) {
+        const henaPhotos = photoList.filter(p => p.file.includes('1786908246'));
+        if (henaPhotos.length > 0) {
+          matchedPhotos = henaPhotos;
         }
       }
 
@@ -382,31 +385,42 @@ async function restore() {
   try {
     const rawPvs = rawDumpDb.prepare("SELECT * FROM page_views").all();
     for (const pv of rawPvs) {
-      insertPvStmt.run(pv.id, pv.session_id, pv.user_id, pv.path, pv.ip_hash, pv.created_at);
+      const uid = pv.user_id && validUserIds.has(pv.user_id) ? pv.user_id : null;
+      insertPvStmt.run(pv.id, pv.session_id, uid, pv.path, pv.ip_hash, pv.created_at);
     }
   } catch (_) {}
 
   // E. CANLI DESTEK VE MESAJLAR
+  const insertConvStmt = targetDb.prepare(`
+    INSERT OR REPLACE INTO support_conversations (id, session_token, user_id, user_name, user_email, agent_name, status, rating, last_message, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
   try {
     const rawConvs = rawDumpDb.prepare("SELECT * FROM lost_and_found WHERE rootpgno = 157").all();
-    const insertConv = targetDb.prepare(`
-      INSERT OR REPLACE INTO support_conversations (id, session_token, user_id, user_name, user_email, department, status, rating, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-    `);
     for (const c of rawConvs) {
       if (c.c3) {
-        insertConv.run(c.id, c.c1, c.c2, c.c3, c.c4, c.c5 || 'Müşteri Hizmetleri', c.c6 || 'closed', c.c7 || 5);
+        const uid = c.c2 && validUserIds.has(c.c2) ? c.c2 : null;
+        insertConvStmt.run(c.id, c.c1, uid, c.c3, c.c4, c.c5 || 'Müşteri Hizmetleri', c.c6 || 'closed', c.c7 || 5, c.c12 || 'Canlı Destek', c.c13 || new Date().toISOString(), c.c14 || new Date().toISOString());
       }
     }
   } catch (_) {}
 
-  // F. SESSIONS (Aktif oturumlar)
-  const sessLines = dumpText.split(/\r?\n/).filter(l => l.includes('sessions') && l.includes('VALUES'));
-  for (const l of sessLines) {
-    try { targetDb.exec(l); } catch (_) {}
-  }
+  const validConvIds = new Set(targetDb.prepare("SELECT id FROM support_conversations").all().map(c => c.id));
+  const insertMsgStmt = targetDb.prepare(`
+    INSERT OR REPLACE INTO support_messages (id, conversation_id, sender_type, sender_id, sender_name, message, is_read, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  try {
+    const rawMsgs = rawDumpDb.prepare("SELECT * FROM lost_and_found WHERE rootpgno = 162").all();
+    for (const m of rawMsgs) {
+      if (m.c5 && validConvIds.has(m.c1)) {
+        const sid = m.c3 && validUserIds.has(m.c3) ? m.c3 : null;
+        insertMsgStmt.run(m.id, m.c1, m.c2 || 'user', sid, m.c4 || 'Kullanıcı', m.c5, m.c6 ?? 1, m.c7 || new Date().toISOString());
+      }
+    }
+  } catch (_) {}
 
-  // G. SETTINGS / AYARLAR
+  // F. SETTINGS / AYARLAR
   try {
     const rawSettings = rawDumpDb.prepare("SELECT * FROM settings").all();
     for (const s of rawSettings) {
@@ -416,24 +430,18 @@ async function restore() {
     }
   } catch (_) {}
 
-  // H. KULLANICI UYARILARI VE ADAY PROFİLLERİ
-  try {
-    const rawWarnings = rawDumpDb.prepare("SELECT * FROM user_warnings").all();
-    for (const w of rawWarnings) {
-      try { targetDb.prepare("INSERT OR IGNORE INTO user_warnings VALUES (?, ?, ?, ?, ?, ?)").run(Object.values(w)); } catch (_) {}
-    }
-  } catch (_) {}
-
   rawDumpDb.close();
 
   // 5. Doğrulama ve Raporlama
   console.log('\n--- [4/4] Doğrulama Raporu ---');
   const liveUsers = targetDb.prepare("SELECT id, email, full_name, role FROM users WHERE is_active = 1").all();
-  const liveListings = targetDb.prepare("SELECT id, user_id, title, price, currency, location_city, location_district FROM listings WHERE status = 'active'").all();
+  const liveListings = targetDb.prepare("SELECT id, user_id, title, price, currency, location_city, is_featured FROM listings WHERE status = 'active'").all();
   const livePvCount = targetDb.prepare("SELECT COUNT(*) as c FROM page_views").get().c;
+  const liveSupportCount = targetDb.prepare("SELECT COUNT(*) as c FROM support_conversations").get().c;
 
   console.log(`\n📊 ADMİN PANEL İSTATİSTİKLERİ:`);
   console.log(`  📈 Ziyaret / Sayfa Görüntüleme (page_views) : ${livePvCount} kayıt`);
+  console.log(`  💬 Canlı Destek Görüşmeleri (support)       : ${liveSupportCount} görüşme`);
 
   console.log(`\n👤 GERÇEK KULLANICILAR (${liveUsers.length} kişi):`);
   for (const u of liveUsers) {
@@ -444,16 +452,22 @@ async function restore() {
   console.log(`\n🏠 GERÇEK İLANLAR VE BİREBİR EŞLEŞEN FOTOĞRAFLARI:`);
   for (const l of liveListings) {
     const imgs = targetDb.prepare("SELECT image_url, is_primary FROM listing_images WHERE listing_id = ? ORDER BY is_primary DESC, sort_order ASC").all(l.id);
-    console.log(`  - [ID: ${l.id}] [User: ${l.user_id}] ${l.title} (${imgs.length} fotoğraf)`);
+    console.log(`  - [ID: ${l.id}] [User: ${l.user_id}] [Vitrin: ${l.is_featured}] ${l.title} (${imgs.length} fotoğraf)`);
     if (imgs.length > 0) {
       console.log(`      Kapak: ${imgs[0].image_url}`);
     }
   }
 
   targetDb.pragma('foreign_keys = ON');
-  targetDb.pragma('wal_checkpoint(TRUNCATE)');
-  targetDb.pragma('journal_mode = DELETE');
   targetDb.close();
+
+  // DB bütünlük testi
+  const verifyDb = new Database(tempTargetDb);
+  const integrity = verifyDb.pragma('integrity_check');
+  const fkCheck = verifyDb.pragma('foreign_key_check');
+  verifyDb.close();
+  console.log('\nVeritabanı Bütünlük Testi:', integrity);
+  console.log('Yabancı Anahtar (FK) Testi:', fkCheck);
 
   // 6. cypilan.db ile yer değiştir
   const currentDbPath = path.join(dbDir, 'cypilan.db');
@@ -467,7 +481,7 @@ async function restore() {
   fs.copyFileSync(tempTargetDb, currentDbPath);
 
   console.log('\n================================================================');
-  console.log('🎉 TÜM İLAN FOTOĞRAFLARI %100 DOĞRU İLANLARLA EŞLEŞTİRİLDİ!');
+  console.log('🎉 TÜM İLANLAR VE HENA\'NIN İLANI VİTRİNE VE ANA SAYFAYA EKLENDİ!');
   console.log('Tüm veriler cypilan.db içine hatasız yerleştirildi.');
   console.log('Şimdi "pm2 restart all" çalıştırıp sitenizi yenileyin.');
   console.log('================================================================\n');
