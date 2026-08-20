@@ -1110,6 +1110,74 @@
             ctx.closePath();
         }
 
+        // Vector Tag Icon for Category Badge
+        function drawVectorTag(ctx, x, y, size, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = color;
+            const w = size * 1.15;
+            const h = size * 0.76;
+            const cut = size * 0.28;
+            ctx.beginPath();
+            ctx.moveTo(cut, 0);
+            ctx.lineTo(w - 2, 0);
+            ctx.arcTo(w, 0, w, 2, 3);
+            ctx.lineTo(w, h - 2);
+            ctx.arcTo(w, h, w - 2, h, 3);
+            ctx.lineTo(cut, h);
+            ctx.lineTo(0, h / 2);
+            ctx.closePath();
+            ctx.fill();
+            // Hole
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(size * 0.76, h / 2, size * 0.13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Vector Pin Icon for Location Badge
+        function drawVectorPin(ctx, x, y, size, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = color;
+            const r = size * 0.42;
+            ctx.beginPath();
+            ctx.arc(0, -size * 0.12, r, Math.PI * 0.78, Math.PI * 2.22, false);
+            ctx.lineTo(0, size * 0.46);
+            ctx.closePath();
+            ctx.fill();
+            // Inner cutout
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(0, -size * 0.12, r * 0.46, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Vector Sparkle Star
+        function drawVectorSparkle(ctx, x, y, size, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            const r1 = size / 2;
+            const r2 = size / 6;
+            for (let i = 0; i < 8; i++) {
+                const r = (i % 2 === 0) ? r1 : r2;
+                const a = (i * Math.PI) / 4;
+                const px = Math.cos(a) * r;
+                const py = Math.sin(a) * r;
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        const FONT_FAMILY = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif';
+
         function drawStory(imgObj) {
             ctx.save();
             ctx.clearRect(0, 0, W, H);
@@ -1139,11 +1207,11 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#ffffff';
-            ctx.font = '900 64px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.font = '900 64px ' + FONT_FAMILY;
             ctx.fillText('CYPILAN', W / 2, 110);
 
             ctx.fillStyle = '#94a3b8';
-            ctx.font = '700 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.font = '700 24px ' + FONT_FAMILY;
             ctx.fillText("KIBRIS'IN İLAN PAZARYERİ • cypilan.com", W / 2, 165);
 
             // 3. Photo Card
@@ -1183,7 +1251,7 @@
                 ctx.fillStyle = '#1e293b';
                 ctx.fillRect(photoX, photoY, photoW, photoH);
                 ctx.fillStyle = '#64748b';
-                ctx.font = '600 34px "Inter", sans-serif';
+                ctx.font = '600 34px ' + FONT_FAMILY;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('📷 CYPILAN İLAN GÖRSELİ', W / 2, photoY + photoH / 2);
@@ -1201,24 +1269,28 @@
             // Top-left Tag on Photo
             ctx.save();
             ctx.fillStyle = '#0284c7';
-            roundRect(ctx, photoX + 24, photoY + 24, 220, 52, 26);
+            const tagBadgeW = 220;
+            const tagBadgeH = 52;
+            roundRect(ctx, photoX + 24, photoY + 24, tagBadgeW, tagBadgeH, 26);
             ctx.fill();
+            drawVectorSparkle(ctx, photoX + 48, photoY + 24 + tagBadgeH / 2, 18, '#ffffff');
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 24px "Inter", sans-serif';
-            ctx.textAlign = 'center';
+            ctx.font = '700 23px ' + FONT_FAMILY;
+            ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-            ctx.fillText('✨ GÜNCEL İLAN', photoX + 134, photoY + 50);
+            ctx.fillText('GÜNCEL İLAN', photoX + 66, photoY + 24 + tagBadgeH / 2);
             ctx.restore();
 
             // 4. Details Section (Row 1: Price + Category)
             const row1Y = photoY + photoH + 40; // 1070
             const row1H = 84;
 
+            let pW = 0;
             if (activeData.price) {
                 ctx.save();
-                ctx.font = '900 52px "Inter", sans-serif';
-                const pText = activeData.price;
-                const pW = ctx.measureText(pText).width + 60;
+                ctx.font = '900 52px ' + FONT_FAMILY;
+                const pText = String(activeData.price).trim();
+                pW = ctx.measureText(pText).width + 60;
 
                 const pGrad = ctx.createLinearGradient(photoX, row1Y, photoX + pW, row1Y + row1H);
                 pGrad.addColorStop(0, '#f59e0b');
@@ -1236,27 +1308,53 @@
 
             if (activeData.category) {
                 ctx.save();
-                ctx.font = '700 30px "Inter", sans-serif';
-                const catText = '🏷️ ' + activeData.category;
-                const catW = ctx.measureText(catText).width + 44;
-                const catH = 84;
+                ctx.font = '700 28px ' + FONT_FAMILY;
+                const catName = String(activeData.category).trim();
+                const iconSize = 22;
+                const iconGap = 12;
+                const padX = 24;
+                const textW = ctx.measureText(catName).width;
 
                 let catX = photoX;
-                if (activeData.price) {
-                    ctx.font = '900 52px "Inter", sans-serif';
-                    catX = photoX + ctx.measureText(activeData.price).width + 76;
+                if (pW > 0) {
+                    catX = photoX + pW + 16;
                 }
 
-                if (catX + catW <= photoX + photoW) {
-                    ctx.font = '700 30px "Inter", sans-serif';
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-                    roundRect(ctx, catX, row1Y, catW, catH, 22);
-                    ctx.fill();
+                const maxCatW = (photoX + photoW) - catX;
+                let catW = padX * 2 + iconSize + iconGap + textW;
+                if (catW > maxCatW) {
+                    catW = maxCatW;
+                }
 
+                if (catW >= 120) {
+                    // Pill background
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.20)';
+                    ctx.lineWidth = 1.5;
+                    roundRect(ctx, catX, row1Y, catW, row1H, 22);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Vector Tag Icon
+                    const iconX = catX + padX;
+                    const iconY = row1Y + (row1H - iconSize * 0.76) / 2;
+                    drawVectorTag(ctx, iconX, iconY, iconSize, '#fbbf24');
+
+                    // Category Text
                     ctx.fillStyle = '#f8fafc';
-                    ctx.textAlign = 'center';
+                    ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(catText, catX + catW / 2, row1Y + catH / 2);
+                    const textStartX = iconX + iconSize + iconGap;
+                    const availTextW = catW - (padX * 2 + iconSize + iconGap);
+
+                    let displayText = catName;
+                    if (ctx.measureText(displayText).width > availTextW && availTextW > 30) {
+                        while (displayText.length > 2 && ctx.measureText(displayText + '...').width > availTextW) {
+                            displayText = displayText.slice(0, -1);
+                        }
+                        displayText += '...';
+                    }
+                    ctx.fillText(displayText, textStartX, row1Y + row1H / 2);
                 }
                 ctx.restore();
             }
@@ -1267,21 +1365,31 @@
 
             if (activeData.city) {
                 ctx.save();
-                const cityText = '📍 ' + activeData.city + ', KKTC';
-                ctx.font = '600 30px "Inter", sans-serif';
-                const cityW = ctx.measureText(cityText).width + 44;
+                ctx.font = '600 28px ' + FONT_FAMILY;
+                const cityLabel = String(activeData.city).trim() + ', KKTC';
+                const iconSize = 20;
+                const iconGap = 12;
+                const padX = 22;
+                const textW = ctx.measureText(cityLabel).width;
+                const cityW = padX * 2 + iconSize + iconGap + textW;
 
-                ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
-                ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.14)';
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
                 ctx.lineWidth = 1.5;
                 roundRect(ctx, photoX, row2Y, cityW, row2H, 20);
                 ctx.fill();
                 ctx.stroke();
 
+                // Vector Pin Icon
+                const pinX = photoX + padX + iconSize / 2;
+                const pinY = row2Y + row2H / 2;
+                drawVectorPin(ctx, pinX, pinY, iconSize, '#38bdf8');
+
+                // Location Text
                 ctx.fillStyle = '#38bdf8';
-                ctx.textAlign = 'center';
+                ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(cityText, photoX + cityW / 2, row2Y + row2H / 2);
+                ctx.fillText(cityLabel, photoX + padX + iconSize + iconGap, row2Y + row2H / 2);
                 ctx.restore();
             }
 
@@ -1289,7 +1397,7 @@
             const titleY = row2Y + row2H + 35; // 1273
             ctx.save();
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 48px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.font = '800 48px ' + FONT_FAMILY;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
 
@@ -1329,10 +1437,10 @@
             ctx.stroke();
 
             ctx.fillStyle = '#38bdf8';
-            ctx.font = '700 32px "Inter", sans-serif';
+            ctx.font = '700 32px ' + FONT_FAMILY;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('👉 Detaylar & İletişim İçin: cypilan.com', W / 2, footY + 55);
+            ctx.fillText('Detaylar & İletişim İçin: cypilan.com  →', W / 2, footY + 55);
             ctx.restore();
 
             ctx.restore();

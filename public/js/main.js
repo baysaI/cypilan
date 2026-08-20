@@ -476,6 +476,74 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.closePath();
         }
 
+        // Vector Tag Icon for Category Badge
+        function drawVectorTag(x, y, size, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = color;
+            const w = size * 1.15;
+            const h = size * 0.76;
+            const cut = size * 0.28;
+            ctx.beginPath();
+            ctx.moveTo(cut, 0);
+            ctx.lineTo(w - 2, 0);
+            ctx.arcTo(w, 0, w, 2, 3);
+            ctx.lineTo(w, h - 2);
+            ctx.arcTo(w, h, w - 2, h, 3);
+            ctx.lineTo(cut, h);
+            ctx.lineTo(0, h / 2);
+            ctx.closePath();
+            ctx.fill();
+            // Hole
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(size * 0.76, h / 2, size * 0.13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Vector Pin Icon for Location Badge
+        function drawVectorPin(x, y, size, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = color;
+            const r = size * 0.42;
+            ctx.beginPath();
+            ctx.arc(0, -size * 0.12, r, Math.PI * 0.78, Math.PI * 2.22, false);
+            ctx.lineTo(0, size * 0.46);
+            ctx.closePath();
+            ctx.fill();
+            // Inner cutout
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(0, -size * 0.12, r * 0.46, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Vector Sparkle Star
+        function drawVectorSparkle(x, y, size, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            const r1 = size / 2;
+            const r2 = size / 6;
+            for (let i = 0; i < 8; i++) {
+                const r = (i % 2 === 0) ? r1 : r2;
+                const a = (i * Math.PI) / 4;
+                const px = Math.cos(a) * r;
+                const py = Math.sin(a) * r;
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        const FONT_FAMILY = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif';
+
         // Draw complete canvas
         function drawCanvas(photoImg) {
             ctx.save();
@@ -508,11 +576,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // CYPILAN Logo Text
             ctx.fillStyle = '#ffffff';
-            ctx.font = '900 64px "Inter", "Segoe UI", sans-serif';
+            ctx.font = '900 64px ' + FONT_FAMILY;
             ctx.fillText('CYPILAN', W / 2, 110);
 
             ctx.fillStyle = '#94a3b8';
-            ctx.font = '700 24px "Inter", "Segoe UI", sans-serif';
+            ctx.font = '700 24px ' + FONT_FAMILY;
             ctx.fillText("KIBRIS'IN İLAN PAZARYERİ • cypilan.com", W / 2, 165);
 
             // 3. Photo Card Container
@@ -556,8 +624,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.fillRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH);
 
                 ctx.fillStyle = '#64748b';
-                ctx.font = '600 32px "Inter", sans-serif';
+                ctx.font = '600 32px ' + FONT_FAMILY;
                 ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
                 ctx.fillText('📷 CYPILAN İlan Görseli', W / 2, imgBoxY + imgBoxH / 2);
             }
             ctx.restore();
@@ -573,13 +642,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Top-left badge over photo
             ctx.save();
             ctx.fillStyle = '#0284c7';
-            roundRect(imgBoxX + 24, imgBoxY + 24, 230, 52, 26);
+            const tagBadgeW = 220;
+            const tagBadgeH = 52;
+            roundRect(imgBoxX + 24, imgBoxY + 24, tagBadgeW, tagBadgeH, 26);
             ctx.fill();
+            drawVectorSparkle(imgBoxX + 48, imgBoxY + 24 + tagBadgeH / 2, 18, '#ffffff');
             ctx.fillStyle = '#ffffff';
-            ctx.font = '700 24px "Inter", sans-serif';
-            ctx.textAlign = 'center';
+            ctx.font = '700 23px ' + FONT_FAMILY;
+            ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-            ctx.fillText('✨ GÜNCEL İLAN', imgBoxX + 139, imgBoxY + 50);
+            ctx.fillText('GÜNCEL İLAN', imgBoxX + 66, imgBoxY + 24 + tagBadgeH / 2);
             ctx.restore();
 
             // 4. Details Section (Distinct Non-Overlapping Rows)
@@ -587,51 +659,77 @@ document.addEventListener('DOMContentLoaded', () => {
             const row1Y = imgBoxY + imgBoxH + 40; // 1070
             const row1H = 84;
 
+            let pW = 0;
             if (currentShareData.price) {
                 ctx.save();
-                ctx.font = '900 52px "Inter", sans-serif';
-                const priceText = currentShareData.price;
-                const priceW = ctx.measureText(priceText).width + 60;
+                ctx.font = '900 52px ' + FONT_FAMILY;
+                const priceText = String(currentShareData.price).trim();
+                pW = ctx.measureText(priceText).width + 60;
 
-                const pGrad = ctx.createLinearGradient(imgBoxX, row1Y, imgBoxX + priceW, row1Y + row1H);
+                const pGrad = ctx.createLinearGradient(imgBoxX, row1Y, imgBoxX + pW, row1Y + row1H);
                 pGrad.addColorStop(0, '#f59e0b');
                 pGrad.addColorStop(1, '#d97706');
                 ctx.fillStyle = pGrad;
-                roundRect(imgBoxX, row1Y, priceW, row1H, 22);
+                roundRect(imgBoxX, row1Y, pW, row1H, 22);
                 ctx.fill();
 
                 ctx.fillStyle = '#0f172a';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(priceText, imgBoxX + priceW / 2, row1Y + row1H / 2);
+                ctx.fillText(priceText, imgBoxX + pW / 2, row1Y + row1H / 2);
                 ctx.restore();
             }
 
             // Category Badge next to Price
             if (currentShareData.category) {
                 ctx.save();
-                ctx.font = '700 30px "Inter", sans-serif';
-                const catText = `🏷️ ${currentShareData.category}`;
-                const catW = ctx.measureText(catText).width + 44;
-                const catH = 84;
+                ctx.font = '700 28px ' + FONT_FAMILY;
+                const catName = String(currentShareData.category).trim();
+                const iconSize = 22;
+                const iconGap = 12;
+                const padX = 24;
+                const textW = ctx.measureText(catName).width;
                 
                 let catX = imgBoxX;
-                if (currentShareData.price) {
-                    ctx.font = '900 52px "Inter", sans-serif';
-                    const priceW = ctx.measureText(currentShareData.price).width + 60;
-                    catX = imgBoxX + priceW + 16;
+                if (pW > 0) {
+                    catX = imgBoxX + pW + 16;
                 }
 
-                if (catX + catW <= imgBoxX + imgBoxW) {
-                    ctx.font = '700 30px "Inter", sans-serif';
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-                    roundRect(catX, row1Y, catW, catH, 22);
-                    ctx.fill();
+                const maxCatW = (imgBoxX + imgBoxW) - catX;
+                let catW = padX * 2 + iconSize + iconGap + textW;
+                if (catW > maxCatW) {
+                    catW = maxCatW;
+                }
 
+                if (catW >= 120) {
+                    // Pill background
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.20)';
+                    ctx.lineWidth = 1.5;
+                    roundRect(catX, row1Y, catW, row1H, 22);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Vector Tag Icon
+                    const iconX = catX + padX;
+                    const iconY = row1Y + (row1H - iconSize * 0.76) / 2;
+                    drawVectorTag(iconX, iconY, iconSize, '#fbbf24');
+
+                    // Category Text
                     ctx.fillStyle = '#f8fafc';
-                    ctx.textAlign = 'center';
+                    ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(catText, catX + catW / 2, row1Y + catH / 2);
+                    const textStartX = iconX + iconSize + iconGap;
+                    const availTextW = catW - (padX * 2 + iconSize + iconGap);
+
+                    let displayText = catName;
+                    if (ctx.measureText(displayText).width > availTextW && availTextW > 30) {
+                        while (displayText.length > 2 && ctx.measureText(displayText + '...').width > availTextW) {
+                            displayText = displayText.slice(0, -1);
+                        }
+                        displayText += '...';
+                    }
+                    ctx.fillText(displayText, textStartX, row1Y + row1H / 2);
                 }
                 ctx.restore();
             }
@@ -642,21 +740,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentShareData.city) {
                 ctx.save();
-                const cityText = `📍 ${currentShareData.city}, KKTC`;
-                ctx.font = '600 30px "Inter", sans-serif';
-                const cityW = ctx.measureText(cityText).width + 44;
+                ctx.font = '600 28px ' + FONT_FAMILY;
+                const cityLabel = String(currentShareData.city).trim() + ', KKTC';
+                const iconSize = 20;
+                const iconGap = 12;
+                const padX = 22;
+                const textW = ctx.measureText(cityLabel).width;
+                const cityW = padX * 2 + iconSize + iconGap + textW;
 
-                ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
-                ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.14)';
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
                 ctx.lineWidth = 1.5;
                 roundRect(imgBoxX, row2Y, cityW, row2H, 20);
                 ctx.fill();
                 ctx.stroke();
 
+                // Vector Pin Icon
+                const pinX = imgBoxX + padX + iconSize / 2;
+                const pinY = row2Y + row2H / 2;
+                drawVectorPin(pinX, pinY, iconSize, '#38bdf8');
+
+                // Location Text
                 ctx.fillStyle = '#38bdf8';
-                ctx.textAlign = 'center';
+                ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(cityText, imgBoxX + cityW / 2, row2Y + row2H / 2);
+                ctx.fillText(cityLabel, imgBoxX + padX + iconSize + iconGap, row2Y + row2H / 2);
                 ctx.restore();
             }
 
@@ -664,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleY = row2Y + row2H + 35; // 1273
             ctx.save();
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 48px "Inter", "Segoe UI", sans-serif';
+            ctx.font = '800 48px ' + FONT_FAMILY;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
 
@@ -704,10 +812,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
 
             ctx.fillStyle = '#38bdf8';
-            ctx.font = '700 32px "Inter", sans-serif';
+            ctx.font = '700 32px ' + FONT_FAMILY;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('👉 Detaylar & İletişim İçin: cypilan.com', W / 2, footY + 55);
+            ctx.fillText('Detaylar & İletişim İçin: cypilan.com  →', W / 2, footY + 55);
             ctx.restore();
 
             ctx.restore();
