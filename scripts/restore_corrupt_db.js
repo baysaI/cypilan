@@ -352,6 +352,8 @@ async function restore() {
   }
 
   targetDb.pragma('foreign_keys = ON');
+  targetDb.pragma('wal_checkpoint(TRUNCATE)');
+  targetDb.pragma('journal_mode = DELETE');
   targetDb.close();
 
   // 5. cypilan.db ile yer değiştir
@@ -365,9 +367,15 @@ async function restore() {
 
   fs.copyFileSync(tempTargetDb, currentDbPath);
 
+  // Doğrulama kontrolü
+  const verifyDb = new Database(currentDbPath);
+  const liveUsers = verifyDb.prepare("SELECT COUNT(*) as c FROM users WHERE is_active = 1").get().c;
+  const liveListings = verifyDb.prepare("SELECT COUNT(*) as c FROM listings WHERE status = 'active'").get().c;
+  verifyDb.close();
+
   console.log('\n======================================================');
   console.log('🎉 VERİLERİNİZ %100 EKSİKSİZ VE HATASIZ KURTARILDI!');
-  console.log('Tüm kullanıcılarınız, ilanlarınız ve resimleriniz cypilan.db içine aktarıldı.');
+  console.log(`✅ CANLI DOĞRULAMA: ${liveUsers} Kullanıcı, ${liveListings} İlan cypilan.db içinde hazır!`);
   console.log('Şimdi "pm2 restart all" çalıştırıp sitenizi yenileyin.');
   console.log('======================================================\n');
 
