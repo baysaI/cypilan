@@ -514,6 +514,7 @@ const create = async (req, res, next) => {
             city,
             district,
             status,
+            is_featured: 1,
             expires_at: listingPolicy.expiresAt(),
             ...listingBadges.fromBody(req.body, rootSlug),
             images

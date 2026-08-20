@@ -1,11 +1,13 @@
 const Listing = require('../models/Listing');
 const Category = require('../models/Category');
 const User = require('../models/User');
+const Setting = require('../models/Setting');
 
 const index = async (req, res) => {
     try {
         const featuredListings = await Listing.getFeatured(24);
         const recentListings = await Listing.getRecent(24);
+        const showRecentListings = Setting.getBool(Setting.KEYS.SHOW_RECENT_LISTINGS, false);
         const categories = await Category.getMainCategoriesWithCount();
 
         const totalListings = await Listing.countAll();
@@ -24,6 +26,7 @@ const index = async (req, res) => {
         res.render('home', {
             featuredListings,
             recentListings,
+            showRecentListings,
             categories,
             stats,
             userFavoriteIds,

@@ -1,16 +1,111 @@
 <%
 const isUnlimitedOn = typeof unlimitedEnabled !== 'undefined' && Boolean(unlimitedEnabled);
 const isMaintOn = typeof enabled !== 'undefined' && Boolean(enabled);
+const isRecentListingsOn = typeof recentListingsEnabled !== 'undefined' && Boolean(recentListingsEnabled);
 const maintMsg = typeof message !== 'undefined' ? message : '';
 const maintUntil = typeof until !== 'undefined' ? until : '';
 const maintLast = typeof lastChange !== 'undefined' ? lastChange : null;
 const unlimLast = typeof unlimitedLastChange !== 'undefined' ? unlimitedLastChange : null;
+const recentLast = typeof recentListingsLastChange !== 'undefined' ? recentListingsLastChange : null;
 %>
 
 <div class="mb-4">
     <h1 class="h4 fw-bold mb-1">Sistem &amp; İlan Ayarları</h1>
-    <p class="text-muted small mb-0">Platform genelindeki ilan kotalarını ve bakım modunu yönetin.</p>
+    <p class="text-muted small mb-0">Platform genelindeki ilan kotalarını, ana sayfa bölümlerini ve bakım modunu yönetin.</p>
 </div>
+
+<!-- Recent Listings Section Toggle Card -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle bg-info bg-opacity-10 text-info p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fa-solid fa-clock-rotate-left fs-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="fs-6 fw-bold mb-0">Ana Sayfa "Son Eklenen İlanlar" Bölümü</h2>
+                        <span class="text-muted small">Ana sayfada vitrin haricinde tüm son eklenen ilanları listeleme</span>
+                    </div>
+                </div>
+
+                <% if (isRecentListingsOn) { %>
+                    <div class="alert alert-success border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="fa-solid fa-circle-check fs-4 mt-1 text-success"></i>
+                        <div>
+                            <strong class="d-block">Son Eklenen İlanlar Bölümü AÇIK (ETKİN)</strong>
+                            <span class="small">
+                                Ana sayfada Vitrin İlanları'nın hemen altında <strong>"Son Eklenen İlanlar"</strong> başlığıyla en son yayınlanan tüm ilanlar listelenmektedir.
+                            </span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-secondary border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="fa-solid fa-eye-slash fs-4 mt-1 text-muted"></i>
+                        <div>
+                            <strong class="d-block">Son Eklenen İlanlar Bölümü KAPALI (PASİF)</strong>
+                            <span class="small">
+                                Şu an ana sayfada sadece <strong>"Vitrin İlanları"</strong> gösterilmektedir. Eklenen tüm ilanlar vitrinde yer alır.
+                            </span>
+                        </div>
+                    </div>
+                <% } %>
+
+                <form action="/admin/son-ilanlar-ayari" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                    <div class="form-check form-switch mb-4 p-3 bg-light rounded-4 border">
+                        <input class="form-check-input ms-0 me-3 cursor-pointer" type="checkbox" role="switch"
+                               name="enabled" value="1" id="recentListingsEnabledSwitch"
+                               style="width: 3.2rem; height: 1.6rem;"
+                               <%= isRecentListingsOn ? 'checked' : '' %>>
+                        <label class="form-check-label fw-bold cursor-pointer" for="recentListingsEnabledSwitch">
+                            <%= isRecentListingsOn ? 'Son İlanlar Bölümünü Kapat (Sadece Vitrin Göster)' : 'Son İlanlar Bölümünü Ana Sayfada Göster (Etkinleştir)' %>
+                        </label>
+                        <div class="form-text small mt-1 ms-0">
+                            Açıldığında: Ana sayfaya ayrı bir "Son Eklenen İlanlar" ızgarası eklenir. Kapatıldığında: Ana sayfa sade kalır, sadece vitrin ilanları listelenir.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn <%= isRecentListingsOn ? 'btn-outline-danger' : 'btn-primary' %> fw-medium px-4">
+                        <i class="fa-solid fa-arrows-rotate me-2"></i><%= isRecentListingsOn ? 'Bölümü Pasife Al' : 'Bölümü Etkinleştir' %>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h3 class="fs-6 fw-bold mb-3"><i class="fa-solid fa-circle-info text-info me-2"></i>Bu Ayar Nasıl Çalışır?</h3>
+                <ul class="small text-muted mb-0 ps-3">
+                    <li class="mb-2"><strong>Pasif (Kapalı):</strong> Ana sayfada yalnızca Vitrin İlanları yer alır. Sitede açılan tüm ilanlar otomatik olarak vitrinde gösterilir.</li>
+                    <li class="mb-2"><strong>Etkin (Açık):</strong> Ana sayfada Vitrin İlanları'nın altında ek olarak "Son Eklenen İlanlar" bölümü açılır.</li>
+                    <li class="mb-0"><strong>Dilediğiniz Zaman:</strong> Tek bir butonla açıp kapatabilirsiniz.</li>
+                </ul>
+            </div>
+        </div>
+
+        <% if (recentLast) { %>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="fs-6 fw-bold mb-2">Son Değişiklik</h3>
+                    <p class="small text-muted mb-0">
+                        Durum: <strong><%= recentLast.value === '1' ? 'Bölüm Açık' : 'Bölüm Kapalı (Pasif)' %></strong>
+                        <% if (recentLast.updated_by_name) { %>
+                            &middot; <%= recentLast.updated_by_name %>
+                        <% } %>
+                        <br>
+                        <span class="text-muted"><%= helpers.timeAgo(recentLast.updated_at, lang) %></span>
+                    </p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<hr class="border-secondary my-4">
 
 <!-- Unlimited Listings Mode Card -->
 <div class="row g-4 mb-4">

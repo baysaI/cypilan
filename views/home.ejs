@@ -74,7 +74,7 @@
     </section>
     <% } %>
 
-    <% if (typeof recentListings !== 'undefined' && recentListings && recentListings.length > 0) { %>
+    <% if (typeof showRecentListings !== 'undefined' && showRecentListings && typeof recentListings !== 'undefined' && recentListings && recentListings.length > 0) { %>
     <section class="recent-section py-5 <%= (typeof featuredListings !== 'undefined' && featuredListings && featuredListings.length > 0) ? 'bg-white' : 'bg-light' %>">
         <div class="container">
             <div class="d-flex justify-content-between align-items-end mb-4">

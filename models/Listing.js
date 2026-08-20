@@ -17,7 +17,7 @@ class Listing {
       user_id, category_id, title, slug, description, price,
       currency = 'TRY', listing_type = 'sale', status = 'pending',
       location_lat = null, location_lng = null,
-      is_premium = 0, is_featured = 0, expires_at = null,
+      is_premium = 0, is_featured = 1, expires_at = null,
       is_urgent = 0, is_opportunity = 0, is_negotiable = 0,
       images = []
     } = listingData;

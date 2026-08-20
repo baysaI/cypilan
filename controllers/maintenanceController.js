@@ -16,6 +16,8 @@ const show = async (req, res) => {
             lastChange: Setting.describe(Setting.KEYS.MAINTENANCE_ENABLED),
             unlimitedEnabled: Setting.getBool(Setting.KEYS.UNLIMITED_LISTINGS_MODE, false),
             unlimitedLastChange: Setting.describe(Setting.KEYS.UNLIMITED_LISTINGS_MODE),
+            recentListingsEnabled: Setting.getBool(Setting.KEYS.SHOW_RECENT_LISTINGS, false),
+            recentListingsLastChange: Setting.describe(Setting.KEYS.SHOW_RECENT_LISTINGS),
             pendingReports,
             activePage: 'maintenance',
             title: 'Sistem Ayarları'
@@ -78,9 +80,28 @@ const updateUnlimited = async (req, res) => {
     }
 };
 
+const updateRecentListings = async (req, res) => {
+    try {
+        const enabled = Boolean(req.body.enabled);
+        Setting.setBool(Setting.KEYS.SHOW_RECENT_LISTINGS, enabled, req.session.userId);
+
+        console.log(
+            `[ShowRecentListings] ${enabled ? 'AÇILDI' : 'kapatıldı'} — kullanıcı #${req.session.userId}`
+        );
+
+        req.flash('success', enabled ? 'Son Eklenen İlanlar bölümü ana sayfada etkinleştirildi.' : 'Son Eklenen İlanlar bölümü ana sayfada gizlendi (pasife alındı).');
+        res.redirect('/admin/bakim');
+    } catch (error) {
+        console.error('Show Recent Listings Update Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/bakim');
+    }
+};
+
 module.exports = {
     show,
     update,
     updateUnlimited,
+    updateRecentListings,
     MAX_MESSAGE
 };

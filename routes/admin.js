@@ -65,6 +65,7 @@ router.post('/uyari/:id/sil', adminController.deleteWarning);
 router.get('/bakim', maintenanceController.show);
 router.post('/bakim', maintenanceController.update);
 router.post('/sinirsiz-ilan', maintenanceController.updateUnlimited);
+router.post('/son-ilanlar-ayari', maintenanceController.updateRecentListings);
 
 const broadcastController = require('../controllers/broadcastController');
 router.get('/duyuru', broadcastController.compose);
