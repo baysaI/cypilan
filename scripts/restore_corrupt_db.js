@@ -267,6 +267,13 @@ async function restore() {
 
   const schema = fs.readFileSync(schemaPath, 'utf8');
   targetDb.exec(schema);
+  const seedPath = path.join(dbDir, 'seed.sql');
+  if (fs.existsSync(seedPath)) {
+    try {
+      const seedData = fs.readFileSync(seedPath, 'utf8');
+      targetDb.exec(seedData);
+    } catch (_) {}
+  }
 
   // 3. Ham Sayfa Tarayıcısı (Raw Binary Leaf Page Scanner)
   console.log('\n[3/3] Ham veritabanı sayfaları taranıyor ve kayıtlar sınıflandırılıyor...');
@@ -339,8 +346,8 @@ async function restore() {
   `);
 
   const insertNotificationStmt = targetDb.prepare(`
-    INSERT OR REPLACE INTO notifications (id, user_id, actor_id, listing_id, type, title, message, link_url, is_read, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT OR REPLACE INTO notifications (id, user_id, actor_id, type, title, message, link_url, is_read, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   targetDb.transaction(() => {
