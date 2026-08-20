@@ -17,7 +17,7 @@
     <!-- Top KPI Counters -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100 border-start border-4 border-danger">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100 border-start border-4 border-danger">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-muted small fw-semibold d-block">Bekleyen Yanıt</span>
@@ -31,7 +31,7 @@
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100 border-start border-4 border-success">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100 border-start border-4 border-success">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-muted small fw-semibold d-block">Aktif Görüşmeler</span>
@@ -45,7 +45,7 @@
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100 border-start border-4 border-secondary">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100 border-start border-4 border-secondary">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-muted small fw-semibold d-block">Tamamlananlar</span>
@@ -59,7 +59,7 @@
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 bg-white p-3 h-100 border-start border-4 border-warning">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100 border-start border-4 border-warning">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-muted small fw-semibold d-block">Memnuniyet Puanı</span>
@@ -77,12 +77,12 @@
     <div class="row g-3">
         <!-- Left Column: Conversations List -->
         <div class="col-12 col-lg-5 col-xl-4">
-            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 d-flex flex-column" style="min-height: 600px; max-height: 750px;">
+            <div class="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column" style="min-height: 600px; max-height: 750px;">
                 <div class="p-3 border-bottom">
                     <!-- Search Input -->
                     <div class="input-group input-group-sm mb-2">
-                        <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                        <input type="text" id="adminSearchInput" class="form-control bg-light border-start-0" placeholder="İsim, e-posta veya mesaj ara..." value="<%= searchQuery %>">
+                        <span class="input-group-text bg-light-subtle border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="adminSearchInput" class="form-control bg-light-subtle border-start-0" placeholder="İsim, e-posta veya mesaj ara..." value="<%= searchQuery %>">
                     </div>
 
                     <!-- Status Filter Tabs -->
@@ -114,7 +114,7 @@
                                         <% if (conv.registered_user_avatar) { %>
                                             <img src="<%= conv.registered_user_avatar %>" class="rounded-circle object-fit-cover border" width="40" height="40" alt="Avatar">
                                         <% } else { %>
-                                            <div class="rounded-circle bg-light text-primary border d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                            <div class="rounded-circle bg-light-subtle text-primary border d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
                                                 <%= (conv.user_name || 'Z')[0].toUpperCase() %>
                                             </div>
                                         <% } %>
@@ -128,16 +128,16 @@
                                     <div class="flex-grow-1 min-w-0">
                                         <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
                                             <% if (conv.user_id) { %>
-                                                <a href="/profile/<%= conv.user_id %>" target="_blank" rel="noopener" class="fw-bold text-truncate small text-dark text-decoration-none hover-primary" onclick="event.stopPropagation();" title="Kullanıcı Profilini Aç">
+                                                <a href="/profile/<%= conv.user_id %>" target="_blank" rel="noopener" class="conv-user-name fw-bold text-truncate small text-decoration-none hover-primary" onclick="event.stopPropagation();" title="Kullanıcı Profilini Aç">
                                                     <%= conv.user_name || 'Ziyaretçi' %> <i class="fa-solid fa-arrow-up-right-from-square text-primary" style="font-size: 0.65rem;"></i>
                                                 </a>
                                             <% } else { %>
-                                                <span class="fw-bold text-truncate small text-dark"><%= conv.user_name || 'Ziyaretçi' %></span>
+                                                <span class="conv-user-name fw-bold text-truncate small"><%= conv.user_name || 'Ziyaretçi' %></span>
                                             <% } %>
-                                            <span class="text-muted" style="font-size: 0.68rem;"><%= (typeof helpers !== 'undefined' && helpers.timeAgo) ? helpers.timeAgo(conv.last_message_at) : '' %></span>
+                                            <span class="conv-time" style="font-size: 0.68rem;"><%= (typeof helpers !== 'undefined' && helpers.timeAgo) ? helpers.timeAgo(conv.last_message_at) : '' %></span>
                                         </div>
 
-                                        <p class="text-muted small text-truncate mb-1" style="font-size: 0.78rem;">
+                                        <p class="conv-last-msg small text-truncate mb-1" style="font-size: 0.78rem;">
                                             <%= conv.last_message || 'Yeni görüşme başlatıldı' %>
                                         </p>
 
@@ -145,7 +145,7 @@
                                             <% if (conv.user_id) { %>
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">Üye</span>
                                             <% } else { %>
-                                                <span class="badge bg-light text-muted border" style="font-size: 0.65rem;">Misafir</span>
+                                                <span class="badge badge-guest" style="font-size: 0.65rem;">Misafir</span>
                                             <% } %>
 
                                             <% if (conv.unread_admin_count > 0) { %>
@@ -176,13 +176,13 @@
 
         <!-- Right Column: Active Conversation Pane -->
         <div class="col-12 col-lg-7 col-xl-8">
-            <div class="card border-0 shadow-sm rounded-4 bg-white h-100 d-flex flex-column" style="min-height: 600px; max-height: 750px;">
+            <div class="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column" style="min-height: 600px; max-height: 750px;">
                 <!-- Empty State when no conversation selected -->
                 <div id="adminChatEmptyState" class="d-flex flex-column align-items-center justify-content-center flex-grow-1 p-5 text-center text-muted">
-                    <div class="rounded-circle bg-light p-4 mb-3">
+                    <div class="rounded-circle bg-light-subtle p-4 mb-3">
                         <i class="fa-solid fa-headset fs-1 text-primary opacity-50"></i>
                     </div>
-                    <h5 class="fw-bold text-dark mb-1">Görüşme Seçin</h5>
+                    <h5 class="fw-bold mb-1">Görüşme Seçin</h5>
                     <p class="small text-muted mb-0" style="max-width: 320px;">
                         Detayları görüntülemek ve ziyaretçiye anında yanıt vermek için soldaki listeden bir sohbet seçin.
                     </p>
@@ -191,18 +191,18 @@
                 <!-- Active Chat Pane -->
                 <div id="adminChatActivePane" class="d-flex flex-column h-100" style="display: none !important;">
                     <!-- Active Chat Header -->
-                    <div class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2 bg-light rounded-top-4">
+                    <div class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2 admin-chat-header rounded-top-4">
                         <div class="d-flex align-items-center gap-2 min-w-0">
                             <div id="adminActiveAvatar" class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
                                 Z
                             </div>
                             <div class="text-truncate">
                                 <div class="d-flex align-items-center gap-2">
-                                    <a id="adminActiveUserLink" href="#" target="_blank" rel="noopener" class="text-dark text-decoration-none d-inline-flex align-items-center gap-1 hover-primary" style="pointer-events: none;" title="Kullanıcı Profilini Aç">
+                                    <a id="adminActiveUserLink" href="#" target="_blank" rel="noopener" class="text-decoration-none d-inline-flex align-items-center gap-1 hover-primary" style="pointer-events: none;" title="Kullanıcı Profilini Aç">
                                         <h6 class="mb-0 fw-bold text-truncate" id="adminActiveName">Ziyaretçi</h6>
                                         <i class="fa-solid fa-arrow-up-right-from-square text-primary small" id="adminActiveUserLinkIcon" style="font-size: 0.72rem; display: none;"></i>
                                     </a>
-                                    <span id="adminActiveUserBadge" class="badge bg-light text-muted border">Misafir</span>
+                                    <span id="adminActiveUserBadge" class="badge badge-guest">Misafir</span>
                                     <a id="adminActiveProfileBtn" href="#" target="_blank" rel="noopener" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0" style="font-size: 0.68rem; display: none;" title="Profili Yeni Sekmede Aç">
                                         <i class="fa-regular fa-user me-1"></i>Profili Gör
                                     </a>
@@ -237,12 +237,12 @@
                     </div>
 
                     <!-- Messages Log Area -->
-                    <div id="adminMessagesLog" class="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-2 bg-light-subtle" style="background-color: #f8fafc;">
+                    <div id="adminMessagesLog" class="flex-grow-1 overflow-y-auto p-3 d-flex flex-column gap-2 admin-messages-log">
                         <!-- Messages loaded dynamically -->
                     </div>
 
                     <!-- Canned Responses (Hazır Şablonlar) -->
-                    <div class="px-3 pt-2 pb-1 border-top bg-white">
+                    <div class="px-3 pt-2 pb-1 border-top admin-canned-box">
                         <div class="d-flex align-items-center gap-1 overflow-x-auto py-1" style="white-space: nowrap;">
                             <span class="text-muted small me-1" style="font-size: 0.72rem;"><i class="fa-regular fa-bookmark me-1"></i>Şablonlar:</span>
                             <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill canned-btn" style="font-size: 0.72rem;" data-text="Merhaba, CYPILAN Canlı Destek ekibine hoş geldiniz! Size nasıl yardımcı olabilirim?">
@@ -261,7 +261,7 @@
                     </div>
 
                     <!-- Reply Form -->
-                    <div class="p-3 border-top bg-white rounded-bottom-4">
+                    <div class="p-3 border-top admin-reply-box rounded-bottom-4">
                         <form id="adminReplyForm" class="d-flex align-items-end gap-2 m-0">
                             <textarea id="adminReplyInput" class="form-control rounded-3" rows="2" placeholder="Yanıtınızı yazın (Göndermek için Enter, yeni satır için Shift+Enter)..." required></textarea>
                             <button type="submit" id="adminSendBtn" class="btn btn-primary rounded-3 px-4 h-100 d-flex align-items-center justify-content-center fw-bold">
@@ -279,15 +279,43 @@
 .admin-conv-card {
     border-color: #e2e8f0 !important;
     background-color: #ffffff;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
 }
 .admin-conv-card:hover {
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
     border-color: #cbd5e1 !important;
 }
 .admin-conv-card.active-chat {
     background-color: #e0f2fe !important;
     border-color: #0284c7 !important;
+}
+.admin-conv-card .conv-user-name {
+    color: #0f172a;
+}
+.admin-conv-card.active-chat .conv-user-name {
+    color: #0369a1;
+}
+.admin-conv-card .conv-last-msg {
+    color: #64748b;
+}
+.admin-conv-card .conv-time {
+    color: #94a3b8;
+}
+.admin-conv-card .badge-guest,
+.badge-guest {
+    background-color: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+/* Chat Messages Log Area */
+.admin-messages-log {
+    background-color: #f8fafc;
+}
+.admin-chat-header,
+.admin-canned-box,
+.admin-reply-box {
+    background-color: #ffffff;
 }
 
 .admin-msg-bubble {
@@ -305,6 +333,9 @@
     border: 1px solid #e2e8f0;
     border-bottom-left-radius: 3px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.admin-msg-user .msg-sender-name {
+    color: #64748b;
 }
 .admin-msg-admin {
     align-self: flex-end;
@@ -327,6 +358,7 @@
     font-size: 0.68rem;
     margin-top: 4px;
     display: block;
+    color: #94a3b8;
 }
 .admin-msg-admin .admin-msg-time {
     color: #e0f2fe;
@@ -335,6 +367,65 @@
 .btn-xs {
     padding: 2px 8px;
     font-size: 0.72rem;
+}
+
+/* -------------------------------------------------------------
+   Dark Mode Support for Live Chat Console
+------------------------------------------------------------- */
+[data-bs-theme="dark"] .admin-conv-card {
+    background-color: var(--cyp-surface-muted, #1e293b) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-bs-theme="dark"] .admin-conv-card:hover {
+    background-color: #334155 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+[data-bs-theme="dark"] .admin-conv-card.active-chat {
+    background-color: rgba(14, 165, 233, 0.22) !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 1px #38bdf8 !important;
+}
+[data-bs-theme="dark"] .admin-conv-card .conv-user-name {
+    color: #f8fafc !important;
+}
+[data-bs-theme="dark"] .admin-conv-card.active-chat .conv-user-name {
+    color: #38bdf8 !important;
+}
+[data-bs-theme="dark"] .admin-conv-card .conv-last-msg {
+    color: #cbd5e1 !important;
+}
+[data-bs-theme="dark"] .admin-conv-card .conv-time {
+    color: #94a3b8 !important;
+}
+[data-bs-theme="dark"] .admin-conv-card .badge-guest,
+[data-bs-theme="dark"] .badge-guest {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .admin-messages-log {
+    background-color: #0b1120 !important;
+}
+[data-bs-theme="dark"] .admin-chat-header,
+[data-bs-theme="dark"] .admin-canned-box,
+[data-bs-theme="dark"] .admin-reply-box {
+    background-color: var(--cyp-surface, #1e293b) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-bs-theme="dark"] .admin-msg-user {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+[data-bs-theme="dark"] .admin-msg-user .msg-sender-name {
+    color: #94a3b8 !important;
+}
+[data-bs-theme="dark"] .admin-msg-system {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #94a3b8 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
 }
 </style>
 
@@ -441,11 +532,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const avatarHtml = conv.registered_user_avatar
                 ? `<img src="${conv.registered_user_avatar}" class="rounded-circle object-fit-cover border" width="40" height="40">`
-                : `<div class="rounded-circle bg-light text-primary border d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">${initial}</div>`;
+                : `<div class="rounded-circle bg-light-subtle text-primary border d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">${initial}</div>`;
             
             const nameHtml = conv.user_id
-                ? `<a href="/profile/${conv.user_id}" target="_blank" rel="noopener" class="fw-bold text-truncate small text-dark text-decoration-none hover-primary" onclick="event.stopPropagation();" title="Kullanıcı Profilini Aç">${escapeHtml(conv.user_name || 'Ziyaretçi')} <i class="fa-solid fa-arrow-up-right-from-square text-primary" style="font-size: 0.65rem;"></i></a>`
-                : `<span class="fw-bold text-truncate small text-dark">${escapeHtml(conv.user_name || 'Ziyaretçi')}</span>`;
+                ? `<a href="/profile/${conv.user_id}" target="_blank" rel="noopener" class="conv-user-name fw-bold text-truncate small text-decoration-none hover-primary" onclick="event.stopPropagation();" title="Kullanıcı Profilini Aç">${escapeHtml(conv.user_name || 'Ziyaretçi')} <i class="fa-solid fa-arrow-up-right-from-square text-primary" style="font-size: 0.65rem;"></i></a>`
+                : `<span class="conv-user-name fw-bold text-truncate small">${escapeHtml(conv.user_name || 'Ziyaretçi')}</span>`;
 
             return `
                 <div class="admin-conv-card p-3 rounded-3 mb-2 border transition-all ${isSelected}" data-id="${conv.id}" style="cursor: pointer;">
@@ -457,13 +548,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="flex-grow-1 min-w-0">
                             <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
                                 ${nameHtml}
-                                <span class="text-muted" style="font-size: 0.68rem;">${formatTime(conv.last_message_at)}</span>
+                                <span class="conv-time" style="font-size: 0.68rem;">${formatTime(conv.last_message_at)}</span>
                             </div>
-                            <p class="text-muted small text-truncate mb-1" style="font-size: 0.78rem;">
+                            <p class="conv-last-msg small text-truncate mb-1" style="font-size: 0.78rem;">
                                 ${escapeHtml(conv.last_message || 'Yeni görüşme')}
                             </p>
                             <div class="d-flex align-items-center justify-content-between">
-                                <span class="badge ${conv.user_id ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border'}" style="font-size: 0.65rem;">
+                                <span class="badge ${conv.user_id ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'badge-guest'}" style="font-size: 0.65rem;">
                                     ${conv.user_id ? 'Üye' : 'Misafir'}
                                 </span>
                                 ${statusBadge}
@@ -530,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeEmail.textContent = conv.user_email || (conv.user_id ? 'Kayıtlı Kullanıcı' : 'Misafir Ziyaretçi');
                 activeAvatar.textContent = (conv.user_name || 'Z')[0].toUpperCase();
                 activeUserBadge.textContent = conv.user_id ? 'Kayıtlı Üye' : 'Misafir';
-                activeUserBadge.className = conv.user_id ? 'badge bg-primary-subtle text-primary border' : 'badge bg-light text-muted border';
+                activeUserBadge.className = conv.user_id ? 'badge bg-primary-subtle text-primary border' : 'badge badge-guest';
 
                 const activeUserLink = document.getElementById('adminActiveUserLink');
                 const activeUserLinkIcon = document.getElementById('adminActiveUserLinkIcon');
@@ -649,9 +740,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (msg.sender_type === 'user') {
             bubble.className = 'admin-msg-bubble admin-msg-user';
             bubble.innerHTML = `
-                <div class="fw-bold text-secondary mb-1" style="font-size: 0.72rem;">${escapeHtml(msg.sender_name || 'Ziyaretçi')}</div>
-                <div>${escapeHtml(msg.message)}</div>
-                <span class="admin-msg-time text-muted">${timeStr}</span>
+                <div class="fw-bold msg-sender-name mb-1" style="font-size: 0.72rem;">${escapeHtml(msg.sender_name || 'Ziyaretçi')}</div>
+                <div class="msg-content">${escapeHtml(msg.message)}</div>
+                <span class="admin-msg-time">${timeStr}</span>
             `;
         } else if (msg.sender_type === 'admin') {
             bubble.className = 'admin-msg-bubble admin-msg-admin';

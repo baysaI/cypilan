@@ -1483,3 +1483,70 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     color: #0f172a !important;
 }
 
+/* -------------------------------------------------------------
+   Admin Live Support Panel (Light & Dark Theme)
+------------------------------------------------------------- */
+.admin-conv-card {
+    background-color: #ffffff;
+    border-color: #e2e8f0 !important;
+    transition: all 0.18s ease;
+}
+.admin-conv-card:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1 !important;
+}
+.admin-conv-card.active-chat {
+    background-color: #e0f2fe !important;
+    border-color: #0284c7 !important;
+}
+.admin-conv-card .conv-user-name {
+    color: #0f172a;
+}
+.admin-conv-card.active-chat .conv-user-name {
+    color: #0369a1;
+}
+.admin-conv-card .conv-last-msg {
+    color: #64748b;
+}
+.admin-conv-card .conv-time {
+    color: #94a3b8;
+}
+.admin-conv-card .badge-guest,
+.badge-guest {
+    background-color: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+[data-bs-theme="dark"] .admin-conv-card {
+    background-color: var(--cyp-surface-muted, #1e293b) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-bs-theme="dark"] .admin-conv-card:hover {
+    background-color: #334155 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+[data-bs-theme="dark"] .admin-conv-card.active-chat {
+    background-color: rgba(14, 165, 233, 0.22) !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 1px #38bdf8 !important;
+}
+[data-bs-theme="dark"] .admin-conv-card .conv-user-name {
+    color: #f8fafc !important;
+}
+[data-bs-theme="dark"] .admin-conv-card.active-chat .conv-user-name {
+    color: #38bdf8 !important;
+}
+[data-bs-theme="dark"] .admin-conv-card .conv-last-msg {
+    color: #cbd5e1 !important;
+}
+[data-bs-theme="dark"] .admin-conv-card .conv-time {
+    color: #94a3b8 !important;
+}
+[data-bs-theme="dark"] .admin-conv-card .badge-guest,
+[data-bs-theme="dark"] .badge-guest {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #94a3b8 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
