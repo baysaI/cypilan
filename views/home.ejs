@@ -46,6 +46,7 @@
         </div>
     </section>
 
+    <% if (typeof featuredListings !== 'undefined' && featuredListings && featuredListings.length > 0) { %>
     <section class="featured-section py-5 bg-light">
         <div class="container">
             <div class="d-flex justify-content-between align-items-end mb-4">
@@ -55,30 +56,15 @@
                     </h2>
                     <p class="text-muted mb-0"><%= t('home.featured_subtitle') %></p>
                 </div>
-                <%# The label now says "all listings", so it goes to all listings.
-                    It used to carry ?premium=true, which was already wrong when
-                    the section falls back to recent listings. %>
                 <a href="/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium d-none d-md-inline-block hover-lift"><%= t('home.show_all') %></a>
             </div>
 
-            <%# Two to a row on a phone. One full-width card is 356px tall, so a
-                single listing filled the screen and four meant three screens of
-                scrolling to see them. %>
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4">
-                <% const displayListings = (typeof featuredListings !== 'undefined' && featuredListings && featuredListings.length > 0) ? featuredListings : (typeof recentListings !== 'undefined' ? recentListings : []); %>
-                
-                <% if (displayListings.length > 0) { %>
-                    <% displayListings.forEach(function(listing) { %>
-                        <div class="col">
-                            <%- include('partials/listingCard', { listing: listing }) %>
-                        </div>
-                    <% }); %>
-                <% } else { %>
-                    <div class="col-12 text-center py-5 text-muted">
-                        <i class="fa-solid fa-folder-open fs-1 mb-3 opacity-50 d-block"></i>
-                        <p class="mb-0"><%= t('home.no_featured') %></p>
+                <% featuredListings.forEach(function(listing) { %>
+                    <div class="col">
+                        <%- include('partials/listingCard', { listing: listing }) %>
                     </div>
-                <% } %>
+                <% }); %>
             </div>
             
             <div class="text-center mt-4 d-md-none">
@@ -86,6 +72,35 @@
             </div>
         </div>
     </section>
+    <% } %>
+
+    <% if (typeof recentListings !== 'undefined' && recentListings && recentListings.length > 0) { %>
+    <section class="recent-section py-5 <%= (typeof featuredListings !== 'undefined' && featuredListings && featuredListings.length > 0) ? 'bg-white' : 'bg-light' %>">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1 text-dark d-flex align-items-center">
+                        <i class="fa-solid fa-clock-rotate-left text-primary me-2 fs-4"></i> <%= t('home.recent_listings') %>
+                    </h2>
+                    <p class="text-muted mb-0"><%= t('home.featured_subtitle') %></p>
+                </div>
+                <a href="/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium d-none d-md-inline-block hover-lift"><%= t('home.show_all') %></a>
+            </div>
+
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4">
+                <% recentListings.forEach(function(listing) { %>
+                    <div class="col">
+                        <%- include('partials/listingCard', { listing: listing }) %>
+                    </div>
+                <% }); %>
+            </div>
+            
+            <div class="text-center mt-4 d-md-none">
+                <a href="/listings" class="btn btn-outline-primary rounded-pill px-4 fw-medium"><%= t('home.show_all') %></a>
+            </div>
+        </div>
+    </section>
+    <% } %>
 
     <section class="stats-cta-section py-5 py-md-7 position-relative overflow-hidden bg-primary text-white">
         <div class="container position-relative z-1">
