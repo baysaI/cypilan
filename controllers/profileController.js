@@ -312,6 +312,54 @@ const myPriceAlerts = async (req, res, next) => {
     }
 };
 
+const deleteAccount = async (req, res) => {
+    try {
+        const userId = req.session && req.session.userId;
+        if (!userId) {
+            return res.redirect('/auth/login');
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/auth/login');
+        }
+
+        const { current_password, confirmation } = req.body;
+
+        // If account has a password, verify password
+        if (Number(user.has_password) === 1) {
+            if (!current_password) {
+                req.flash('error', 'flash.current_password_required');
+                return res.redirect('/profile/edit');
+            }
+            const matches = await User.verifyPassword(current_password, user.password_hash);
+            if (!matches) {
+                req.flash('error', 'flash.password_wrong');
+                return res.redirect('/profile/edit');
+            }
+        } else {
+            // If OAuth / social login user without password, require typing "SIL"
+            if (!confirmation || String(confirmation).trim().toUpperCase() !== 'SIL') {
+                req.flash('error', 'flash.delete_confirmation_required');
+                return res.redirect('/profile/edit');
+            }
+        }
+
+        await User.delete(userId);
+
+        req.session.destroy((err) => {
+            if (err) console.error('Session destroy error on account delete:', err);
+            res.clearCookie('connect.sid');
+            res.redirect('/?account_deleted=1');
+        });
+    } catch (error) {
+        console.error('Delete Account Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/profile/edit');
+    }
+};
+
 module.exports = {
     index,
     show,
@@ -321,5 +369,6 @@ module.exports = {
     changeEmail,
     myListings,
     myFavorites,
-    myPriceAlerts
+    myPriceAlerts,
+    deleteAccount
 };

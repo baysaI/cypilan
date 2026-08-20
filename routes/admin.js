@@ -50,6 +50,8 @@ router.put('/listings/:id/status', adminController.toggleListingStatus);
 router.post('/listings/:id/ikaz', adminController.sendListingNotice);
 router.delete('/listings/:id', adminController.deleteListing);
 router.put('/users/:id/status', adminController.toggleUserStatus);
+router.delete('/users/:id', adminController.deleteUser);
+router.post('/users/:id/sil', adminController.deleteUser);
 router.put('/users/:id', adminController.updateUser);
 router.post('/users/:id/duzenle', adminController.updateUser);
 router.post('/users/:id/kurumsal-onayla', adminController.approveCorporate);

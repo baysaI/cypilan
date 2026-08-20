@@ -242,6 +242,95 @@ class User {
     const { total } = db.prepare('SELECT COUNT(*) as total FROM users WHERE is_active = 1').get();
     return total;
   }
+
+  static async delete(id) {
+    const db = getDb();
+    const user = await this.findById(id);
+    if (!user) return false;
+
+    // Collect file URLs to delete from disk after DB operations succeed
+    let listingImageUrls = [];
+    try {
+      const rows = db.prepare(`
+        SELECT image_url FROM listing_images 
+        WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)
+      `).all([id]);
+      listingImageUrls = rows.map(r => r.image_url);
+    } catch (e) {
+      console.error('Error fetching listing images for user delete:', e);
+    }
+
+    let candidateProfile = null;
+    try {
+      candidateProfile = db.prepare('SELECT photo_url, custom_cv_url FROM candidate_profiles WHERE user_id = ?').get([id]);
+    } catch (e) {
+      console.error('Error fetching candidate profile for user delete:', e);
+    }
+
+    const performDelete = db.transaction(() => {
+      // 1. Detach non-critical audit records to prevent foreign key errors
+      db.prepare('UPDATE feedback SET user_id = NULL WHERE user_id = ?').run([id]);
+      db.prepare('UPDATE page_views SET user_id = NULL WHERE user_id = ?').run([id]);
+      db.prepare('UPDATE broadcasts SET sent_by = NULL WHERE sent_by = ?').run([id]);
+      db.prepare('UPDATE settings SET updated_by = NULL WHERE updated_by = ?').run([id]);
+      db.prepare('UPDATE support_conversations SET user_id = NULL WHERE user_id = ?').run([id]);
+      db.prepare('UPDATE support_conversations SET assigned_admin_id = NULL WHERE assigned_admin_id = ?').run([id]);
+
+      // 2. Delete user's communications, reviews, blocks, and warnings
+      db.prepare('DELETE FROM reviews WHERE reviewer_id = ? OR reviewed_user_id = ?').run([id, id]);
+      db.prepare('DELETE FROM messages WHERE sender_id = ? OR receiver_id = ?').run([id, id]);
+      db.prepare('DELETE FROM user_blocks WHERE blocker_id = ? OR blocked_id = ?').run([id, id]);
+      db.prepare('DELETE FROM user_warnings WHERE user_id = ? OR issued_by = ?').run([id, id]);
+
+      // 3. Delete user's career profile & applications
+      db.prepare('DELETE FROM job_applications WHERE applicant_id = ?').run([id]);
+      db.prepare('DELETE FROM candidate_profiles WHERE user_id = ?').run([id]);
+
+      // 4. Delete user's direct activity items
+      db.prepare('DELETE FROM favorites WHERE user_id = ?').run([id]);
+      db.prepare('DELETE FROM price_alerts WHERE user_id = ?').run([id]);
+      db.prepare('DELETE FROM notifications WHERE user_id = ? OR actor_id = ?').run([id, id]);
+      db.prepare('DELETE FROM bids WHERE bidder_id = ?').run([id]);
+      db.prepare('DELETE FROM payments WHERE user_id = ?').run([id]);
+      db.prepare('DELETE FROM reports WHERE reporter_id = ? OR reported_user_id = ?').run([id, id]);
+      db.prepare('DELETE FROM service_requests WHERE user_id = ?').run([id]);
+
+      // 5. Delete all dependencies attached to user's listings
+      db.prepare('DELETE FROM messages WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM reviews WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM payments WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM reports WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM bids WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM favorites WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM service_requests WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM job_applications WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM listing_attributes WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM listing_images WHERE listing_id IN (SELECT id FROM listings WHERE user_id = ?)').run([id]);
+      db.prepare('DELETE FROM listings WHERE user_id = ?').run([id]);
+
+      // 6. Delete user account
+      return db.prepare('DELETE FROM users WHERE id = ?').run([id]).changes;
+    });
+
+    const changes = performDelete();
+
+    // Asynchronously delete user files from disk
+    try {
+      const { removeAvatarByUrl, removeCvFileByUrl, removeImagesByUrl } = require('../middlewares/upload');
+      if (user.avatar_url) removeAvatarByUrl(user.avatar_url).catch(() => {});
+      if (candidateProfile) {
+        if (candidateProfile.custom_cv_url) removeCvFileByUrl(candidateProfile.custom_cv_url).catch(() => {});
+        if (candidateProfile.photo_url) removeAvatarByUrl(candidateProfile.photo_url).catch(() => {});
+      }
+      if (listingImageUrls.length > 0) {
+        removeImagesByUrl(listingImageUrls).catch(() => {});
+      }
+    } catch (err) {
+      console.error('File cleanup error during user delete:', err);
+    }
+
+    return changes > 0;
+  }
 }
 
 module.exports = User;

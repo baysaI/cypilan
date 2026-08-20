@@ -192,8 +192,14 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <input type="hidden" name="_method" value="PUT">
                                             <input type="hidden" name="status" value="<%= u.is_active ? 'suspended' : 'active' %>">
-                                            <button class="btn btn-sm <%= u.is_active ? 'btn-outline-danger' : 'btn-outline-success' %>">
+                                            <button class="btn btn-sm <%= u.is_active ? 'btn-outline-danger' : 'btn-outline-success' %> me-1" title="<%= u.is_active ? 'Hesabı Askıya Al' : 'Hesabı Aktifleştir' %>">
                                                 <%= u.is_active ? 'Askıya Al' : 'Aktifleştir' %>
+                                            </button>
+                                        </form>
+                                        <form action="/admin/users/<%= u.id %>/sil" method="POST" class="d-inline" onsubmit="return confirm('<%= (u.company_name || u.full_name) %> adlı kullanıcıyı ve tüm ilanlarını/verilerini kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz!');">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Kullanıcıyı ve Tüm Verilerini Kalıcı Olarak Sil">
+                                                <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </form>
                                     <% } %>
@@ -376,14 +382,23 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                         <div class="form-text small">Admin müdahalesi ile kullanıcının şifresini sıfırlamak için buraya yeni şifre yazın.</div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-primary fw-medium">Değişiklikleri Kaydet</button>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnModalDeleteUser" title="Kullanıcıyı Kalıcı Olarak Sil">
+                        <i class="fa-solid fa-trash-can me-1"></i>Kullanıcıyı Sil
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-primary fw-medium">Değişiklikleri Kaydet</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<form id="adminDeleteUserForm" action="" method="POST" class="d-none">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+</form>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -401,6 +416,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!editModalEl) return;
     const editModal = new bootstrap.Modal(editModalEl);
     const editForm = document.getElementById('editUserForm');
+    const deleteForm = document.getElementById('adminDeleteUserForm');
+    const btnModalDelete = document.getElementById('btnModalDeleteUser');
+    let currentEditUserId = null;
+    let currentEditUserName = '';
+
+    if (btnModalDelete && deleteForm) {
+        btnModalDelete.addEventListener('click', function () {
+            if (!currentEditUserId) return;
+            if (confirm((currentEditUserName || 'Bu kullanıcı') + ' ve tüm verileri kalıcı olarak silinecek. Emin misiniz?')) {
+                deleteForm.action = '/admin/users/' + currentEditUserId + '/sil';
+                deleteForm.submit();
+            }
+        });
+    }
 
     document.querySelectorAll('.btn-edit-user').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -412,6 +441,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const company = this.getAttribute('data-company');
             const corporateStatus = this.getAttribute('data-corporate-status') || 'none';
             const isVerified = this.getAttribute('data-is-verified') === '1';
+
+            currentEditUserId = id;
+            currentEditUserName = company || name;
 
             editForm.action = '/admin/users/' + id;
             document.getElementById('editFullName').value = name;

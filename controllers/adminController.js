@@ -19,7 +19,7 @@ const PAGE_SIZE = 20;
 // read it. Their own preference is on the row.
 const translatorFor = (user) => (key, params) => translate(key, (user && user.language_pref) || 'tr', params);
 
-const wantsJson = (req) => req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1);
+const wantsJson = (req) => Boolean(req && (req.xhr || (req.headers && req.headers.accept && req.headers.accept.indexOf('json') > -1)));
 
 const dashboard = async (req, res) => {
     try {
@@ -334,6 +334,43 @@ const toggleUserStatus = async (req, res) => {
         res.redirect(req.get('referer') || '/admin/users');
     } catch (error) {
         console.error('Admin Toggle User Error:', error);
+        if (wantsJson(req)) return res.status(500).json({ error: res.locals.t('flash.action_failed') });
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/users');
+    }
+};
+
+const deleteUser = async (req, res) => {
+    try {
+        const targetUserId = parseInt(req.params.id, 10);
+
+        if (!targetUserId || !Number.isInteger(targetUserId)) {
+            if (wantsJson(req)) return res.status(400).json({ error: res.locals.t('flash.user_not_found') });
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        if (targetUserId === req.session.userId) {
+            if (wantsJson(req)) return res.status(400).json({ error: res.locals.t('flash.cannot_delete_self') });
+            req.flash('error', 'flash.cannot_delete_self');
+            return res.redirect('/admin/users');
+        }
+
+        const user = await User.findById(targetUserId);
+        if (!user) {
+            if (wantsJson(req)) return res.status(404).json({ error: res.locals.t('flash.user_not_found') });
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        await User.delete(targetUserId);
+
+        if (wantsJson(req)) return res.json({ success: true });
+
+        req.flash('success', 'flash.user_deleted_success');
+        res.redirect(req.get('referer') || '/admin/users');
+    } catch (error) {
+        console.error('Admin Delete User Error:', error);
         if (wantsJson(req)) return res.status(500).json({ error: res.locals.t('flash.action_failed') });
         req.flash('error', 'flash.action_failed');
         res.redirect('/admin/users');
@@ -744,5 +781,6 @@ module.exports = {
     analytics,
     sendListingNotice,
     approveCorporate,
-    rejectCorporate
+    rejectCorporate,
+    deleteUser
 };
