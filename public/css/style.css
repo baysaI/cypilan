@@ -1398,6 +1398,76 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     color: #ffffff !important;
 }
 
+/* Dark Mode for Category Items & Type Pills */
+[data-bs-theme="dark"] .cyp-category-item {
+    color: #f1f5f9 !important;
+    border-color: transparent !important;
+}
+
+[data-bs-theme="dark"] .cyp-category-item:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #38bdf8 !important;
+}
+
+[data-bs-theme="dark"] .cyp-category-item.active {
+    background-color: rgba(14, 165, 233, 0.2) !important;
+    border-color: rgba(56, 189, 248, 0.4) !important;
+    color: #38bdf8 !important;
+    border-left: 4px solid #38bdf8 !important;
+}
+
+[data-bs-theme="dark"] .cyp-category-item .badge-count {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .cyp-category-item.active .badge-count {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .cyp-type-pill {
+    background: var(--cyp-surface-muted, #1e293b) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #f1f5f9 !important;
+}
+
+[data-bs-theme="dark"] .cyp-type-pill:hover {
+    background: #334155 !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .cyp-type-pill.active {
+    background: #0284c7 !important;
+    border-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .cyp-type-pill.active.pill-wanted {
+    background: #f59e0b !important;
+    border-color: #f59e0b !important;
+    color: #0f172a !important;
+}
+
+[data-bs-theme="dark"] .page-link.page-circle {
+    background-color: var(--cyp-surface-muted, #1e293b) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .page-link.page-circle:hover {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .page-item.active .page-link.page-circle {
+    background-color: #0284c7 !important;
+    border-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+
 /* Wanted purpose radio button styling */
 .wanted-purpose-btn {
     border-color: #f59e0b !important;
