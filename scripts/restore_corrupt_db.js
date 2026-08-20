@@ -357,10 +357,12 @@ async function restore() {
       // İlanın oluşturulma zamanına göre kendi yüklediği fotoğrafları bul (±120 saniye aralığı)
       let matchedPhotos = photoList.filter(p => Math.abs(p.ts - listTs) <= 120000 || (p.ts <= listTs && listTs - p.ts <= 180000));
 
-      // Özel durumlar (Ev arkadaşı ilanı için tek foto)
+      // Özel durumlar (Ev arkadaşı ilanı için fotoğraflar)
       if (listing.id === 7 && matchedPhotos.length === 0) {
-        const evPhoto = photoList.find(p => p.file.includes('1786876779949'));
-        if (evPhoto) matchedPhotos = [evPhoto];
+        const evPhotos = photoList.filter(p => p.file.includes('1786908246') || p.file.includes('1786876779949'));
+        if (evPhotos.length > 0) {
+          matchedPhotos = evPhotos;
+        }
       }
 
       matchedPhotos.forEach((p, idx) => {
