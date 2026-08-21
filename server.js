@@ -24,6 +24,14 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
+// The stylesheet and script were tagged with Date.now() on every render, so the
+// query string differed on every page view and no browser ever reused what it
+// had already downloaded — 116 KB of CSS and JS fetched again on each
+// navigation, and the cache header above rendered pointless. The stamp is taken
+// once at boot instead: a deploy restarts the process and so still busts the
+// cache, but between deploys the URL holds still and the cache can do its job.
+const ASSET_VERSION = Date.now().toString(36);
+
 const SESSION_SECRET = process.env.SESSION_SECRET;
 if (!SESSION_SECRET && IS_PRODUCTION) {
   console.error('FATAL: SESSION_SECRET tanımlı değil. Üretim ortamında oturumlar taklit edilebilir hale gelir.');
@@ -202,6 +210,7 @@ app.use((req, res, next) => {
   res.locals.cities = cities;
   res.locals.listingBadges = listingBadges;
   res.locals.currentPath = req.path;
+  res.locals.assetVersion = ASSET_VERSION;
   // Absolute URLs in the page (canonical, og:image, structured data) follow the
   // configured site address in production. In development they follow the host
   // the request came in on, so a phone testing over the LAN does not read a
@@ -240,6 +249,7 @@ app.use((req, res, next) => {
   res.locals.helpers = res.locals.helpers || helpers;
   res.locals.cities = res.locals.cities || cities;
   res.locals.listingBadges = res.locals.listingBadges || listingBadges;
+  res.locals.assetVersion = res.locals.assetVersion || ASSET_VERSION;
   res.locals.meta = {
     ...(res.locals.meta || {}),
     title: 'Sayfa Bulunamadı',
@@ -296,6 +306,7 @@ app.use((err, req, res, next) => {
   res.locals.helpers = res.locals.helpers || helpers;
   res.locals.cities = res.locals.cities || cities;
   res.locals.listingBadges = res.locals.listingBadges || listingBadges;
+  res.locals.assetVersion = res.locals.assetVersion || ASSET_VERSION;
   res.locals.meta = {
     ...(res.locals.meta || {}),
     title: 'Hata',
