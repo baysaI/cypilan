@@ -27,3 +27,6 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Dagitim arsivleri (git archive ile uretiliyor, depoda tutulmasi gerekmiyor)
+*.zip
