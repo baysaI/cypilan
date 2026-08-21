@@ -181,7 +181,7 @@ const show = async (req, res, next) => {
 
         const cityName = getCityName(listing.location_city, req.lang || 'tr') || listing.location_city || 'Kıbrıs';
         const categoryName = listing.category_name || 'İlan';
-        const baseUrl = (process.env.SITE_URL || 'https://www.cypilan.com').replace(/\/$/, '');
+        const baseUrl = (process.env.SITE_URL || 'https://cypilan.com').replace(/\/$/, '');
         const canonicalUrl = `${baseUrl}/listings/${encodeURIComponent(listing.slug)}`;
 
         res.locals.meta.title = listing.price 

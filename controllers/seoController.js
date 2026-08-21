@@ -3,7 +3,7 @@ const cities = require('../config/cities');
 const { getDb } = require('../config/database');
 const guidesConfig = require('../config/guides');
 
-const DEFAULT_SITE_URL = 'https://www.cypilan.com';
+const DEFAULT_SITE_URL = 'https://cypilan.com';
 let sitemapCache = null;
 let sitemapCacheTime = 0;
 const SITEMAP_CACHE_TTL = 30 * 60 * 1000; // 30 mins cache

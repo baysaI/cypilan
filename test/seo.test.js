@@ -15,7 +15,7 @@ t.run('SEO, Dinamik Sitemap, Robots.txt ve Schema.org Zengin Veri Yapısı', asy
   t.assert(robotsText.includes('Disallow: /admin/'), 'robots.txt admin engelini içeriyor');
   t.assert(robotsText.includes('Disallow: /panel/'), 'robots.txt panel engelini içeriyor');
   t.assert(robotsText.includes('Disallow: /messages/'), 'robots.txt mesajlaşma engelini içeriyor');
-  t.assert(robotsText.includes('Sitemap: https://www.cypilan.com/sitemap.xml'), 'robots.txt sitemap bağlantısı veriyor');
+  t.assert(robotsText.includes('Sitemap: https://cypilan.com/sitemap.xml'), 'robots.txt sitemap bağlantısı veriyor');
 
   // 2. Sitemap.xml Testi
   let sitemapXml = '';
@@ -26,11 +26,11 @@ t.run('SEO, Dinamik Sitemap, Robots.txt ve Schema.org Zengin Veri Yapısı', asy
   await seoController.sitemap({}, mockSitemapRes);
 
   t.assert(sitemapXml.includes('<urlset'), 'sitemap.xml urlset kök elemanı içeriyor');
-  t.assert(sitemapXml.includes('https://www.cypilan.com/'), 'sitemap.xml ana sayfa URL içeriyor');
-  t.assert(sitemapXml.includes('https://www.cypilan.com/listings'), 'sitemap.xml ilanlar sayfası URL içeriyor');
-  t.assert(sitemapXml.includes('https://www.cypilan.com/sss'), 'sitemap.xml SSS sayfası URL içeriyor');
-  t.assert(sitemapXml.includes('https://www.cypilan.com/ogrenci'), 'sitemap.xml öğrenci rehberi URL içeriyor');
-  t.assert(sitemapXml.includes('https://www.cypilan.com/yatirimci'), 'sitemap.xml yatırımcı rehberi URL içeriyor');
+  t.assert(sitemapXml.includes('https://cypilan.com/'), 'sitemap.xml ana sayfa URL içeriyor');
+  t.assert(sitemapXml.includes('https://cypilan.com/listings'), 'sitemap.xml ilanlar sayfası URL içeriyor');
+  t.assert(sitemapXml.includes('https://cypilan.com/sss'), 'sitemap.xml SSS sayfası URL içeriyor');
+  t.assert(sitemapXml.includes('https://cypilan.com/ogrenci'), 'sitemap.xml öğrenci rehberi URL içeriyor');
+  t.assert(sitemapXml.includes('https://cypilan.com/yatirimci'), 'sitemap.xml yatırımcı rehberi URL içeriyor');
   t.assert(sitemapXml.includes('hreflang="tr"'), 'sitemap.xml Türkçe dil etiketi içeriyor');
   t.assert(sitemapXml.includes('hreflang="en"'), 'sitemap.xml İngilizce dil etiketi içeriyor');
   t.assert(sitemapXml.includes('hreflang="ru"'), 'sitemap.xml Rusça dil etiketi içeriyor');

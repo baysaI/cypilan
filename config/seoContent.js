@@ -147,7 +147,7 @@ const getSeoBlock = (categorySlug, cityName) => {
   };
 };
 
-const getFaqSchema = (categorySlug, baseUrl = 'https://www.cypilan.com') => {
+const getFaqSchema = (categorySlug, baseUrl = 'https://cypilan.com') => {
   if (!categorySlug) return null;
   const slug = String(categorySlug).toLowerCase();
   let block = null;

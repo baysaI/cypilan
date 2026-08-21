@@ -6,8 +6,17 @@ const STATUSES = ['new', 'read', 'resolved'];
 const MESSAGE_MIN_LENGTH = 5;
 const MESSAGE_MAX_LENGTH = 2000;
 
+// The table is created if missing on first use, but that check was running on
+// every call — and getUnreadCount runs on every page a signed-in visitor opens.
+// A CREATE TABLE IF NOT EXISTS parses and compares the schema each time; here it
+// cost more than the query it was guarding. Once per process is enough: nothing
+// drops the table while the server is up.
+let tableEnsured = false;
+
 class Feedback {
   static ensureTable(db) {
+    if (tableEnsured) return;
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS feedback (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,6 +33,8 @@ class Feedback {
       CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
     `);
+
+    tableEnsured = true;
   }
 
   static async create({ user_id = null, type, message, contact_email = null, page_url = null }) {

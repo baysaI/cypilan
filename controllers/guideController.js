@@ -11,7 +11,7 @@ const index = async (req, res, next) => {
     res.locals.meta.title = 'Kıbrıs Yaşam & Emlak, Araç, İş Rehberi - CYPILAN';
     res.locals.meta.description = 'Kuzey Kıbrıs’ta ev alımı, araç devir işlemleri, kiralık daireler, çalışma izni ve Kıbrıs yaşam maliyetleri hakkında en güncel ve kapsamlı rehberler.';
 
-    const baseUrl = (process.env.SITE_URL || 'https://www.cypilan.com').replace(/\/$/, '');
+    const baseUrl = (process.env.SITE_URL || 'https://cypilan.com').replace(/\/$/, '');
     const breadcrumbs = {
       "@type": "BreadcrumbList",
       "itemListElement": [
@@ -60,7 +60,7 @@ const show = async (req, res, next) => {
     }
 
     const otherGuides = guidesConfig.getRelatedGuides(guide.slug, 3);
-    const baseUrl = (process.env.SITE_URL || 'https://www.cypilan.com').replace(/\/$/, '');
+    const baseUrl = (process.env.SITE_URL || 'https://cypilan.com').replace(/\/$/, '');
     const canonicalUrl = `${baseUrl}/rehber/${encodeURIComponent(guide.slug)}`;
 
     res.locals.meta = res.locals.meta || {};

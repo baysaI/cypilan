@@ -1,8 +1,17 @@
 const { getDb } = require('../config/database');
 const Notification = require('./Notification');
 
+// The table is created if missing on first use, but that check was running on
+// every call — and getUnreadCount runs on every page a signed-in visitor opens.
+// A CREATE TABLE IF NOT EXISTS parses and compares the schema each time; here it
+// cost more than the query it was guarding. Once per process is enough: nothing
+// drops the table while the server is up.
+let tableEnsured = false;
+
 class PriceAlert {
   static ensureTable(db) {
+    if (tableEnsured) return;
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS price_alerts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -15,6 +24,8 @@ class PriceAlert {
       CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id);
       CREATE INDEX IF NOT EXISTS idx_price_alerts_listing ON price_alerts(listing_id);
     `);
+
+    tableEnsured = true;
   }
 
   static async findByPair(userId, listingId) {

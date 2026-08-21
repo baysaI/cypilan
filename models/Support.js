@@ -23,8 +23,17 @@ function pickRandomPersona() {
   return REPRESENTATIVE_PERSONAS[idx];
 }
 
+// The table is created if missing on first use, but that check was running on
+// every call — and getUnreadCount runs on every page a signed-in visitor opens.
+// A CREATE TABLE IF NOT EXISTS parses and compares the schema each time; here it
+// cost more than the query it was guarding. Once per process is enough: nothing
+// drops the table while the server is up.
+let tableEnsured = false;
+
 class Support {
   static ensureTable(db) {
+    if (tableEnsured) return;
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS support_conversations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,6 +70,8 @@ class Support {
       CREATE INDEX IF NOT EXISTS idx_support_messages_conv ON support_messages(conversation_id, created_at ASC);
       CREATE INDEX IF NOT EXISTS idx_support_messages_read ON support_messages(conversation_id, is_read);
     `);
+
+    tableEnsured = true;
   }
 
   static getPersonas() {

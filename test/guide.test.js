@@ -67,7 +67,7 @@ t.run('Kıbrıs Yaşam & Rehber (Blog) Sistemi ve SEO Entegrasyonu', async (db) 
     guide: evGuide,
     relatedListings: [],
     otherGuides: related,
-    canonicalUrl: 'https://www.cypilan.com/rehber/kktc-ev-alirken-bilinmesi-gerekenler'
+    canonicalUrl: 'https://cypilan.com/rehber/kktc-ev-alirken-bilinmesi-gerekenler'
   });
   t.assert(showHtml.includes('Tapu (Koçan) Türlerini'), 'show.ejs makale gövdesini render ediyor');
   t.assert(showHtml.includes('Diğer Kıbrıs Rehberleri'), 'show.ejs diğer rehberler yan panelini basıyor');
@@ -80,7 +80,7 @@ t.run('Kıbrıs Yaşam & Rehber (Blog) Sistemi ve SEO Entegrasyonu', async (db) 
     send: (xml) => { sitemapXml = xml; }
   };
   await seoController.sitemap({}, mockSitemapRes);
-  t.assert(sitemapXml.includes('https://www.cypilan.com/rehber'), 'sitemap.xml /rehber ana sayfasını içeriyor');
-  t.assert(sitemapXml.includes('https://www.cypilan.com/rehber/kktc-ev-alirken-bilinmesi-gerekenler'), 'sitemap.xml ev alma rehberini içeriyor');
-  t.assert(sitemapXml.includes('https://www.cypilan.com/rehber/kktc-arac-devir-ve-ruhsat-islemleri'), 'sitemap.xml araç devir rehberini içeriyor');
+  t.assert(sitemapXml.includes('https://cypilan.com/rehber'), 'sitemap.xml /rehber ana sayfasını içeriyor');
+  t.assert(sitemapXml.includes('https://cypilan.com/rehber/kktc-ev-alirken-bilinmesi-gerekenler'), 'sitemap.xml ev alma rehberini içeriyor');
+  t.assert(sitemapXml.includes('https://cypilan.com/rehber/kktc-arac-devir-ve-ruhsat-islemleri'), 'sitemap.xml araç devir rehberini içeriyor');
 });

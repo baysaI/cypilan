@@ -40,8 +40,17 @@ const parseEmails = (value) => [...new Set(
     .filter(Boolean)
 )];
 
+// The table is created if missing on first use, but that check was running on
+// every call — and getUnreadCount runs on every page a signed-in visitor opens.
+// A CREATE TABLE IF NOT EXISTS parses and compares the schema each time; here it
+// cost more than the query it was guarding. Once per process is enough: nothing
+// drops the table while the server is up.
+let tableEnsured = false;
+
 class Broadcast {
   static ensureTable(db) {
+    if (tableEnsured) return;
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS broadcasts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,6 +65,8 @@ class Broadcast {
       );
       CREATE INDEX IF NOT EXISTS idx_broadcasts_created ON broadcasts(created_at DESC);
     `);
+
+    tableEnsured = true;
   }
 
   // Who a given filter would reach, resolved before anything is written so the

@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = 'https://www.cypilan.com';
+const DEFAULT_SITE_URL = 'https://cypilan.com';
 
 const seoMiddleware = (req, res, next) => {
     const siteName = 'CYPILAN.COM';
