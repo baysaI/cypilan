@@ -502,6 +502,30 @@ const create = async (req, res, next) => {
             selectedType = 'sale';
         }
 
+        // Collect and save structured listing attributes (rooms, size, build_year, brand, km, features etc.)
+        const attributes = {};
+        const directKeys = [
+            'rooms', 'size', 'floor', 'build_year', 'buildYear',
+            'brand', 'model', 'year', 'km', 'fuel', 'gear', 'condition',
+            'body_type', 'engine_power', 'engine_size', 'drivetrain', 'color', 'vehicle_status', 'swap'
+        ];
+        directKeys.forEach(k => {
+            const v = req.body[k] || (req.body.attributes && req.body.attributes[k]);
+            if (v !== undefined && v !== null && String(v).trim() !== '') {
+                const canonicalKey = (k === 'buildYear') ? 'build_year' : k;
+                attributes[canonicalKey] = String(v).trim();
+            }
+        });
+
+        const rawFeatures = req.body.features || (req.body.attributes && req.body.attributes.features);
+        if (rawFeatures) {
+            const list = Array.isArray(rawFeatures) ? rawFeatures : [rawFeatures];
+            const cleaned = list.filter(f => f && String(f).trim() !== '');
+            if (cleaned.length > 0) {
+                attributes.features = cleaned.join(',');
+            }
+        }
+
         const listing = await Listing.create({
             user_id: req.session.userId,
             category_id,
@@ -517,7 +541,11 @@ const create = async (req, res, next) => {
             is_featured: 1,
             expires_at: listingPolicy.expiresAt(),
             ...listingBadges.fromBody(req.body, rootSlug),
-            images
+            images,
+            attributes,
+            // Pay, contract shape and requirements live beside the listing rather
+            // than inside it, and only exist for adverts under the jobs tree.
+            jobDetails: rootSlug === 'is-ilanlari' ? req.body : null
         });
 
         // Broadcast targeted notification to matching corporate businesses if user opted in for bids
@@ -543,39 +571,6 @@ const create = async (req, res, next) => {
             }
         }
 
-        // Collect and save structured listing attributes (rooms, size, build_year, brand, km, features etc.)
-        const attributes = {};
-        const directKeys = [
-            'rooms', 'size', 'floor', 'build_year', 'buildYear',
-            'brand', 'model', 'year', 'km', 'fuel', 'gear', 'condition',
-            'body_type', 'engine_power', 'engine_size', 'drivetrain', 'color', 'vehicle_status', 'swap'
-        ];
-        directKeys.forEach(k => {
-            const v = req.body[k] || (req.body.attributes && req.body.attributes[k]);
-            if (v !== undefined && v !== null && String(v).trim() !== '') {
-                const canonicalKey = (k === 'buildYear') ? 'build_year' : k;
-                attributes[canonicalKey] = String(v).trim();
-            }
-        });
-
-        const rawFeatures = req.body.features || (req.body.attributes && req.body.attributes.features);
-        if (rawFeatures) {
-            const list = Array.isArray(rawFeatures) ? rawFeatures : [rawFeatures];
-            const cleaned = list.filter(f => f && String(f).trim() !== '');
-            if (cleaned.length > 0) {
-                attributes.features = cleaned.join(',');
-            }
-        }
-
-        if (Object.keys(attributes).length > 0) {
-            await Listing.setAttributes(listing.id, attributes);
-        }
-
-        // Pay, contract shape and requirements live beside the listing rather than
-        // inside it, and only exist for adverts under the jobs tree.
-        if (rootSlug === 'is-ilanlari') {
-            await Career.saveJobDetails(listing.id, req.body);
-        }
 
         if (req.session && req.session.listingFormData) {
             delete req.session.listingFormData;

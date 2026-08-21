@@ -138,8 +138,10 @@ class Career {
     return db.prepare('SELECT * FROM job_details WHERE listing_id = ?').get([listingId]) || null;
   }
 
-  static async saveJobDetails(listingId, data) {
-    const db = getDb();
+    // The insert is split out so a caller that is already inside a transaction
+    // can reuse it without opening a second one: creating a listing writes the
+    // advert, its images, its attributes and this row as one unit.
+    static writeJobDetails(db, listingId, data) {
 
     const min = Number.parseFloat(data.salary_min);
     const max = Number.parseFloat(data.salary_max);
@@ -172,9 +174,13 @@ class Career {
       data.required_skills || null,
       data.required_languages || null
     ]);
+    }
 
-    return this.getJobDetails(listingId);
-  }
+    static async saveJobDetails(listingId, data) {
+      const db = getDb();
+      this.writeJobDetails(db, listingId, data);
+      return this.getJobDetails(listingId);
+    }
 
   // ---- Applications --------------------------------------------------------
 

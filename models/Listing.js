@@ -43,7 +43,14 @@ class Listing {
       location_lat = null, location_lng = null,
       is_premium = 0, is_featured = 1, expires_at = null,
       is_urgent = 0, is_opportunity = 0, is_negotiable = 0,
-      images = []
+      images = [],
+      // Attributes and job details were written in their own transactions after
+      // this one had already committed, so a failure between them published a
+      // listing with none of its detail and no way to tell it apart from one the
+      // seller had simply left blank. They are written here instead, inside the
+      // same transaction as the advert and its images.
+      attributes = null,
+      jobDetails = null
     } = listingData;
 
     const location_city = listingData.location_city ?? listingData.city ?? null;
@@ -77,8 +84,20 @@ class Listing {
         });
       }
 
-      return listingId;
-    });
+
+        if (attributes && Object.keys(attributes).length > 0) {
+          const attrStmt = db.prepare(
+            'INSERT INTO listing_attributes (listing_id, attribute_key, attribute_value) VALUES (?, ?, ?)'
+          );
+          Object.entries(attributes).forEach(([key, value]) => attrStmt.run([listingId, key, value]));
+        }
+
+        if (jobDetails) {
+          require('./Career').writeJobDetails(db, listingId, jobDetails);
+        }
+
+        return listingId;
+      });
 
     return this.findById(insert());
   }
