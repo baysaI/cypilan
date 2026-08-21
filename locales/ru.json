@@ -245,6 +245,9 @@
     "work_type_part_time": "Частичная занятость",
     "work_type_seasonal": "Сезонная",
     "years_experience": "опыт {years} лет",
+    "years": "Лет",
+    "year": "Год",
+    "no_experience": "Без опыта",
     "you_are_shortlisted": "Поздравляем, вы в коротком списке!"
   },
   "categories": {

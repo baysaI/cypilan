@@ -10,51 +10,72 @@ document.addEventListener('DOMContentLoaded', () => {
     // instead of a hardcoded offset that is wrong at half the breakpoints.
     const siteHeader = document.querySelector('.site-header');
     if (siteHeader) {
+        let lastHeaderH = 0;
         const publishHeaderHeight = () => {
-            document.documentElement.style.setProperty('--cyp-header-h', Math.round(siteHeader.offsetHeight) + 'px');
+            const h = Math.round(siteHeader.offsetHeight);
+            if (h > 0 && h !== lastHeaderH) {
+                lastHeaderH = h;
+                document.documentElement.style.setProperty('--cyp-header-h', h + 'px');
+            }
         };
 
-        // "Giriş Yap" and "İlan Ver" show their labels when the top row can
-        // hold them and fall back to bare icons when it cannot — which depends
-        // on the language as much as on the screen. Measured rather than
-        // guessed at a breakpoint.
         const headerRow = siteHeader.querySelector('.header-row');
+        let isFitting = false;
         const fitHeaderLabels = () => {
-            if (!headerRow) return;
-
-            siteHeader.classList.add('header-labels-fit');
-            if (headerRow.scrollWidth > headerRow.clientWidth + 1) {
-                siteHeader.classList.remove('header-labels-fit');
-            }
+            if (!headerRow || isFitting) return;
+            isFitting = true;
+            requestAnimationFrame(() => {
+                siteHeader.classList.add('header-labels-fit');
+                if (headerRow.scrollWidth > headerRow.clientWidth + 1) {
+                    siteHeader.classList.remove('header-labels-fit');
+                }
+                isFitting = false;
+            });
         };
 
         fitHeaderLabels();
         publishHeaderHeight();
 
         window.addEventListener('load', () => {
-            // The web font changes every label's width, so measure again once
-            // it has actually arrived.
             fitHeaderLabels();
             publishHeaderHeight();
-        });
+        }, { once: true });
 
-        window.addEventListener('resize', fitHeaderLabels);
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                fitHeaderLabels();
+                publishHeaderHeight();
+            }, 100);
+        }, { passive: true });
 
         if (typeof ResizeObserver !== 'undefined') {
-            new ResizeObserver(publishHeaderHeight).observe(siteHeader);
-        } else {
-            window.addEventListener('resize', publishHeaderHeight);
+            const ro = new ResizeObserver((entries) => {
+                for (const entry of entries) {
+                    const h = Math.round(entry.contentRect.height);
+                    if (h > 0 && Math.abs(h - lastHeaderH) > 2) {
+                        publishHeaderHeight();
+                    }
+                }
+            });
+            ro.observe(siteHeader);
         }
 
-        // Tuck the header away while scrolling down a long list on a phone and
-        // bring it back on the first upward scroll. It never tucks while a menu
-        // it owns is open, and never on desktop, where it stays pinned.
+        // Tuck the header away while scrolling down on phone ONLY (not desktop)
         if (!prefersReducedMotion) {
             let lastY = window.scrollY;
             let ticking = false;
 
             const updateHeaderTuck = () => {
                 ticking = false;
+                if (window.innerWidth >= 992) {
+                    if (siteHeader.classList.contains('header-tucked')) {
+                        siteHeader.classList.remove('header-tucked');
+                    }
+                    return;
+                }
+
                 const y = Math.max(0, window.scrollY);
                 const delta = y - lastY;
 

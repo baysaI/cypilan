@@ -346,7 +346,7 @@
                                 <% if (jd.experience_required !== null && jd.experience_required !== undefined) { %>
                                     <div class="col">
                                         <div class="text-muted small mb-1"><%= t('career.experience_required') %></div>
-                                        <div class="fw-bold text-dark"><%= jd.experience_required > 0 ? jd.experience_required + ' ' + (t('career.years') || 'Yıl') : (t('career.no_experience') || 'Deneyimsiz') %></div>
+                                        <div class="fw-bold text-dark"><%= jd.experience_required > 0 ? (jd.experience_required + ' ' + t('career.years')) : t('career.no_experience') %></div>
                                     </div>
                                 <% } %>
                                 <% if (jd.salary_min || jd.salary_max) { %>

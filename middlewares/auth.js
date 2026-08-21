@@ -9,11 +9,20 @@ const isAuthenticated = (req, res, next) => {
         return next();
     }
 
-    if (req.method === 'GET' && !req.xhr) {
+    const isApiOrAjax = req.xhr ||
+        (req.headers.accept && req.headers.accept.includes('application/json')) ||
+        req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+        req.originalUrl.startsWith('/api/') ||
+        req.originalUrl.includes('/heartbeat') ||
+        req.originalUrl.includes('/poll') ||
+        req.originalUrl.includes('/conversations') ||
+        req.originalUrl.includes('/messages');
+
+    if (req.method === 'GET' && !isApiOrAjax) {
         req.session.returnTo = req.originalUrl;
     }
     
-    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+    if (isApiOrAjax) {
         return res.status(401).json({ error: 'Authentication required' });
     }
     

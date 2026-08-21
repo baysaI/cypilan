@@ -488,12 +488,8 @@ body {
 html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    overflow-x: clip;
-    overflow-y: auto;
 }
 
-/* Long unbroken strings — pasted URLs in a description, an e-mail address in a
-   narrow table cell — are the other common source of overflow. */
 body {
     overflow-wrap: break-word;
 }

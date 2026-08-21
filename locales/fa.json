@@ -245,6 +245,9 @@
     "work_type_part_time": "پاره‌وقت",
     "work_type_seasonal": "فصلی",
     "years_experience": "{years} سال سابقه",
+    "years": "سال",
+    "year": "سال",
+    "no_experience": "بدون سابقه",
     "you_are_shortlisted": "تبریک، به فهرست کوتاه راه یافتید!"
   },
   "categories": {

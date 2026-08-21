@@ -245,6 +245,9 @@
     "work_type_part_time": "Part Time",
     "work_type_seasonal": "Seasonal",
     "years_experience": "{years} years of experience",
+    "years": "Years",
+    "year": "Year",
+    "no_experience": "No experience required",
     "you_are_shortlisted": "Congratulations, you have been shortlisted!"
   },
   "categories": {
