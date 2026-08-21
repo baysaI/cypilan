@@ -61,6 +61,35 @@ app.use(helmet({
 
 app.use(compression());
 
+// cypilan.com and www.cypilan.com both served the site, and a cookie set on one
+// host is never sent to the other. A session started on www therefore became
+// invisible the moment Google returned the visitor to the apex — the address
+// GOOGLE_CALLBACK_URL names — so the sign-in completed against a second, empty
+// session and the visitor landed back on the site still logged out.
+//
+// SITE_URL already names the address the rest of the app treats as canonical
+// (sitemap, canonical tags, og:image, e-mail links), so that is the host
+// everything is funnelled onto. Localhost and bare IPs are left alone, or LAN
+// and development testing would be redirected off the machine running them.
+const canonicalHost = (() => {
+  try {
+    return process.env.SITE_URL ? new URL(process.env.SITE_URL).host : null;
+  } catch (error) {
+    return null;
+  }
+})();
+
+const isLocalHost = (host) => /^(localhost|127\.|\[?::1\]?|\d+\.\d+\.\d+\.\d+)/i.test(host);
+
+if (canonicalHost && !isLocalHost(canonicalHost)) {
+  app.use((req, res, next) => {
+    const host = req.get('host');
+    if (!host || host === canonicalHost || isLocalHost(host)) return next();
+    return res.redirect(301, `https://${canonicalHost}${req.originalUrl}`);
+  });
+}
+
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
