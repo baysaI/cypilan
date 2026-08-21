@@ -36,8 +36,14 @@ t.run('Hizmet talepleri ve açıklama taslağı', async (db) => {
   );
 
   // --- Onay ilani gercekten one cikarmali
+  // Yeni ilanlar artik dogrudan vitrine giriyor (Listing.create varsayilani
+  // is_featured = 1), bu yuzden gecisin baslangici elle kuruluyor. Burada
+  // olculen sey onayin ilani vitrine almasi ve reddin geri cikarmasi; ilanin
+  // hangi durumda dogdugu bu testin konusu degil.
+  db.prepare('UPDATE listings SET is_featured = 0 WHERE id = ?').run(listing.id);
+
   let current = await Listing.findById(listing.id);
-  t.assertEqual(Number(current.is_featured), 0, 'İlan başlangıçta öne çıkarılmamış');
+  t.assertEqual(Number(current.is_featured), 0, 'İlan öne çıkarılmamış duruma alındı');
 
   await ServiceRequest.setStatus(first.id, 'approved', 'Onaylandı');
   current = await Listing.findById(listing.id);
