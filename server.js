@@ -92,7 +92,20 @@ const isLocalHost = (host) => /^(localhost|127\.|\[?::1\]?|\d+\.\d+\.\d+\.\d+)/i
 if (canonicalHost && !isLocalHost(canonicalHost)) {
   app.use((req, res, next) => {
     const host = req.get('host');
-    if (!host || host === canonicalHost || isLocalHost(host)) return next();
+    if (!host || isLocalHost(host)) return next();
+
+    // Plain http still answered with a page rather than pointing at the secure
+    // address, so search engines indexed http://cypilan.com beside the real one
+    // and a visitor could stay on an unencrypted connection without noticing.
+    //
+    // The scheme is trusted only when the proxy states it. A missing header is
+    // deliberately read as "already fine": inferring http from its absence would
+    // bounce an https request back to https forever, and a redirect loop takes
+    // the whole site down to fix a canonical address.
+    const overPlainHttp = req.get('x-forwarded-proto') === 'http';
+
+    if (host === canonicalHost && !overPlainHttp) return next();
+
     return res.redirect(301, `https://${canonicalHost}${req.originalUrl}`);
   });
 }

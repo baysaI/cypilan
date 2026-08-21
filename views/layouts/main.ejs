@@ -60,7 +60,11 @@
     <link rel="icon" type="image/png" sizes="48x48" href="/img/favicon-48x48.png">
     <link rel="icon" type="image/png" sizes="96x96" href="/img/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192x192.png">
-    <link rel="icon" type="image/svg+xml" href="/img/logo.svg">
+    <%# logo.svg 1920x1080 bir afis; favicon olarak tanitildiginda Google onu
+        kare olmadigi icin reddediyor ve arama sonucunda genel dunya simgesini
+        gosteriyor. Tarayicilar da SVG sunuldugunda onu PNG'lere tercih ediyor,
+        yani sekme simgesi de bundan etkileniyordu. Kare bir SVG olmadigi surece
+        asagidaki PNG seti (48/96/192) zaten eksiksiz. %>
     <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
 
