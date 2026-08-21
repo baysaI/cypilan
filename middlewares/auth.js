@@ -109,6 +109,36 @@ const touchLastSeen = async (req, userId) => {
     }
 };
 
+// A visitor whose account was suspended or removed is still holding a session
+// that was perfectly valid when it was issued. It is regenerated rather than
+// just emptied, so the old session id cannot be replayed, and the explanation
+// is written to the fresh session — writing it to the old one would throw it
+// away along with the session.
+const endSession = (req, res, messageKey, redirectTo) => {
+    const wantsJson = req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1);
+
+    if (wantsJson) {
+        const translate = (res.locals && typeof res.locals.t === 'function') ? res.locals.t : null;
+        const message = (messageKey && translate) ? translate(messageKey) : 'Session ended';
+        return res.status(403).json({ error: message });
+    }
+
+    if (!req.session) return res.redirect(redirectTo);
+
+    return req.session.regenerate((error) => {
+        if (error) {
+            console.error('Session regenerate on sign-out failed:', error);
+            return res.redirect(redirectTo);
+        }
+
+        if (messageKey && typeof req.flash === 'function') {
+            req.flash('error', messageKey);
+        }
+
+        req.session.save(() => res.redirect(redirectTo));
+    });
+};
+
 const setUserLocal = async (req, res, next) => {
     let userId = req.session && req.session.userId;
     let user = req.user;
@@ -125,31 +155,37 @@ const setUserLocal = async (req, res, next) => {
     }
 
     if (userId) {
-        let isVerified = req.session && typeof req.session.userIsVerified !== 'undefined'
-            ? req.session.userIsVerified
-            : null;
-        let userAvatar = req.session && typeof req.session.userAvatar !== 'undefined'
-            ? req.session.userAvatar
-            : undefined;
-        let corporateStatus = req.session && typeof req.session.userCorporateStatus !== 'undefined'
-            ? req.session.userCorporateStatus
-            : undefined;
+        // The row is read on every authenticated request rather than trusted from
+        // the session. Suspension and role changes used to stay invisible until the
+        // next sign-in: an account could be banned and go on posting for the rest of
+        // the week, and a demoted admin kept the panel. This is a primary-key lookup
+        // sitting next to the five counter queries below, so being correct here does
+        // not cost anything measurable.
+        const uData = await User.findById(userId);
 
-        if (isVerified === null || userAvatar === undefined || corporateStatus === undefined) {
-            const uData = await User.findById(userId);
-            if (uData) {
-                isVerified = Boolean(uData.is_verified);
-                userAvatar = uData.avatar_url || null;
-                corporateStatus = uData.corporate_status || 'none';
-                if (req.session) {
-                    req.session.userIsVerified = isVerified;
-                    req.session.userAvatar = userAvatar;
-                    req.session.userCorporateStatus = corporateStatus;
-                    req.session.userCorporateType = uData.corporate_type || null;
-                    req.session.userCompanyName = uData.company_name || null;
-                    req.session.userRole = uData.role;
-                }
-            }
+        if (!uData) {
+            // The account was deleted while the session was still open. Nothing to
+            // tell them about their account, so they are simply signed out.
+            return endSession(req, res, null, '/');
+        }
+
+        if (Number(uData.is_active) === 0) {
+            return endSession(req, res, 'flash.account_suspended', '/auth/login');
+        }
+
+        const isVerified = Boolean(uData.is_verified);
+        const userAvatar = uData.avatar_url || null;
+        const corporateStatus = uData.corporate_status || 'none';
+
+        if (req.session) {
+            req.session.userIsVerified = isVerified;
+            req.session.userAvatar = userAvatar;
+            req.session.userCorporateStatus = corporateStatus;
+            req.session.userCorporateType = uData.corporate_type || null;
+            req.session.userCompanyName = uData.company_name || null;
+            req.session.userRole = uData.role;
+            req.session.userEmail = uData.email;
+            req.session.userName = uData.full_name;
         }
 
         const userData = {
