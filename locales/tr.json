@@ -245,6 +245,9 @@
     "work_type_part_time": "Yarı Zamanlı",
     "work_type_seasonal": "Sezonluk",
     "years_experience": "{years} yıl deneyim",
+    "years": "Yıl",
+    "year": "Yıl",
+    "no_experience": "Deneyimsiz",
     "you_are_shortlisted": "Tebrikler, kısa listeye alındın!"
   },
   "categories": {

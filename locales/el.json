@@ -245,6 +245,9 @@
     "work_type_part_time": "Μερική Απασχόληση",
     "work_type_seasonal": "Εποχιακή",
     "years_experience": "{years} έτη εμπειρίας",
+    "years": "Χρόνια",
+    "year": "Χρόνος",
+    "no_experience": "Χωρίς εμπειρία",
     "you_are_shortlisted": "Συγχαρητήρια, μπήκατε στη βραχεία λίστα!"
   },
   "categories": {

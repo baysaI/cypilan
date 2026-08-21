@@ -25,7 +25,12 @@ const reject = (req, res) => {
     }
 
     req.flash('error', 'flash.csrf_failed');
-    return res.redirect(req.get('referer') || '/');
+    if (req.session) {
+        return req.session.save(() => {
+            res.redirect(303, req.get('referer') || '/');
+        });
+    }
+    return res.redirect(303, req.get('referer') || '/');
 };
 
 const csrfProtection = (req, res, next) => {

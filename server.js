@@ -94,7 +94,7 @@ app.use(session({
   }),
   secret: SESSION_SECRET || 'cypilan-development-only-secret',
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   cookie: {
     secure: 'auto',
     httpOnly: true,
@@ -109,14 +109,24 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use((req, res, next) => {
+  const flashSuccess = req.session ? (req.session.flashSuccess || null) : null;
+  const flashError = req.session ? (req.session.flashError || null) : null;
+  const flashInfo = req.session ? (req.session.flashInfo || null) : null;
+
   res.locals.flash = {
-    success: req.session.flashSuccess || null,
-    error: req.session.flashError || null,
-    info: req.session.flashInfo || null
+    success: flashSuccess,
+    error: flashError,
+    info: flashInfo
   };
-  delete req.session.flashSuccess;
-  delete req.session.flashError;
-  delete req.session.flashInfo;
+  res.locals.success = flashSuccess;
+  res.locals.error = flashError;
+  res.locals.info = flashInfo;
+
+  if (req.session) {
+    delete req.session.flashSuccess;
+    delete req.session.flashError;
+    delete req.session.flashInfo;
+  }
 
   // Messages are stored translated: the reader is the same user in the same
   // request cycle, so the language is already known here. Anything that does not

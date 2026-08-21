@@ -13,7 +13,7 @@ const startAuthenticatedSession = (req, user, redirectTo, successMessage, res) =
         if (regenerateErr) {
             console.error('Session Regenerate Error:', regenerateErr);
             req.flash('error', 'flash.session_start_failed');
-            return res.redirect('/auth/login');
+            return res.redirect(303, '/auth/login');
         }
 
         req.session.userId = user.id;
@@ -25,10 +25,13 @@ const startAuthenticatedSession = (req, user, redirectTo, successMessage, res) =
         req.session.userCompanyName = user.company_name || null;
         req.session.userIsVerified = Boolean(user.is_verified);
 
+        if (successMessage) {
+            req.flash('success', successMessage);
+        }
+
         req.session.save((saveErr) => {
             if (saveErr) console.error('Session Save Error:', saveErr);
-            req.flash('success', successMessage);
-            res.redirect(redirectTo);
+            return res.redirect(303, redirectTo || '/');
         });
     });
 };
@@ -76,7 +79,16 @@ const login = async (req, res) => {
         }
 
         // Read before regenerating — the old session is discarded.
-        const returnTo = req.session.returnTo || '/';
+        let returnTo = req.session.returnTo || (user.role === 'admin' ? '/admin' : '/');
+        if (
+            returnTo.includes('heartbeat') ||
+            returnTo.includes('/poll') ||
+            returnTo.startsWith('/api/') ||
+            returnTo.includes('/messages') ||
+            returnTo.includes('/conversations')
+        ) {
+            returnTo = user.role === 'admin' ? '/admin' : '/';
+        }
         const rememberMe = Boolean(remember);
 
         await User.touchLastSeen(user.id);
@@ -85,7 +97,7 @@ const login = async (req, res) => {
             if (regenerateErr) {
                 console.error('Session Regenerate Error:', regenerateErr);
                 req.flash('error', 'flash.session_start_failed');
-                return res.redirect('/auth/login');
+                return res.redirect(303, '/auth/login');
             }
 
             req.session.userId = user.id;
@@ -98,10 +110,11 @@ const login = async (req, res) => {
                 req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
             }
 
+            req.flash('success', 'flash.login_success');
+
             req.session.save((saveErr) => {
                 if (saveErr) console.error('Session Save Error:', saveErr);
-                req.flash('success', 'flash.login_success');
-                res.redirect(returnTo);
+                return res.redirect(303, returnTo || '/');
             });
         });
     } catch (error) {

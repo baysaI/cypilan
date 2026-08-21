@@ -369,7 +369,13 @@
 
     async function checkSupportHeartbeat() {
         try {
-            const res = await fetch('/admin/canli-destek/heartbeat');
+            const res = await fetch('/admin/canli-destek/heartbeat', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            if (res.status === 401 || res.status === 403) return;
             const data = await res.json();
             if (!data || !data.success) return;
 

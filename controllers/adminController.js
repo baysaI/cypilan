@@ -210,6 +210,9 @@ const toggleListingStatus = async (req, res) => {
         }
 
         const updated = await Listing.updateStatus(id, status);
+        if (status === 'active') {
+            await Listing.update(id, { is_featured: 1 });
+        }
         if (!updated) {
             if (wantsJson(req)) return res.status(404).json({ error: res.locals.t('flash.listing_not_found') });
             req.flash('error', 'flash.listing_not_found');
