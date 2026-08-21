@@ -521,4 +521,31 @@ CREATE TABLE IF NOT EXISTS broadcasts (
 
 CREATE INDEX IF NOT EXISTS idx_broadcasts_created ON broadcasts(created_at DESC);
 
+-- ---------------------------------------------------------------------------
+-- Sorgu planlari EXPLAIN QUERY PLAN ile olculdu: asagidaki her sorgu bu
+-- indeksler olmadan tabloyu bastan sona tariyordu. Bugunku veri boyutunda
+-- fark edilmiyor, buyudukce fark ediliyor.
+-- ---------------------------------------------------------------------------
 
+-- Sifre sifirlama ve e-posta dogrulama, jetonu users tablosunda ariyor.
+-- Jeton kolonlari neredeyse her satirda NULL, bu yuzden indeksler kismi:
+-- yalnizca acik bir jetonu olan satirlari tutuyorlar.
+CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(password_reset_token) WHERE password_reset_token IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(email_verification_token) WHERE email_verification_token IS NOT NULL;
+
+-- Yonetici panelindeki kullanici listesi role gore suzup tarihe gore siraliyor.
+-- Iki kolon birlikte indekslenince siralama icin gecici B-tree kurulmasi da
+-- gerekmiyor.
+CREATE INDEX IF NOT EXISTS idx_users_role_created ON users(role, created_at DESC);
+
+-- Bekleyen sikayet sayaci yonetici sayfalarinda, ayni ilana acik sikayet
+-- kontrolu ise her sikayet gonderiminde calisiyor.
+CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reports_listing ON reports(listing_id, status);
+
+-- Gelen kutusu hem gonderen hem alan tarafi ariyor; yalnizca alici tarafi
+-- indeksliydi, dolayisiyla sorgunun yarisi tarama yapiyordu.
+CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id, created_at DESC);
+
+-- Bir ilan silinirken favorilerden temizlenmesi gerekiyor.
+CREATE INDEX IF NOT EXISTS idx_favorites_listing ON favorites(listing_id);
