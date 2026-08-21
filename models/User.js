@@ -3,6 +3,40 @@ const { getDb } = require('../config/database');
 
 const SALT_ROUNDS = 10;
 
+// update() SET cumlesini kendisine verilen nesnenin anahtarlarindan kuruyor, yani
+// anahtar dogrudan SQL metnine giriyor. Bugun her cagiran anahtarlari elle
+// yaziyor, ama bir gun biri istek govdesini oldugu gibi gecirirse kolonu
+// gonderen secmis olur - ve role bu kolonlardan biri. Liste o gunu bekleyip
+// gormemek icin var. id, created_at ve updated_at bilerek disarida: ilki
+// degismemeli, sonuncusunu sorgunun kendisi yaziyor.
+const UPDATABLE_COLUMNS = new Set([
+  'email',
+  'password_hash',
+  'full_name',
+  'phone',
+  'role',
+  'avatar_url',
+  'bio',
+  'company_name',
+  'language_pref',
+  'currency_pref',
+  'is_verified',
+  'is_active',
+  'show_phone',
+  'show_surname',
+  'has_password',
+  'password_reset_token',
+  'password_reset_expires',
+  'email_verification_token',
+  'email_verification_expires',
+  'last_seen_at',
+  'corporate_status',
+  'corporate_tax_no',
+  'corporate_type',
+  'corporate_applied_at',
+  'corporate_reviewed_at',
+]);
+
 class User {
   static async findById(id) {
     const db = getDb();
@@ -54,6 +88,11 @@ class User {
     const db = getDb();
     const keys = Object.keys(updateData);
     if (keys.length === 0) return false;
+
+    const unknown = keys.filter((key) => !UPDATABLE_COLUMNS.has(key));
+    if (unknown.length > 0) {
+      throw new Error('User.update: guncellenemeyecek alan: ' + unknown.join(', '));
+    }
 
     const setClause = keys.map(k => `${k} = ?`).join(', ');
     const values = Object.values(updateData);

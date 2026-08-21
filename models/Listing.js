@@ -1,5 +1,29 @@
 const { getDb } = require('../config/database');
 
+// User.update ile ayni gerekce. user_id listede yok: bir ilanin sahibi bu
+// yoldan degistirilememeli. views_count da yok, onu incrementViews yaziyor.
+const UPDATABLE_COLUMNS = new Set([
+  'category_id',
+  'title',
+  'slug',
+  'description',
+  'price',
+  'currency',
+  'listing_type',
+  'status',
+  'location_city',
+  'location_district',
+  'location_lat',
+  'location_lng',
+  'is_premium',
+  'is_featured',
+  'is_urgent',
+  'is_opportunity',
+  'is_negotiable',
+  'is_swap',
+  'expires_at',
+]);
+
 class Listing {
   static async findById(id) {
     const db = getDb();
@@ -119,6 +143,11 @@ class Listing {
     const db = getDb();
     const keys = Object.keys(updateData);
     if (keys.length === 0) return false;
+
+    const unknown = keys.filter((key) => !UPDATABLE_COLUMNS.has(key));
+    if (unknown.length > 0) {
+      throw new Error('Listing.update: guncellenemeyecek alan: ' + unknown.join(', '));
+    }
 
     const oldListing = db.prepare('SELECT * FROM listings WHERE id = ?').get([id]);
 
