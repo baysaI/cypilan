@@ -13,6 +13,8 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 
+require('dotenv').config();
+
 const dbPath = process.env.DB_PATH
   ? path.resolve(__dirname, '..', process.env.DB_PATH)
   : path.join(__dirname, '..', 'database', 'cypilan.db');
@@ -79,5 +81,57 @@ if (integrity !== 'ok' || mismatched.length > 0) {
   process.exit(1);
 }
 
+
+// Saat basi yedek, temizlik olmadan yilda birkac gigabayt birakir - ve o
+// dosyalarin neredeyse hepsi ise yaramaz: iki hafta onceki saat 03:00 ile
+// 04:00 arasindaki farki kimse aramaz. Tutulanlar kademeli: son iki gunun her
+// saati, son bir ayin her gunu, son bir yilin her ayi. Dosya sayisi bir tavana
+// oturdugu icin klasor sinirsiz buyumuyor.
+//
+// Temizlik yeni yedek dogrulandiktan SONRA calisiyor. Once silip sonra
+// yedeklemek, kotu giden bir gunde elde hicbir sey birakmayabilirdi.
+const HOURLY_KEEP = 48;
+const DAILY_KEEP = 30;
+const MONTHLY_KEEP = 12;
+
+const prune = (dir) => {
+  const pattern = /^cypilan-(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})\.db$/;
+
+  const files = fs.readdirSync(dir)
+    .map((name) => ({ name, match: name.match(pattern) }))
+    .filter((item) => item.match)
+    .map(({ name, match }) => ({
+      name,
+      day: match.slice(1, 4).join('-'),
+      month: match.slice(1, 3).join('-')
+    }))
+    .sort((a, b) => b.name.localeCompare(a.name));
+
+  const keep = new Set();
+  files.slice(0, HOURLY_KEEP).forEach((file) => keep.add(file.name));
+
+  const newestPerPeriod = (field, limit) => {
+    const seen = new Map();
+    files.forEach((file) => {
+      if (!seen.has(file[field])) seen.set(file[field], file.name);
+    });
+    [...seen.values()].slice(0, limit).forEach((name) => keep.add(name));
+  };
+
+  newestPerPeriod('day', DAILY_KEEP);
+  newestPerPeriod('month', MONTHLY_KEEP);
+
+  const removed = files.filter((file) => !keep.has(file.name));
+  removed.forEach((file) => fs.unlinkSync(path.join(dir, file.name)));
+
+  return { kept: keep.size, removed: removed.length };
+};
+
+const { kept, removed } = prune(path.dirname(target));
+
 console.log('');
-console.log('Yedek dogrulandi.');
+console.log(
+  removed > 0
+    ? `Yedek dogrulandi. ${kept} yedek tutuluyor, ${removed} eskisi silindi.`
+    : `Yedek dogrulandi. ${kept} yedek tutuluyor.`
+);
