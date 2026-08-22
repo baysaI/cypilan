@@ -6,11 +6,11 @@ const crypto = require('crypto');
 const FAQ_KNOWLEDGE_BASE = {
   faq_post_listing: {
     title: 'İlan Nasıl Verilir?',
-    answer: 'CYPILAN üzerinden ilan vermek çok kolay ve tamamen ücretsizdir! Üst menüde yer alan "+ İlan Ver" butonuna tıklayarak kategorinizi seçebilir, ilan başlığı, açıklama, fotoğraf ve detayları girerek birkaç saniye içinde ilanınızı yayına alabilirsiniz.'
+    answer: 'CYPILAN üzerinden ilan vermek çok kolaydır! Üst menüde yer alan "+ İlan Ver" butonuna tıklayarak kategorinizi seçebilir, ilan başlığı, açıklama, fotoğraf ve detayları girerek birkaç saniye içinde ilanınızı yayına alabilirsiniz. Emlak, vasıta ve ikinci el kategorilerinde ücretsiz ilan hakkınız 3 adettir. İş ilanları, usta & hizmetler ve kurumsal tedarikçi kategorilerinde ise ilan vermek sınırsız ve ücretsizdir.'
   },
   faq_featured: {
     title: 'İlanımı Nasıl Öne Çıkarırım?',
-    answer: 'İlanlarınızı arama sonuçlarında ve ana sayfada en üst sıralara taşımak için "İlanlarım" sayfasından ilgili ilanınızın yanındaki "Öne Çıkar" butonuna basarak vitrin & doping talebi oluşturabilirsiniz.'
+    answer: 'Yayınladığınız ilanların tamamı otomatik olarak vitrine alınıyor; ayrıca bir talep oluşturmanıza gerek yok. İlanınızın daha çok dikkat çekmesi için ilan verirken veya düzenlerken "Acil Satılık", "Fırsat Ürünü" ve "Pazarlıklı" etiketlerini işaretleyebilirsiniz. Bu etiketler ücretsizdir ve alıcılar aramalarda bunlara göre filtreleme yapabiliyor (iş ilanları ile usta & hizmetler kategorilerinde kullanılmaz). Net fotoğraflar ve açıklayıcı bir başlık da sıralamada belirleyici oluyor.'
   },
   faq_cv: {
     title: 'Kariyer & CV Sistemi',
@@ -18,7 +18,7 @@ const FAQ_KNOWLEDGE_BASE = {
   },
   faq_corporate: {
     title: 'Kurumsal Üyelik Avantajları',
-    answer: 'Emlak ofisleri, oto galeriler ve kurumsal işletmeler için sınırsız ilan hakkı, özel şirket profil sayfası, aramalarda öncelik ve detaylı performans paneli sunulmaktadır. Kurumsal üyelik için destek ekibimizle iletişime geçebilirsiniz.'
+    answer: 'Emlak ofisleri, oto galeriler ve kurumsal işletmeler için ilan hakkı sınırsızdır. Profil sayfanız kişi adınız yerine şirket adınızla görünür ve Kurumsal Tedarikçi Ağı kategorisindeki aramalarda ilanlarınız listenin başında yer alır. Kurumsal üyelik için destek ekibimizle iletişime geçebilirsiniz.'
   }
 };
 
