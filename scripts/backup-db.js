@@ -135,3 +135,49 @@ console.log(
     ? `Yedek dogrulandi. ${kept} yedek tutuluyor, ${removed} eskisi silindi.`
     : `Yedek dogrulandi. ${kept} yedek tutuluyor.`
 );
+
+// Sunucunun kendi diskindeki yedek, sunucuyu kaybettigin senaryoda ise yaramaz -
+// ki yedegin asil var olma sebebi o senaryo. BACKUP_MIRROR_DIR tanimliysa
+// yedekler oraya da kopyalaniyor; bulut istemcisinin izledigi bir klasoru
+// gostermek, dosyalari sunucu disina cikarmaya yetiyor.
+//
+// Kopyalanan sey canli veritabani degil, kapali ve donmus bir yedek dosyasi.
+// Bu ayrim onemli: bu veritabaninin gecmisteki bozulmalari, WAL modundaki canli
+// dosyanin yazilirken senkronlanmasindan kaynaklaniyordu. Senkron kapsamina
+// yalnizca bu klasor girdigi surece ayni tuzak kurulmuyor.
+const mirrorDir = process.env.BACKUP_MIRROR_DIR;
+
+if (mirrorDir) {
+  const backupPattern = /^cypilan-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.db$/;
+  const sourceDir = path.dirname(target);
+
+  if (!fs.existsSync(mirrorDir)) {
+    console.log('');
+    console.log(`UYARI: BACKUP_MIRROR_DIR bulunamadi, kopyalama atlandi: ${mirrorDir}`);
+  } else {
+    const local = fs.readdirSync(sourceDir).filter((name) => backupPattern.test(name));
+    const remote = fs.readdirSync(mirrorDir).filter((name) => backupPattern.test(name));
+
+    let copied = 0;
+    local.forEach((name) => {
+      if (!remote.includes(name)) {
+        fs.copyFileSync(path.join(sourceDir, name), path.join(mirrorDir, name));
+        copied += 1;
+      }
+    });
+
+    // Yalnizca kendi adlandirma kalibimiza uyanlar siliniyor; klasorde baska ne
+    // varsa ona dokunulmuyor.
+    let dropped = 0;
+    remote.forEach((name) => {
+      if (!local.includes(name)) {
+        fs.unlinkSync(path.join(mirrorDir, name));
+        dropped += 1;
+      }
+    });
+
+    console.log('');
+    console.log(`Kopya: ${mirrorDir}`);
+    console.log(`  ${local.length} yedek eslendi` + (copied > 0 ? `, ${copied} yenisi kopyalandi` : '') + (dropped > 0 ? `, ${dropped} eskisi silindi` : '') + '.');
+  }
+}
