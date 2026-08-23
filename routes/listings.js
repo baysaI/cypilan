@@ -7,6 +7,37 @@ const { isAuthenticated, isOwner, requireVerifiedEmail } = require('../middlewar
 const { verifyCsrf } = require('../middlewares/csrf');
 const { uploadListingImages, processImagesWithWatermark } = require('../middlewares/upload');
 
+// Ilan sayfasindaki hizli teklif kutusu da ayni bildirimi uretiyor, dolayisiyla
+// ayni siniri hak ediyor.
+const offerLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => String(req.session.userId),
+    handler: (req, res) => {
+        req.flash('error', 'flash.rate_limit_bid');
+        res.redirect(req.get('referer') || '/listings');
+    }
+});
+
+
+// Favorilemek ucuz bir islem ve gezinirken cok kez yapilabiliyor, bu yuzden
+// sinir yuksek. Yine de sinirsiz degil: favoriden cikarip tekrar eklemek ilan
+// sahibine her seferinde bildirim gonderiyordu.
+const favoriteLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => String(req.session.userId),
+    handler: (req, res) => {
+        req.flash('error', 'flash.rate_limit_favorite');
+        res.redirect(req.get('referer') || '/listings');
+    }
+});
+
+
 const fetchListingForOwnership = async (req, res, next) => {
     try {
         const listing = await Listing.findBySlug(req.params.slug);
@@ -73,10 +104,10 @@ router.delete('/:slug', isAuthenticated, fetchListingForOwnership, isOwner, list
 
 router.get('/:id/phone', isAuthenticated, phoneRevealLimiter, listingController.revealPhone);
 
-router.post('/:id/favorite', isAuthenticated, listingController.toggleFavorite);
+router.post('/:id/favorite', isAuthenticated, favoriteLimiter, listingController.toggleFavorite);
 
 router.post('/:id/price-alert', isAuthenticated, listingController.togglePriceAlert);
 
-router.post('/:id/quick-offer', isAuthenticated, listingController.quickOffer);
+router.post('/:id/quick-offer', isAuthenticated, offerLimiter, listingController.quickOffer);
 
 module.exports = router;

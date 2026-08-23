@@ -64,8 +64,23 @@ const panelController = require('../controllers/panelController');
 router.get('/panel', isAuthenticated, panelController.index);
 
 const serviceController = require('../controllers/serviceController');
+
+// Hizmet talebi yonetici kuyruguna dusuyor; sinirsiz birakmak kuyrugu
+// doldurmanin serbest olmasi demekti.
+const serviceLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => String(req.session.userId),
+    handler: (req, res) => {
+        req.flash('error', 'flash.rate_limit_service');
+        res.redirect(req.get('referer') || '/profile/taleplerim');
+    }
+});
+
 router.get('/profile/taleplerim', isAuthenticated, serviceController.myRequests);
-router.post('/hizmet/:type/:listingId', isAuthenticated, serviceController.request);
+router.post('/hizmet/:type/:listingId', isAuthenticated, serviceLimiter, serviceController.request);
 
 const bidController = require('../controllers/bidController');
 router.get('/profile/teklifler', isAuthenticated, bidController.received);

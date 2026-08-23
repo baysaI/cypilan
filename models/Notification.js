@@ -7,6 +7,32 @@ const { getDb } = require('../config/database');
 // drops the table while the server is up.
 let tableEnsured = false;
 
+// Ayni kisiye, ayni kisi tarafindan, ayni metinle atilan bildirim tekrar
+// yazilmiyor. Bir kullanici teklif butonuna yirmi bes kez bastiginda teklif
+// tablosunda tek satir olusuyordu ama ilan sahibine yirmi bes bildirim
+// gidiyordu; favoriden cikarip tekrar ekleyerek de ayni sey yapilabiliyordu.
+//
+// Karsilastirma metin uzerinden yapiliyor: tutari degisen bir teklif farkli
+// bir metin uretiyor ve gecmesi gerekiyor, cunku yeni bir bilgi tasiyor.
+// Kelimesi kelimesine ayni olan bir bildirim ise tanim geregi yeni bir sey
+// soylemiyor - yalnizca gurultu.
+//
+// Uc ayri yerden bildirim yaziliyor (create, notifyCorporateGroup,
+// notifyAdmins), bu yuzden kontrol ortak bir yardimciya alindi.
+const DUPLICATE_WINDOW_MINUTES = 60;
+
+const findDuplicate = (db, { user_id, actor_id, type, message }) => db.prepare(`
+  SELECT id FROM notifications
+  WHERE user_id = ?
+    AND type = ?
+    AND message = ?
+    AND (actor_id IS ? OR actor_id = ?)
+    AND created_at > datetime('now', '-' || ? || ' minutes')
+  LIMIT 1
+`).get([user_id, type, message, actor_id, actor_id, DUPLICATE_WINDOW_MINUTES]);
+
+const isDuplicate = (db, args) => Boolean(findDuplicate(db, args));
+
 class Notification {
   static ensureTable(db) {
     if (tableEnsured) return;
@@ -46,6 +72,9 @@ class Notification {
       const actorRow = db.prepare('SELECT id FROM users WHERE id = ?').get([actor_id]);
       if (actorRow) validActorId = actorRow.id;
     }
+
+    const existing = findDuplicate(db, { user_id, actor_id: validActorId, type: type || 'system', message });
+    if (existing) return this.findById(existing.id);
 
     const info = db.prepare(`
       INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
@@ -88,6 +117,8 @@ class Notification {
     `);
 
     for (const r of recipients) {
+      if (isDuplicate(db, { user_id: r.id, actor_id: validActorId, type: 'bid', message })) continue;
+
       try {
         stmt.run([r.id, validActorId, title, message, link_url]);
       } catch (err) {
@@ -218,6 +249,8 @@ class Notification {
     const adminRows = db.prepare("SELECT id FROM users WHERE role = 'admin' AND is_active = 1").all();
     const notifications = [];
     for (const admin of adminRows) {
+      if (isDuplicate(db, { user_id: admin.id, actor_id: validActorId, type, message })) continue;
+
       const info = db.prepare(`
         INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
         VALUES (?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
