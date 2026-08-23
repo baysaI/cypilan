@@ -33,6 +33,29 @@ const findDuplicate = (db, { user_id, actor_id, type, message }) => db.prepare(`
 
 const isDuplicate = (db, args) => Boolean(findDuplicate(db, args));
 
+// Metin karsilastirmasi tek basina yetmiyordu: teklifi her seferinde bir
+// kurus degistiren biri her defasinda farkli bir metin uretiyor ve kontrolden
+// geciyordu. Bu yuzden ayni gonderenden ayni aliciya ayni turde gelen bir
+// bildirim, kisa sure icinde tekrarlandiginda yeni satir acmiyor; var olan
+// satir guncelleniyor ve okunmamis isaretleniyor. Bilgi kaybi yok - toplanan
+// bildirim her zaman en guncel tutari gosteriyor.
+//
+// Yalnizca kullanicidan kullaniciya giden turler toplaniyor. Yonetici
+// bildirimleri disarida kaldi: ayni yonetici kisa arayla iki farkli ilan
+// hakkinda yazabilir ve ikisinin de gorulmesi gerekir.
+const COLLAPSIBLE_TYPES = new Set(['bid', 'favorite']);
+const COLLAPSE_WINDOW_MINUTES = 30;
+
+const findRecentFromActor = (db, { user_id, actor_id, type }) => db.prepare(`
+  SELECT id FROM notifications
+  WHERE user_id = ?
+    AND actor_id = ?
+    AND type = ?
+    AND created_at > datetime('now', '-' || ? || ' minutes')
+  ORDER BY created_at DESC
+  LIMIT 1
+`).get([user_id, actor_id, type, COLLAPSE_WINDOW_MINUTES]);
+
 class Notification {
   static ensureTable(db) {
     if (tableEnsured) return;
@@ -73,13 +96,29 @@ class Notification {
       if (actorRow) validActorId = actorRow.id;
     }
 
-    const existing = findDuplicate(db, { user_id, actor_id: validActorId, type: type || 'system', message });
+    const resolvedType = type || 'system';
+
+    if (validActorId && COLLAPSIBLE_TYPES.has(resolvedType)) {
+      const recent = findRecentFromActor(db, { user_id, actor_id: validActorId, type: resolvedType });
+
+      if (recent) {
+        db.prepare(`
+          UPDATE notifications
+          SET title = ?, message = ?, link_url = ?, is_read = 0, created_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).run([title, message, link_url, recent.id]);
+
+        return this.findById(recent.id);
+      }
+    }
+
+    const existing = findDuplicate(db, { user_id, actor_id: validActorId, type: resolvedType, message });
     if (existing) return this.findById(existing.id);
 
     const info = db.prepare(`
       INSERT INTO notifications (user_id, actor_id, type, title, message, link_url, is_read, created_at)
       VALUES (?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP)
-    `).run([user_id, validActorId, type || 'system', title, message, link_url]);
+    `).run([user_id, validActorId, resolvedType, title, message, link_url]);
 
     return this.findById(info.lastInsertRowid);
   }

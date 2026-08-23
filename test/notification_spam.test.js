@@ -29,13 +29,28 @@ t.run('Bildirim spam korumasi', async (db) => {
     'Teklif tablosunda yine tek satır var'
   );
 
-  // --- Tutari degisen teklif yeni bilgi tasiyor, gecmeli
+  // --- Tutari her seferinde degistirerek spam atmak da engellenmeli:
+  // ayni gonderenden ayni turde gelen bildirim yeni satir acmiyor, var olani
+  // guncelliyor. Bilgi kaybi yok - kalan bildirim en guncel tutari gosteriyor.
+  for (let i = 0; i < 15; i += 1) {
+    await Bid.submitQuickOffer({ listing_id: listing.id, bidder_id: buyer, amount: 90000 + i, currency: 'GBP' });
+  }
+
+  t.assertEqual(countFor(seller), 1, 'Tutarı değiştirerek on beş kez teklif verilse de tek bildirim kalıyor');
+
+  const latest = db.prepare("SELECT message FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 1").get([seller]).message;
+  t.assert(latest.includes('90.014'), 'Kalan bildirim en güncel tutarı gösteriyor');
+
+  const unread = db.prepare("SELECT is_read FROM notifications WHERE user_id = ? LIMIT 1").get([seller]).is_read;
+  t.assertEqual(Number(unread), 0, 'Güncellenen bildirim okunmamış işaretleniyor');
+
+  // --- Tutar degisince yeni satir acilmiyor, var olan guncelleniyor
   await Bid.submitQuickOffer({ listing_id: listing.id, bidder_id: buyer, amount: 95000, currency: 'GBP' });
-  t.assertEqual(countFor(seller), 2, 'Tutarı değişen teklif yeni bildirim üretiyor');
+  t.assertEqual(countFor(seller), 1, 'Tutar değişince yeni satır açılmıyor, mevcut bildirim güncelleniyor');
 
   // --- Baska bir kullanicinin ayni tutarli teklifi ayri bir olay
   await Bid.submitQuickOffer({ listing_id: listing.id, bidder_id: other, amount: 95000, currency: 'GBP' });
-  t.assertEqual(countFor(seller), 3, 'Farklı kullanıcının teklifi ayrı bildirim üretiyor');
+  t.assertEqual(countFor(seller), 2, 'Farklı kullanıcının teklifi ayrı bildirim üretiyor');
 
   // --- Ayni metin farkli kisiye gidiyorsa engellenmemeli
   await Notification.create({
