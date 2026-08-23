@@ -92,11 +92,12 @@
                     <% const activeUser = (typeof user !== 'undefined' && user) ? user : ((typeof currentUser !== 'undefined' && currentUser) ? currentUser : null); %>
                     <% if (activeUser) { %>
                         <% const totalUnread = ((typeof unreadMessages !== 'undefined' ? unreadMessages : 0) + (typeof unreadNotifications !== 'undefined' ? unreadNotifications : 0)); %>
-                        <a href="/notifications" class="btn btn-light border-0 position-relative px-2 px-md-3" title="<%= t('notifications.title') %>" aria-label="<%= t('notifications.title') %>">
+                        <%# Rozet sayac sifir olsa da basiliyor, yalnizca gizleniyor:
+                            yoklama yeni bildirim gordugunde guncelleyecek bir yer bulmali. %>
+                        <% const bellCount = (typeof unreadNotifications !== 'undefined' && unreadNotifications > 0) ? unreadNotifications : 0; %>
+                        <a href="/notifications" class="btn btn-light border-0 position-relative px-2 px-md-3" title="<%= t('notifications.title') %>" aria-label="<%= t('notifications.title') %>" data-notification-bell>
                             <i class="fa-regular fa-bell text-primary"></i>
-                            <% if (typeof unreadNotifications !== 'undefined' && unreadNotifications > 0) { %>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><%= unreadNotifications %></span>
-                            <% } %>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger<%= bellCount > 0 ? '' : ' d-none' %>" data-notification-badge><%= bellCount %></span>
                         </a>
 
                         <div class="dropdown">

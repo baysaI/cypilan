@@ -1485,3 +1485,131 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateCompareUI();
 });
+
+    // -------------------------------------------------------------
+    // Bildirim yoklamasi ve sesi
+    // -------------------------------------------------------------
+    // Zil rozeti sunucu tarafinda basiliyordu, yani yeni bir bildirim ancak
+    // sayfa yenilendiginde goruluyordu. Burasi acik sekmede sayaci guncel
+    // tutuyor ve sayac arttiginda kisa bir ses caliyor.
+    (function notificationWatcher() {
+        const bell = document.querySelector("[data-notification-bell]");
+        if (!bell) return; // giris yapilmamis
+
+        const badge = bell.querySelector("[data-notification-badge]");
+        if (!badge) return;
+
+        const POLL_MS = 60000;
+        const STORAGE_KEY = "cypilan.notificationSound";
+
+        let lastCount = Number(badge.textContent) || 0;
+
+        const soundEnabled = () => {
+            try { return localStorage.getItem(STORAGE_KEY) !== "off"; }
+            catch (error) { return true; }
+        };
+
+        // Ses dosyasi yok: iki notali kisa bir cinlama Web Audio ile uretiliyor.
+        // Bir mp3 eklemek her sayfa yuklenisine bir istek ve CSP'de bir istisna
+        // daha demekti; yarim saniyelik bir ses icin degmez.
+        let audioCtx = null;
+
+        const audio = () => {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return null;
+            if (!audioCtx) audioCtx = new Ctx();
+            return audioCtx;
+        };
+
+        // Tarayicilar ses baglamini bir kullanici hareketi olmadan baslatmiyor.
+        // Ilk tiklama veya tus basimi baglami hazirliyor, boylece bildirim
+        // geldiginde ses sessizce yutulmuyor.
+        const primeAudio = () => {
+            const ctx = audio();
+            if (ctx && ctx.state === "suspended") ctx.resume().catch(() => {});
+        };
+        document.addEventListener("click", primeAudio, { once: true });
+        document.addEventListener("keydown", primeAudio, { once: true });
+
+        const chime = () => {
+            if (!soundEnabled()) return;
+
+            try {
+                const ctx = audio();
+                if (!ctx) return;
+                if (ctx.state === "suspended") ctx.resume().catch(() => {});
+
+                [[880, 0], [1320, 0.11]].forEach(function (pair) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    const startAt = ctx.currentTime + pair[1];
+
+                    osc.type = "sine";
+                    osc.frequency.value = pair[0];
+
+                    gain.gain.setValueAtTime(0.0001, startAt);
+                    gain.gain.exponentialRampToValueAtTime(0.16, startAt + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.20);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(startAt);
+                    osc.stop(startAt + 0.22);
+                });
+            } catch (error) {
+                // Ses calinamadiysa bildirim yine de rozette gorunuyor.
+            }
+        };
+
+        const paint = (count) => {
+            badge.textContent = count;
+            badge.classList.toggle("d-none", count < 1);
+        };
+
+        const poll = () => {
+            fetch("/api/notifications", { headers: { Accept: "application/json" } })
+                .then((response) => (response.ok ? response.json() : null))
+                .then((data) => {
+                    if (!data || typeof data.unreadCount === "undefined") return;
+
+                    const count = Number(data.unreadCount) || 0;
+                    if (count > lastCount) chime();
+
+                    lastCount = count;
+                    paint(count);
+                })
+                .catch(() => {
+                    // Ag hatasi gecici olabilir; bir sonraki turda tekrar denenir.
+                });
+        };
+
+        setInterval(poll, POLL_MS);
+
+        // Sayfadaki ac/kapa anahtari
+        const toggle = document.querySelector("[data-notification-sound-toggle]");
+        if (toggle) {
+            const icon = toggle.querySelector("[data-notification-sound-icon]");
+            const label = toggle.querySelector("[data-notification-sound-label]");
+            const onText = label ? label.textContent : "";
+            const offText = toggle.getAttribute("data-off-label") || onText;
+
+            const render = () => {
+                const on = soundEnabled();
+                if (icon) icon.className = on
+                    ? "fa-solid fa-volume-high me-1"
+                    : "fa-solid fa-volume-xmark me-1";
+                if (label) label.textContent = on ? onText : offText;
+                toggle.classList.toggle("btn-outline-secondary", on);
+                toggle.classList.toggle("btn-outline-danger", !on);
+            };
+
+            toggle.addEventListener("click", () => {
+                try { localStorage.setItem(STORAGE_KEY, soundEnabled() ? "off" : "on"); }
+                catch (error) { return; }
+                render();
+                if (soundEnabled()) chime();
+            });
+
+            render();
+        }
+    })();

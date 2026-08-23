@@ -847,6 +847,8 @@
     "mark_all_read": "Tümünü Okundu İşaretle",
     "no_notifications": "Henüz bildiriminiz bulunmuyor",
     "no_unread": "Okunmamış bildiriminiz yok",
+    "sound_off": "Ses kapalı",
+    "sound_on": "Ses açık",
     "subtitle": "İlanlarınız ve hesabınızla ilgili tüm anlık güncellemeler",
     "title": "Bildirimler",
     "unread": "Okunmamış",

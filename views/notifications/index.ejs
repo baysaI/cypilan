@@ -30,6 +30,11 @@
                 </ul>
 
                 <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+                    <%# Kapatilamayan bir bildirim sesi, bildirimin kendisinden daha
+                        rahatsiz edicidir. Tercih tarayicida saklaniyor. %>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-none fw-medium me-2" data-notification-sound-toggle data-off-label="<%= t('notifications.sound_off') %>">
+                        <i class="fa-solid fa-volume-high me-1" data-notification-sound-icon></i><span data-notification-sound-label><%= t('notifications.sound_on') %></span>
+                    </button>
                     <form action="/notifications/mark-all-read" method="POST" class="m-0">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-none fw-medium">

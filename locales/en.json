@@ -847,6 +847,8 @@
     "mark_all_read": "Mark All as Read",
     "no_notifications": "You have no notifications yet",
     "no_unread": "No unread notifications",
+    "sound_off": "Sound off",
+    "sound_on": "Sound on",
     "subtitle": "All live updates regarding your listings and account",
     "title": "Notifications",
     "unread": "Unread",
