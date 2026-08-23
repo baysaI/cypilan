@@ -90,36 +90,45 @@ if (integrity !== 'ok' || mismatched.length > 0) {
 //
 // Temizlik yeni yedek dogrulandiktan SONRA calisiyor. Once silip sonra
 // yedeklemek, kotu giden bir gunde elde hicbir sey birakmayabilirdi.
-const HOURLY_KEEP = 48;
-const DAILY_KEEP = 30;
-const MONTHLY_KEEP = 12;
+// Yedek uc saatte bir aliniyor. Tutulanlar iki kademeli: son iki gunun her
+// yedegi, oncesinde gunde bir. Iki aydan eski hicbir sey tutulmuyor - o yasa
+// gelmis bir yedegi geri yuklemek, aradaki iki aylik ilan ve uyelik hareketini
+// silmek demek olurdu; kimse onu yapmaz.
+const RECENT_KEEP = 16;      // 48 saat / 3 saat
+const DAILY_KEEP = 60;       // gunde bir, iki ay boyunca
+const MAX_AGE_DAYS = 60;
 
 const prune = (dir) => {
   const pattern = /^cypilan-(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})\.db$/;
+  const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
   const files = fs.readdirSync(dir)
     .map((name) => ({ name, match: name.match(pattern) }))
     .filter((item) => item.match)
-    .map(({ name, match }) => ({
-      name,
-      day: match.slice(1, 4).join('-'),
-      month: match.slice(1, 3).join('-')
-    }))
+    .map(({ name, match }) => {
+      const [, year, month, day, hour, minute, second] = match;
+      return {
+        name,
+        day: `${year}-${month}-${day}`,
+        takenAt: Date.parse(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`)
+      };
+    })
     .sort((a, b) => b.name.localeCompare(a.name));
 
   const keep = new Set();
-  files.slice(0, HOURLY_KEEP).forEach((file) => keep.add(file.name));
+  files.slice(0, RECENT_KEEP).forEach((file) => keep.add(file.name));
 
-  const newestPerPeriod = (field, limit) => {
-    const seen = new Map();
-    files.forEach((file) => {
-      if (!seen.has(file[field])) seen.set(file[field], file.name);
-    });
-    [...seen.values()].slice(0, limit).forEach((name) => keep.add(name));
-  };
+  const seenDays = new Map();
+  files.forEach((file) => {
+    if (!seenDays.has(file.day)) seenDays.set(file.day, file.name);
+  });
+  [...seenDays.values()].slice(0, DAILY_KEEP).forEach((name) => keep.add(name));
 
-  newestPerPeriod('day', DAILY_KEEP);
-  newestPerPeriod('month', MONTHLY_KEEP);
+  // Yas siniri kademelerin uzerinde: iki ayi gecen bir dosya, gununun tek
+  // temsilcisi olsa bile kaliyor sayilmiyor.
+  files.forEach((file) => {
+    if (file.takenAt < cutoff) keep.delete(file.name);
+  });
 
   const removed = files.filter((file) => !keep.has(file.name));
   removed.forEach((file) => fs.unlinkSync(path.join(dir, file.name)));
