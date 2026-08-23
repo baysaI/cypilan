@@ -182,8 +182,8 @@
                                 <div class="input-group has-validation">
                                     <input type="number" name="price" id="priceInput" class="form-control form-control-lg bg-light border-0 shadow-none focus-ring-primary" placeholder="0" value="<%= typeof formData !== 'undefined' && typeof formData.price !== 'undefined' ? formData.price : '' %>" required min="0" step="any">
                                     <select name="currency" class="form-select bg-light border-0 shadow-none" style="max-width: 100px;">
+                                        <option value="GBP" <%= (typeof formData === 'undefined' || formData.currency !== 'TRY') ? 'selected' : '' %>>£ GBP</option>
                                         <option value="TRY" <%= (typeof formData !== 'undefined' && formData.currency === 'TRY') ? 'selected' : '' %>>₺ TRY</option>
-                                        <option value="GBP" <%= (typeof formData !== 'undefined' && formData.currency === 'GBP') ? 'selected' : '' %>>£ GBP</option>
                                     </select>
                                     <div class="invalid-feedback"><%= t('listing.price') %> gereklidir.</div>
                                 </div>

@@ -39,7 +39,7 @@ class Listing {
     const db = getDb();
     const {
       user_id, category_id, title, slug, description, price,
-      currency = 'TRY', listing_type = 'sale', status = 'pending',
+      currency = 'GBP', listing_type = 'sale', status = 'pending',
       location_lat = null, location_lng = null,
       is_premium = 0, is_featured = 1, expires_at = null,
       is_urgent = 0, is_opportunity = 0, is_negotiable = 0,

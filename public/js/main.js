@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = e.currentTarget;
             const currency = target.getAttribute('data-currency');
             if (currency) {
-                document.cookie = `currency=${currency}; path=/; max-age=31536000`;
+                document.cookie = `currency_choice=${currency}; path=/; max-age=31536000`;
                 const url = new URL(window.location.href);
                 url.searchParams.set('currency', currency);
                 window.location.href = url.toString();
@@ -1414,7 +1414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = btn.getAttribute('data-title') || '';
         const image = btn.getAttribute('data-image') || '';
         const price = btn.getAttribute('data-price') || '';
-        const currency = btn.getAttribute('data-currency') || 'TRY';
+        const currency = btn.getAttribute('data-currency') || 'GBP';
 
         if (!id) return;
 

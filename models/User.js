@@ -63,7 +63,7 @@ class User {
       corporate_type = null,
       corporate_applied_at = null,
       language_pref = 'tr',
-      currency_pref = 'TRY',
+      currency_pref = 'GBP',
       has_password = 1
     } = userData;
 

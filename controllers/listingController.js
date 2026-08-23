@@ -280,7 +280,7 @@ const show = async (req, res, next) => {
                 "offers": {
                     "@type": "Offer",
                     "price": listing.price || 0,
-                    "priceCurrency": listing.currency || "TRY",
+                    "priceCurrency": listing.currency || "GBP",
                     "availability": listing.status === 'active' ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
                     "url": canonicalUrl,
                     "seller": sellerObj
@@ -533,7 +533,7 @@ const create = async (req, res, next) => {
             slug: `${generateSlug(title)}-${Date.now().toString(36)}`,
             description: description.trim(),
             price: Number.isFinite(parsedPrice) ? parsedPrice : null,
-            currency: ALLOWED_CURRENCIES.includes(currency) ? currency : 'TRY',
+            currency: ALLOWED_CURRENCIES.includes(currency) ? currency : 'GBP',
             listing_type: collectsBids ? 'bid_request' : (['sale', 'rent', 'wanted', 'job', 'service'].includes(selectedType) ? selectedType : 'sale'),
             city,
             district,
@@ -943,7 +943,7 @@ const quickOffer = async (req, res) => {
             listing_id: listingId,
             bidder_id: req.session.userId,
             amount,
-            currency: req.body.currency || listing.currency || 'TRY',
+            currency: req.body.currency || listing.currency || 'GBP',
             message: message || null
         });
 

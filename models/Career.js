@@ -167,7 +167,7 @@ class Career {
       WORK_TYPES.includes(data.work_type) ? data.work_type : 'full_time',
       Number.isFinite(min) && min > 0 ? min : null,
       Number.isFinite(max) && max > 0 ? max : null,
-      data.salary_currency === 'GBP' ? 'GBP' : 'TRY',
+      data.salary_currency === 'TRY' ? 'TRY' : 'GBP',
       SALARY_PERIODS.includes(data.salary_period) ? data.salary_period : 'monthly',
       Number.isFinite(Number(data.experience_required)) ? Math.max(0, Math.min(40, Number(data.experience_required))) : 0,
       data.benefits || null,

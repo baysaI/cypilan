@@ -104,8 +104,8 @@ class PriceAlert {
     for (const sub of subscribers) {
       if (sub.user_id === listing.user_id) continue; // Don't notify owner
 
-      const oldFormatted = `${Number(oldPrice).toLocaleString('tr-TR')} ${listing.currency || 'TRY'}`;
-      const newFormatted = `${Number(newPrice).toLocaleString('tr-TR')} ${listing.currency || 'TRY'}`;
+      const oldFormatted = `${Number(oldPrice).toLocaleString('tr-TR')} ${listing.currency || 'GBP'}`;
+      const newFormatted = `${Number(newPrice).toLocaleString('tr-TR')} ${listing.currency || 'GBP'}`;
 
       try {
         await Notification.create({

@@ -12,7 +12,7 @@ module.exports = {
   
   currencies: {
     supported: ['TRY', 'GBP'],
-    default: 'TRY'
+    default: 'GBP'
   },
   
   listings: {

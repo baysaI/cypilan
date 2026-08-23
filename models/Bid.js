@@ -22,7 +22,7 @@ class Bid {
   // Revising an offer overwrites the previous one (idx_bids_pair). A withdrawn
   // or rejected offer becomes pending again when the bidder submits a new
   // number, which is what "revise my offer" has to mean.
-  static async upsert({ listing_id, bidder_id, amount, currency = 'TRY', message = null }) {
+  static async upsert({ listing_id, bidder_id, amount, currency = 'GBP', message = null }) {
     const db = getDb();
 
     db.prepare(`
@@ -42,7 +42,7 @@ class Bid {
   /**
    * Submits a fast bargaining offer from any buyer to the listing seller and notifies the seller.
    */
-  static async submitQuickOffer({ listing_id, bidder_id, amount, currency = 'TRY', message = null }) {
+  static async submitQuickOffer({ listing_id, bidder_id, amount, currency = 'GBP', message = null }) {
     const db = getDb();
     const listing = db.prepare('SELECT * FROM listings WHERE id = ?').get([listing_id]);
     if (!listing) throw new Error('İlan bulunamadı.');
@@ -52,7 +52,7 @@ class Bid {
       listing_id,
       bidder_id,
       amount,
-      currency: currency || listing.currency || 'TRY',
+      currency: currency || listing.currency || 'GBP',
       message
     });
 
@@ -60,7 +60,7 @@ class Bid {
     const bidderName = bidder ? bidder.full_name : 'Bir kullanıcı';
     const Notification = require('./Notification');
 
-    const formattedAmount = `${Number(amount).toLocaleString('tr-TR')} ${currency || listing.currency || 'TRY'}`;
+    const formattedAmount = `${Number(amount).toLocaleString('tr-TR')} ${currency || listing.currency || 'GBP'}`;
     try {
       await Notification.create({
         user_id: listing.user_id,

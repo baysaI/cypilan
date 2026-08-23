@@ -1,8 +1,16 @@
 const { translate, supportedLanguages } = require('../config/i18n');
+const appConfig = require('../config/app');
 
 const DEFAULT_LANGUAGE = 'tr';
 const SUPPORTED_CURRENCIES = ['TRY', 'GBP', 'EUR', 'USD'];
-const DEFAULT_CURRENCY = 'TRY';
+// Kibris'ta fiyatlar sterlin uzerinden konusuluyor, varsayilan o. Deger
+// config/app.js icinden geliyor: orada zaten tanimliydi ama kimse okumuyordu,
+// ve site para birimi ortama gore degisen bir sey degil - .env'e baglamak,
+// sunucudaki dosyada eski deger kaldigi gun degisikligin sessizce etkisiz
+// kalmasi demek olurdu.
+const DEFAULT_CURRENCY = SUPPORTED_CURRENCIES.includes(appConfig.currencies.default)
+    ? appConfig.currencies.default
+    : 'GBP';
 
 const i18nMiddleware = (req, res, next) => {
     const cookies = req.cookies || {};
@@ -27,13 +35,30 @@ const i18nMiddleware = (req, res, next) => {
         res.cookie('lang', lang, { maxAge: 31536000000, httpOnly: false });
     }
 
-    let currency = req.query.currency || cookies.currency || DEFAULT_CURRENCY;
+    // Para birimi cerezi, ziyaretci hicbir sey secmese bile ilk istekte
+    // yaziliyordu. Bedeli, varsayilani degistirmenin eski ziyaretcilere hicbir
+    // sey ifade etmemesiydi: hepsinin tarayicisinda bir yil gecerli bir cerez
+    // vardi ve o cerez bir tercihi degil, yalnizca o gunku varsayilani
+    // temsil ediyordu - ikisini birbirinden ayirmanin da yolu yoktu.
+    //
+    // Artik cerez yalnizca acik bir secimde yaziliyor; secici her zaman
+    // ?currency= ile geliyor. Secim yapmamis ziyaretci varsayilani goruyor ve
+    // varsayilan degistiginde onunki de degisiyor.
+    const chosenCurrency = req.query.currency;
+    let currency = chosenCurrency || cookies.currency_choice || DEFAULT_CURRENCY;
+
     if (!SUPPORTED_CURRENCIES.includes(currency)) {
         currency = DEFAULT_CURRENCY;
     }
 
-    if (cookies.currency !== currency) {
-        res.cookie('currency', currency, { maxAge: 31536000000, httpOnly: false });
+    if (chosenCurrency && SUPPORTED_CURRENCIES.includes(chosenCurrency)) {
+        res.cookie('currency_choice', currency, { maxAge: 31536000000, httpOnly: false });
+    }
+
+    // Eskiden otomatik yazilan cerez artik okunmuyor; tarayicida bir yil daha
+    // bosuna durmasin diye siliniyor.
+    if (cookies.currency) {
+        res.clearCookie('currency');
     }
 
     res.locals.lang = lang;
