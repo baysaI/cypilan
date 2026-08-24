@@ -50,6 +50,19 @@
         <div>
             <h1 class="fs-3 fw-bold mb-1"><%= t('nav.my_listings') %></h1>
             <p class="text-muted small mb-0"><%= listings ? listings.length : 0 %> <%= t('listing.total_found') %></p>
+        <%# Hakkin kac tane kaldigini butonun yaninda degil burada gosteriyoruz:
+            her satirda tekrarlanan bir sayac, tablodaki asil bilgiyi bogardi. %>
+        <% if (typeof boostQuota !== 'undefined' && boostQuota > 0) { %>
+            <% const boostLeft = Math.max(0, boostQuota - (boostsUsed || 0)); %>
+            <p class="small mb-0 mt-1 <%= boostLeft > 0 ? 'text-primary' : 'text-muted' %>">
+                <i class="fa-solid fa-arrow-up-wide-short me-1"></i>
+                <% if (boostLeft > 0) { %>
+                    <%= t('listing.boost_remaining', { remaining: boostLeft }) %>
+                <% } else { %>
+                    <%= t('listing.boost_none_left', { date: nextBoostAt ? helpers.formatDate(nextBoostAt, lang) : '' }) %>
+                <% } %>
+            </p>
+        <% } %>
         </div>
         <a href="/listings/create" class="btn btn-primary rounded-pill px-4 fw-bold">
             <i class="fa-solid fa-plus me-2"></i><%= t('nav.post_ad') %>
@@ -103,9 +116,30 @@
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <a href="/listings/<%= listing.slug %>/edit" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                        <i class="fa-solid fa-pen me-1"></i><%= t('common.edit') %>
-                                    </a>
+                                    <%# Firlatma yalnizca yayindaki ilanlar icin anlamli: yayinda
+                                        olmayan bir ilani vitrinin tepesine tasimak hicbir sey
+                                        gostermez, ama hakki yakardi. %>
+                                    <% const canBoost = listing.status === 'active' && typeof boostQuota !== 'undefined' && (boostQuota - (boostsUsed || 0)) > 0; %>
+                                    <% const isBoosted = listing.boosted_at && (Date.now() - new Date(String(listing.boosted_at).replace(' ', 'T') + 'Z').getTime()) < (boostWindowDays || 7) * 86400000; %>
+
+                                    <div class="d-inline-flex align-items-center gap-2">
+                                        <% if (isBoosted) { %>
+                                            <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                                                <i class="fa-solid fa-arrow-up me-1"></i><%= t('listing.boosted_badge') %>
+                                            </span>
+                                        <% } else if (canBoost) { %>
+                                            <form action="/listings/<%= listing.id %>/boost" method="POST" class="m-0">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <button type="submit" class="btn btn-outline-success btn-sm rounded-pill px-3" title="<%= t('listing.boost_hint') %>">
+                                                    <i class="fa-solid fa-arrow-up-wide-short me-1"></i><%= t('listing.boost') %>
+                                                </button>
+                                            </form>
+                                        <% } %>
+
+                                        <a href="/listings/<%= listing.slug %>/edit" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                            <i class="fa-solid fa-pen me-1"></i><%= t('common.edit') %>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         <% }); %>

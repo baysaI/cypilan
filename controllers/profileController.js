@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Listing = require('../models/Listing');
+const listingPolicy = require('../config/listingPolicy');
 const Review = require('../models/Review');
 const Warning = require('../models/Warning');
 const reviewController = require('./reviewController');
@@ -272,6 +273,12 @@ const myListings = async (req, res, next) => {
     try {
         const listings = await Listing.getByUser(req.session.userId);
 
+        const boostQuota = listingPolicy.boostQuotaFor(req.session.userRole);
+        const boostsUsed = await Listing.boostsUsed(req.session.userId);
+        const nextBoostAt = boostsUsed >= boostQuota
+            ? await Listing.nextBoostAt(req.session.userId)
+            : null;
+
         // A warning the member never sees teaches them nothing, so it is surfaced
         // where they manage the listings that caused it.
         const warnings = await Warning.forUser(req.session.userId, 10);
@@ -283,6 +290,10 @@ const myListings = async (req, res, next) => {
 
         res.render('profile/listings', {
             listings,
+            boostQuota,
+            boostsUsed,
+            boostWindowDays: listingPolicy.BOOST_WINDOW_DAYS,
+            nextBoostAt,
             warnings: activeWarnings,
             warningsRemaining: Warning.remainingBeforeSuspension(activeWarnings.length),
             suspensionThreshold: Warning.SUSPENSION_THRESHOLD,

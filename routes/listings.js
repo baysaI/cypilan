@@ -110,4 +110,8 @@ router.post('/:id/price-alert', isAuthenticated, listingController.togglePriceAl
 
 router.post('/:id/quick-offer', isAuthenticated, offerLimiter, listingController.quickOffer);
 
+// Haftalik hak zaten modelde sayiliyor; buradaki sinir yalnizca ard arda
+// gonderilen isteklerin bosuna sorgu uretmesini kesiyor.
+router.post('/:id/boost', isAuthenticated, offerLimiter, listingController.boost);
+
 module.exports = router;

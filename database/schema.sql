@@ -69,6 +69,9 @@ CREATE TABLE IF NOT EXISTS listings (
   is_urgent INTEGER DEFAULT 0,
   is_opportunity INTEGER DEFAULT 0,
   is_negotiable INTEGER DEFAULT 0,
+  -- Uyenin ilani vitrinin tepesine firlattigi an. Bos ise ilan sirasini
+  -- yayin tarihinden aliyor.
+  boosted_at DATETIME,
   expires_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -515,3 +518,21 @@ CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id, created_at
 
 -- Bir ilan silinirken favorilerden temizlenmesi gerekiyor.
 CREATE INDEX IF NOT EXISTS idx_favorites_listing ON favorites(listing_id);
+
+-- ---------------------------------------------------------------------------
+-- Vitrine firlatma kayitlari
+-- ---------------------------------------------------------------------------
+-- Haftalik hak bu tablodan sayiliyor, listings.boosted_at uzerinden degil:
+-- ayni ilani ikinci kez firlatmak boosted_at alanini gunceller ve sayim
+-- yapilmis bir firlatmayi gormezden gelirdi. Her firlatma burada ayri bir
+-- satir, yani hak sayimi da gecmis de dogru.
+CREATE TABLE IF NOT EXISTS listing_boosts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_listing_boosts_user ON listing_boosts(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_listing_boosts_listing ON listing_boosts(listing_id);
+

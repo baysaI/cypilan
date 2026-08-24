@@ -31,3 +31,8 @@ npm-debug.log*
 
 # Dagitim arsivleri (git archive ile uretiliyor, depoda tutulmasi gerekmiyor)
 *.zip
+
+# Kurtarma calismasindan kalan veritabani kopyalari. Bunlar kaynak degil,
+# icinde gercek kullanici e-postalari ve sifre ozetleri olan veri dosyalari.
+/backups/
+database/pre-restore-backup-*/

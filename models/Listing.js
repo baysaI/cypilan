@@ -1,4 +1,5 @@
 const { getDb } = require('../config/database');
+const listingPolicy = require('../config/listingPolicy');
 
 // User.update ile ayni gerekce. user_id listede yok: bir ilanin sahibi bu
 // yoldan degistirilememeli. views_count da yok, onu incrementViews yaziyor.
@@ -100,6 +101,62 @@ class Listing {
       });
 
     return this.findById(insert());
+  }
+
+  // Haftalik hak listing_boosts uzerinden sayiliyor. listings.boosted_at
+  // uzerinden saymak yanlis olurdu: ayni ilani ikinci kez firlatmak o alani
+  // gunceller ve yapilmis bir firlatma sayimdan duserdi.
+  static async boostsUsed(userId) {
+    const db = getDb();
+    const row = db.prepare(`
+      SELECT COUNT(*) AS count FROM listing_boosts
+      WHERE user_id = ?
+        AND created_at > datetime('now', '-' || ? || ' days')
+    `).get([userId, listingPolicy.BOOST_WINDOW_DAYS]);
+
+    return row ? row.count : 0;
+  }
+
+  // Hak dolduysa, en eski firlatmanin pencereden cikacagi an bir sonraki hakkin
+  // dogdugu andir. Uyeye "bir sure sonra" demek yerine tam zamani soyleyebilmek
+  // icin geri donuyor.
+  static async nextBoostAt(userId) {
+    const db = getDb();
+    const row = db.prepare(`
+      SELECT datetime(created_at, '+' || ? || ' days') AS next_at
+      FROM listing_boosts
+      WHERE user_id = ?
+        AND created_at > datetime('now', '-' || ? || ' days')
+      ORDER BY created_at ASC
+      LIMIT 1
+    `).get([listingPolicy.BOOST_WINDOW_DAYS, userId, listingPolicy.BOOST_WINDOW_DAYS]);
+
+    return row ? row.next_at : null;
+  }
+
+  // Firlatma ile hak kaydi tek islemde yaziliyor. Ikisi ayri kalsaydi arada
+  // olusacak bir hata ya hakki harcamadan tepeye cikmayi ya da tepeye cikmadan
+  // hakki yakmayi mumkun kilardi.
+  //
+  // Sahiplik ve durum kontrolu de UPDATE cumlesinin icinde: baskasinin ilanini
+  // ya da yayinda olmayan bir ilani firlatma denemesi hicbir satira dokunmuyor
+  // ve hak da harcanmiyor.
+  static async boost(listingId, userId) {
+    const db = getDb();
+
+    const run = db.transaction(() => {
+      const changed = db.prepare(`
+        UPDATE listings SET boosted_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND user_id = ? AND status = 'active'
+      `).run([listingId, userId]).changes;
+
+      if (changed === 0) return false;
+
+      db.prepare('INSERT INTO listing_boosts (listing_id, user_id) VALUES (?, ?)').run([listingId, userId]);
+      return true;
+    });
+
+    return run();
   }
 
   static async getImages(listingId) {
@@ -249,8 +306,18 @@ class Listing {
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.id
       WHERE l.is_featured = 1 AND l.status = 'active'
-      ORDER BY l.created_at DESC LIMIT ?
-    `).all([limit]);
+      -- Yakin zamanda firlatilanlar once, kendi aralarinda en yeni firlatma
+      -- ustte; gerisi yayin tarihine gore. Firlatmanin etkisi pencere dolunca
+      -- kendiliginden bitiyor, yani bir ilan tepede suresiz kalmiyor.
+      -- Suresi dolmus bir firlatma, hic firlatilmamis bir ilandan once
+      -- gelmemeli. CASE, penceresi gecmis damgayi NULL yapiyor; SQLite NULL'u
+      -- en kucuk saydigi icin DESC siralamada bunlar dogal olarak sona dusuyor
+      -- ve sirayi yayin tarihi belirliyor.
+      ORDER BY
+        (CASE WHEN l.boosted_at > datetime('now', '-' || ? || ' days') THEN l.boosted_at END) DESC,
+        l.created_at DESC
+      LIMIT ?
+    `).all([listingPolicy.BOOST_WINDOW_DAYS, limit]);
   }
 
   static async getRecent(limit = 10) {

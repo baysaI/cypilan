@@ -75,6 +75,23 @@ const usesQuota = (rootSlug) => QUOTA_CATEGORIES.includes(rootSlug);
 
 const isCorporateRole = (role) => role === 'business' || role === 'agent' || role === 'admin';
 
+// Vitrin siralamasi yayin tarihine gore isliyordu, yani bir ilan yeni ilanlar
+// geldikce asagi kayiyor ve yirmi dorduncu siradan sonra vitrinden tamamen
+// dusuyordu. Firlatma, uyeye ilanini haftada bir kez tepeye tasima hakki
+// veriyor.
+//
+// Ucretsiz ve bilerek oyle: odeme altyapisi bagli degil ve fiyat sayfasinda
+// ucretli denen bir seyi elle onaylamak, onu bedava vermek olurdu.
+//
+// Hak yuvarlanan yedi gun uzerinden sayiliyor, takvim haftasi uzerinden
+// degil: pazartesi sabahi herkesin hakkinin ayni anda yenilenmesi hem
+// vitrini o saatte doldurur hem de cuma firlatani cezalandirirdi.
+const WEEKLY_BOOST_QUOTA = 1;
+const WEEKLY_BOOST_QUOTA_CORPORATE = 3;
+const BOOST_WINDOW_DAYS = 7;
+
+const boostQuotaFor = (role) => (isCorporateRole(role) ? WEEKLY_BOOST_QUOTA_CORPORATE : WEEKLY_BOOST_QUOTA);
+
 const evaluate = ({ role, rootSlug, usedCount, isUnlimited = false }) => {
   const unlimited = Boolean(isUnlimited) || isCorporateRole(role);
   if (unlimited) {
@@ -108,6 +125,10 @@ module.exports = {
   ALWAYS_FREE_CATEGORIES,
   PHOTO_REQUIRED_CATEGORIES,
   CORPORATE_FIRST_CATEGORIES,
+  WEEKLY_BOOST_QUOTA,
+  WEEKLY_BOOST_QUOTA_CORPORATE,
+  BOOST_WINDOW_DAYS,
+  boostQuotaFor,
   isCorporateFirst,
   PAID_TIERS_LIVE,
   PROMOTION_REQUESTS_LIVE,

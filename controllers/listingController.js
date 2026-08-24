@@ -963,6 +963,52 @@ const quickOffer = async (req, res) => {
     }
 };
 
+// Vitrin siralamasi yayin tarihine gore isliyor, yani her yeni ilan
+// oncekileri asagi itiyor ve bir ilan yirmi dorduncu siradan sonra vitrinden
+// tamamen dusuyor. Firlatma, uyenin haftada bir kez bunu tersine cevirmesini
+// sagliyor.
+const boost = async (req, res) => {
+    const backTo = '/profile/listings';
+
+    try {
+        const listingId = parseInt(req.params.id, 10);
+        if (!Number.isInteger(listingId)) {
+            req.flash('error', 'flash.listing_not_found');
+            return res.redirect(backTo);
+        }
+
+        const quota = listingPolicy.boostQuotaFor(req.session.userRole);
+        const used = await Listing.boostsUsed(req.session.userId);
+
+        if (used >= quota) {
+            // Hak dolmussa ne zaman yenilenecegi soyleniyor; "daha sonra tekrar
+            // deneyin" demek uyeyi her gun bosuna denemeye davet ederdi.
+            const nextAt = await Listing.nextBoostAt(req.session.userId);
+            req.flash('error', 'flash.boost_quota_reached', {
+                quota,
+                date: nextAt ? helpers.formatDate(nextAt, req.lang || 'tr') : ''
+            });
+            return res.redirect(backTo);
+        }
+
+        // Sahiplik ve yayin durumu modelin UPDATE cumlesinde kontrol ediliyor,
+        // yani buraya ayri bir sorgu koymaya gerek yok.
+        const boosted = await Listing.boost(listingId, req.session.userId);
+
+        if (!boosted) {
+            req.flash('error', 'flash.boost_failed');
+            return res.redirect(backTo);
+        }
+
+        req.flash('success', 'flash.boost_done', { remaining: quota - used - 1 });
+        return res.redirect(backTo);
+    } catch (error) {
+        console.error('Listing Boost Error:', error);
+        req.flash('error', 'flash.boost_failed');
+        return res.redirect(backTo);
+    }
+};
+
 module.exports = {
     index,
     show,
@@ -975,5 +1021,6 @@ module.exports = {
     toggleFavorite,
     compare,
     togglePriceAlert,
-    quickOffer
+    quickOffer,
+    boost
 };

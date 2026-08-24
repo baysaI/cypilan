@@ -112,6 +112,7 @@ const closeDb = () => {
 };
 
 const COLUMN_MIGRATIONS = [
+  { table: 'listings', column: 'boosted_at', ddl: 'ALTER TABLE listings ADD COLUMN boosted_at DATETIME' },
   { table: 'users', column: 'show_phone', ddl: 'ALTER TABLE users ADD COLUMN show_phone INTEGER DEFAULT 1' },
   { table: 'users', column: 'show_surname', ddl: 'ALTER TABLE users ADD COLUMN show_surname INTEGER DEFAULT 0' },
   { table: 'users', column: 'has_password', ddl: 'ALTER TABLE users ADD COLUMN has_password INTEGER DEFAULT 1' },
@@ -290,6 +291,15 @@ const applyColumnMigrations = (db) => {
       console.log(`Migration applied: ${table}.${column}`);
     }
   });
+
+  // Bu indeks boosted_at kolonuna dayaniyor, dolayisiyla schema.sql icinde
+  // duramaz: orasi var olan bir veritabaninda CREATE TABLE adimini atlayip
+  // dogruca indekse gecerdi ve kolon henuz eklenmemis olurdu. Migrasyonlarin
+  // ardina alindi.
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_listings_boosted
+      ON listings(is_featured, status, boosted_at DESC);
+  `);
 
   try {
     db.exec("UPDATE users SET last_seen_at = created_at WHERE last_seen_at IS NULL");
