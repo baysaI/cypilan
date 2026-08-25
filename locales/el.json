@@ -721,7 +721,7 @@
     "boost_hint": "Μεταφέρει την αγγελία στην κορυφή της βιτρίνας",
     "boost_none_left": "Οι εβδομαδιαίες προωθήσεις εξαντλήθηκαν. Επόμενη: {date}",
     "boost_remaining": "Σας απομένουν {remaining} προωθήσεις αυτή την εβδομάδα",
-    "boosted_badge": "Στη βιτρίνα",
+    "boosted_badge": "Προωθήθηκε",
     "call_whatsapp": "Κλήση μέσω WhatsApp",
     "category": "Κατηγορία",
     "city": "Πόλη",

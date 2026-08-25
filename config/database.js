@@ -292,13 +292,18 @@ const applyColumnMigrations = (db) => {
     }
   });
 
-  // Bu indeks boosted_at kolonuna dayaniyor, dolayisiyla schema.sql icinde
-  // duramaz: orasi var olan bir veritabaninda CREATE TABLE adimini atlayip
-  // dogruca indekse gecerdi ve kolon henuz eklenmemis olurdu. Migrasyonlarin
-  // ardina alindi.
+  // Vitrin siralamasi COALESCE(boosted_at, created_at) uzerinden yapiliyor,
+  // yani indeksin de o ifadeyi tasimasi gerekiyor: yalnizca boosted_at
+  // kolonunu indekslemek siralamaya yardim etmez.
+  //
+  // Bu indeks boosted_at kolonuna dayandigi icin schema.sql icinde duramaz:
+  // orasi var olan bir veritabaninda CREATE TABLE adimini atlayip dogruca
+  // indekse gecerdi ve kolon henuz eklenmemis olurdu. Migrasyonlarin ardina
+  // alindi.
   db.exec(`
-    CREATE INDEX IF NOT EXISTS idx_listings_boosted
-      ON listings(is_featured, status, boosted_at DESC);
+    DROP INDEX IF EXISTS idx_listings_boosted;
+    CREATE INDEX IF NOT EXISTS idx_listings_showcase
+      ON listings(is_featured, status, COALESCE(boosted_at, created_at) DESC);
   `);
 
   try {

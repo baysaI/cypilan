@@ -62,12 +62,29 @@ t.run('Vitrine firlatma', async (db) => {
   await Listing.boost(c1.id, company);
   t.assertEqual(await Listing.boostsUsed(company), 4, 'Aynı ilanı tekrar fırlatmak da hak harcıyor');
 
-  // --- Firlatmanin etkisi pencere dolunca bitmeli
-  db.prepare("UPDATE listings SET boosted_at = datetime('now', '-10 days') WHERE id = ?").run([eski.id]);
-  const expired = await Listing.getFeatured(10);
-  const eskiIndex = expired.findIndex((row) => row.id === eski.id);
-  const yeniIndex = expired.findIndex((row) => row.id === yeni.id);
-  t.assert(yeniIndex < eskiIndex, 'Süresi dolan fırlatma artık üste taşımıyor');
+  // --- Asil kural: firlatma tepeye firlatir ama orada TUTMAZ.
+  //
+  // Zaman damgalari saniye cozunurlukte oldugu icin ayni saniyede olusan
+  // kayitlar beraberlige dusuyor ve siralamalari belirsiz kaliyor. Test bunu
+  // sansa birakmiyor: karsilastirilan degerler elle veriliyor.
+  db.prepare("UPDATE listings SET status = 'sold' WHERE user_id = ?").run([company]);
+  db.prepare("UPDATE listings SET boosted_at = '2026-07-01 10:00:00' WHERE id = ?").run([eski.id]);
+
+  const sonra = await makeListing(member, 'firlatmadan-sonra', 'Fırlatmadan Sonra Açıldı');
+  db.prepare("UPDATE listings SET created_at = '2026-07-01 11:00:00' WHERE id = ?").run([sonra.id]);
+
+  const withNewer = await Listing.getFeatured(10);
+  t.assertEqual(withNewer[0].id, sonra.id, 'Fırlatmadan sonra açılan ilan başa geçiyor');
+  t.assertEqual(withNewer[1].id, eski.id, 'Fırlatılan ilan bir sıra aşağı iniyor, kaybolmuyor');
+  t.assertEqual(withNewer[2].id, yeni.id, 'Fırlatılmamış ilan yayın tarihindeki yerini koruyor');
+
+  // --- Eski bir firlatma, sonradan acilan ilanlarin altinda kalmali
+  db.prepare("UPDATE listings SET boosted_at = '2026-01-15 00:00:00' WHERE id = ?").run([eski.id]);
+
+  const aged = await Listing.getFeatured(10);
+  const eskiIndex = aged.findIndex((row) => row.id === eski.id);
+  const yeniIndex = aged.findIndex((row) => row.id === yeni.id);
+  t.assert(yeniIndex < eskiIndex, 'Eski bir fırlatma yeni ilanların üstüne çıkmıyor');
 
   // --- Pencere disina dusen firlatma hak sayimindan da dusmeli
   db.prepare("UPDATE listing_boosts SET created_at = datetime('now', '-10 days') WHERE user_id = ?").run([member]);

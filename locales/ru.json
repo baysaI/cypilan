@@ -721,7 +721,7 @@
     "boost_hint": "Поднимает объявление в начало витрины",
     "boost_none_left": "Еженедельные поднятия исчерпаны. Следующее: {date}",
     "boost_remaining": "На этой неделе осталось поднятий: {remaining}",
-    "boosted_badge": "В витрине",
+    "boosted_badge": "Поднято",
     "call_whatsapp": "Позвонить в WhatsApp",
     "category": "Категория",
     "city": "Город",

@@ -125,7 +125,7 @@
                                     <div class="d-inline-flex align-items-center gap-2">
                                         <% if (isBoosted) { %>
                                             <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
-                                                <i class="fa-solid fa-arrow-up me-1"></i><%= t('listing.boosted_badge') %>
+                                                <i class="fa-solid fa-arrow-up me-1"></i><%= t('listing.boosted_badge') %> · <%= helpers.timeAgo(listing.boosted_at, lang) %>
                                             </span>
                                         <% } else if (canBoost) { %>
                                             <form action="/listings/<%= listing.id %>/boost" method="POST" class="m-0">

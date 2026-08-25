@@ -306,18 +306,15 @@ class Listing {
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.id
       WHERE l.is_featured = 1 AND l.status = 'active'
-      -- Yakin zamanda firlatilanlar once, kendi aralarinda en yeni firlatma
-      -- ustte; gerisi yayin tarihine gore. Firlatmanin etkisi pencere dolunca
-      -- kendiliginden bitiyor, yani bir ilan tepede suresiz kalmiyor.
-      -- Suresi dolmus bir firlatma, hic firlatilmamis bir ilandan once
-      -- gelmemeli. CASE, penceresi gecmis damgayi NULL yapiyor; SQLite NULL'u
-      -- en kucuk saydigi icin DESC siralamada bunlar dogal olarak sona dusuyor
-      -- ve sirayi yayin tarihi belirliyor.
-      ORDER BY
-        (CASE WHEN l.boosted_at > datetime('now', '-' || ? || ' days') THEN l.boosted_at END) DESC,
-        l.created_at DESC
+      -- Firlatma, ilani yeniden yayinlanmis saymak demek: o an listenin basina
+      -- geciyor, ama orada tutulmuyor. Sonradan acilan ya da firlatilan her ilan
+      -- onu dogal olarak asagi itiyor.
+      --
+      -- Onceki hali firlatilan ilani yedi gun boyunca tepeye sabitliyordu; bu,
+      -- o sure boyunca yeni acilan ilanlarin hicbirinin basa gecememesi demekti.
+      ORDER BY COALESCE(l.boosted_at, l.created_at) DESC
       LIMIT ?
-    `).all([listingPolicy.BOOST_WINDOW_DAYS, limit]);
+    `).all([limit]);
   }
 
   static async getRecent(limit = 10) {
@@ -453,7 +450,10 @@ class Listing {
     } else if (filters.sort === 'price_desc') {
       orderClauses.push('l.price DESC');
     } else {
-      orderClauses.push('l.created_at DESC');
+      // Varsayilan siralama vitrinle ayni olcuyu kullaniyor: firlatilan ilan
+      // yeniden yayinlanmis sayiliyor. Aksi halde satici ilanini firlatip ana
+      // sayfada basta gorur, kategori listesine gecince hala gomulu bulurdu.
+      orderClauses.push('COALESCE(l.boosted_at, l.created_at) DESC');
     }
     const orderBy = ' ORDER BY ' + orderClauses.join(', ');
 
