@@ -384,6 +384,32 @@ const applyColumnMigrations = (db) => {
 
 const TABLE_REBUILDS = [
   {
+    // listing_boosts ilk halinde listing_id uzerinde ON DELETE CASCADE
+    // tasiyordu. Bunun bedeli yalnizca kayip bir kayit degildi: haftalik hak
+    // bu tablodan sayildigi icin ilani silmek hakki da iade ediyordu ve
+    // firlat-sil-firlat dongusuyle sinir asilabiliyordu.
+    //
+    // Yeniden kurma listing_title kolonunun yoklugundan tetikleniyor; o kolon
+    // ayrica silinmis ilanlarin basligini yonetici kaydinda tutuyor.
+    table: 'listing_boosts',
+    whenMissingColumn: 'listing_title',
+    create: `
+      CREATE TABLE listing_boosts_migrated (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        listing_id INTEGER REFERENCES listings(id) ON DELETE SET NULL,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        listing_title TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `,
+    copy: `
+      INSERT INTO listing_boosts_migrated (id, listing_id, user_id, listing_title, created_at)
+      SELECT b.id, b.listing_id, b.user_id, l.title, b.created_at
+      FROM listing_boosts b
+      LEFT JOIN listings l ON b.listing_id = l.id
+    `
+  },
+  {
     table: 'reports',
     whenMissingColumn: 'reported_user_id',
     create: `

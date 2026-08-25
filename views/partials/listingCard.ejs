@@ -1,4 +1,17 @@
-<div class="listing-card card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift transition-all <%= (listing.is_premium || listing.isPremium) ? 'premium-card' : '' %>">
+<%
+    // One cikarma bir konum hareketi: ilan o an listenin basina geciyor ama
+    // orada tutulmuyor. Bu yuzden isaret de kalici degil, yalnizca firlatma
+    // tazeyken gosteriliyor - bir gun once firlatilip artik otuzuncu sirada
+    // olan bir ilanda "one cikarildi" yazmak dogru olmazdi.
+    const BOOST_FRESH_HOURS = 24;
+    let boostFresh = false;
+
+    if (listing.boosted_at) {
+        const stamp = Date.parse(String(listing.boosted_at).replace(' ', 'T') + 'Z');
+        boostFresh = Number.isFinite(stamp) && (Date.now() - stamp) < BOOST_FRESH_HOURS * 3600 * 1000;
+    }
+%>
+<div class="listing-card card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift transition-all <%= (listing.is_premium || listing.isPremium) ? 'premium-card' : '' %> <%= boostFresh ? 'boosted-card' : '' %>">
     
     <% 
         const cardBadges = (typeof listingBadges !== 'undefined' && listingBadges) ? listingBadges.activeFor(listing) : [];
@@ -86,7 +99,13 @@
                 <span class="text-truncate"><%= listing.location_city || listing.city || 'Kıbrıs' %><%= (listing.location_district || listing.district) ? ', ' + (listing.location_district || listing.district) : '' %></span>
             </div>
             <div class="date whitespace-nowrap d-none d-sm-block">
-                <i class="fa-regular fa-clock me-1"></i> <%= listing.created_at ? helpers.timeAgo(listing.created_at, lang) : t('common.today') %>
+                <% if (boostFresh) { %>
+                    <span class="text-primary fw-semibold">
+                        <i class="fa-solid fa-arrow-up-wide-short me-1"></i><%= t('listing.boosted_badge') %>
+                    </span>
+                <% } else { %>
+                    <i class="fa-regular fa-clock me-1"></i> <%= listing.created_at ? helpers.timeAgo(listing.created_at, lang) : t('common.today') %>
+                <% } %>
             </div>
         </div>
     </div>

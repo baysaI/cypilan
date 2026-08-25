@@ -152,11 +152,50 @@ class Listing {
 
       if (changed === 0) return false;
 
-      db.prepare('INSERT INTO listing_boosts (listing_id, user_id) VALUES (?, ?)').run([listingId, userId]);
+      // Baslik firlatma aninda kopyalaniyor: ilan sonradan silinirse yonetici
+      // kaydinda neyin one cikarildigi yine goruluyor.
+      const title = db.prepare('SELECT title FROM listings WHERE id = ?').get([listingId]);
+      db.prepare(
+        'INSERT INTO listing_boosts (listing_id, user_id, listing_title) VALUES (?, ?, ?)'
+      ).run([listingId, userId, title ? title.title : null]);
       return true;
     });
 
     return run();
+  }
+
+  // Yonetici gorunumu icin firlatma gecmisi. Kim, hangi ilani, ne zaman
+  // firlatti - ve o an haftalik hakkinin kacincisiydi. Silinmis ilan ya da
+  // hesap olsa bile kayit duruyor, bu yuzden LEFT JOIN.
+  static async boostHistory({ limit = 50, offset = 0 } = {}) {
+    const db = getDb();
+
+    return db.prepare(`
+      SELECT b.id, b.created_at, b.listing_id, b.user_id,
+             COALESCE(l.title, b.listing_title) AS listing_title, l.slug AS listing_slug, l.status AS listing_status,
+             u.full_name AS user_name, u.email AS user_email, u.role AS user_role
+      FROM listing_boosts b
+      LEFT JOIN listings l ON b.listing_id = l.id
+      LEFT JOIN users u ON b.user_id = u.id
+      ORDER BY b.created_at DESC
+      LIMIT ? OFFSET ?
+    `).all([limit, offset]);
+  }
+
+  static async boostHistoryCount() {
+    const db = getDb();
+    return db.prepare('SELECT COUNT(*) AS count FROM listing_boosts').get().count;
+  }
+
+  // Son yedi gundeki firlatma sayisi - panelin ust ozetinde gosteriliyor.
+  static async boostsThisWeek() {
+    const db = getDb();
+    const row = db.prepare(`
+      SELECT COUNT(*) AS count FROM listing_boosts
+      WHERE created_at > datetime('now', '-' || ? || ' days')
+    `).get([listingPolicy.BOOST_WINDOW_DAYS]);
+
+    return row ? row.count : 0;
   }
 
   static async getImages(listingId) {

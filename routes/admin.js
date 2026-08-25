@@ -41,6 +41,7 @@ router.use(async (req, res, next) => {
 
 router.get('/', adminController.dashboard);
 router.get('/analytics', adminController.analytics);
+router.get('/one-cikarmalar', adminController.boosts);
 router.get('/users', adminController.users);
 router.get('/listings', adminController.listings);
 router.get('/reports', adminController.reports);

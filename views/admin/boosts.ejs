@@ -1,0 +1,109 @@
+<%
+    const list = (typeof history !== 'undefined' && history) ? history : [];
+    const listingStatusStyles = {
+        active: 'bg-success bg-opacity-10 text-success',
+        pending: 'bg-warning bg-opacity-10 text-warning',
+        sold: 'bg-secondary bg-opacity-10 text-secondary',
+        expired: 'bg-secondary bg-opacity-10 text-secondary',
+        rejected: 'bg-danger bg-opacity-10 text-danger'
+    };
+%>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <h1 class="h4 fw-bold mb-1">Öne Çıkarmalar</h1>
+        <p class="text-muted small mb-0">
+            Üye başına <%= windowDays %> günde <%= quotaNormal %> hak, kurumsal hesaplarda <%= quotaCorporate %>.
+            Öne çıkarma ilanı listenin başına taşır, orada tutmaz.
+        </p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Son <%= windowDays %> gün</p>
+                <p class="h4 fw-bold mb-0"><%= thisWeek %></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Toplam</p>
+                <p class="h4 fw-bold mb-0"><%= total %></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if (list.length > 0) { %>
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Üye</th>
+                        <th>İlan</th>
+                        <th class="d-none d-md-table-cell">Durum</th>
+                        <th class="text-end pe-4">Zaman</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% list.forEach(function (row) { %>
+                        <tr>
+                            <td class="ps-4">
+                                <%# Hesap silinmis olabilir; kayit duruyor ama sahibi yok. %>
+                                <% if (row.user_name) { %>
+                                    <a href="/profile/<%= row.user_id %>" class="fw-semibold text-dark text-decoration-none d-block">
+                                        <%= row.user_name %>
+                                    </a>
+                                    <span class="small text-muted"><%= row.user_email %></span>
+                                    <% if (row.user_role && row.user_role !== 'user') { %>
+                                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary ms-1"><%= row.user_role %></span>
+                                    <% } %>
+                                <% } else { %>
+                                    <span class="text-muted fst-italic">silinmiş hesap</span>
+                                <% } %>
+                            </td>
+
+                            <td>
+                                <% if (row.listing_slug) { %>
+                                    <a href="/listings/<%= row.listing_slug %>" class="text-dark text-decoration-none d-block text-truncate" style="max-width: 280px;">
+                                        <%= row.listing_title %>
+                                    </a>
+                                <% } else { %>
+                                    <span class="text-muted fst-italic">silinmiş ilan</span>
+                                <% } %>
+                            </td>
+
+                            <td class="d-none d-md-table-cell">
+                                <% if (row.listing_status) { %>
+                                    <span class="badge rounded-pill <%= listingStatusStyles[row.listing_status] || 'bg-secondary bg-opacity-10 text-secondary' %>">
+                                        <%= t('listing.status_' + row.listing_status) %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="text-muted small">—</span>
+                                <% } %>
+                            </td>
+
+                            <td class="text-end pe-4 text-muted small">
+                                <%= helpers.timeAgo(row.created_at, lang) %>
+                                <span class="d-block"><%= helpers.formatDate(row.created_at, lang) %></span>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%- include('_pagination', { pagination, baseUrl: '/admin/one-cikarmalar', query: {} }) %>
+<% } else { %>
+    <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+        <i class="fa-solid fa-arrow-up-wide-short fs-1 text-muted mb-3 opacity-50 d-block"></i>
+        <h5 class="fw-bold text-dark mb-2">Henüz öne çıkarma yok</h5>
+        <p class="text-muted small mb-0">Bir üye ilanını öne çıkardığında burada görünecek.</p>
+    </div>
+<% } %>

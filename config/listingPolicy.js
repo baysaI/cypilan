@@ -13,6 +13,19 @@ const PHOTO_REQUIRED_CATEGORIES = [...QUOTA_CATEGORIES, 'kurumsal-tedarikci'];
 // the visitor asked — this promotes corporate listings, it does not hide others.
 const CORPORATE_FIRST_CATEGORIES = ['kurumsal-tedarikci'];
 
+// Kabul edilen bir teklif ilani "cozer" mu?
+//
+// Bir daire ya da araba tek aliciya gidiyor: sahibi birini sectiginde oteki
+// teklifler gecerliligini yitiriyor ve onlari bekletmek, cevap bekleyen
+// insanlari bosuna oyalamak olurdu.
+//
+// Bir usta hizmeti, tedarikci ilani ya da is ilani boyle degil: ilk isi
+// almak ikincisini reddetmeyi gerektirmiyor. O kategorilerde oteki teklifler
+// bekleyen kaliyor ve karari ilan sahibi tek tek veriyor.
+const EXCLUSIVE_SALE_ROOTS = ['emlak', 'vasita', 'ikinci-el'];
+
+const isExclusiveSale = (rootSlug) => EXCLUSIVE_SALE_ROOTS.includes(rootSlug);
+
 const PAID_TIERS_LIVE = false;
 
 // Featuring a listing is a paid tier, so it is offered only when the paid tiers
@@ -125,6 +138,8 @@ module.exports = {
   ALWAYS_FREE_CATEGORIES,
   PHOTO_REQUIRED_CATEGORIES,
   CORPORATE_FIRST_CATEGORIES,
+  EXCLUSIVE_SALE_ROOTS,
+  isExclusiveSale,
   WEEKLY_BOOST_QUOTA,
   WEEKLY_BOOST_QUOTA_CORPORATE,
   BOOST_WINDOW_DAYS,

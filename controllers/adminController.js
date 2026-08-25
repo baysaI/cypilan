@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const User = require('../models/User');
 const Listing = require('../models/Listing');
+const listingPolicy = require('../config/listingPolicy');
 const Report = require('../models/Report');
 const Message = require('../models/Message');
 const Warning = require('../models/Warning');
@@ -779,8 +780,44 @@ const sendListingNotice = async (req, res) => {
     }
 };
 
+// Firlatma ucretsiz ve haftalik bir hak; kotuye kullanimi gormenin tek yolu
+// kayitlara bakabilmek. Buradan kimin neyi ne siklikta one cikardigini
+// gormek, kotanin dogru ayarlanip ayarlanmadigini da soyluyor.
+const boosts = async (req, res, next) => {
+    try {
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limit = 50;
+
+        const [history, total, thisWeek] = await Promise.all([
+            Listing.boostHistory({ limit, offset: (page - 1) * limit }),
+            Listing.boostHistoryCount(),
+            Listing.boostsThisWeek()
+        ]);
+
+        res.locals.meta = res.locals.meta || {};
+        res.locals.meta.title = 'Öne Çıkarmalar | Admin Paneli';
+
+        res.render('admin/boosts', {
+            layout: 'admin/layout',
+            history,
+            total,
+            thisWeek,
+            windowDays: listingPolicy.BOOST_WINDOW_DAYS,
+            quotaNormal: listingPolicy.WEEKLY_BOOST_QUOTA,
+            quotaCorporate: listingPolicy.WEEKLY_BOOST_QUOTA_CORPORATE,
+            pagination: { page, totalPages: Math.max(1, Math.ceil(total / limit)), totalItems: total },
+            activePage: 'boosts',
+            title: 'Öne Çıkarmalar'
+        });
+    } catch (error) {
+        console.error('Admin Boosts Error:', error);
+        next(error);
+    }
+};
+
 module.exports = {
     dashboard,
+    boosts,
     users,
     listings,
     reports,

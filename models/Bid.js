@@ -1,4 +1,5 @@
 const { getDb } = require('../config/database');
+const listingPolicy = require('../config/listingPolicy');
 
 // Who is allowed to bid. The promise on the marketing material is that
 // professionals compete for the seller's business, so a private user cannot bid
@@ -6,6 +7,22 @@ const { getDb } = require('../config/database');
 const BIDDER_ROLES = ['agent', 'business', 'admin'];
 
 const canBid = (role) => BIDDER_ROLES.includes(role);
+
+// Category.getRootSlug async imzali; burasi bir db.transaction icinde
+// calistigi icin ayni islemin senkron bir kopyasi kullaniliyor.
+const rootSlugOf = (db, categoryId) => {
+  const stmt = db.prepare('SELECT slug, parent_id FROM categories WHERE id = ?');
+  let currentId = categoryId;
+
+  for (let depth = 0; depth < 10; depth += 1) {
+    const row = stmt.get([currentId]);
+    if (!row) return null;
+    if (row.parent_id == null) return row.slug;
+    currentId = row.parent_id;
+  }
+
+  return null;
+};
 
 class Bid {
   static async findById(id) {
@@ -94,10 +111,18 @@ class Bid {
       if (!bid) return null;
 
       db.prepare("UPDATE bids SET status = 'accepted' WHERE id = ?").run([bidId]);
-      db.prepare(`
-        UPDATE bids SET status = 'rejected'
-        WHERE listing_id = ? AND id != ? AND status = 'pending'
-      `).run([bid.listing_id, bidId]);
+        // Oteki tekliflerin dusup dusmedigi kategoriye bagli: tek aliciya giden
+        // bir ilanda secim yapilmasi otekileri gecersiz kiliyor, bir hizmet
+        // ilaninda kilmiyor. Kural config/listingPolicy.js icinde tanimli.
+        const listingRow = db.prepare('SELECT category_id FROM listings WHERE id = ?').get([bid.listing_id]);
+        const rootSlug = listingRow ? rootSlugOf(db, listingRow.category_id) : null;
+
+        if (listingPolicy.isExclusiveSale(rootSlug)) {
+          db.prepare(`
+            UPDATE bids SET status = 'rejected'
+            WHERE listing_id = ? AND id != ? AND status = 'pending'
+          `).run([bid.listing_id, bidId]);
+        }
       // Teklif kabul edilince ilan eskiden satildi sayilip yayindan
       // kaldiriliyordu. Bu yalnizca tek parca bir esya icin dogru: bir usta
       // hizmeti, tedarikci ilani ya da kiralik bir daire tek musteriyle

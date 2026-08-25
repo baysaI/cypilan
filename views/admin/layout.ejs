@@ -111,6 +111,11 @@
             </a>
         </li>
         <li>
+            <a href="/admin/one-cikarmalar" class="nav-link rounded-3 <%= activePage === 'boosts' ? 'active' : '' %>">
+                <span><i class="fa-solid fa-arrow-up-wide-short fa-fw me-2"></i> Öne Çıkarmalar</span>
+            </a>
+        </li>
+        <li>
             <a href="/admin/hizmet-talepleri" class="nav-link rounded-3 d-flex justify-content-between align-items-center <%= activePage === 'services' ? 'active' : '' %>">
                 <span><i class="fa-solid fa-handshake fa-fw me-2"></i> Hizmet Talepleri</span>
                 <% if (typeof pendingServices !== 'undefined' && pendingServices > 0) { %>

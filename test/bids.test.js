@@ -76,6 +76,29 @@ t.run('Teklif sistemi (Evini/Aracını Sat)', async (db) => {
 
   open = await Bid.openRequests({}, 1, 20);
   t.assertEqual(open.total, 1, 'İlan teklif listesinde kalmaya devam ediyor');
+
+  // --- Kategoriye gore ayrim: tek aliciya giden bir ilanda secim yapilmasi
+  // otekileri gecersiz kiliyor, bir hizmet ilaninda kilmiyor.
+  const usta = t.makeUser(db, 'usta@test.local', 'Usta');
+  const m1 = t.makeUser(db, 'musteri1@test.local', 'Müşteri 1');
+  const m2 = t.makeUser(db, 'musteri2@test.local', 'Müşteri 2');
+
+  const hizmet = await Listing.create({
+    user_id: usta, category_id: 401, title: 'Boya Badana', slug: 'boya-badana-test',
+    description: 'usta hizmeti', price: 500, currency: 'GBP', status: 'active', city: 'Girne'
+  });
+
+  await Bid.submitQuickOffer({ listing_id: hizmet.id, bidder_id: m1, amount: 450, currency: 'GBP' });
+  await Bid.submitQuickOffer({ listing_id: hizmet.id, bidder_id: m2, amount: 480, currency: 'GBP' });
+
+  const hizmetBids = await Bid.findForListing(hizmet.id);
+  await Bid.accept(hizmetBids[0].id, usta);
+
+  const sonrasi = await Bid.findForListing(hizmet.id);
+  t.assertEqual(sonrasi.filter((b) => b.status === 'accepted').length, 1, 'Hizmet ilanında teklif kabul ediliyor');
+  t.assertEqual(sonrasi.filter((b) => b.status === 'pending').length, 1, 'Hizmet ilanında diğer teklif bekleyen kalıyor');
+  t.assertEqual(sonrasi.filter((b) => b.status === 'rejected').length, 0, 'Hizmet ilanında otomatik reddetme yok');
+  t.assertEqual((await Listing.findById(hizmet.id)).status, 'active', 'Hizmet ilanı yayında kalıyor');
   t.assertEqual(await Bid.countPendingForOwner(owner), 0, 'Bekleyen teklif sayacı sıfırlandı');
 
   // --- Sablonlar

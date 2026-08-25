@@ -1616,3 +1616,25 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
+
+/* ==========================================================================
+   One cikarilan ilan karti
+   ========================================================================== */
+/* One cikarma bir konum hareketi: ilan o an listenin basina geciyor ama orada
+   tutulmuyor. Isaret de kalici degil - kart bu sinifi yalnizca firlatma
+   tazeyken (24 saat) tasiyor. Cerceve fark edilecek kadar belirgin, fotografin
+   uzerindeki rozet kumesiyle yarisacak kadar degil. */
+.listing-card.boosted-card {
+    box-shadow: 0 0 0 2px #3C81AB, 0 .5rem 1rem rgba(60, 129, 171, .18) !important;
+}
+
+.listing-card.boosted-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3C81AB, rgba(60, 129, 171, .3));
+    z-index: 3;
+}

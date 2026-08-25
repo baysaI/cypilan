@@ -526,10 +526,17 @@ CREATE INDEX IF NOT EXISTS idx_favorites_listing ON favorites(listing_id);
 -- ayni ilani ikinci kez firlatmak boosted_at alanini gunceller ve sayim
 -- yapilmis bir firlatmayi gormezden gelirdi. Her firlatma burada ayri bir
 -- satir, yani hak sayimi da gecmis de dogru.
+-- listing_id CASCADE degil SET NULL: kayit ilanla birlikte silinseydi haftalik
+-- hak da iade edilirdi ve firlat-sil-firlat dongusu sinirsiz olurdu. Kayit
+-- kaliyor, hak harcanmis sayiliyor.
+--
+-- listing_title, firlatma anindaki basligin kopyasi: ilan silindikten sonra
+-- yonetici kaydinda "silinmis ilan" yerine neyin one cikarildigi goruluyor.
 CREATE TABLE IF NOT EXISTS listing_boosts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  listing_id INTEGER REFERENCES listings(id) ON DELETE SET NULL,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  listing_title TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

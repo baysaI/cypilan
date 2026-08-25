@@ -90,4 +90,19 @@ t.run('Vitrine firlatma', async (db) => {
   db.prepare("UPDATE listing_boosts SET created_at = datetime('now', '-10 days') WHERE user_id = ?").run([member]);
   t.assertEqual(await Listing.boostsUsed(member), 0, 'Süresi dolan fırlatma hak sayımından düşüyor');
   t.assertEqual(await Listing.nextBoostAt(member), null, 'Hak dolmadığında bekleme zamanı yok');
+
+  // --- Yonetici gorunumu icin gecmis sorgulari
+  const gecmis = await Listing.boostHistory({ limit: 50 });
+  t.assert(gecmis.length > 0, 'Fırlatma geçmişi kayıt döndürüyor');
+  t.assert(Boolean(gecmis[0].user_name), 'Geçmişte üye adı çözülüyor');
+  t.assert(Boolean(gecmis[0].listing_title), 'Geçmişte ilan başlığı çözülüyor');
+
+  const toplam = await Listing.boostHistoryCount();
+  t.assertEqual(toplam, gecmis.length, 'Toplam sayaç kayıt sayısıyla tutarlı');
+
+  // Silinmis ilanin kaydi durmali - yoksa gecmis, kotuye kullanimi gizlemenin
+  // en kolay yolu olurdu: firlat, ilani sil, iz kalmasin.
+  db.prepare('DELETE FROM listings WHERE id = ?').run([c2.id]);
+  const silmeSonrasi = await Listing.boostHistory({ limit: 50 });
+  t.assertEqual(silmeSonrasi.length, gecmis.length, 'İlan silinse de fırlatma kaydı duruyor');
 });
