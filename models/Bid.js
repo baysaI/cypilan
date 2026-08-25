@@ -98,8 +98,13 @@ class Bid {
         UPDATE bids SET status = 'rejected'
         WHERE listing_id = ? AND id != ? AND status = 'pending'
       `).run([bid.listing_id, bidId]);
-      db.prepare("UPDATE listings SET status = 'sold', updated_at = CURRENT_TIMESTAMP WHERE id = ?")
-        .run([bid.listing_id]);
+      // Teklif kabul edilince ilan eskiden satildi sayilip yayindan
+      // kaldiriliyordu. Bu yalnizca tek parca bir esya icin dogru: bir usta
+      // hizmeti, tedarikci ilani ya da kiralik bir daire tek musteriyle
+      // tukenmiyor - o ilanlar kapandiginda saticinin gorunurlugu de bitiyordu.
+      //
+      // Ilan artik acik kaliyor. Gercekten tukenen bir sey satildiysa sahibi
+      // durumu duzenleme ekranindan kendisi degistirebiliyor; karar onun.
 
       return bid;
     });

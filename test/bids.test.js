@@ -69,10 +69,13 @@ t.run('Teklif sistemi (Evini/Aracını Sat)', async (db) => {
   t.assertEqual(bids.filter((bid) => bid.status === 'rejected').length, 2, 'Diğer teklifler otomatik reddedildi');
 
   const afterListing = await Listing.findById(listing.id);
-  t.assertEqual(afterListing.status, 'sold', 'İlan otomatik "satıldı" işaretlendi');
+  // Kabul, ilani kapatmiyor: bir usta hizmeti ya da tedarikci ilani tek
+  // musteriyle tukenmiyor. Gercekten tukenen bir sey satildiysa karari
+  // sahibi duzenleme ekranindan veriyor.
+  t.assertEqual(afterListing.status, 'active', 'İlan kabul sonrası yayında kalıyor');
 
   open = await Bid.openRequests({}, 1, 20);
-  t.assertEqual(open.total, 0, 'Satılan ilan teklif listesinden düştü');
+  t.assertEqual(open.total, 1, 'İlan teklif listesinde kalmaya devam ediyor');
   t.assertEqual(await Bid.countPendingForOwner(owner), 0, 'Bekleyen teklif sayacı sıfırlandı');
 
   // --- Sablonlar
