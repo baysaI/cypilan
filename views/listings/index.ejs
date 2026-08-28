@@ -284,11 +284,35 @@
 
             <% if (pagination.totalPages > 1) { %>
                 <%
-                    const pageQuery = (filters.category ? '&category=' + filters.category : '')
-                        + (filters.city ? '&city=' + filters.city : '')
-                        + (filters.type ? '&type=' + filters.type : '')
-                        + (filters.badge ? '&badge=' + filters.badge : '')
-                        + (filters.q ? '&q=' + encodeURIComponent(filters.q) : '');
+                    // Every filter the controller reads has to survive the jump to the
+                    // next page. Dropping sort or the price range reset them silently,
+                    // and a link without smart=1 sent the whole sentence to the database
+                    // as literal text, which matches nothing.
+                    const pageParams = [];
+                    const addPageParam = function (key, value) {
+                        if (value) pageParams.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                    };
+
+                    addPageParam('category', filters.category);
+                    addPageParam('city', filters.city);
+                    addPageParam('type', filters.type);
+                    addPageParam('badge', filters.badge);
+                    addPageParam('minPrice', filters.minPrice);
+                    addPageParam('maxPrice', filters.maxPrice);
+                    // 'newest' is the controller's own default, so it stays out of the URL.
+                    if (filters.sort !== 'newest') addPageParam('sort', filters.sort);
+
+                    // In smart mode filters.q holds only the words left over after parsing;
+                    // the box showed the whole sentence and the next page has to search for
+                    // the same thing.
+                    if (smartQuery) {
+                        addPageParam('q', smartQuery);
+                        addPageParam('smart', '1');
+                    } else {
+                        addPageParam('q', filters.q);
+                    }
+
+                    const pageQuery = pageParams.length ? '&' + pageParams.join('&') : '';
 
                     // A category with 40 pages used to render 40 circles, which is
                     // three screens wide on a phone. Five around the current page
