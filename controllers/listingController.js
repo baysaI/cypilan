@@ -134,7 +134,7 @@ const index = async (req, res, next) => {
         res.render('listings/index', {
             listings: result.data,
             pagination: {
-                currentPage: page,
+                page,
                 totalPages: result.pages,
                 totalItems: result.total
             },
