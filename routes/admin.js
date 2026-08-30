@@ -60,6 +60,10 @@ router.post('/users/:id/kurumsal-reddet', adminController.rejectCorporate);
 router.put('/reports/:id', adminController.resolveReport);
 
 router.post('/users/:id/uyari', adminController.issueWarning);
+
+router.get('/users/:id/rozetler', adminController.userBadges);
+router.post('/users/:id/rozetler', adminController.grantUserBadge);
+router.post('/users/:id/rozetler/kaldir', adminController.revokeUserBadge);
 router.post('/uyari/:id/kaldir', adminController.revokeWarning);
 router.post('/uyari/:id/sil', adminController.deleteWarning);
 

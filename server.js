@@ -219,10 +219,14 @@ const cities = require('./config/cities');
 // badges, so the definitions are a global local rather than something each
 // controller has to remember to pass.
 const listingBadges = require('./config/listingBadges');
+// Ayni gerekce uye rozetleri icin de gecerli: profil basligi, ilandaki
+// satici kutusu ve yonetici ekrani ayni katalogu okuyor.
+const userBadges = require('./config/userBadges');
 app.use((req, res, next) => {
   res.locals.helpers = helpers;
   res.locals.cities = cities;
   res.locals.listingBadges = listingBadges;
+  res.locals.userBadges = userBadges;
   res.locals.currentPath = req.path;
   res.locals.assetVersion = ASSET_VERSION;
   // Absolute URLs in the page (canonical, og:image, structured data) follow the

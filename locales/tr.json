@@ -102,6 +102,20 @@
     "verify_pending_spam_notice": "E-postayı gelen kutunuzda göremiyorsanız lütfen Spam (Gereksiz) klasörünüzü de kontrol edin.",
     "verify_pending_title": "E-posta Adresinizi Kontrol Edin"
   },
+  "badges": {
+    "verified_seller": "Onaylı Satıcı",
+    "verified_corporate": "Onaylı Kurumsal",
+    "verified_agent": "Onaylı Emlakçı",
+    "verified_dealer": "Onaylı Galerici",
+    "verified_master": "Onaylı Usta",
+    "trusted_member": "Güvenilir Üye",
+    "founding_member": "Kurucu Üye",
+    "agent_of_month": "Ayın Emlakçısı",
+    "dealer_of_month": "Ayın Galericisi",
+    "master_of_month": "Ayın Ustası",
+    "seller_of_month": "Ayın Satıcısı",
+    "top_rated": "Yüksek Puanlı Satıcı"
+  },
   "bids": {
     "accept": "Kabul Et",
     "accept_confirm": "Bu teklifi kabul edersen diğer teklifler otomatik reddedilir ve ilan satıldı olarak işaretlenir. Onaylıyor musun?",
@@ -847,6 +861,9 @@
   },
   "notifications": {
     "all": "Tümü",
+    "badge_extended_msg": "\"{badge}\" rozetiniz yenilendi. Rozetiniz profilinizde ve ilanlarınızda görünmeye devam ediyor.",
+    "badge_granted_msg": "Profilinize \"{badge}\" rozeti eklendi. Rozetiniz hem profilinizde hem de ilanlarınızda görünüyor.",
+    "badge_granted_title": "Tebrikler, yeni bir rozet kazandınız! 🎉",
     "browse_listings": "İlanları Keşfet",
     "corporate_approved_msg": "Kurumsal hesap başvurunuz yönetici tarafından onaylandı. Artık ilanlarınızı oluşturabilir ve kurumsal mağazanızı yönetebilirsiniz.",
     "corporate_approved_title": "Kurumsal Hesabınız Onaylandı 🎉",

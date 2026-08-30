@@ -102,6 +102,20 @@
     "verify_pending_spam_notice": "If you do not see the email in your inbox, please also check your Spam folder.",
     "verify_pending_title": "Check Your Email Address"
   },
+  "badges": {
+    "verified_seller": "Verified Seller",
+    "verified_corporate": "Verified Business",
+    "verified_agent": "Verified Estate Agent",
+    "verified_dealer": "Verified Car Dealer",
+    "verified_master": "Verified Tradesperson",
+    "trusted_member": "Trusted Member",
+    "founding_member": "Founding Member",
+    "agent_of_month": "Estate Agent of the Month",
+    "dealer_of_month": "Car Dealer of the Month",
+    "master_of_month": "Tradesperson of the Month",
+    "seller_of_month": "Seller of the Month",
+    "top_rated": "Highly Rated Seller"
+  },
   "bids": {
     "accept": "Accept",
     "accept_confirm": "Accepting this offer automatically rejects the others and marks the listing as sold. Do you confirm?",
@@ -847,6 +861,9 @@
   },
   "notifications": {
     "all": "All",
+    "badge_extended_msg": "Your \"{badge}\" badge has been renewed. It still appears on your profile and on your listings.",
+    "badge_granted_msg": "The \"{badge}\" badge has been added to your profile. It appears on your profile and on your listings.",
+    "badge_granted_title": "Congratulations, you have earned a badge! 🎉",
     "browse_listings": "Explore Listings",
     "corporate_approved_msg": "Your corporate account application has been approved by the administrator. You can now create your ads and manage your corporate store.",
     "corporate_approved_title": "Your Corporate Account Has Been Approved 🎉",

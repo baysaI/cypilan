@@ -5,6 +5,13 @@
 
             <div class="text-center text-sm-start flex-grow-1">
                 <h1 class="fs-4 fw-bold mb-1"><%= profileUser.company_name || helpers.formatDisplayName(profileUser.full_name, profileUser.show_surname) %></h1>
+
+                <%# Rozetler adin hemen altinda: bir uyeye guvenilip guvenilmeyecegine
+                    bakilan yer burasi, sayfanin dibi degil. %>
+                <%- include('../partials/userBadges', {
+                    badges: typeof profileBadges !== 'undefined' ? profileBadges : [],
+                    badgeWrapClass: 'justify-content-center justify-content-sm-start mb-2'
+                }) %>
                 <div class="d-flex flex-wrap justify-content-center justify-content-sm-start gap-3 text-muted small align-items-center">
                     <span>
                         <i class="fa-regular fa-user me-1"></i>

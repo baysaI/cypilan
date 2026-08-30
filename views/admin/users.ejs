@@ -240,6 +240,10 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                             title="Düzenle">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
+                                    <a href="/admin/users/<%= u.id %>/rozetler"
+                                       class="btn btn-sm btn-outline-secondary me-1" title="Rozetler ve Unvanlar">
+                                        <i class="fa-solid fa-award"></i>
+                                    </a>
                                     <% if (u.id === activeAdminUser.id) { %>
                                         <span class="text-muted small ms-1">(Siz)</span>
                                     <% } else { %>

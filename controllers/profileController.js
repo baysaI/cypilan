@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const UserBadge = require('../models/UserBadge');
 const Listing = require('../models/Listing');
 const listingPolicy = require('../config/listingPolicy');
 const Review = require('../models/Review');
@@ -62,6 +63,7 @@ const show = async (req, res) => {
 
         res.render('profile/show', {
             profileUser: user,
+            profileBadges: UserBadge.forUser(userId),
             listings,
             stats,
             reviewSummary,

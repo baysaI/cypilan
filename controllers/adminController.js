@@ -7,6 +7,8 @@ const Report = require('../models/Report');
 const Message = require('../models/Message');
 const Warning = require('../models/Warning');
 const Notification = require('../models/Notification');
+const UserBadge = require('../models/UserBadge');
+const badgeCatalog = require('../config/userBadges');
 const ServiceRequest = require('../models/ServiceRequest');
 const Analytics = require('../models/Analytics');
 const mailer = require('../config/mailer');
@@ -815,6 +817,136 @@ const boosts = async (req, res, next) => {
     }
 };
 
+const userBadges = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const user = await User.findById(id);
+
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        res.locals.meta.title = 'Kullanıcı Rozetleri | Admin Paneli';
+        res.render('admin/userBadges', {
+            layout: 'admin/layout',
+            targetUser: user,
+            badgeRows: UserBadge.adminListForUser(id),
+            catalog: badgeCatalog.BADGES,
+            // Donemsel bir unvani verirken yoneticinin bilmesi gereken tek sey
+            // su an kimde oldugu; ayni unvani iki kisiye birden vermek onu
+            // anlamsizlastirir.
+            holders: badgeCatalog.BADGES.reduce((acc, badge) => {
+                acc[badge.key] = UserBadge.holdersOf(badge.key).filter((h) => h.user_id !== id);
+                return acc;
+            }, {}),
+            activePage: 'users',
+            title: 'Kullanıcı Rozetleri'
+        });
+    } catch (error) {
+        console.error('User Badges Page Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/users');
+    }
+};
+
+// Bitis tarihi ucu acik degil: yonetici ya rozetin kendi varsayilan suresini
+// kullaniyor, ya kalici veriyor, ya da bir tarih seciyor. Bos birakilan bir
+// alani "kalici" saymak, donemsel bir unvani kazara omur boyu vermenin en
+// kolay yoluydu.
+const resolveExpiry = (badgeKey, mode, rawDate) => {
+    if (mode === 'never') return null;
+
+    if (mode === 'custom') {
+        const date = String(rawDate || '').trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return badgeCatalog.defaultExpiry(badgeKey);
+        // Secilen gunun sonuna kadar gecerli: yoneticinin "31 Ocak" demesi
+        // rozetin 31 Ocak sabahi dusmesi anlamina gelmemeli.
+        return date + ' 23:59:59';
+    }
+
+    return badgeCatalog.defaultExpiry(badgeKey);
+};
+
+const grantUserBadge = async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const backUrl = '/admin/users/' + id + '/rozetler';
+
+    try {
+        const user = await User.findById(id);
+        if (!user) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/users');
+        }
+
+        const badgeKey = String(req.body.badgeKey || '');
+        if (!badgeCatalog.isKnownKey(badgeKey)) {
+            req.flash('error', 'Böyle bir rozet yok.');
+            return res.redirect(backUrl);
+        }
+
+        const note = String(req.body.note || '').trim().slice(0, 200) || null;
+        const expiresAt = resolveExpiry(badgeKey, req.body.expiryMode, req.body.expiresAt);
+
+        const result = UserBadge.grant(id, badgeKey, {
+            grantedBy: req.session.userId,
+            note,
+            expiresAt
+        });
+
+        // Bildirim uyenin kendi dilinde saklaniyor: bildirimler yazildiklari
+        // haliyle duruyor ve okundugu anda cevrilmiyor.
+        const notifyT = translatorFor(user);
+        const badgeName = notifyT(badgeCatalog.translationKey(badgeKey));
+
+        await Notification.create({
+            user_id: id,
+            actor_id: req.session.userId,
+            type: 'badge',
+            title: notifyT('notifications.badge_granted_title'),
+            message: result && result.isNew
+                ? notifyT('notifications.badge_granted_msg', { badge: badgeName })
+                : notifyT('notifications.badge_extended_msg', { badge: badgeName }),
+            link_url: '/profile'
+        });
+
+        console.log(
+            `[UserBadge] ${badgeKey} -> kullanıcı #${id} (yönetici #${req.session.userId})`
+        );
+
+        req.flash('success', 'Rozet verildi ve kullanıcıya bildirim gönderildi.');
+        res.redirect(backUrl);
+    } catch (error) {
+        console.error('Grant Badge Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect(backUrl);
+    }
+};
+
+const revokeUserBadge = async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const backUrl = '/admin/users/' + id + '/rozetler';
+
+    try {
+        const badgeKey = String(req.body.badgeKey || '');
+        const removed = UserBadge.revoke(id, badgeKey);
+
+        // Geri alma sessiz: rozeti kaybettigini bildiren bir mesaj, kimseye
+        // yardimi olmayan bir kotu haber olurdu. Suresi dolan unvanlar da
+        // zaten kendiliginden ve sessizce dusuyor.
+        console.log(
+            `[UserBadge] ${badgeKey} kaldırıldı <- kullanıcı #${id} (yönetici #${req.session.userId})`
+        );
+
+        req.flash(removed ? 'success' : 'info', removed ? 'Rozet kaldırıldı.' : 'Kaldırılacak rozet bulunamadı.');
+        res.redirect(backUrl);
+    } catch (error) {
+        console.error('Revoke Badge Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect(backUrl);
+    }
+};
+
 module.exports = {
     dashboard,
     boosts,
@@ -834,5 +966,8 @@ module.exports = {
     sendListingNotice,
     approveCorporate,
     rejectCorporate,
-    deleteUser
+    deleteUser,
+    userBadges,
+    grantUserBadge,
+    revokeUserBadge
 };

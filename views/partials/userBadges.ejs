@@ -1,0 +1,31 @@
+<%#
+    Bir üyenin rozetleri.
+
+    Profil başlığı, ilandaki satıcı kutusu ve yönetici ekranı aynı parçayı
+    kullanıyor: rozetin nasıl göründüğüne dair karar tek yerde duruyor, çünkü
+    üç ayrı kopya birbirinden kaçınılmaz olarak ayrışır ve ziyaretçi aynı
+    rozeti iki farklı renkte görür.
+
+    Beklenen yerel: `badges` — models/UserBadge.js'in döndürdüğü satırlar.
+    İsteğe bağlı: `badgeWrapClass` (sarmalayıcıya eklenecek sınıflar).
+%>
+<%
+    const badgeRows = (typeof badges !== 'undefined' && Array.isArray(badges)) ? badges : [];
+    const wrapClass = typeof badgeWrapClass !== 'undefined' ? badgeWrapClass : '';
+%>
+<% if (badgeRows.length > 0) { %>
+    <div class="d-flex flex-wrap gap-1 <%= wrapClass %>">
+        <% badgeRows.forEach(function (row) { %>
+            <%
+                // Katalogdan kaldirilmis bir anahtar notr bir rozet olarak
+                // basiliyor: eski bir satir yuzunden profil sayfasi dusmemeli.
+                const def = userBadges.describe(row.badge_key);
+                const label = t(userBadges.translationKey(row.badge_key));
+            %>
+            <span class="badge rounded-pill bg-<%= def.variant %>-subtle text-<%= def.variant %>-emphasis border border-<%= def.variant %>-subtle fw-semibold d-inline-flex align-items-center gap-1"
+                  style="font-size: 0.72rem;"<% if (row.note) { %> title="<%= row.note %>"<% } %>>
+                <i class="fa-solid <%= def.icon %>"></i><%= label %>
+            </span>
+        <% }); %>
+    </div>
+<% } %>

@@ -80,6 +80,7 @@ const { translate } = require(path.join(rootDir, 'config', 'i18n'));
 const helpers = require(path.join(rootDir, 'utils', 'helpers'));
 const cities = require(path.join(rootDir, 'config', 'cities'));
 const listingBadges = require(path.join(rootDir, 'config', 'listingBadges'));
+const userBadges = require(path.join(rootDir, 'config', 'userBadges'));
 
 // The locals server.js puts on every response. Rendering a view with anything
 // less would fail for reasons the template is not responsible for.
@@ -89,6 +90,7 @@ const baseLocals = (overrides = {}) => Object.assign({
   helpers,
   cities,
   listingBadges,
+  userBadges,
   csrfToken: 'test-token',
   t: (key, params) => translate(key, 'tr', params)
 }, overrides);

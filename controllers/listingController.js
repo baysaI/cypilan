@@ -1,4 +1,5 @@
 const Listing = require('../models/Listing');
+const UserBadge = require('../models/UserBadge');
 const Category = require('../models/Category');
 const User = require('../models/User');
 const Review = require('../models/Review');
@@ -325,6 +326,7 @@ const show = async (req, res, next) => {
 
         res.render('listings/show', {
             listing,
+            sellerBadges: listing.user_id ? UserBadge.forUser(listing.user_id) : [],
             isFavorited,
             isPriceAlertActive,
             coordinates,

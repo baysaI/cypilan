@@ -516,6 +516,11 @@
                     </div>
 
                     <h5 class="fw-bold mb-1"><%= listing.seller_company || listing.seller_name || t('user.member') %></h5>
+
+                    <%- include('../partials/userBadges', {
+                        badges: typeof sellerBadges !== 'undefined' ? sellerBadges : [],
+                        badgeWrapClass: 'justify-content-center mb-2'
+                    }) %>
                     <p class="text-muted small mb-2"><%= listing.seller_role === 'business' ? t('user.business_member') : (listing.seller_role === 'agent' ? t('user.agent_member') : t('user.individual_member')) %></p>
 
                     <%# Presence, so a buyer can tell whether a message is likely to be

@@ -543,3 +543,35 @@ CREATE TABLE IF NOT EXISTS listing_boosts (
 CREATE INDEX IF NOT EXISTS idx_listing_boosts_user ON listing_boosts(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_listing_boosts_listing ON listing_boosts(listing_id);
 
+
+-- ---------------------------------------------------------------------------
+-- Yonetici tarafindan verilen uye rozetleri
+-- ---------------------------------------------------------------------------
+-- Rozetin ne oldugunu config/userBadges.js soyluyor; burada yalnizca anahtari
+-- duruyor. Katalog degistiginde veritabani semasina dokunmak gerekmesin diye
+-- CHECK listesi yok: karsiligi kalmamis bir anahtar profil sayfasini
+-- dusurmuyor, notr bir rozet olarak basiliyor.
+--
+-- UNIQUE(user_id, badge_key): ayni rozeti ikinci kez vermek uzatmadir,
+-- kopyalama degil. Ayin Emlakcisi'ni ust uste iki ay ayni kisiye vermek bitis
+-- tarihini oteliyor, profilinde iki ayni etiket birakmiyor.
+--
+-- expires_at bos ise rozet kalici. Donemsel unvanlar kendiliginden dusuyor:
+-- bir yil boyunca duran "Ayin Emlakcisi" hic rozet olmamasindan daha kotu,
+-- cunku ikinci ayin kazanani unvani dolu buluyor.
+--
+-- user_id CASCADE: silinmis bir uyenin rozetinin anlami yok. granted_by ise
+-- SET NULL, rozeti veren yonetici hesabi kapansa da rozet yerinde kaliyor.
+CREATE TABLE IF NOT EXISTS user_badges (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  badge_key TEXT NOT NULL,
+  note TEXT,
+  granted_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  granted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  expires_at DATETIME,
+  UNIQUE(user_id, badge_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_badges_user ON user_badges(user_id, granted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_badges_key ON user_badges(badge_key, expires_at);
