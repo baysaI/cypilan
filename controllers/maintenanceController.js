@@ -18,6 +18,8 @@ const show = async (req, res) => {
             unlimitedLastChange: Setting.describe(Setting.KEYS.UNLIMITED_LISTINGS_MODE),
             recentListingsEnabled: Setting.getBool(Setting.KEYS.SHOW_RECENT_LISTINGS, false),
             recentListingsLastChange: Setting.describe(Setting.KEYS.SHOW_RECENT_LISTINGS),
+            loginRequiredEnabled: Setting.getBool(Setting.KEYS.LOGIN_REQUIRED, false),
+            loginRequiredLastChange: Setting.describe(Setting.KEYS.LOGIN_REQUIRED),
             pendingReports,
             activePage: 'maintenance',
             title: 'Sistem Ayarları'
@@ -98,10 +100,29 @@ const updateRecentListings = async (req, res) => {
     }
 };
 
+const updateLoginRequired = async (req, res) => {
+    try {
+        const enabled = Boolean(req.body.enabled);
+        Setting.setBool(Setting.KEYS.LOGIN_REQUIRED, enabled, req.session.userId);
+
+        console.log(
+            `[LoginRequired] ${enabled ? 'AÇILDI' : 'kapatıldı'} — kullanıcı #${req.session.userId}`
+        );
+
+        req.flash('success', enabled ? 'flash.login_required_mode_on' : 'flash.login_required_mode_off');
+        res.redirect('/admin/bakim');
+    } catch (error) {
+        console.error('Login Required Update Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/bakim');
+    }
+};
+
 module.exports = {
     show,
     update,
     updateUnlimited,
     updateRecentListings,
+    updateLoginRequired,
     MAX_MESSAGE
 };

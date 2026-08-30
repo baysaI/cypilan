@@ -100,6 +100,18 @@
         </div>
     <% } %>
 
+    <% if (typeof loginRequiredBypass !== 'undefined' && loginRequiredBypass) { %>
+        <div class="bg-dark text-white py-2">
+            <div class="container d-flex flex-wrap align-items-center gap-2 small">
+                <i class="fa-solid fa-user-lock"></i>
+                <strong><%= t('access.admin_banner') %></strong>
+                <a href="/admin/bakim" class="text-white text-decoration-underline ms-auto fw-semibold">
+                    <%= t('access.admin_banner_action') %>
+                </a>
+            </div>
+        </div>
+    <% } %>
+
     <% if (typeof previewBanner !== 'undefined' && previewBanner) { %>
         <div class="bg-warning text-dark py-2 border-bottom border-warning-subtle">
             <div class="container d-flex flex-wrap align-items-center gap-2 small">

@@ -17,6 +17,7 @@ const themeMiddleware = require('./middlewares/theme');
 const { setUserLocal } = require('./middlewares/auth');
 const { csrfProtection } = require('./middlewares/csrf');
 const maintenanceMiddleware = require('./middlewares/maintenance');
+const loginRequiredMiddleware = require('./middlewares/loginRequired');
 const routes = require('./routes/index');
 
 const app = express();
@@ -238,6 +239,11 @@ app.use((req, res, next) => {
 // so the closed-for-maintenance page can be rendered in the visitor's language
 // and an admin can be recognised and let through.
 app.use(maintenanceMiddleware);
+
+// After maintenance, because a closed site is closed to members too: when both
+// switches are on the visitor should be told the site is down, not sent to a
+// login page that leads back to the same 503.
+app.use(loginRequiredMiddleware);
 
 app.use('/', routes);
 

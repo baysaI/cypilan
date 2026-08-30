@@ -1,4 +1,8 @@
 {
+  "access": {
+    "admin_banner": "Members-only mode is on — only signed-in members can see the site.",
+    "admin_banner_action": "Access settings"
+  },
   "admin": {
     "activate": "Activate",
     "analytics_title": "Visitor & Ad Analytics",
@@ -528,6 +532,8 @@
     "login_failed": "Something went wrong while signing in.",
     "login_required": "Please sign in.",
     "login_required_first": "Please sign in first.",
+    "login_required_mode_off": "Members-only mode is off. The site is public again.",
+    "login_required_mode_on": "Members-only mode is on. Only signed-in members can see the site now.",
     "login_success": "You are now signed in.",
     "maintenance_no_user_login": "Maintenance mode is active. Currently only administrators can log in.",
     "maintenance_off": "Maintenance mode is off. The site is running normally.",
@@ -601,6 +607,7 @@
     "session_open_failed": "Something went wrong opening your session.",
     "session_start_failed": "The session could not be started. Please try again.",
     "set_password_before_email": "Set a password before changing your e-mail address.",
+    "site_login_required": "You need to sign in to view this page.",
     "title_required": "A listing title is required.",
     "title_too_long": "A listing title can be at most {max} characters.",
     "unlimited_mode_off": "Unlimited listings mode disabled. The 3 free listings quota is back in effect.",

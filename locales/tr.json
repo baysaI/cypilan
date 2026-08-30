@@ -1,4 +1,8 @@
 {
+  "access": {
+    "admin_banner": "Kayıtla görüntüleme açık — siteyi yalnızca giriş yapmış üyeler görebiliyor.",
+    "admin_banner_action": "Erişim ayarları"
+  },
   "admin": {
     "activate": "Aktifleştir",
     "analytics_title": "Ziyaretçi & İlan Analitiği",
@@ -528,6 +532,8 @@
     "login_failed": "Giriş işlemi sırasında bir hata oluştu.",
     "login_required": "Lütfen giriş yapın.",
     "login_required_first": "Lütfen önce giriş yapın.",
+    "login_required_mode_off": "Kayıtla görüntüleme kapatıldı. Site yeniden herkese açık.",
+    "login_required_mode_on": "Kayıtla görüntüleme açıldı. Siteyi artık yalnızca giriş yapmış üyeler görebilir.",
     "login_success": "Başarıyla giriş yaptınız.",
     "maintenance_no_user_login": "Bakım modu aktif. Şu anda sadece yöneticiler giriş yapabilir.",
     "maintenance_off": "Bakım modu kapatıldı. Site normal çalışıyor.",
@@ -601,6 +607,7 @@
     "session_open_failed": "Oturum açılırken hata oluştu.",
     "session_start_failed": "Oturum başlatılamadı. Lütfen tekrar deneyin.",
     "set_password_before_email": "E-posta adresinizi değiştirmeden önce bir şifre belirlemelisiniz.",
+    "site_login_required": "Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.",
     "title_required": "İlan başlığı zorunludur.",
     "title_too_long": "İlan başlığı en fazla {max} karakter olabilir.",
     "unlimited_mode_off": "Sınırsız ilan modu kapatıldı. 3 ücretsiz ilan kotası tekrar devrede.",

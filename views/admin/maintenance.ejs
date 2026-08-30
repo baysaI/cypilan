@@ -7,6 +7,8 @@ const maintUntil = typeof until !== 'undefined' ? until : '';
 const maintLast = typeof lastChange !== 'undefined' ? lastChange : null;
 const unlimLast = typeof unlimitedLastChange !== 'undefined' ? unlimitedLastChange : null;
 const recentLast = typeof recentListingsLastChange !== 'undefined' ? recentListingsLastChange : null;
+const isLoginRequiredOn = typeof loginRequiredEnabled !== 'undefined' && Boolean(loginRequiredEnabled);
+const loginLast = typeof loginRequiredLastChange !== 'undefined' ? loginRequiredLastChange : null;
 %>
 
 <div class="mb-4">
@@ -192,6 +194,102 @@ const recentLast = typeof recentListingsLastChange !== 'undefined' ? recentListi
                         <% } %>
                         <br>
                         <span class="text-muted"><%= helpers.timeAgo(unlimLast.updated_at, lang) %></span>
+                    </p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<hr class="border-secondary my-4">
+
+<!-- Members-Only (Login Required) Mode Card -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle bg-dark bg-opacity-10 text-dark p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fa-solid fa-user-lock fs-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="fs-6 fw-bold mb-0">Kayıtla Görüntüleme (Üyelere Özel Site)</h2>
+                        <span class="text-muted small">Siteyi yalnızca giriş yapmış üyelerin görebilmesi</span>
+                    </div>
+                </div>
+
+                <% if (isLoginRequiredOn) { %>
+                    <div class="alert alert-warning border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="fa-solid fa-lock fs-4 mt-1 text-warning"></i>
+                        <div>
+                            <strong class="d-block">Kayıtla Görüntüleme AÇIK — site üyelere özel</strong>
+                            <span class="small">
+                                Giriş yapmamış ziyaretçiler <strong>hiçbir sayfayı göremiyor</strong>, giriş sayfasına yönlendiriliyorlar. Kayıt ve giriş yolları ile yönetici paneli açık kalır.
+                            </span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-info border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="fa-solid fa-globe fs-4 mt-1 text-primary"></i>
+                        <div>
+                            <strong class="d-block">Site Herkese Açık</strong>
+                            <span class="small">
+                                Ziyaretçiler üye olmadan tüm ilanları görüntüleyebiliyor ve arama motorları siteyi tarayabiliyor.
+                            </span>
+                        </div>
+                    </div>
+                <% } %>
+
+                <form action="/admin/kayitla-goruntuleme" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                    <div class="form-check form-switch mb-4 p-3 bg-light rounded-4 border">
+                        <input class="form-check-input ms-0 me-3 cursor-pointer" type="checkbox" role="switch"
+                               name="enabled" value="1" id="loginRequiredSwitch"
+                               style="width: 3.2rem; height: 1.6rem;"
+                               <%= isLoginRequiredOn ? 'checked' : '' %>>
+                        <label class="form-check-label fw-bold cursor-pointer" for="loginRequiredSwitch">
+                            <%= isLoginRequiredOn ? 'Kayıtla Görüntülemeyi Kapat (Siteyi Herkese Aç)' : 'Kayıtla Görüntülemeyi Aç (Yalnızca Üyeler Görsün)' %>
+                        </label>
+                        <div class="form-text small mt-1 ms-0">
+                            Açıldığında: Giriş yapmamış herkes giriş sayfasına yönlendirilir. Gitmek istediği adres hatırlanır, giriş yaptıktan sonra oraya döner.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn <%= isLoginRequiredOn ? 'btn-outline-danger' : 'btn-dark' %> fw-medium px-4">
+                        <i class="fa-solid fa-user-lock me-2"></i><%= isLoginRequiredOn ? 'Siteyi Herkese Aç' : 'Kayıtla Görüntülemeyi Etkinleştir' %>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h3 class="fs-6 fw-bold mb-3"><i class="fa-solid fa-circle-info text-primary me-2"></i>Bu Mod Neleri Değiştirir?</h3>
+                <ul class="small text-muted mb-0 ps-3">
+                    <li class="mb-2"><strong>Tüm sayfalar:</strong> Ana sayfa, ilanlar ve kategoriler dahil hiçbir sayfa giriş yapmadan görüntülenemez.</li>
+                    <li class="mb-2"><strong>Açık kalanlar:</strong> Giriş, kayıt, şifre sıfırlama, Google ile giriş ve yönetici paneli. Aksi halde siteye kimse giremezdi.</li>
+                    <li class="mb-2"><strong>Dönüş yolu:</strong> Ziyaretçinin gitmek istediği adres hatırlanır; giriş yaptıktan sonra o sayfaya döner.</li>
+                    <li class="mb-2"><strong>Sayfa içi istekler:</strong> API çağrılarına yönlendirme yerine 401 döner, böylece giriş sayfası veri sanılmaz.</li>
+                    <li class="mb-2"><strong class="text-danger">Arama motorları:</strong> Google siteyi tarayamaz. Uzun süre açık kalırsa ilanlarınız arama sonuçlarından düşer — bu modu kalıcı olarak açık tutmadan önce bunu göze aldığınızdan emin olun.</li>
+                    <li class="mb-0"><strong>Görseller:</strong> Doğrudan adresi bilinen ilan görselleri yine açılabilir; yüklenen dosyalar bu kapının öncesinde sunuluyor.</li>
+                </ul>
+            </div>
+        </div>
+
+        <% if (loginLast) { %>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="fs-6 fw-bold mb-2">Erişim Ayarı Son Değişiklik</h3>
+                    <p class="small text-muted mb-0">
+                        Durum: <strong><%= loginLast.value === '1' ? 'Kayıtla Görüntüleme Açık' : 'Site Herkese Açık' %></strong>
+                        <% if (loginLast.updated_by_name) { %>
+                            &middot; <%= loginLast.updated_by_name %>
+                        <% } %>
+                        <br>
+                        <span class="text-muted"><%= helpers.timeAgo(loginLast.updated_at, lang) %></span>
                     </p>
                 </div>
             </div>
