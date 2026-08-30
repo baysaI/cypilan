@@ -607,7 +607,7 @@
     "session_open_failed": "Something went wrong opening your session.",
     "session_start_failed": "The session could not be started. Please try again.",
     "set_password_before_email": "Set a password before changing your e-mail address.",
-    "site_login_required": "You need to sign in to view this page.",
+    "site_login_required": "This page is for members. Sign in and you will continue right where you left off; if you do not have an account yet, signing up is free.",
     "title_required": "A listing title is required.",
     "title_too_long": "A listing title can be at most {max} characters.",
     "unlimited_mode_off": "Unlimited listings mode disabled. The 3 free listings quota is back in effect.",

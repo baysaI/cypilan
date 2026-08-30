@@ -607,7 +607,7 @@
     "session_open_failed": "Oturum açılırken hata oluştu.",
     "session_start_failed": "Oturum başlatılamadı. Lütfen tekrar deneyin.",
     "set_password_before_email": "E-posta adresinizi değiştirmeden önce bir şifre belirlemelisiniz.",
-    "site_login_required": "Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.",
+    "site_login_required": "Bu sayfa üyelerimize özel. Giriş yaptıktan sonra kaldığınız yerden devam edeceksiniz; hesabınız yoksa ücretsiz üye olabilirsiniz.",
     "title_required": "İlan başlığı zorunludur.",
     "title_too_long": "İlan başlığı en fazla {max} karakter olabilir.",
     "unlimited_mode_off": "Sınırsız ilan modu kapatıldı. 3 ücretsiz ilan kotası tekrar devrede.",

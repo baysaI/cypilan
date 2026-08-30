@@ -56,6 +56,12 @@ t.run('Kayıtla görüntüleme modu', async (db) => {
     guest.req.flashed[0] && guest.req.flashed[0].message, 'flash.site_login_required',
     'Ziyaretçiye neden yönlendirildiği söyleniyor'
   );
+  // Kirmizi hata kutusu ziyaretciye bir sey bozuldugunu dusundururdu; oysa
+  // yanlis yaptigi bir sey yok, kendisine durumu anlatiyoruz.
+  t.assertEqual(
+    guest.req.flashed[0] && guest.req.flashed[0].type, 'info',
+    'Mesaj hata değil, bilgilendirme olarak gösteriliyor'
+  );
 
   // Giris yaptiktan sonra gitmek istedigi yere donmeli; yoksa her ziyaretci ana
   // sayfaya dusuyor ve tikladigi ilani yeniden aramak zorunda kaliyor.

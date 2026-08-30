@@ -86,8 +86,10 @@ const loginRequiredMiddleware = (req, res, next) => {
     req.session.returnTo = req.originalUrl;
   }
 
+  // 'info', 'error' degil: ziyaretci bir sey yanlis yapmadi. Kirmizi hata
+  // kutusu sitenin bozuldugunu dusundurur; buradaki mesaj bir aciklama.
   if (typeof req.flash === 'function') {
-    req.flash('error', 'flash.site_login_required');
+    req.flash('info', 'flash.site_login_required');
   }
 
   return res.redirect('/auth/login');
