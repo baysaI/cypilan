@@ -9,6 +9,8 @@ const unlimLast = typeof unlimitedLastChange !== 'undefined' ? unlimitedLastChan
 const recentLast = typeof recentListingsLastChange !== 'undefined' ? recentListingsLastChange : null;
 const isLoginRequiredOn = typeof loginRequiredEnabled !== 'undefined' && Boolean(loginRequiredEnabled);
 const loginLast = typeof loginRequiredLastChange !== 'undefined' ? loginRequiredLastChange : null;
+const isDevNoticeOn = typeof devNoticeEnabled === 'undefined' || Boolean(devNoticeEnabled);
+const devNoticeLast = typeof devNoticeLastChange !== 'undefined' ? devNoticeLastChange : null;
 %>
 
 <div class="mb-4">
@@ -194,6 +196,108 @@ const loginLast = typeof loginRequiredLastChange !== 'undefined' ? loginRequired
                         <% } %>
                         <br>
                         <span class="text-muted"><%= helpers.timeAgo(unlimLast.updated_at, lang) %></span>
+                    </p>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<hr class="border-secondary my-4">
+
+<!-- Development Notice Strip Card -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle bg-secondary bg-opacity-10 text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fa-solid fa-flask fs-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="fs-6 fw-bold mb-0">Geliştirme Notu Şeridi</h2>
+                        <span class="text-muted small">Sitenin üstündeki "geliştirme aşamasında" satırı</span>
+                    </div>
+                </div>
+
+                <% if (isDevNoticeOn) { %>
+                    <div class="alert alert-info border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="fa-solid fa-circle-info fs-4 mt-1 text-primary"></i>
+                        <div>
+                            <strong class="d-block">Not Gösteriliyor</strong>
+                            <span class="small">
+                                Ziyaretçiler içeriğin üstünde tek satırlık bir not görüyor; tıklayınca Öneri / Hata Bildir formu açılıyor.
+                            </span>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-secondary border-0 d-flex gap-3 align-items-start mb-4">
+                        <i class="fa-solid fa-eye-slash fs-4 mt-1 text-secondary"></i>
+                        <div>
+                            <strong class="d-block">Not Kapalı</strong>
+                            <span class="small">
+                                Site notsuz görünüyor. Geri bildirim formuna footer ve hesap menüsünden ulaşılmaya devam ediyor.
+                            </span>
+                        </div>
+                    </div>
+                <% } %>
+
+                <div class="bg-light rounded-4 border p-3 mb-4">
+                    <div class="text-muted mb-1" style="font-size: 0.72rem;">Ziyaretçinin gördüğü:</div>
+                    <div class="text-center text-body-secondary" style="font-size: 0.78rem;">
+                        <%= t('site.dev_notice') %>
+                        <span class="text-decoration-underline"><%= t('site.dev_notice_action') %></span>
+                    </div>
+                </div>
+
+                <form action="/admin/gelistirme-notu" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                    <div class="form-check form-switch mb-4 p-3 bg-light rounded-4 border">
+                        <input class="form-check-input ms-0 me-3 cursor-pointer" type="checkbox" role="switch"
+                               name="enabled" value="1" id="devNoticeSwitch"
+                               style="width: 3.2rem; height: 1.6rem;"
+                               <%= isDevNoticeOn ? 'checked' : '' %>>
+                        <label class="form-check-label fw-bold cursor-pointer" for="devNoticeSwitch">
+                            <%= isDevNoticeOn ? 'Geliştirme Notunu Kaldır' : 'Geliştirme Notunu Göster' %>
+                        </label>
+                        <div class="form-text small mt-1 ms-0">
+                            Site yayına hazır hâle geldiğinde buradan kapatın; kod değişikliği gerekmez.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn <%= isDevNoticeOn ? 'btn-outline-secondary' : 'btn-primary' %> fw-medium px-4">
+                        <i class="fa-solid fa-flask me-2"></i><%= isDevNoticeOn ? 'Notu Kaldır' : 'Notu Göster' %>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h3 class="fs-6 fw-bold mb-3"><i class="fa-solid fa-circle-info text-primary me-2"></i>Not Hakkında</h3>
+                <ul class="small text-muted mb-0 ps-3">
+                    <li class="mb-2"><strong>Yeri:</strong> Sitenin üst kısmında, içeriğin hemen üstünde tek satır.</li>
+                    <li class="mb-2"><strong>Tıklayınca:</strong> Öneri / Hata Bildir formu açılıyor — yeni sayfa açılmıyor.</li>
+                    <li class="mb-2"><strong>Kapatılabilir:</strong> Ziyaretçi × ile kapatınca kendi tarayıcısında bir daha görmüyor.</li>
+                    <li class="mb-0"><strong>Varsayılan açık:</strong> Ayar hiç değiştirilmemişse not gösterilir.</li>
+                </ul>
+            </div>
+        </div>
+
+        <% if (devNoticeLast) { %>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="fs-6 fw-bold mb-2">Not Ayarı Son Değişiklik</h3>
+                    <p class="small text-muted mb-0">
+                        Durum: <strong><%= devNoticeLast.value === '1' ? 'Gösteriliyor' : 'Kapalı' %></strong>
+                        <% if (devNoticeLast.updated_by_name) { %>
+                            &middot; <%= devNoticeLast.updated_by_name %>
+                        <% } %>
+                        <br>
+                        <span class="text-muted"><%= helpers.timeAgo(devNoticeLast.updated_at, lang) %></span>
                     </p>
                 </div>
             </div>

@@ -83,7 +83,8 @@ Setting.KEYS = {
   MAINTENANCE_UNTIL: 'maintenance.until',
   UNLIMITED_LISTINGS_MODE: 'listings.unlimited_mode',
   SHOW_RECENT_LISTINGS: 'homepage.show_recent_listings',
-  LOGIN_REQUIRED: 'access.login_required'
+  LOGIN_REQUIRED: 'access.login_required',
+  DEV_NOTICE: 'site.dev_notice_enabled'
 };
 
 Setting.CACHE_TTL_MS = CACHE_TTL_MS;

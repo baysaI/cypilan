@@ -20,6 +20,8 @@ const show = async (req, res) => {
             recentListingsLastChange: Setting.describe(Setting.KEYS.SHOW_RECENT_LISTINGS),
             loginRequiredEnabled: Setting.getBool(Setting.KEYS.LOGIN_REQUIRED, false),
             loginRequiredLastChange: Setting.describe(Setting.KEYS.LOGIN_REQUIRED),
+            devNoticeEnabled: Setting.getBool(Setting.KEYS.DEV_NOTICE, true),
+            devNoticeLastChange: Setting.describe(Setting.KEYS.DEV_NOTICE),
             pendingReports,
             activePage: 'maintenance',
             title: 'Sistem Ayarları'
@@ -118,11 +120,32 @@ const updateLoginRequired = async (req, res) => {
     }
 };
 
+const updateDevNotice = async (req, res) => {
+    try {
+        const enabled = Boolean(req.body.enabled);
+        Setting.setBool(Setting.KEYS.DEV_NOTICE, enabled, req.session.userId);
+
+        console.log(
+            `[DevNotice] ${enabled ? 'AÇILDI' : 'kapatıldı'} — kullanıcı #${req.session.userId}`
+        );
+
+        req.flash('success', enabled
+            ? 'Geliştirme notu sitede gösteriliyor.'
+            : 'Geliştirme notu kaldırıldı. Site notsuz görünüyor.');
+        res.redirect('/admin/bakim');
+    } catch (error) {
+        console.error('Dev Notice Update Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/bakim');
+    }
+};
+
 module.exports = {
     show,
     update,
     updateUnlimited,
     updateRecentListings,
     updateLoginRequired,
+    updateDevNotice,
     MAX_MESSAGE
 };

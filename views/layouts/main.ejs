@@ -166,56 +166,59 @@
         </div>
     <% } %>
 
-    <%# Site gelistirme asamasinda oldugunu soyleyen sessiz bir not.
+    <% if (typeof devNoticeEnabled === 'undefined' || devNoticeEnabled) { %>
+        <%# Site gelistirme asamasinda oldugunu soyleyen sessiz bir not.
 
-        Ilk hali sari bir uyari seridiydi ve yanlis seyi soyluyordu: tam
-        genislikte renkli bir cubuk, tarayicinin "bir sey ters gitti" kalibi.
-        Ziyaretci sitede bir ariza oldugunu sanip geri donuyordu. Oysa mesaj bir
-        alarm degil, bir davet.
+            Ilk hali sari bir uyari seridiydi ve yanlis seyi soyluyordu: tam
+            genislikte renkli bir cubuk, tarayicinin "bir sey ters gitti" kalibi.
+            Ziyaretci sitede bir ariza oldugunu sanip geri donuyordu. Oysa mesaj bir
+            alarm degil, bir davet.
 
-        Bu yuzden rengi yok: govde rengiyle ayni zeminde, ikincil metin
-        tonunda, tek satir ve kucuk punto. Tema degisince de dogru kalsin diye
-        Bootstrap'in tema degiskenleri kullanildi - bg-warning-subtle karanlik
-        temada koyu kahveye donuyor ve daha da cok uyari gibi duruyordu.
+            Bu yuzden rengi yok: govde rengiyle ayni zeminde, ikincil metin
+            tonunda, tek satir ve kucuk punto. Tema degisince de dogru kalsin diye
+            Bootstrap'in tema degiskenleri kullanildi - bg-warning-subtle karanlik
+            temada koyu kahveye donuyor ve daha da cok uyari gibi duruyordu.
 
-        Kapatilinca localStorage'a yaziliyor; ayni ziyaretciye her sayfada
-        tekrar gostermek notun kendisinden daha rahatsiz edici olurdu. Serit
-        varsayilan olarak gizli basilip kapatilmamissa aciliyor: tersi, coktan
-        kapatmis olan herkese her sayfa yuklemesinde bir an yanip sonen bir
-        cubuk gosterirdi. %>
-    <div id="devNoticeBar" class="border-bottom d-none">
-        <div class="container position-relative py-1">
-            <div class="text-center text-body-secondary lh-sm" style="font-size: 0.78rem;">
-                <%= t('site.dev_notice') %>
-                <button type="button" class="btn btn-link p-0 align-baseline text-body-secondary lh-sm"
-                        style="font-size: 0.78rem;" data-bs-toggle="modal" data-bs-target="#feedbackModal">
-                    <%= t('site.dev_notice_action') %>
-                </button>
+            Kapatilinca localStorage'a yaziliyor; ayni ziyaretciye her sayfada
+            tekrar gostermek notun kendisinden daha rahatsiz edici olurdu. Serit
+            varsayilan olarak gizli basilip kapatilmamissa aciliyor: tersi, coktan
+            kapatmis olan herkese her sayfa yuklemesinde bir an yanip sonen bir
+            cubuk gosterirdi. %>
+        <div id="devNoticeBar" class="border-bottom d-none">
+            <div class="container position-relative py-1">
+                <div class="text-center text-body-secondary lh-sm" style="font-size: 0.78rem;">
+                    <%= t('site.dev_notice') %>
+                    <button type="button" class="btn btn-link p-0 align-baseline text-body-secondary lh-sm"
+                            style="font-size: 0.78rem;" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                        <%= t('site.dev_notice_action') %>
+                    </button>
+                </div>
+                <button type="button" class="btn-close position-absolute top-50 end-0 translate-middle-y me-2"
+                        style="font-size: 0.5rem; opacity: 0.3;" id="devNoticeClose"
+                        aria-label="<%= t('common.close') || 'Kapat' %>"></button>
             </div>
-            <button type="button" class="btn-close position-absolute top-50 end-0 translate-middle-y me-2"
-                    style="font-size: 0.5rem; opacity: 0.3;" id="devNoticeClose"
-                    aria-label="<%= t('common.close') || 'Kapat' %>"></button>
         </div>
-    </div>
 
-    <script>
-        (function () {
-            var bar = document.getElementById('devNoticeBar');
-            if (!bar) return;
-            var KEY = 'cypDevNoticeDismissed';
-            var dismissed = false;
-            try { dismissed = localStorage.getItem(KEY) === '1'; } catch (e) {}
-            if (!dismissed) bar.classList.remove('d-none');
+        <script>
+            (function () {
+                var bar = document.getElementById('devNoticeBar');
+                if (!bar) return;
+                var KEY = 'cypDevNoticeDismissed';
+                var dismissed = false;
+                try { dismissed = localStorage.getItem(KEY) === '1'; } catch (e) {}
+                if (!dismissed) bar.classList.remove('d-none');
 
-            var close = document.getElementById('devNoticeClose');
-            if (close) {
-                close.addEventListener('click', function () {
-                    bar.classList.add('d-none');
-                    try { localStorage.setItem(KEY, '1'); } catch (e) {}
-                });
-            }
-        })();
-    </script>
+                var close = document.getElementById('devNoticeClose');
+                if (close) {
+                    close.addEventListener('click', function () {
+                        bar.classList.add('d-none');
+                        try { localStorage.setItem(KEY, '1'); } catch (e) {}
+                    });
+                }
+            })();
+        </script>
+
+    <% } %>
 
     <main id="content" role="main" class="flex-grow-1">
         <%- body %>

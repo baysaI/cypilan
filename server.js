@@ -222,11 +222,23 @@ const listingBadges = require('./config/listingBadges');
 // Ayni gerekce uye rozetleri icin de gecerli: profil basligi, ilandaki
 // satici kutusu ve yonetici ekrani ayni katalogu okuyor.
 const userBadges = require('./config/userBadges');
+const Setting = require('./models/Setting');
 app.use((req, res, next) => {
   res.locals.helpers = helpers;
   res.locals.cities = cities;
   res.locals.listingBadges = listingBadges;
   res.locals.userBadges = userBadges;
+
+  // Gelistirme notu varsayilan olarak acik: ayar hic yazilmamissa site
+  // gelistirme asamasindadir. Kapatmak bir karar, acik olmak varsayilan.
+  try {
+    res.locals.devNoticeEnabled = Setting.getBool(Setting.KEYS.DEV_NOTICE, true);
+  } catch (error) {
+    // Anahtar okunamazsa not gosterilmiyor. Bakim modunun tersi bir tercih ve
+    // sebebi ayni: bir veritabani tikanmasinin sonucu, ziyaretcinin her
+    // sayfada gordugu bir serit olmamali.
+    res.locals.devNoticeEnabled = false;
+  }
   res.locals.currentPath = req.path;
   res.locals.assetVersion = ASSET_VERSION;
   // Absolute URLs in the page (canonical, og:image, structured data) follow the

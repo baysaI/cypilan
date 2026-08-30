@@ -75,6 +75,7 @@ router.post('/bakim', maintenanceController.update);
 router.post('/sinirsiz-ilan', maintenanceController.updateUnlimited);
 router.post('/son-ilanlar-ayari', maintenanceController.updateRecentListings);
 router.post('/kayitla-goruntuleme', maintenanceController.updateLoginRequired);
+router.post('/gelistirme-notu', maintenanceController.updateDevNotice);
 
 const broadcastController = require('../controllers/broadcastController');
 router.get('/duyuru', broadcastController.compose);
