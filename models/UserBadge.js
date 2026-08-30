@@ -115,6 +115,60 @@ class UserBadge {
     `).all([badgeKey]);
   }
 
+  // Panel ozeti: kac rozet dagitildi ve kac uyeye. Iki ayri sayi, cunku bir
+  // uyenin uc rozeti olabiliyor ve "3 rozet" ile "3 rozetli uye" ayni sey degil.
+  static stats() {
+    const db = getDb();
+    return db.prepare(`
+      SELECT COUNT(*) AS total_badges,
+             COUNT(DISTINCT user_id) AS members
+      FROM user_badges
+      WHERE ${ACTIVE}
+    `).get() || { total_badges: 0, members: 0 };
+  }
+
+  // Rozet basina gecerli tasiyici sayisi. Katalogda olup kimseye verilmemis
+  // rozetler burada cikmiyor; onlari cagiran taraf katalogla birlestiriyor.
+  static summary() {
+    const db = getDb();
+    const rows = db.prepare(`
+      SELECT badge_key, COUNT(*) AS holders
+      FROM user_badges
+      WHERE ${ACTIVE}
+      GROUP BY badge_key
+    `).all();
+
+    const map = new Map();
+    rows.forEach((row) => map.set(row.badge_key, row.holders));
+    return map;
+  }
+
+  // Kimin hangi rozeti aldiginin listesi. Suresi dolanlar da geliyor: "gecen
+  // ay kime vermistik" sorusunun cevabi tam olarak orada.
+  static recentGrants(page = 1, limit = 25) {
+    const db = getDb();
+    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 25, 1), 100);
+    const safePage = Math.max(parseInt(page, 10) || 1, 1);
+    const offset = (safePage - 1) * safeLimit;
+
+    const total = db.prepare('SELECT COUNT(*) AS total FROM user_badges').get().total;
+
+    const data = db.prepare(`
+      SELECT ub.user_id, ub.badge_key, ub.note, ub.granted_at, ub.expires_at,
+             u.full_name, u.company_name, u.email, u.role,
+             g.full_name AS granted_by_name,
+             CASE WHEN ub.expires_at IS NOT NULL AND ub.expires_at <= CURRENT_TIMESTAMP
+                  THEN 1 ELSE 0 END AS is_expired
+      FROM user_badges ub
+      JOIN users u ON ub.user_id = u.id
+      LEFT JOIN users g ON ub.granted_by = g.id
+      ORDER BY ub.granted_at DESC, ub.id DESC
+      LIMIT ? OFFSET ?
+    `).all([safeLimit, offset]);
+
+    return { data, total, page: safePage, pages: Math.max(1, Math.ceil(total / safeLimit)) };
+  }
+
   static countActive(userId) {
     const db = getDb();
     const row = db.prepare(

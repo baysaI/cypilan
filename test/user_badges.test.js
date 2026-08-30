@@ -94,6 +94,28 @@ t.run('Kullanıcı rozetleri', async (db) => {
   t.assert(!UserBadge.revoke(agent, 'top_rated'), 'Olmayan rozeti kaldırmak false dönüyor');
   t.assertEqual(UserBadge.countActive(agent), 1, 'Kaldırma sonrası sayı doğru');
 
+  // --- Panel ozeti
+  const stats = UserBadge.stats();
+  t.assertEqual(stats.total_badges, UserBadge.countActive(seller) + UserBadge.countActive(agent), 'Özet geçerli rozetleri sayıyor');
+  t.assertEqual(stats.members, 2, 'Rozetli üye sayısı ayrı hesaplanıyor (rozet sayısıyla aynı şey değil)');
+
+  const summary = UserBadge.summary();
+  t.assertEqual(summary.get('verified_seller'), 1, 'Rozet başına taşıyıcı sayılıyor');
+  t.assertEqual(summary.get('seller_of_month'), undefined, 'Süresi dolan rozet özette görünmüyor');
+
+  const grants = UserBadge.recentGrants(1, 25);
+  t.assert(grants.total >= 3, 'Kayıt listesi süresi dolanları da içeriyor');
+  t.assert(grants.data.some((g) => g.is_expired === 1), 'Süresi dolan kayıt işaretli');
+  t.assert(grants.data.every((g) => g.granted_by_name === 'Admin'), 'Rozeti kimin verdiği listede');
+  t.assertEqual(UserBadge.recentGrants(1, 1).pages, grants.total, 'Kayıt listesi sayfalanıyor');
+
+  const overviewHtml = await t.render('admin/badges.ejs', {
+    stats, catalog: catalog.BADGES, holderCounts: summary, grants, title: 'test'
+  });
+  t.assert(overviewHtml.includes('Onaylı Satıcı'), 'Panel özetinde rozet adı basılıyor');
+  t.assert(overviewHtml.includes('Ayşe Satıcı'), 'Rozet alan üye panelde listeleniyor');
+  t.assert(overviewHtml.includes('Kurucu Üye'), 'Kimseye verilmemiş rozet de katalogda görünüyor');
+
   // --- Sablonlar
   const badgeHtml = await t.render('partials/userBadges.ejs', {
     badges: UserBadge.forUser(seller)

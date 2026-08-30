@@ -1,0 +1,179 @@
+<%
+    const replyRate = stats.conversations > 0
+        ? Math.round((stats.twoWayConversations / stats.conversations) * 100)
+        : 0;
+    const peak = daily.reduce(function (max, d) { return Math.max(max, d.total); }, 0);
+%>
+
+<div class="mb-4">
+    <h1 class="h4 fw-bold mb-1">Mesajlaşma</h1>
+    <p class="text-muted small mb-0">Üyeler birbirine yazıyor mu, yazdıklarına cevap geliyor mu.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-3">
+                <div class="text-muted small">Toplam mesaj</div>
+                <div class="fs-3 fw-bold"><%= stats.totalMessages %></div>
+                <div class="text-muted" style="font-size: 0.72rem;"><%= stats.senders %> farklı gönderen</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-3">
+                <div class="text-muted small">Son 7 gün</div>
+                <div class="fs-3 fw-bold"><%= stats.lastWeek %></div>
+                <div class="text-muted" style="font-size: 0.72rem;">bugün <%= stats.lastDay %> &middot; 30 günde <%= stats.lastMonth %></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-3">
+                <div class="text-muted small">Sohbet</div>
+                <div class="fs-3 fw-bold"><%= stats.conversations %></div>
+                <div class="text-muted" style="font-size: 0.72rem;">aynı iki kişi + aynı ilan</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 <%= replyRate < 40 ? 'border-start border-4 border-warning' : '' %>">
+            <div class="card-body p-3">
+                <div class="text-muted small">Cevap alan sohbet</div>
+                <div class="fs-3 fw-bold"><%= stats.twoWayConversations %> <span class="fs-6 text-muted">/ %<%= replyRate %></span></div>
+                <div class="text-muted" style="font-size: 0.72rem;">karşı taraf en az bir kez yazmış</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%# Asil olcu bu: toplam mesaj sayisi tek yonlu yazismalarla da sisebilir.
+    Cevapsiz kalan sohbet, karsisinda kimseyi bulamamis bir alici demek. %>
+<% if (stats.conversations > 0 && replyRate < 40) { %>
+    <div class="alert alert-warning border-0 d-flex gap-3 align-items-start rounded-4 mb-4">
+        <i class="fa-solid fa-circle-exclamation fs-4 mt-1 text-warning"></i>
+        <div class="small">
+            <strong class="d-block">Sohbetlerin yalnızca %<%= replyRate %>'ine cevap gelmiş.</strong>
+            Mesaj gönderiliyor ama karşı taraf çoğunlukla dönmüyor. Bildirim gitmiyor olabilir ya da
+            satıcılar mesaj kutusunu fark etmiyor olabilir.
+        </div>
+    </div>
+<% } %>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <h2 class="fs-6 fw-bold mb-3">Son 14 Gün</h2>
+        <% if (!daily.length) { %>
+            <p class="text-muted small mb-0">Bu aralıkta hiç mesaj yok.</p>
+        <% } else { %>
+            <div class="d-flex align-items-end gap-1" style="height: 90px;">
+                <% daily.forEach(function (d) { %>
+                    <div class="flex-fill d-flex flex-column justify-content-end align-items-center h-100"
+                         title="<%= d.day %>: <%= d.total %> mesaj">
+                        <div class="w-100 bg-primary rounded-top"
+                             style="height: <%= peak ? Math.max(3, Math.round((d.total / peak) * 100)) : 3 %>%; min-height: 3px;"></div>
+                        <div class="text-muted mt-1" style="font-size: 0.6rem;"><%= d.day.slice(8) %></div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <h2 class="fs-6 fw-bold mb-0">Sohbetler</h2>
+            <form method="GET" action="/admin/mesajlar" class="d-flex gap-2">
+                <input type="search" name="q" class="form-control form-control-sm" style="min-width: 220px;"
+                       placeholder="İsim, e-posta, ilan ya da mesaj içinde ara" value="<%= filters.q %>">
+                <button class="btn btn-sm btn-outline-primary">Ara</button>
+                <% if (filters.q) { %>
+                    <a href="/admin/mesajlar" class="btn btn-sm btn-outline-secondary">Temizle</a>
+                <% } %>
+            </form>
+        </div>
+
+        <% if (!conversations.data.length) { %>
+            <p class="text-muted small mb-0">
+                <%= filters.q ? 'Aramanızla eşleşen sohbet yok.' : 'Henüz hiç mesajlaşma yok.' %>
+            </p>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle mb-0">
+                    <thead class="table-light small text-muted">
+                        <tr>
+                            <th>Taraflar</th>
+                            <th class="d-none d-md-table-cell">İlan</th>
+                            <th>Son mesaj</th>
+                            <th class="text-center">Mesaj</th>
+                            <th class="text-end">&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% conversations.data.forEach(function (row) { %>
+                            <%
+                                const threadUrl = '/admin/mesajlar/' + row.user_a + '/' + row.user_b
+                                    + (row.listing_id ? '?listing=' + row.listing_id : '');
+                                const preview = String(row.last_content || '');
+                            %>
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold small"><%= row.user_a_name || '#' + row.user_a %></div>
+                                    <div class="text-muted small">
+                                        <i class="fa-solid fa-arrows-up-down fa-xs me-1"></i><%= row.user_b_name || '#' + row.user_b %>
+                                    </div>
+                                </td>
+                                <td class="d-none d-md-table-cell small">
+                                    <% if (row.listing_title) { %>
+                                        <a href="/listings/<%= row.listing_slug %>" target="_blank" rel="noopener"
+                                           class="text-decoration-none text-truncate d-inline-block" style="max-width: 180px;">
+                                            <%= row.listing_title %>
+                                        </a>
+                                    <% } else { %>
+                                        <span class="text-muted">—</span>
+                                    <% } %>
+                                </td>
+                                <td class="small">
+                                    <div class="text-truncate" style="max-width: 320px;"><%= preview %></div>
+                                    <div class="text-muted" style="font-size: 0.72rem;"><%= helpers.timeAgo(row.last_at, lang) %></div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill bg-light text-dark border"><%= row.message_count %></span>
+                                    <% if (row.sides < 2) { %>
+                                        <div class="text-warning fw-semibold" style="font-size: 0.68rem;">cevapsız</div>
+                                    <% } %>
+                                </td>
+                                <td class="text-end">
+                                    <a href="<%= threadUrl %>" class="btn btn-sm btn-outline-primary rounded-pill px-3">Aç</a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <%- include('_pagination', {
+                pagination: { page: conversations.page, totalPages: conversations.pages, totalItems: conversations.total },
+                baseUrl: '/admin/mesajlar',
+                query: { q: filters.q }
+            }) %>
+        <% } %>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mt-4">
+    <div class="card-body p-4">
+        <h3 class="fs-6 fw-bold mb-2"><i class="fa-solid fa-shield-halved text-secondary me-2"></i>Bu Sayfa Hakkında</h3>
+        <p class="small text-muted mb-2">
+            Buradaki yazışmalar üyelerin birbirine özel olarak yazdığı mesajlar. Bir sohbeti açtığınızda
+            sunucu günlüğüne kimin hangi sohbeti ne zaman görüntülediği yazılıyor.
+        </p>
+        <p class="small text-muted mb-0">
+            Gizlilik politikanızda şu an mesajlardan hiç söz edilmiyor. Yöneticinin özel yazışmaları
+            okuyabildiğini oraya eklemek, KVKK açısından da üyelere karşı da doğru olan.
+        </p>
+    </div>
+</div>

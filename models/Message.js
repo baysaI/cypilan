@@ -41,6 +41,124 @@ class Message {
     return db.prepare(query).all(params);
   }
 
+  // --- Yonetici gorunumu ----------------------------------------------------
+  //
+  // Bir konusma = ayni iki kisi + ayni ilan. Yon onemsiz oldugu icin taraflar
+  // MIN/MAX ile siralaniyor: A'dan B'ye ve B'den A'ya giden mesajlar tek
+  // konusma sayilmazsa her sohbet listede iki kez gorunurdu.
+  static adminStats() {
+    const db = getDb();
+
+    const totals = db.prepare(`
+      SELECT COUNT(*) AS total_messages,
+             COUNT(DISTINCT sender_id) AS senders,
+             SUM(CASE WHEN created_at >= datetime('now', '-1 day') THEN 1 ELSE 0 END) AS last_day,
+             SUM(CASE WHEN created_at >= datetime('now', '-7 days') THEN 1 ELSE 0 END) AS last_week,
+             SUM(CASE WHEN created_at >= datetime('now', '-30 days') THEN 1 ELSE 0 END) AS last_month
+      FROM messages
+    `).get() || {};
+
+    // Asil soru "mesaj atiliyor mu" degil, "karsi taraf cevap veriyor mu".
+    // Tek yonlu bir konusma cogu zaman cevapsiz kalmis bir alici demek ve
+    // toplam mesaj sayisi bunu gizler.
+    const conversations = db.prepare(`
+      SELECT COUNT(*) AS total,
+             SUM(CASE WHEN sides > 1 THEN 1 ELSE 0 END) AS two_way
+      FROM (
+        SELECT COUNT(DISTINCT sender_id) AS sides
+        FROM messages
+        GROUP BY MIN(sender_id, receiver_id), MAX(sender_id, receiver_id), listing_id
+      )
+    `).get() || {};
+
+    return {
+      totalMessages: totals.total_messages || 0,
+      senders: totals.senders || 0,
+      lastDay: totals.last_day || 0,
+      lastWeek: totals.last_week || 0,
+      lastMonth: totals.last_month || 0,
+      conversations: conversations.total || 0,
+      twoWayConversations: conversations.two_way || 0
+    };
+  }
+
+  static adminDailyCounts(days = 14) {
+    const db = getDb();
+    const safeDays = Math.min(Math.max(parseInt(days, 10) || 14, 1), 90);
+
+    return db.prepare(`
+      SELECT date(created_at) AS day, COUNT(*) AS total
+      FROM messages
+      WHERE created_at >= datetime('now', ?)
+      GROUP BY day
+      ORDER BY day ASC
+    `).all(['-' + safeDays + ' days']);
+  }
+
+  static adminConversations({ q = '', page = 1, limit = 25 } = {}) {
+    const db = getDb();
+    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 25, 1), 100);
+    const safePage = Math.max(parseInt(page, 10) || 1, 1);
+    const offset = (safePage - 1) * safeLimit;
+
+    const term = String(q || '').trim();
+    const like = '%' + term + '%';
+
+    // MAX(id) son mesaji veriyor: id artan sirada yazildigi icin bu ayni
+    // zamanda kronolojik son mesap. Gruplamadan sonra o satira geri baglanmak,
+    // her konusma icin ayri bir alt sorgu calistirmaktan ucuz.
+    const base = `
+      FROM (
+        SELECT MIN(sender_id, receiver_id) AS user_a,
+               MAX(sender_id, receiver_id) AS user_b,
+               listing_id,
+               COUNT(*) AS message_count,
+               COUNT(DISTINCT sender_id) AS sides,
+               MAX(id) AS last_id,
+               MIN(created_at) AS started_at
+        FROM messages
+        GROUP BY MIN(sender_id, receiver_id), MAX(sender_id, receiver_id), listing_id
+      ) g
+      JOIN messages lm ON lm.id = g.last_id
+      LEFT JOIN users ua ON ua.id = g.user_a
+      LEFT JOIN users ub ON ub.id = g.user_b
+      LEFT JOIN listings l ON l.id = g.listing_id
+    `;
+
+    // Icerik aramasi konusmanin tamamina bakiyor, yalnizca son mesaja degil.
+    // Once oyleydi ve sessizce yaniltiyordu: bir kelimeyi arayan yonetici, o
+    // kelimenin gectigi ama sohbetin baska bir cumleyle bittigi yazismalari
+    // hic gormuyordu. Kucuk bir sitede indekssiz EXISTS yeterince hizli;
+    // mesaj sayisi buyurse content uzerinde bir indeks gerekir.
+    const where = term
+      ? ` WHERE ua.full_name LIKE ? OR ub.full_name LIKE ? OR ua.email LIKE ? OR ub.email LIKE ?
+              OR l.title LIKE ?
+              OR EXISTS (
+                SELECT 1 FROM messages mm
+                WHERE MIN(mm.sender_id, mm.receiver_id) = g.user_a
+                  AND MAX(mm.sender_id, mm.receiver_id) = g.user_b
+                  AND mm.listing_id IS g.listing_id
+                  AND mm.content LIKE ?
+              )`
+      : '';
+    const whereParams = term ? [like, like, like, like, like, like] : [];
+
+    const total = db.prepare('SELECT COUNT(*) AS total ' + base + where).get(whereParams).total;
+
+    const data = db.prepare(`
+      SELECT g.user_a, g.user_b, g.listing_id, g.message_count, g.sides, g.started_at,
+             lm.content AS last_content, lm.created_at AS last_at, lm.sender_id AS last_sender_id,
+             ua.full_name AS user_a_name, ua.email AS user_a_email,
+             ub.full_name AS user_b_name, ub.email AS user_b_email,
+             l.title AS listing_title, l.slug AS listing_slug
+      ${base}${where}
+      ORDER BY lm.created_at DESC, lm.id DESC
+      LIMIT ? OFFSET ?
+    `).all([...whereParams, safeLimit, offset]);
+
+    return { data, total, page: safePage, pages: Math.max(1, Math.ceil(total / safeLimit)) };
+  }
+
   static async getInbox(userId) {
     const db = getDb();
     return db.prepare(`

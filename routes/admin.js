@@ -44,6 +44,9 @@ router.get('/analytics', adminController.analytics);
 router.get('/one-cikarmalar', adminController.boosts);
 router.get('/users', adminController.users);
 router.get('/listings', adminController.listings);
+router.get('/rozetler', adminController.badgeOverview);
+router.get('/mesajlar', adminController.messages);
+router.get('/mesajlar/:userA/:userB', adminController.messageConversation);
 router.get('/reports', adminController.reports);
 router.get('/reports/:id/conversation', adminController.reportConversation);
 

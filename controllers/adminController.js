@@ -947,6 +947,95 @@ const revokeUserBadge = async (req, res) => {
     }
 };
 
+const badgeOverview = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page, 10) || 1;
+        const grants = UserBadge.recentGrants(page, 25);
+        const holderCounts = UserBadge.summary();
+
+        res.locals.meta.title = 'Rozetler | Admin Paneli';
+        res.render('admin/badges', {
+            layout: 'admin/layout',
+            stats: UserBadge.stats(),
+            catalog: badgeCatalog.BADGES,
+            // Katalogda olup kimseye verilmemis rozet de listede duruyor:
+            // "hangi rozetler var" sorusunun cevabi dagitilanlarla sinirli degil.
+            holderCounts,
+            grants,
+            activePage: 'badges',
+            title: 'Rozetler'
+        });
+    } catch (error) {
+        console.error('Badge Overview Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin');
+    }
+};
+
+const messages = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page, 10) || 1;
+        const q = String(req.query.q || '').trim();
+
+        res.locals.meta.title = 'Mesajlaşma | Admin Paneli';
+        res.render('admin/messages', {
+            layout: 'admin/layout',
+            stats: Message.adminStats(),
+            daily: Message.adminDailyCounts(14),
+            conversations: Message.adminConversations({ q, page, limit: 25 }),
+            filters: { q },
+            activePage: 'messages',
+            title: 'Mesajlaşma'
+        });
+    } catch (error) {
+        console.error('Admin Messages Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin');
+    }
+};
+
+const messageConversation = async (req, res) => {
+    try {
+        const userA = parseInt(req.params.userA, 10);
+        const userB = parseInt(req.params.userB, 10);
+        const listingId = req.query.listing ? parseInt(req.query.listing, 10) : null;
+
+        if (!Number.isInteger(userA) || !Number.isInteger(userB)) {
+            req.flash('error', 'flash.action_failed');
+            return res.redirect('/admin/mesajlar');
+        }
+
+        const [partyA, partyB] = await Promise.all([User.findById(userA), User.findById(userB)]);
+        if (!partyA || !partyB) {
+            req.flash('error', 'flash.user_not_found');
+            return res.redirect('/admin/mesajlar');
+        }
+
+        const conversation = await Message.getConversation(userA, userB, listingId, 500, 0);
+
+        // Ozel yazismaya bakmak sessizce olmamali. Sunucu gunlugu bunun tek
+        // kaydi: kimin, hangi sohbeti, ne zaman actigi burada duruyor.
+        console.log(
+            `[AdminMessages] #${req.session.userId} -> #${userA}/#${userB} (ilan: ${listingId || '-'}) sohbeti goruntuledi`
+        );
+
+        res.locals.meta.title = 'Sohbet | Admin Paneli';
+        res.render('admin/messageThread', {
+            layout: 'admin/layout',
+            partyA,
+            partyB,
+            listingId,
+            messages: conversation,
+            activePage: 'messages',
+            title: 'Sohbet'
+        });
+    } catch (error) {
+        console.error('Admin Conversation Error:', error);
+        req.flash('error', 'flash.action_failed');
+        res.redirect('/admin/mesajlar');
+    }
+};
+
 module.exports = {
     dashboard,
     boosts,
@@ -969,5 +1058,8 @@ module.exports = {
     deleteUser,
     userBadges,
     grantUserBadge,
-    revokeUserBadge
+    revokeUserBadge,
+    badgeOverview,
+    messages,
+    messageConversation
 };

@@ -1,0 +1,73 @@
+<%
+    const nameOf = function (u) { return u.company_name || u.full_name || ('#' + u.id); };
+    const backUrl = '/admin/mesajlar';
+    const listingRow = messages.find(function (m) { return m.listing_id; });
+%>
+
+<div class="d-flex align-items-center gap-3 mb-3">
+    <a href="<%= backUrl %>" class="btn btn-light border btn-sm"><i class="fa-solid fa-arrow-left"></i></a>
+    <div>
+        <h1 class="fs-4 fw-bold mb-0">Sohbet</h1>
+        <p class="text-muted small mb-0">
+            <a href="/profile/<%= partyA.id %>" target="_blank" rel="noopener" class="text-decoration-none"><%= nameOf(partyA) %></a>
+            <i class="fa-solid fa-arrows-left-right fa-xs mx-1 text-muted"></i>
+            <a href="/profile/<%= partyB.id %>" target="_blank" rel="noopener" class="text-decoration-none"><%= nameOf(partyB) %></a>
+        </p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-3">
+    <div class="card-body p-3">
+        <div class="row g-3 small">
+            <div class="col-md-4">
+                <div class="text-muted">Taraf 1</div>
+                <div class="fw-bold"><%= nameOf(partyA) %></div>
+                <div class="text-muted" style="font-size: 0.72rem;"><%= partyA.email %></div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-muted">Taraf 2</div>
+                <div class="fw-bold"><%= nameOf(partyB) %></div>
+                <div class="text-muted" style="font-size: 0.72rem;"><%= partyB.email %></div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-muted">İlan</div>
+                <div class="fw-bold">
+                    <% if (listingId) { %>
+                        <a href="/listings/<%= listingId %>" class="text-decoration-none">#<%= listingId %></a>
+                    <% } else { %>
+                        <span class="text-muted">İlan dışı yazışma</span>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h2 class="fs-6 fw-bold mb-0"><%= messages.length %> mesaj</h2>
+        <span class="badge bg-secondary bg-opacity-10 text-secondary">Yalnızca inceleme</span>
+    </div>
+    <div class="card-body">
+        <% if (!messages.length) { %>
+            <p class="text-muted text-center py-4 mb-0">Bu iki kişi arasında bu ilanda mesaj yok.</p>
+        <% } else { %>
+            <% messages.forEach(function (m) { %>
+                <% const fromA = m.sender_id === partyA.id; %>
+                <div class="d-flex mb-3 <%= fromA ? 'justify-content-start' : 'justify-content-end' %>">
+                    <div class="<%= fromA ? 'bg-light' : 'bg-primary bg-opacity-10 border border-primary border-opacity-25' %> rounded-3 px-3 py-2"
+                         style="max-width: 78%;">
+                        <div class="small fw-bold mb-1 text-muted"><%= m.sender_name %></div>
+                        <div style="white-space: pre-wrap; word-break: break-word;"><%= m.content %></div>
+                        <div class="small text-muted text-end mt-1" style="font-size: 0.75rem;">
+                            <%= helpers.formatDate(m.created_at, lang) %> &middot; <%= helpers.timeAgo(m.created_at, lang) %>
+                            <% if (!m.is_read) { %>
+                                <span class="badge bg-warning-subtle text-warning-emphasis ms-1">okunmadı</span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } %>
+    </div>
+</div>
