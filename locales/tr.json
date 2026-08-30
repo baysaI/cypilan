@@ -1322,8 +1322,8 @@
   },
   "site": {
     "description": "Kıbrıs'ta emlak, araç, iş ilanı, usta hizmeti ve ikinci el eşya ilanları",
-    "dev_notice": "Site hâlâ geliştirme aşamasında. Öneri ve hata bildirimleri için bize ulaşın.",
-    "dev_notice_action": "Bildir",
+    "dev_notice": "Site geliştirme aşamasında. Önerilerinizi ve gözünüze çarpan eksikleri bekliyoruz.",
+    "dev_notice_action": "Bildirin",
     "name": "CYPILAN.COM",
     "tagline": "Kıbrıs'ın En Büyük İlan Platformu"
   },
