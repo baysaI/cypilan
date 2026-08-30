@@ -834,6 +834,7 @@
     "safety_rule_1": "Cypilan yöneticileri sizden asla şifre, SMS onay kodu veya doğrudan para transferi talep etmez.",
     "safety_rule_2": "Ürünü bizzat görmeden veya teslim almadan kapora / ön ödeme göndermeyiniz.",
     "safety_rule_3": "Şüpheli mesajları ve dolandırıcılık girişimlerini sağ üstteki bayrak simgesinden bize bildirebilirsiniz.",
+    "safety_rule_4": "Bir şikayet geldiğinde ya da dolandırıcılık şüphesi doğduğunda yazışmalar yetkili ekibimizce incelenebilir.",
     "safety_title": "Güvenli İletişim & Alışveriş Uyarısı",
     "unblock_user": "Engeli Kaldır",
     "you_blocked_user": "Bu kullanıcıyı engellediniz. Mesajlaşmak için engeli kaldırın."
@@ -1050,8 +1051,10 @@
       "section2_title": "2. Verilerin Kullanım Amacı",
       "section3_body": "Verileriniz 3. taraf şahıs veya kurumlarla reklam/pazarlama amacıyla satılmaz veya paylaşılmaz. Yalnızca yasal mercilerin resmi talepleri durumunda yetkili makamlarla paylaşılabilir.",
       "section3_title": "3. Veri Güvenliği ve Paylaşım",
-      "section4_body": "Gizlilik politikamız ile ilgili sorularınız için info@cypilan.com adresi üzerinden bizimle iletişime geçebilirsiniz.",
-      "section4_title": "4. İletişim"
+      "section4_body": "Üyelerin site üzerinden birbirine gönderdiği mesajlar, iletişimin sürdürülebilmesi ve olası uyuşmazlıklarda tarafların korunabilmesi için sistemimizde saklanır. Bir şikayet bildirildiğinde, dolandırıcılık şüphesi doğduğunda veya yasal bir talep söz konusu olduğunda bu yazışmalar yetkili ekibimizce incelenebilir. İnceleme yalnızca bu amaçlarla ve gereken ölçüde yapılır; mesajlarınız reklam amacıyla kullanılmaz ve üçüncü kişilerle paylaşılmaz.",
+      "section4_title": "4. Mesajlaşma ve Güvenlik",
+      "section5_body": "Gizlilik politikamız ile ilgili sorularınız için info@cypilan.com adresi üzerinden bizimle iletişime geçebilirsiniz.",
+      "section5_title": "5. İletişim"
     },
     "safety": {
       "badge": "Güvenli Alışveriş",

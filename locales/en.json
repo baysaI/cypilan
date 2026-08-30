@@ -834,6 +834,7 @@
     "safety_rule_1": "Cypilan staff will never ask for your password, SMS verification code, or direct wire transfers.",
     "safety_rule_2": "Do not send any deposit or advance payment before inspecting the item in person.",
     "safety_rule_3": "Report suspicious messages or fraudulent attempts using the flag icon at the top right.",
+    "safety_rule_4": "If a report is filed or fraud is suspected, conversations may be reviewed by authorised staff.",
     "safety_title": "Safe Communication & Shopping Warning",
     "unblock_user": "Unblock",
     "you_blocked_user": "You blocked this user. Unblock to message."
@@ -1050,8 +1051,10 @@
       "section2_title": "2. Purpose of Use of Data",
       "section3_body": "Your data is not sold or shared with third party individuals or institutions for advertising/marketing purposes. It can only be shared with competent authorities in case of official requests by legal authorities.",
       "section3_title": "3. Data Security and Sharing",
-      "section4_body": "If you have questions about our privacy policy, you can contact us at info@cypilan.com.",
-      "section4_title": "4. Communication"
+      "section4_body": "Messages members send each other through the site are stored on our systems so that conversations can continue and so that both parties can be protected if a dispute arises. Where a report is filed, where fraud is suspected, or where we are legally required to do so, these messages may be reviewed by authorised staff. Any such review is limited to those purposes and to what is necessary; your messages are not used for advertising and are not shared with third parties.",
+      "section4_title": "4. Messaging and Safety",
+      "section5_body": "If you have questions about our privacy policy, you can contact us at info@cypilan.com.",
+      "section5_title": "5. Communication"
     },
     "safety": {
       "badge": "Safe Shopping",

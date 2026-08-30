@@ -109,7 +109,7 @@ t.run('Yönetici mesajlaşma görünümü', async (db) => {
   t.assert(html.includes('Girne 2+1 Daire'), 'İlan başlığı basılıyor');
   t.assert(html.includes('cevapsız'), 'Cevapsız sohbet işaretleniyor');
   t.assert(html.includes('%50'), 'Cevap oranı hesaplanıyor');
-  t.assert(html.includes('Gizlilik politikanızda'), 'Gizlilik notu sayfada duruyor');
+  t.assert(html.includes('gizlilik politikasında'), 'Yetkinin nerede açıklandığı sayfada yazıyor');
 
   const emptyHtml = await t.render('admin/messages.ejs', {
     stats: empty,
