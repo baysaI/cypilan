@@ -1,0 +1,296 @@
+<%#
+    Canlı destek uyarısı — yalnızca yöneticiye basılır.
+
+    Bu blok eskiden admin/layout.ejs'in içindeydi, yani yalnızca yönetici
+    panelindeyken çalışıyordu. Yönetici sitenin kendisini açık tuttuğunda
+    hiçbir şey dinlemiyordu: talep geliyor, ses çıkmıyordu. Artık ortak bir
+    parça ve hem panel hem site yerleşimi bunu dahil ediyor.
+
+    Sesin çalması için tarayıcı bir kullanıcı hareketi şart koşuyor. Önceki hal
+    ilk tıklamayı `{ once: true }` ile dinliyordu; sayfa yeni açılmışsa o
+    tıklama hiç gelmiyor ve AudioContext "suspended" kalıyordu — sessizlik.
+    Şimdi dinleyiciler ses gerçekten çalışır hale gelene kadar duruyor.
+
+    Arka plandaki sekmede tarayıcı zamanlayıcıları yavaşlatıyor (Chrome, sekme
+    beş dakikadan uzun gizli kaldıysa dakikada bire kadar). Sesin tek başına
+    yetmemesinin sebebi bu: masaüstü bildirimi sekme gizliyken de görünüyor.
+%>
+<div id="adminSupportToastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1080;"></div>
+
+<button type="button" id="adminSupportEnableAlerts"
+        class="btn btn-dark btn-sm rounded-pill shadow position-fixed d-none align-items-center gap-2"
+        style="bottom: 1rem; left: 1rem; z-index: 1080;">
+    <i class="fa-solid fa-bell"></i>
+    <span>Destek uyarılarını aç</span>
+</button>
+
+<script>
+(function () {
+    // Canli destek sayfasinin kendi, daha isabetli uyarisi var: acik konusmaya
+    // gelen her mesaj icin zil caliyor. Ikisi birden calisirsa ayni mesaj iki
+    // ses uretir, ustelik yoneticinin gozu zaten o listede.
+    if (window.location.pathname.indexOf('/admin/canli-destek') === 0) return;
+
+    var audioCtx = null;
+    var originalTitle = document.title;
+    var titleBlinkInterval = null;
+    var knownLastMessageAt = null;
+    var previousWaitingCount = 0;
+    // Sayfa acilirken zaten bekleyen bir talep varsa bu bir "yeni" olay degil.
+    // Ilk yanit olcut olarak alinir, uyari ikinciden itibaren calisir.
+    var baselineTaken = false;
+
+    var enableBtn = document.getElementById('adminSupportEnableAlerts');
+
+    // ---- Ses -----------------------------------------------------------------
+
+    function audioReady() {
+        return audioCtx && audioCtx.state === 'running';
+    }
+
+    function unlockAudio() {
+        try {
+            var Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            if (!audioCtx) audioCtx = new Ctx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        } catch (e) {}
+        refreshEnableButton();
+    }
+
+    // Dinleyiciler ses acilana kadar duruyor: `once` kullanmak, sayfanin ilk
+    // tiklamasi gelmeden sekme arka plana atildiginda sesi kalici olarak
+    // kilitliyordu.
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (evt) {
+        document.addEventListener(evt, function handler() {
+            unlockAudio();
+            if (audioReady()) document.removeEventListener(evt, handler);
+        });
+    });
+
+    // Sekmeye geri donuldugunde baglam askidan cikabiliyor.
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState !== 'visible') return;
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        checkSupportHeartbeat();
+    });
+
+    function playChime() {
+        try {
+            var Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            if (!audioCtx) audioCtx = new Ctx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            var now = audioCtx.currentTime;
+
+            var osc1 = audioCtx.createOscillator();
+            var gain1 = audioCtx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(587.33, now);
+            osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+            gain1.gain.setValueAtTime(0.35, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.35);
+
+            var osc2 = audioCtx.createOscillator();
+            var gain2 = audioCtx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(1174.66, now + 0.12);
+            gain2.gain.setValueAtTime(0.35, now + 0.12);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start(now + 0.12);
+            osc2.stop(now + 0.5);
+        } catch (err) {
+            console.error('Audio alert error:', err);
+        }
+    }
+
+    // ---- Masaustu bildirimi ---------------------------------------------------
+
+    function notifySupported() {
+        return typeof window.Notification === 'function';
+    }
+
+    function showDesktopNotification(latest, waitingCount) {
+        if (!notifySupported() || Notification.permission !== 'granted') return;
+        try {
+            var who = (latest && latest.user_name) ? latest.user_name : 'Bir ziyaretçi';
+            var text = (latest && latest.last_message) ? latest.last_message : 'Mesaj bekliyor...';
+            var note = new Notification('Yeni canlı destek talebi (' + waitingCount + ' bekleyen)', {
+                body: who + ': ' + text,
+                // Ayni etiket: ust uste on bildirim birikmesin, sonuncusu yeterli.
+                tag: 'cypilan-support'
+            });
+            note.onclick = function () {
+                window.focus();
+                window.location.href = '/admin/canli-destek';
+            };
+        } catch (e) {}
+    }
+
+    // ---- "Uyarilari ac" dugmesi -----------------------------------------------
+
+    function refreshEnableButton() {
+        if (!enableBtn) return;
+        var needsAudio = !audioReady();
+        var needsPermission = notifySupported() && Notification.permission === 'default';
+
+        if (needsAudio || needsPermission) {
+            enableBtn.classList.remove('d-none');
+            enableBtn.classList.add('d-inline-flex');
+        } else {
+            enableBtn.classList.add('d-none');
+            enableBtn.classList.remove('d-inline-flex');
+        }
+    }
+
+    if (enableBtn) {
+        enableBtn.addEventListener('click', function () {
+            unlockAudio();
+            playChime();
+
+            // Izin istegi bir kullanici hareketinin icinde olmak zorunda.
+            if (notifySupported() && Notification.permission === 'default') {
+                var result = Notification.requestPermission();
+                if (result && typeof result.then === 'function') {
+                    result.then(refreshEnableButton);
+                }
+            }
+            refreshEnableButton();
+        });
+        refreshEnableButton();
+    }
+
+    // ---- Panel ici uyari kutusu -----------------------------------------------
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showSupportAlertToast(latest, waitingCount) {
+        var container = document.getElementById('adminSupportToastContainer');
+        if (!container) return;
+
+        var toastEl = document.createElement('div');
+        toastEl.className = 'toast align-items-center text-white bg-dark border-0 shadow-lg mb-2 show';
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+        toastEl.innerHTML =
+            '<div class="d-flex p-3 align-items-start gap-3">' +
+                '<div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">' +
+                    '<i class="fa-solid fa-headset fs-5"></i>' +
+                '</div>' +
+                '<div class="flex-grow-1">' +
+                    '<div class="d-flex align-items-center justify-content-between">' +
+                        '<strong class="text-warning small"><i class="fa-solid fa-bell me-1"></i>Yeni Canlı Destek Talebi!</strong>' +
+                        '<span class="badge bg-danger rounded-pill">' + waitingCount + ' Bekleyen</span>' +
+                    '</div>' +
+                    '<div class="fw-bold mt-1 text-white">' + (latest && latest.user_name ? escapeHtml(latest.user_name) : 'Bir Ziyaretçi') + '</div>' +
+                    '<div class="text-light small text-truncate mt-1" style="max-width: 240px; opacity: 0.85;">' +
+                        (latest && latest.last_message ? escapeHtml(latest.last_message) : 'Mesaj bekliyor...') +
+                    '</div>' +
+                    '<div class="mt-2 pt-1">' +
+                        '<a href="/admin/canli-destek" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold">' +
+                            '<i class="fa-solid fa-comments me-1"></i>Hemen Yanıtla' +
+                        '</a>' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="btn-close btn-close-white ms-auto" aria-label="Kapat"></button>' +
+            '</div>';
+
+        container.appendChild(toastEl);
+
+        var closeBtn = toastEl.querySelector('.btn-close');
+        if (closeBtn) closeBtn.addEventListener('click', function () { toastEl.remove(); });
+        setTimeout(function () { if (toastEl.parentNode) toastEl.remove(); }, 12000);
+    }
+
+    function startTitleBlink(count) {
+        if (titleBlinkInterval) clearInterval(titleBlinkInterval);
+        var toggle = false;
+        titleBlinkInterval = setInterval(function () {
+            document.title = toggle ? '(' + count + ') 🔔 Yeni Destek Talebi!' : originalTitle;
+            toggle = !toggle;
+        }, 1200);
+
+        window.addEventListener('focus', function () {
+            clearInterval(titleBlinkInterval);
+            titleBlinkInterval = null;
+            document.title = originalTitle;
+        }, { once: true });
+    }
+
+    function updateSidebarBadge(waiting) {
+        var supportBadge = document.querySelector('a[href="/admin/canli-destek"] .badge');
+        if (waiting > 0) {
+            if (supportBadge) {
+                supportBadge.textContent = waiting;
+                supportBadge.style.display = 'inline-block';
+            } else {
+                var navLink = document.querySelector('a[href="/admin/canli-destek"]');
+                if (navLink) {
+                    var newBadge = document.createElement('span');
+                    newBadge.className = 'badge bg-danger rounded-pill';
+                    newBadge.textContent = waiting;
+                    navLink.appendChild(newBadge);
+                }
+            }
+        } else if (supportBadge) {
+            supportBadge.style.display = 'none';
+        }
+    }
+
+    // ---- Yoklama ---------------------------------------------------------------
+
+    var checking = false;
+
+    async function checkSupportHeartbeat() {
+        if (checking) return;
+        checking = true;
+
+        try {
+            var res = await fetch('/admin/canli-destek/heartbeat', {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (res.status === 401 || res.status === 403) return;
+
+            var data = await res.json();
+            if (!data || !data.success) return;
+
+            var waiting = data.waitingCount || 0;
+            var latest = data.latest || null;
+
+            updateSidebarBadge(waiting);
+
+            var isNewer = latest && latest.last_message_at && latest.last_message_at !== knownLastMessageAt;
+            var countIncreased = waiting > previousWaitingCount;
+
+            if (baselineTaken && waiting > 0 && (countIncreased || isNewer)) {
+                playChime();
+                showDesktopNotification(latest, waiting);
+                showSupportAlertToast(latest, waiting);
+                startTitleBlink(waiting);
+            }
+
+            if (latest && latest.last_message_at) knownLastMessageAt = latest.last_message_at;
+            previousWaitingCount = waiting;
+            baselineTaken = true;
+        } catch (err) {
+        } finally {
+            checking = false;
+        }
+    }
+
+    checkSupportHeartbeat();
+    setInterval(checkSupportHeartbeat, 5000);
+})();
+</script>

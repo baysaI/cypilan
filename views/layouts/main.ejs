@@ -166,6 +166,43 @@
         </div>
     <% } %>
 
+    <%# Site gelistirme asamasinda: ince, kapatilabilir bir serit. Kapatilinca
+        localStorage'a yaziliyor — ayni ziyaretciye her sayfada tekrar gostermek
+        uyarinin kendisinden daha rahatsiz edici olurdu. Serit varsayilan olarak
+        gizli basiliyor ve kapatilmamissa aciliyor; tersi, kapatmis olan herkese
+        her sayfada bir an icin yanip sonen bir cubuk gosterirdi. %>
+    <div id="devNoticeBar" class="bg-warning-subtle border-bottom border-warning-subtle py-1 d-none">
+        <div class="container d-flex align-items-center gap-2">
+            <i class="fa-solid fa-flask text-warning-emphasis small"></i>
+            <button type="button" class="btn btn-link p-0 m-0 text-start small text-decoration-none flex-grow-1 lh-sm"
+                    data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                <span class="text-dark-emphasis"><%= t('site.dev_notice') %></span>
+                <span class="fw-semibold text-decoration-underline ms-1"><%= t('site.dev_notice_action') %></span>
+            </button>
+            <button type="button" class="btn-close" style="font-size: 0.6rem;" id="devNoticeClose"
+                    aria-label="<%= t('common.close') || 'Kapat' %>"></button>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var bar = document.getElementById('devNoticeBar');
+            if (!bar) return;
+            var KEY = 'cypDevNoticeDismissed';
+            var dismissed = false;
+            try { dismissed = localStorage.getItem(KEY) === '1'; } catch (e) {}
+            if (!dismissed) bar.classList.remove('d-none');
+
+            var close = document.getElementById('devNoticeClose');
+            if (close) {
+                close.addEventListener('click', function () {
+                    bar.classList.add('d-none');
+                    try { localStorage.setItem(KEY, '1'); } catch (e) {}
+                });
+            }
+        })();
+    </script>
+
     <main id="content" role="main" class="flex-grow-1">
         <%- body %>
     </main>
@@ -199,6 +236,12 @@
     <%# One copy for the whole site: the footer link and the account menu item both
         open this modal, so the form cannot drift into two versions. %>
     <%- include('../partials/feedbackModal') %>
+
+    <%# Yonetici siteyi gezerken de canli destek talebini duymali; panelde
+        olmadigi surece hicbir sey dinlemiyordu. %>
+    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+        <%- include('../partials/supportAlert') %>
+    <% } %>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>

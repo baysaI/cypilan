@@ -1322,6 +1322,8 @@
   },
   "site": {
     "description": "Real estate, vehicles, job listings, services and second-hand items in Cyprus",
+    "dev_notice": "The site is still under development. Tell us about anything broken or missing.",
+    "dev_notice_action": "Report",
     "name": "CYPILAN.COM",
     "tagline": "Cyprus' Largest Classifieds Platform"
   },
