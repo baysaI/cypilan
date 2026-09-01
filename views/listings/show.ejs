@@ -135,6 +135,37 @@
                 <% } %>
             </div>
 
+            <% if (imgs.length > 1) { %>
+                <script>
+                (function () {
+                    // Karusel elle kuruluyor.
+                    //
+                    // Bootstrap'in veri API'si bir karusel ornegini kendiliginden
+                    // yaratmiyor: ya data-bs-ride ozniteligini gormesi ya da ok
+                    // dugmelerinden birine tiklanmasi gerekiyor. Dokunma
+                    // dinleyicileri de o ornek kurulurken baglandigi icin, mobilde
+                    // parmakla kaydirmak ilk tiklamaya kadar hicbir sey yapmiyordu:
+                    // once oka bas, sonra kaydir. Fotograf gezmenin telefondaki
+                    // dogal yolu kaydirmak oldugu icin bu, galerinin yarisinin
+                    // calismamasi demekti.
+                    //
+                    // data-bs-ride="carousel" da kurardi ama beraberinde otomatik
+                    // gecisi getirirdi; fotograflari kendi kendine kayan bir ilan
+                    // sayfasi kimsenin istemedigi bir sey. Bu yuzden elle kurulup
+                    // interval kapatiliyor.
+                    var el = document.getElementById('listingCarousel');
+                    if (!el || typeof bootstrap === 'undefined' || !bootstrap.Carousel) return;
+
+                    bootstrap.Carousel.getOrCreateInstance(el, {
+                        interval: false,
+                        ride: false,
+                        touch: true,
+                        wrap: true
+                    });
+                })();
+                </script>
+            <% } %>
+
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4 border-bottom pb-2 d-flex align-items-center justify-content-between">
