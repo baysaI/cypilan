@@ -116,6 +116,16 @@
                                 </div>
                             <% }); %>
                         </div>
+
+                        <%# Fotografin dokununca buyudugunu soyleyen tek isaret bu.
+                            Ok dugmelerinin disinda, kose: kaydirmanin onune
+                            gecmesin. %>
+                        <span class="badge bg-dark bg-opacity-75 rounded-pill position-absolute bottom-0 end-0 m-3 px-3 py-2 d-flex align-items-center gap-2"
+                              style="z-index: 2; pointer-events: none; font-size: 0.75rem;">
+                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                            <span id="galleryCounter"><%= imgs.length > 1 ? '1 / ' + imgs.length : '' %></span>
+                        </span>
+
                         <% if (imgs.length > 1) { %>
                             <button class="carousel-control-prev" type="button" data-bs-target="#listingCarousel" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon bg-dark bg-opacity-50 rounded-circle p-3" aria-hidden="true"></span>
@@ -135,38 +145,153 @@
                 <% } %>
             </div>
 
-            <% if (imgs.length > 1) { %>
+            <% if (imgs.length > 0) { %>
+                <div class="modal fade" id="listingLightbox" tabindex="-1" aria-hidden="true" aria-label="<%= t('listing.open_photo') %>">
+                    <div class="modal-dialog modal-fullscreen">
+                        <div class="modal-content bg-black border-0">
+                            <div class="position-absolute top-0 start-0 end-0 d-flex align-items-center justify-content-between p-2" style="z-index: 3;">
+                                <span class="badge bg-dark bg-opacity-75 rounded-pill px-3 py-2" id="lightboxCounter"></span>
+                                <button type="button" class="btn btn-dark bg-opacity-75 rounded-circle d-flex align-items-center justify-content-center"
+                                        style="width: 42px; height: 42px;" data-bs-dismiss="modal" aria-label="<%= t('common.close') %>">
+                                    <i class="fa-solid fa-xmark fs-5"></i>
+                                </button>
+                            </div>
+
+                            <div class="modal-body p-0 d-flex align-items-center overflow-hidden">
+                                <div id="listingLightboxCarousel" class="carousel slide w-100">
+                                    <div class="carousel-inner">
+                                        <% imgs.forEach(function(img, i) { %>
+                                            <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                                                <img src="<%= img %>" class="d-block w-100 object-fit-contain" alt="<%= listing.title %>"
+                                                     style="max-height: 100vh;"
+                                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800';">
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                    <% if (imgs.length > 1) { %>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#listingLightboxCarousel" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden"><%= t('common.previous') %></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#listingLightboxCarousel" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden"><%= t('common.next') %></span>
+                                        </button>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <script>
                 (function () {
-                    // Karusel elle kuruluyor.
+                    if (typeof bootstrap === 'undefined' || !bootstrap.Carousel) return;
+
+                    var gallery = document.getElementById('listingCarousel');
+                    var lightboxEl = document.getElementById('listingLightbox');
+                    var lightboxCarouselEl = document.getElementById('listingLightboxCarousel');
+                    if (!gallery || !lightboxEl || !lightboxCarouselEl) return;
+
+                    var total = gallery.querySelectorAll('.carousel-item').length;
+
+                    // Karuseller elle kuruluyor.
                     //
                     // Bootstrap'in veri API'si bir karusel ornegini kendiliginden
                     // yaratmiyor: ya data-bs-ride ozniteligini gormesi ya da ok
                     // dugmelerinden birine tiklanmasi gerekiyor. Dokunma
                     // dinleyicileri de o ornek kurulurken baglandigi icin, mobilde
-                    // parmakla kaydirmak ilk tiklamaya kadar hicbir sey yapmiyordu:
-                    // once oka bas, sonra kaydir. Fotograf gezmenin telefondaki
-                    // dogal yolu kaydirmak oldugu icin bu, galerinin yarisinin
-                    // calismamasi demekti.
+                    // parmakla kaydirmak ilk tiklamaya kadar hicbir sey yapmiyordu.
                     //
                     // data-bs-ride="carousel" da kurardi ama beraberinde otomatik
                     // gecisi getirirdi; fotograflari kendi kendine kayan bir ilan
-                    // sayfasi kimsenin istemedigi bir sey. Bu yuzden elle kurulup
-                    // interval kapatiliyor.
-                    var el = document.getElementById('listingCarousel');
-                    if (!el || typeof bootstrap === 'undefined' || !bootstrap.Carousel) return;
+                    // sayfasi kimsenin istemedigi bir sey.
+                    var carouselOptions = { interval: false, ride: false, touch: true, wrap: true };
+                    var galleryCarousel = bootstrap.Carousel.getOrCreateInstance(gallery, carouselOptions);
+                    var lightboxCarousel = bootstrap.Carousel.getOrCreateInstance(lightboxCarouselEl, carouselOptions);
+                    var lightbox = bootstrap.Modal.getOrCreateInstance(lightboxEl);
 
-                    bootstrap.Carousel.getOrCreateInstance(el, {
-                        interval: false,
-                        ride: false,
-                        touch: true,
-                        wrap: true
+                    var indexOf = function (root) {
+                        var items = Array.prototype.slice.call(root.querySelectorAll('.carousel-item'));
+                        var active = root.querySelector('.carousel-item.active');
+                        return Math.max(0, items.indexOf(active));
+                    };
+
+                    var setCounter = function (el, index) {
+                        if (!el || total < 2) return;
+                        el.textContent = (index + 1) + ' / ' + total;
+                    };
+
+                    var galleryCounter = document.getElementById('galleryCounter');
+                    var lightboxCounter = document.getElementById('lightboxCounter');
+                    setCounter(lightboxCounter, 0);
+
+                    gallery.addEventListener('slid.bs.carousel', function () {
+                        setCounter(galleryCounter, indexOf(gallery));
+                    });
+                    lightboxCarouselEl.addEventListener('slid.bs.carousel', function () {
+                        setCounter(lightboxCounter, indexOf(lightboxCarouselEl));
+                    });
+
+                    // --- Dokunus mu, kaydirma mi -------------------------------
+                    //
+                    // Fotografa dokununca buyumesi isteniyor ama kaydirmak da
+                    // parmagi fotografin uzerinde gezdirmek demek. Duz bir click
+                    // dinleyicisi ikisini ayirt edemez: kaydirmanin sonunda da
+                    // click atesleniyor ve her kaydirmada tam ekran aciliyordu.
+                    //
+                    // Bu yuzden dokunus, hareketin kendisinden anlasiliyor: parmak
+                    // on pikselden az gezmis ve yarim saniyeden kisa surmusse
+                    // dokunustur. Uzun basma da disarida kaliyor - orada
+                    // tarayicinin kendi menusu aciliyor ve ustune bir de tam ekran
+                    // acilmasi istenmez.
+                    var MOVE_LIMIT = 10;
+                    var TIME_LIMIT = 500;
+                    var startX = 0;
+                    var startY = 0;
+                    var startedAt = 0;
+                    var tracking = false;
+
+                    gallery.addEventListener('pointerdown', function (event) {
+                        if (event.pointerType === 'mouse' && event.button !== 0) return;
+                        tracking = true;
+                        startX = event.clientX;
+                        startY = event.clientY;
+                        startedAt = Date.now();
+                    }, { passive: true });
+
+                    var cancel = function () { tracking = false; };
+                    gallery.addEventListener('pointercancel', cancel, { passive: true });
+                    gallery.addEventListener('pointerleave', cancel, { passive: true });
+
+                    gallery.addEventListener('pointerup', function (event) {
+                        if (!tracking) return;
+                        tracking = false;
+
+                        // Ok dugmeleri kendi islerini yapiyor; onlara basmak
+                        // fotografi buyutmemeli.
+                        if (event.target.closest('.carousel-control-prev, .carousel-control-next')) return;
+
+                        if (Math.abs(event.clientX - startX) > MOVE_LIMIT) return;
+                        if (Math.abs(event.clientY - startY) > MOVE_LIMIT) return;
+                        if (Date.now() - startedAt > TIME_LIMIT) return;
+
+                        lightboxCarousel.to(indexOf(gallery));
+                        lightbox.show();
+                    }, { passive: true });
+
+                    // Tam ekranda gezilen fotograf, kapaninca sayfadaki galeride de
+                    // acik kalsin: kapatinca bastan baslamak, ziyaretcinin az once
+                    // yaptigi isi geri almak olurdu.
+                    lightboxEl.addEventListener('hidden.bs.modal', function () {
+                        galleryCarousel.to(indexOf(lightboxCarouselEl));
                     });
                 })();
                 </script>
             <% } %>
 
             <div class="card border-0 shadow-sm rounded-4 mb-4">
+
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4 border-bottom pb-2 d-flex align-items-center justify-content-between">
                         <span><%= t('listing.attributes') %></span>
