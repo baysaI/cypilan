@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const owner = require('../config/owner');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const mailer = require('../config/mailer');
@@ -265,13 +264,7 @@ const forgotPassword = async (req, res) => {
         }
 
         const user = await User.findByEmail(email);
-
-        // Sahip hesabi icin sifirlama baglantisi uretilmiyor. Cevap degismiyor:
-        // adresin ozel oldugunu belli etmek, saldirgana hangi kutuyu hedef
-        // alacagini soylemek olurdu.
-        const resettable = user && !owner.isOwner(user);
-
-        if (resettable && Number(user.is_active) !== 0) {
+        if (user && Number(user.is_active) !== 0) {
             const token = crypto.randomBytes(32).toString('hex');
             const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
 

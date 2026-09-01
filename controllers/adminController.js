@@ -9,7 +9,6 @@ const Warning = require('../models/Warning');
 const Notification = require('../models/Notification');
 const UserBadge = require('../models/UserBadge');
 const badgeCatalog = require('../config/userBadges');
-const owner = require('../config/owner');
 const ServiceRequest = require('../models/ServiceRequest');
 const Analytics = require('../models/Analytics');
 const mailer = require('../config/mailer');
@@ -24,24 +23,6 @@ const PAGE_SIZE = 20;
 const translatorFor = (user) => (key, params) => translate(key, (user && user.language_pref) || 'tr', params);
 
 const wantsJson = (req) => Boolean(req && (req.xhr || (req.headers && req.headers.accept && req.headers.accept.indexOf('json') > -1)));
-
-// Sahip hesabina dokunmaya calisan her yonetici eylemi ayni cevabi veriyor.
-// Model zaten engelliyor; buradaki kontrol yoneticiye neden olmadigini
-// soylemek icin: sessizce basarisiz olan bir dugme, calismayan bir dugmeden
-// daha kotu.
-const refuseIfOwner = async (req, res, targetId) => {
-    const target = await User.findById(targetId);
-    if (!owner.isOwner(target)) return false;
-
-    if (wantsJson(req)) {
-        res.status(403).json({ error: res.locals.t('flash.owner_protected') });
-        return true;
-    }
-
-    req.flash('error', 'flash.owner_protected');
-    res.redirect(req.get('referer') || '/admin/users');
-    return true;
-};
 
 const dashboard = async (req, res) => {
     try {
@@ -105,10 +86,6 @@ const users = async (req, res) => {
         // for it as well would be a second query per row for a number in hand.
         const warningHistory = {};
         const warningCounts = {};
-        // Sahip satiri listede isaretleniyor: yoneticinin calismayacak bir
-        // dugmeye basmasindansa dugmeyi hic gormemesi daha iyi.
-        result.data.forEach((user) => { user.is_owner = owner.isOwner(user); });
-
         await Promise.all(result.data.map(async (user) => {
             const history = await Warning.forUser(user.id, 20);
             warningHistory[user.id] = history;
@@ -354,8 +331,6 @@ const toggleUserStatus = async (req, res) => {
             return res.redirect('/admin/users');
         }
 
-        if (await refuseIfOwner(req, res, parseInt(id, 10))) return;
-
         const updated = await User.setActive(id, status === 'active');
         if (!updated) {
             if (wantsJson(req)) return res.status(404).json({ error: res.locals.t('flash.user_not_found') });
@@ -390,8 +365,6 @@ const deleteUser = async (req, res) => {
             req.flash('error', 'flash.cannot_delete_self');
             return res.redirect('/admin/users');
         }
-
-        if (await refuseIfOwner(req, res, targetUserId)) return;
 
         const user = await User.findById(targetUserId);
         if (!user) {
@@ -439,10 +412,6 @@ const resolveReport = async (req, res) => {
 // suspending them. The third standing warning suspends the account by itself,
 // inside Warning.issue, so the count and the account state stay in step.
 const issueWarning = async (req, res) => {
-    {
-        const guarded = parseInt(req.params.id, 10);
-        if (Number.isInteger(guarded) && await refuseIfOwner(req, res, guarded)) return;
-    }
     try {
         const userId = parseInt(req.params.id, 10);
         const { reason, note, report_id } = req.body;
@@ -609,13 +578,6 @@ const updateUser = async (req, res) => {
             return res.redirect('/admin/users');
         }
 
-        // Sahip hesabina yalnizca sahibin kendisi dokunabiliyor.
-        const actor = await User.findById(req.session.userId);
-        if (!owner.canModify(user, actor)) {
-            req.flash('error', 'flash.owner_protected');
-            return res.redirect(req.get('referer') || '/admin/users');
-        }
-
         const { isValidEmail, isValidPassword } = require('../utils/validators');
 
         if (!email || !isValidEmail(email)) {
@@ -630,11 +592,7 @@ const updateUser = async (req, res) => {
         }
 
         const allowedRoles = ['user', 'business', 'agent', 'admin'];
-        // Sahibin rolu panelden degistirilemiyor - kendisi tarafindan da. Yanlislikla
-        // rolunu dusurmek, paneli acan tek hesabi kaybetmek demek olurdu.
-        const targetRole = owner.isOwner(user)
-            ? 'admin'
-            : (allowedRoles.includes(role) ? role : user.role);
+        const targetRole = allowedRoles.includes(role) ? role : user.role;
 
         const allowedCorporateStatuses = ['none', 'pending', 'approved', 'rejected'];
         let targetCorporateStatus = user.corporate_status || 'none';
@@ -663,10 +621,7 @@ const updateUser = async (req, res) => {
 
         await User.update(id, updateData);
 
-        // Sifre panelden hic degistirilmiyor: sahip kendi sifresini profil
-        // sayfasindan, mevcut sifresini girerek degistiriyor. Paneldeki alan
-        // baska bir yoneticinin oturumu ele gecirildiginde en kisa yol olurdu.
-        if (!owner.isOwner(user) && password && String(password).trim().length > 0) {
+        if (password && String(password).trim().length > 0) {
             const cleanPass = String(password).trim();
             if (!isValidPassword(cleanPass)) {
                 req.flash('error', 'flash.weak_password');
@@ -685,10 +640,6 @@ const updateUser = async (req, res) => {
 };
 
 const approveCorporate = async (req, res) => {
-    {
-        const guarded = parseInt(req.params.id, 10);
-        if (Number.isInteger(guarded) && await refuseIfOwner(req, res, guarded)) return;
-    }
     try {
         const id = parseInt(req.params.id, 10);
         const targetRole = req.body.role === 'agent' ? 'agent' : 'business';
@@ -721,10 +672,6 @@ const approveCorporate = async (req, res) => {
 };
 
 const rejectCorporate = async (req, res) => {
-    {
-        const guarded = parseInt(req.params.id, 10);
-        if (Number.isInteger(guarded) && await refuseIfOwner(req, res, guarded)) return;
-    }
     try {
         const id = parseInt(req.params.id, 10);
         const user = await User.findById(id);

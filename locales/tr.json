@@ -563,7 +563,6 @@
     "no_page_access": "Bu sayfaya erişim yetkiniz yok.",
     "notification_deleted": "Bildirim silindi.",
     "notifications_marked_read": "Tüm bildirimler okundu olarak işaretlendi.",
-    "owner_protected": "Bu hesap korumalı. Yalnızca sunucudan yönetilebilir.",
     "password_created": "Şifreniz belirlendi. Artık e-posta ile de giriş yapabilirsiniz.",
     "password_reset_failed": "Şifre sıfırlanırken bir hata oluştu.",
     "password_reset_success": "Şifreniz başarıyla güncellendi. Yeni şifrenizle giriş yapabilirsiniz.",

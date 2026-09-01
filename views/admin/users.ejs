@@ -244,17 +244,7 @@ const activeAdminUser = (typeof currentUser !== 'undefined' && currentUser) ? cu
                                        class="btn btn-sm btn-outline-secondary me-1" title="Rozetler ve Unvanlar">
                                         <i class="fa-solid fa-award"></i>
                                     </a>
-                                    <% if (u.is_owner) { %>
-                                        <%# Sahip hesabi: askiya alma, silme ve uyari dugmeleri hic basilmiyor.
-                                            Sunucu zaten reddediyor; dugmeyi gostermek yoneticiye calisan bir
-                                            sey varmis gibi gosterirdi. %>
-                                        <span class="badge bg-dark bg-opacity-75 rounded-pill ms-1" title="Bu hesap yalnızca sunucudan yönetilir">
-                                            <i class="fa-solid fa-lock me-1"></i>Sahip
-                                        </span>
-                                        <% if (u.id === activeAdminUser.id) { %>
-                                            <span class="text-muted small ms-1">(Siz)</span>
-                                        <% } %>
-                                    <% } else if (u.id === activeAdminUser.id) { %>
+                                    <% if (u.id === activeAdminUser.id) { %>
                                         <span class="text-muted small ms-1">(Siz)</span>
                                     <% } else { %>
                                         <button class="btn btn-sm btn-outline-warning me-1" type="button"

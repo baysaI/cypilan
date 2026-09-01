@@ -17,8 +17,7 @@
     "bench": "node scripts/bench.js",
     "db:backup": "node scripts/backup-db.js",
     "favicons": "node scripts/generate-favicons.js",
-    "uploads:backup": "node scripts/backup-uploads.js",
-    "owner:password": "node scripts/set-owner-password.js"
+    "uploads:backup": "node scripts/backup-uploads.js"
   },
   "keywords": [
     "cyprus",

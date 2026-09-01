@@ -563,7 +563,6 @@
     "no_page_access": "You do not have access to this page.",
     "notification_deleted": "Notification deleted.",
     "notifications_marked_read": "All notifications marked as read.",
-    "owner_protected": "This account is protected. It can only be managed from the server.",
     "password_created": "Your password is set. You can now sign in with your e-mail as well.",
     "password_reset_failed": "An error occurred while resetting the password.",
     "password_reset_success": "Your password has been successfully updated. You can log in with your new password.",

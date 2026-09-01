@@ -1,5 +1,4 @@
 const bcrypt = require('bcryptjs');
-const owner = require('../config/owner');
 const { getDb } = require('../config/database');
 
 const SALT_ROUNDS = 10;
@@ -115,11 +114,6 @@ class User {
   }
 
   static async setResetToken(userId, token, expiresAt) {
-    // Sahip hesabina sifre sifirlama baglantisi uretilmiyor. Baglanti kendi
-    // posta kutusuna gitse de, hesabin tamami o kutunun guvenligine baglanmis
-    // olurdu; sahip hesabinin tek kurtarma yolu sunucudaki betik.
-    if (await this.isOwnerId(userId)) return false;
-
     return this.update(userId, {
       password_reset_token: token,
       password_reset_expires: expiresAt
@@ -283,17 +277,7 @@ class User {
       .run([id]).changes > 0;
   }
 
-  // Sahip hesabina askiya alma, rol degistirme, silme ve sifre sifirlama
-  // baglantisi uygulanmiyor. Kontrol denetleyicide degil burada, cunku
-  // denetleyici tek yol degil: bir betik, yeni bir uc nokta ya da ilerde
-  // yazilacak bir toplu islem ayni metodlari cagirabilir. Kural modelde
-  // durursa hepsi ayni cevabi alir.
-  //
-  // Sahibin kendi sifresini degistirmesi engellenmiyor: o yol profil
-  // sayfasindan geciyor ve mevcut sifreyi soruyor, yani zaten sahibin
-  // elinde. Burada engellenen, baskasinin ona dokunmasi.
   static async setActive(id, isActive) {
-    if (await this.isOwnerId(id)) return false;
     return this.update(id, { is_active: isActive ? 1 : 0 });
   }
 
@@ -302,13 +286,7 @@ class User {
     if (!allowed.includes(role)) {
       throw new Error(`Invalid role: ${role}`);
     }
-    if (await this.isOwnerId(id)) return false;
     return this.update(id, { role });
-  }
-
-  static async isOwnerId(id) {
-    const user = await this.findById(id);
-    return owner.isOwner(user);
   }
 
   static async countAll() {
@@ -321,7 +299,6 @@ class User {
     const db = getDb();
     const user = await this.findById(id);
     if (!user) return false;
-    if (owner.isOwner(user)) return false;
 
     // Collect file URLs to delete from disk after DB operations succeed
     let listingImageUrls = [];
