@@ -205,7 +205,20 @@
                                 </div>
                                 <p class="text-muted small mb-3">Bu bilgileri doldurduğunuzda ilanda detay olarak gösterilir. Dilerseniz yukarıdaki butonla otomatik açıklama metni de oluşturabilirsiniz.</p>
 
-                                <div class="row g-2 mb-3" id="draftFields"></div>
+                                <%# Degerler burada, gorunen arayuzden bagimsiz: form gonderimi ve
+                                    aciklama taslagi ureteci ikisi de [data-draft] okuyor. %>
+                                <div id="draftValues" hidden></div>
+
+                                <div class="d-flex flex-wrap gap-2" id="draftAnswered"></div>
+                                <div class="border rounded-4 bg-white p-3 mb-2" id="draftSteps"></div>
+
+                                <button type="button" class="btn btn-sm btn-link text-decoration-none px-0" id="draftDetailsToggle"
+                                        data-bs-toggle="collapse" data-bs-target="#draftDetailsWrap">
+                                    <i class="fa-solid fa-sliders me-1"></i>Daha fazla detay ekle
+                                </button>
+                                <div class="collapse" id="draftDetailsWrap">
+                                    <div class="row g-2 pt-2" id="draftDetails"></div>
+                                </div>
 
                                 <div class="pt-2 border-top" id="featuresSection">
                                     <label class="form-label small fw-semibold text-muted d-block mb-2">
@@ -826,22 +839,32 @@ document.addEventListener('DOMContentLoaded', function() {
         // Kapalı listeler artık açılır kutu değil, dokunulacak etiketler.
         // Telefonda açılır kutu üç hareket istiyor - aç, kaydır, seç; etiket bir
         // dokunuş. Satıcının bir ilanda on kez tekrarladığı şey tam olarak bu.
+        // Alanlar iki bolume ayriliyor: adim adim sorulanlar ve isteyenin actigi
+        // detaylar.
+        //
+        // Ilk hal on uc alani ayni anda ekrana basiyordu. Etiketlere cevirmek onu
+        // daha okunur yapmadi, yalnizca daha renkli yapti - telefonda goz nereye
+        // bakacagini bilemiyordu. Bir seferde bir soru sormak, ayni bilgiyi
+        // toplamanin tek okunabilir yolu.
+        //
+        // Adim olacak alanlar, bir aracin ya da evin ne oldugunu soyleyen az
+        // sayidaki alan. Motor hacmi de gerekli bir bilgi ama once "hangi marka"
+        // sorusunun cevaplanmasi gerekiyor; ikisini yan yana koymak ikisini de
+        // zorlastiriyor.
         const FIELDS = {
             emlak: [
-                // Oda sayısı ve kat, emlak ilanında en çok yazılan iki şey.
-                // Yazılacak yerde seçilecek şeye dönüştüler.
-                { name: 'rooms', label: '<%= t("draft.field_rooms") %>', choices: ['1+0', '1+1', '2+1', '3+1', '4+1', '5+1', '6+1 ve üzeri'], placeholder: 'Örn: 3+1' },
-                { name: 'size', label: '<%= t("draft.field_size") %> (m²)', placeholder: 'Örn: 120' },
-                { name: 'floor', label: '<%= t("draft.field_floor") %>', choices: ['Bodrum', 'Zemin', 'Bahçe Katı', '1', '2', '3', '4', '5', '6-10', '10 üzeri'], placeholder: 'Örn: 2' },
+                { name: 'rooms', label: '<%= t("draft.field_rooms") %>', step: true, choices: ['1+0', '1+1', '2+1', '3+1', '4+1', '5+1', '6+1 ve üzeri'], placeholder: 'Örn: 3+1' },
+                { name: 'size', label: '<%= t("draft.field_size") %>', step: true, placeholder: 'Örn: 120' },
+                { name: 'floor', label: '<%= t("draft.field_floor") %>', step: true, choices: ['Bodrum', 'Zemin', 'Bahçe Katı', '1', '2', '3', '4', '5', '6-10', '10 üzeri'], placeholder: 'Örn: 2' },
                 { name: 'build_year', draftKey: 'buildYear', label: '<%= t("draft.field_build_year") %>', placeholder: 'Örn: 2018' }
             ],
             vasita: [
-                { name: 'brand', label: '<%= t("draft.field_brand") %>', brandChoices: true, placeholder: 'Örn: BMW' },
-                { name: 'model', label: '<%= t("draft.field_model") %>', modelChoices: true, placeholder: 'Örn: 320i' },
-                { name: 'year', label: '<%= t("draft.field_year") %>', placeholder: 'Örn: 2020' },
-                { name: 'km', label: '<%= t("draft.field_km") %>', placeholder: 'Örn: 85000' },
-                { name: 'fuel', label: '<%= t("draft.field_fuel") %>', choices: ['Benzin', 'Dizel', 'Hibrit', 'Elektrik', 'LPG'] },
-                { name: 'gear', label: '<%= t("draft.field_gear") %>', choices: ['Otomatik', 'Manuel', 'Yarı Otomatik'] },
+                { name: 'brand', label: '<%= t("draft.field_brand") %>', step: true, brandChoices: true, searchable: true, placeholder: 'Örn: BMW' },
+                { name: 'model', label: '<%= t("draft.field_model") %>', step: true, modelChoices: true, placeholder: 'Örn: 320i' },
+                { name: 'year', label: '<%= t("draft.field_year") %>', step: true, yearChoices: true, placeholder: 'Örn: 2020' },
+                { name: 'km', label: '<%= t("draft.field_km") %>', step: true, placeholder: 'Örn: 85000' },
+                { name: 'fuel', label: '<%= t("draft.field_fuel") %>', step: true, choices: ['Benzin', 'Dizel', 'Hibrit', 'Elektrik', 'LPG'] },
+                { name: 'gear', label: '<%= t("draft.field_gear") %>', step: true, choices: ['Otomatik', 'Manuel', 'Yarı Otomatik'] },
                 { name: 'body_type', label: '<%= t("draft.field_body_type") %>', choices: ['Sedan', 'Hatchback', 'SUV', 'Coupe', 'Cabrio', 'Station Wagon', 'Pick-up', 'Minivan'] },
                 { name: 'engine_power', label: '<%= t("draft.field_engine_power") %>', placeholder: 'Örn: 150 HP' },
                 { name: 'engine_size', label: '<%= t("draft.field_engine_size") %>', placeholder: 'Örn: 1600 cc' },
@@ -851,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { name: 'swap', label: '<%= t("draft.field_swap") %>', choices: ['Hayır (Takas Yok)', 'Evet (Takasa Uygun)', 'Sadece Araçla Takas', 'Düşük Model Araçla Takas'] }
             ],
             'ikinci-el': [
-                { name: 'condition', label: '<%= t("draft.field_condition") %>', choices: ['Sıfır / Kapalı Kutu', 'Çok Az Kullanılmış (Yeni Gibi)', 'İkinci El (Sorunsuz)', 'Kozmetik Kusurlu'] },
+                { name: 'condition', label: '<%= t("draft.field_condition") %>', step: true, choices: ['Sıfır / Kapalı Kutu', 'Çok Az Kullanılmış (Yeni Gibi)', 'İkinci El (Sorunsuz)', 'Kozmetik Kusurlu'] },
                 { name: 'swap', label: '<%= t("draft.field_swap") %>', choices: ['Hayır (Takas Yok)', 'Evet (Takasa Uygun)'] }
             ]
         };
@@ -868,108 +891,217 @@ document.addEventListener('DOMContentLoaded', function() {
             return option ? option.getAttribute('data-root') : null;
         };
 
-        const escapeAttr = function (value) {
-            return String(value === undefined || value === null ? '' : value).replace(/"/g, '&quot;');
-        };
-
         const currentSub = function () {
             const option = categorySelect.options[categorySelect.selectedIndex];
             return option ? option.getAttribute('data-slug') : null;
         };
 
-        // Etiket grubu: gizli bir alan degeri tutuyor, etiketler onu yaziyor.
-        // Gizli alan `data-draft` tasidigi icin aciklama taslagi ureteci de
-        // eskisi gibi okuyabiliyor - o tarafta hicbir sey degismedi.
-        const choiceGroupHtml = function (field, values, existingVal, opts) {
-            const settings = opts || {};
-            const inList = values.some(function (v) { return String(v) === String(existingVal); });
-            const freeVal = existingVal && !inList ? existingVal : '';
+        const escapeAttr = function (value) {
+            return String(value === undefined || value === null ? '' : value).replace(/"/g, '&quot;');
+        };
 
-            let html = '<input type="hidden" name="' + field.name + '" id="attr_' + field.name +
-                '" data-draft="' + (field.draftKey || field.name) + '" value="' + escapeAttr(existingVal) + '">';
+        const escapeHtml = function (value) {
+            const div = document.createElement('div');
+            div.textContent = String(value === undefined || value === null ? '' : value);
+            return div.innerHTML;
+        };
 
-            // Kirk alti marka telefonda bir duvar. Once sik gorulenler, gerisi
-            // bir dokunusla. Secili deger kirpilan kisimdaysa liste zaten acik
-            // basiliyor - yoksa satici kendi sectigi markayi goremezdi.
-            const collapseAfter = settings.collapseAfter || 0;
-            const hiddenIndex = values.indexOf(existingVal);
-            const startExpanded = !collapseAfter || (hiddenIndex >= collapseAfter);
+        // Son yirmi bes yil. Bir arac ilaninda yil neredeyse her zaman yakin
+        // gecmiste; daha eskisi icin "Baska" var.
+        const yearChoices = function () {
+            const now = new Date().getFullYear();
+            const list = [];
+            for (let y = now + 1; y >= now - 24; y--) list.push(String(y));
+            return list;
+        };
 
-            html += '<div class="d-flex flex-wrap gap-1 choice-chips" data-field="' + field.name + '">';
-            values.forEach(function (value, index) {
-                const active = String(value) === String(existingVal);
-                const collapsed = collapseAfter && index >= collapseAfter && !startExpanded;
-                html += '<button type="button" class="btn btn-sm rounded-pill choice-chip' +
-                    (collapsed ? ' choice-more d-none' : '') + ' ' +
-                    (active ? 'btn-primary' : 'btn-outline-secondary') + '" data-value="' + escapeAttr(value) + '">' +
-                    value + '</button>';
+        const choicesFor = function (field) {
+            if (field.choices) return field.choices;
+            if (field.yearChoices) return yearChoices();
+            if (field.brandChoices) {
+                const brands = BRANDS_BY_SUB[currentSub()] || BRANDS_BY_SUB.otomobil || { all: [] };
+                return brands.all;
+            }
+            return null;
+        };
+
+        // Degerler her zaman gizli alanlarda duruyor, gorunen arayuzden bagimsiz.
+        // Boylece form gonderimi ve aciklama taslagi ureteci - ikisi de
+        // `[data-draft]` okuyor - adim adim arayuzden hic haberdar olmadan
+        // eskisi gibi calisiyor.
+        const valueStore = document.getElementById('draftValues');
+
+        // Girilen her deger burada da tutuluyor. Gizli alanlar kategori
+        // degistiginde yeniden kuruluyor ve o kategoride bulunmayan alanlar
+        // DOM'dan dusuyor; bu hafiza olmasa emlaktan vasitaya bakip geri donen
+        // biri oda sayisini yeniden girmek zorunda kalirdi.
+        const enteredValues = {};
+
+        const ensureInputs = function (fields) {
+            valueStore.querySelectorAll('input[type="hidden"]').forEach(function (el) {
+                enteredValues[el.getAttribute('name')] = el.value;
             });
 
-            if (collapseAfter && !startExpanded && values.length > collapseAfter) {
-                html += '<button type="button" class="btn btn-sm rounded-pill btn-light border choice-expand">' +
-                    '+' + (values.length - collapseAfter) + ' daha</button>';
+            valueStore.innerHTML = fields.map(function (field) {
+                const draftKey = field.draftKey || field.name;
+                const existing = enteredValues[field.name] !== undefined
+                    ? enteredValues[field.name]
+                    : (savedAttributes[field.name] || savedAttributes[draftKey] || '');
+                return '<input type="hidden" name="' + field.name + '" id="attr_' + field.name +
+                    '" data-draft="' + draftKey + '" value="' + escapeAttr(existing) + '">';
+            }).join('');
+        };
+
+        const getValue = function (name) {
+            const el = document.getElementById('attr_' + name);
+            return el ? el.value : '';
+        };
+
+        const setValue = function (name, value) {
+            const el = document.getElementById('attr_' + name);
+            if (!el) return;
+            el.value = value;
+            enteredValues[name] = value;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+
+        // --- Adim durumu ---------------------------------------------------------
+        let stepFields = [];
+        let detailFields = [];
+        let stepIndex = 0;
+
+        const stepHost = document.getElementById('draftSteps');
+        const doneHost = document.getElementById('draftAnswered');
+        const detailHost = document.getElementById('draftDetails');
+        const detailToggle = document.getElementById('draftDetailsToggle');
+
+        // Cevaplanmis adimlar tek satirlik ozetlere iniyor. Ekranda kalmalari
+        // gerekiyor - insan ne sectigini gormek ister - ama yer kaplamamalari da
+        // gerekiyor; dokununca o adima geri donuluyor.
+        const renderAnswered = function () {
+            const parts = [];
+            stepFields.forEach(function (field, index) {
+                if (index >= stepIndex) return;
+                const value = getValue(field.name);
+                parts.push(
+                    '<button type="button" class="btn btn-sm btn-light border rounded-pill answered-chip d-inline-flex align-items-center gap-2" data-step="' + index + '">' +
+                    '<span class="text-muted">' + escapeHtml(field.label) + '</span>' +
+                    '<span class="fw-semibold">' + (value ? escapeHtml(value) : '—') + '</span>' +
+                    '<i class="fa-solid fa-pen text-muted" style="font-size: 0.7rem;"></i></button>'
+                );
+            });
+            doneHost.innerHTML = parts.join('');
+            doneHost.classList.toggle('mb-3', parts.length > 0);
+        };
+
+        const renderStep = function () {
+            renderAnswered();
+
+            if (stepIndex >= stepFields.length) {
+                stepHost.innerHTML = '';
+                stepHost.hidden = true;
+                return;
             }
 
-            // Liste kapali degil. Kibris'ta tek bir Morgan varsa o da ilan
-            // verilebilmeli; "Baska" onu yazmanin yolu.
-            html += '<button type="button" class="btn btn-sm rounded-pill choice-other ' +
-                (freeVal ? 'btn-primary' : 'btn-outline-secondary') + '">' +
-                (settings.otherLabel || 'Başka…') + '</button>';
-            html += '</div>';
+            stepHost.hidden = false;
+            const field = stepFields[stepIndex];
+            const value = getValue(field.name);
+            const options = choicesFor(field);
 
-            html += '<input type="text" class="form-control form-control-sm bg-white mt-1 choice-free' +
-                (freeVal ? '' : ' d-none') + '" placeholder="' + escapeAttr(field.placeholder || '') +
-                '" value="' + escapeAttr(freeVal) + '">';
+            let html = '<div class="d-flex align-items-center gap-2 mb-2">' +
+                '<span class="badge bg-primary rounded-pill">' + (stepIndex + 1) + ' / ' + stepFields.length + '</span>' +
+                '<span class="fw-bold">' + escapeHtml(field.label) + '</span>' +
+                '</div>';
 
-            if (settings.hint) {
-                html += '<div class="form-text small mt-1">' + settings.hint + '</div>';
+            if (field.searchable && options && options.length > 12) {
+                html += '<input type="search" class="form-control form-control-sm mb-2 step-search" ' +
+                    'placeholder="Yazarak ara…" autocomplete="off">';
             }
 
-            return html;
+            if (options) {
+                html += '<div class="d-flex flex-wrap gap-2 step-options">';
+                options.forEach(function (option) {
+                    const on = String(option) === String(value);
+                    html += '<button type="button" class="btn rounded-pill step-option ' +
+                        (on ? 'btn-primary' : 'btn-outline-secondary') + '" data-value="' + escapeAttr(option) + '">' +
+                        escapeHtml(option) + '</button>';
+                });
+                html += '</div>';
+                html += '<input type="text" class="form-control form-control-sm mt-2 step-free" ' +
+                    'placeholder="' + escapeAttr(field.placeholder || 'Listede yoksa buraya yazın') + '" value="' +
+                    escapeAttr(options.indexOf(value) === -1 ? value : '') + '">';
+            } else {
+                html += '<input type="text" class="form-control step-free" inputmode="' +
+                    (field.name === 'km' || field.name === 'size' ? 'numeric' : 'text') + '" placeholder="' +
+                    escapeAttr(field.placeholder || '') + '" value="' + escapeAttr(value) + '">';
+            }
+
+            if (field.modelChoices) {
+                html += '<div class="d-flex flex-wrap gap-2 mt-2 model-suggestions" hidden></div>';
+            }
+
+            html += '<div class="d-flex gap-2 mt-3">' +
+                '<button type="button" class="btn btn-primary rounded-pill px-4 step-next">Devam</button>' +
+                '<button type="button" class="btn btn-link text-muted step-skip">Bu adımı atla</button>' +
+                '</div>';
+
+            stepHost.innerHTML = html;
+
+            const search = stepHost.querySelector('.step-search');
+            if (search) search.focus();
+
+            if (field.modelChoices) loadModelSuggestions();
+        };
+
+        // Detaylar acilana kadar basilmiyor: cogu ilanda bunlarin cogu bos
+        // kaliyor ve bos kalacak on alani gostermek, doldurulacak besini
+        // gizliyor.
+        const renderDetails = function () {
+            detailHost.innerHTML = detailFields.map(function (field) {
+                const value = getValue(field.name);
+                const options = choicesFor(field);
+                let html = '<div class="col-12 mb-2"><label class="form-label small fw-semibold text-muted mb-1">' +
+                    escapeHtml(field.label) + '</label>';
+
+                if (options) {
+                    html += '<div class="d-flex flex-wrap gap-1 detail-options" data-field="' + field.name + '">';
+                    options.forEach(function (option) {
+                        const on = String(option) === String(value);
+                        html += '<button type="button" class="btn btn-sm rounded-pill detail-option ' +
+                            (on ? 'btn-primary' : 'btn-outline-secondary') + '" data-value="' + escapeAttr(option) + '">' +
+                            escapeHtml(option) + '</button>';
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<input type="text" class="form-control form-control-sm detail-free" data-field="' +
+                        field.name + '" placeholder="' + escapeAttr(field.placeholder || '') +
+                        '" value="' + escapeAttr(value) + '">';
+                }
+
+                return html + '</div>';
+            }).join('');
         };
 
         const renderDraftInputs = function () {
             const root = currentRoot();
-            draftFields.innerHTML = '';
-            draftFeatures.innerHTML = '';
-
             const fields = FIELDS[root] || [];
-            fields.forEach(function (field) {
-                const isChoice = Boolean(field.choices || field.brandChoices || field.modelChoices);
-                const col = document.createElement('div');
-                col.className = isChoice ? 'col-12' : 'col-6 col-md-3';
-                const draftKey = field.draftKey || field.name;
-                const existingVal = savedAttributes[field.name] || savedAttributes[draftKey] || '';
 
-                let inputHtml = '';
-                if (field.brandChoices) {
-                    const sub = currentSub();
-                    const brands = (BRANDS_BY_SUB[sub] || BRANDS_BY_SUB.otomobil || { popular: [], all: [] });
-                    inputHtml = choiceGroupHtml(field, brands.all, existingVal, {
-                        otherLabel: 'Listede yok…',
-                        collapseAfter: (brands.popular || []).length
-                    });
-                } else if (field.modelChoices) {
-                    // Model listesi markaya bagli ve sunucudan geliyor; marka
-                    // secilene kadar ortada gosterilecek bir sey yok.
-                    inputHtml = '<input type="text" class="form-control form-control-sm bg-white" name="' + field.name +
-                        '" id="attr_' + field.name + '" data-draft="' + draftKey +
-                        '" placeholder="' + escapeAttr(field.placeholder || '') + '" value="' + escapeAttr(existingVal) + '">' +
-                        '<div class="d-flex flex-wrap gap-1 mt-1 model-suggestions" hidden></div>';
-                } else if (field.choices) {
-                    inputHtml = choiceGroupHtml(field, field.choices, existingVal);
-                } else {
-                    inputHtml = '<input type="text" class="form-control form-control-sm bg-white" name="' + field.name +
-                        '" id="attr_' + field.name + '" data-draft="' + draftKey +
-                        '" placeholder="' + escapeAttr(field.placeholder || '') + '" value="' + escapeAttr(existingVal) + '">';
-                }
+            ensureInputs(fields);
+            stepFields = fields.filter(function (f) { return f.step; });
+            detailFields = fields.filter(function (f) { return !f.step; });
 
-                col.innerHTML = '<label class="form-label small fw-semibold text-muted mb-1"' +
-                    (isChoice ? '' : ' for="attr_' + field.name + '"') + '>' + field.label + '</label>' + inputHtml;
-                draftFields.appendChild(col);
-            });
+            // Kaldigi yerden devam: daha once doldurulmus alanlar tekrar
+            // sorulmuyor.
+            stepIndex = 0;
+            while (stepIndex < stepFields.length && getValue(stepFields[stepIndex].name)) stepIndex++;
+
+            renderStep();
+            renderDetails();
+            detailToggle.hidden = detailFields.length === 0;
 
             const feats = FEATURES[root] || [];
+            draftFeatures.innerHTML = '';
             if (feats.length > 0) {
                 if (featuresSection) featuresSection.hidden = false;
                 const savedFeats = savedAttributes.features ? (Array.isArray(savedAttributes.features) ? savedAttributes.features : String(savedAttributes.features).split(',')) : [];
@@ -989,114 +1121,104 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             draftBox.hidden = !root || (fields.length === 0 && feats.length === 0);
-
-            if (FIELDS[root] && FIELDS[root].some(function (f) { return f.modelChoices; })) {
-                loadModelSuggestions();
-            }
         };
 
-        // --- Etiketlere dokunma -------------------------------------------------
-        const setChoiceValue = function (group, value, fromFree) {
-            const hidden = group.parentNode.querySelector('input[type="hidden"]');
-            const free = group.parentNode.querySelector('.choice-free');
-            if (!hidden) return;
-
-            hidden.value = value;
-            // Taslak ureteci ve form saklama degisikligi duysun.
-            hidden.dispatchEvent(new Event('input', { bubbles: true }));
-            hidden.dispatchEvent(new Event('change', { bubbles: true }));
-
-            group.querySelectorAll('.choice-chip').forEach(function (chip) {
-                const on = !fromFree && chip.getAttribute('data-value') === value;
-                chip.classList.toggle('btn-primary', on);
-                chip.classList.toggle('btn-outline-secondary', !on);
-            });
-
-            const other = group.querySelector('.choice-other');
-            if (other) {
-                other.classList.toggle('btn-primary', Boolean(fromFree));
-                other.classList.toggle('btn-outline-secondary', !fromFree);
-            }
-
-            if (!fromFree && free) {
-                free.value = '';
-                free.classList.add('d-none');
-            }
-
-            if (hidden.getAttribute('name') === 'brand') loadModelSuggestions();
+        // --- Etkilesim -----------------------------------------------------------
+        const advance = function () {
+            stepIndex = Math.min(stepIndex + 1, stepFields.length);
+            renderStep();
         };
 
-        draftFields.addEventListener('click', function (event) {
-            const chip = event.target.closest('.choice-chip');
-            if (chip) {
-                const group = chip.closest('.choice-chips');
-                const already = chip.classList.contains('btn-primary');
-                // Ikinci dokunus secimi kaldiriyor: yanlis dokunan biri sayfayi
-                // yenilemek zorunda kalmamali.
-                setChoiceValue(group, already ? '' : chip.getAttribute('data-value'), false);
+        stepHost.addEventListener('click', function (event) {
+            const option = event.target.closest('.step-option');
+            if (option) {
+                const field = stepFields[stepIndex];
+                setValue(field.name, option.getAttribute('data-value'));
+                // Secim yapinca bir sonraki soruya geciliyor: "Devam"a basmak
+                // ayni seyi iki kez yaptirmak olurdu.
+                if (field.modelChoices || !field.brandChoices) advance();
+                else { renderStep(); advance(); }
                 return;
             }
 
-            const expand = event.target.closest('.choice-expand');
-            if (expand) {
-                const group = expand.closest('.choice-chips');
-                group.querySelectorAll('.choice-more').forEach(function (chip) { chip.classList.remove('d-none'); });
-                expand.remove();
+            if (event.target.closest('.step-next')) {
+                const free = stepHost.querySelector('.step-free');
+                if (free) setValue(stepFields[stepIndex].name, free.value.trim());
+                advance();
                 return;
             }
 
-            const other = event.target.closest('.choice-other');
-            if (other) {
-                const group = other.closest('.choice-chips');
-                const free = group.parentNode.querySelector('.choice-free');
-                if (!free) return;
-                free.classList.remove('d-none');
-                free.focus();
-                setChoiceValue(group, free.value.trim(), true);
+            if (event.target.closest('.step-skip')) {
+                setValue(stepFields[stepIndex].name, '');
+                advance();
                 return;
             }
 
             const suggestion = event.target.closest('.model-chip');
             if (suggestion) {
-                const input = document.getElementById('attr_model');
-                if (!input) return;
-                const already = suggestion.classList.contains('btn-primary');
-                input.value = already ? '' : suggestion.getAttribute('data-value');
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                suggestion.parentNode.querySelectorAll('.model-chip').forEach(function (c) {
-                    const on = c === suggestion && !already;
-                    c.classList.toggle('btn-primary', on);
-                    c.classList.toggle('btn-outline-secondary', !on);
-                });
+                setValue('model', suggestion.getAttribute('data-value'));
+                advance();
             }
         });
 
-        draftFields.addEventListener('input', function (event) {
-            const free = event.target.closest('.choice-free');
-            if (!free) return;
-            const group = free.parentNode.querySelector('.choice-chips');
-            setChoiceValue(group, free.value.trim(), true);
+        stepHost.addEventListener('input', function (event) {
+            const search = event.target.closest('.step-search');
+            if (search) {
+                const needle = search.value.trim().toLocaleLowerCase('tr');
+                stepHost.querySelectorAll('.step-option').forEach(function (btn) {
+                    const hit = !needle || btn.textContent.toLocaleLowerCase('tr').indexOf(needle) !== -1;
+                    btn.classList.toggle('d-none', !hit);
+                });
+                return;
+            }
+
+            const free = event.target.closest('.step-free');
+            if (free) setValue(stepFields[stepIndex].name, free.value.trim());
+        });
+
+        stepHost.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter') return;
+            if (!event.target.closest('.step-free') && !event.target.closest('.step-search')) return;
+            event.preventDefault();
+            const free = stepHost.querySelector('.step-free');
+            if (free) setValue(stepFields[stepIndex].name, free.value.trim());
+            advance();
+        });
+
+        doneHost.addEventListener('click', function (event) {
+            const chip = event.target.closest('.answered-chip');
+            if (!chip) return;
+            stepIndex = parseInt(chip.getAttribute('data-step'), 10) || 0;
+            renderStep();
+        });
+
+        detailHost.addEventListener('click', function (event) {
+            const option = event.target.closest('.detail-option');
+            if (!option) return;
+            const group = option.closest('.detail-options');
+            const name = group.getAttribute('data-field');
+            const already = option.classList.contains('btn-primary');
+            setValue(name, already ? '' : option.getAttribute('data-value'));
+            group.querySelectorAll('.detail-option').forEach(function (btn) {
+                const on = btn === option && !already;
+                btn.classList.toggle('btn-primary', on);
+                btn.classList.toggle('btn-outline-secondary', !on);
+            });
+        });
+
+        detailHost.addEventListener('input', function (event) {
+            const free = event.target.closest('.detail-free');
+            if (free) setValue(free.getAttribute('data-field'), free.value.trim());
         });
 
         // --- Markaya gore model onerileri ---------------------------------------
-        //
-        // Liste elle yazilmiyor; daha once ilan verilmis modellerden birikiyor.
-        // Ilk gunlerde bos gelecek ve form bugunku gibi serbest metin olarak
-        // calisacak - bu bir eksiklik degil, listenin dogru bicimde dolmasinin
-        // yolu: adada gercekten satilan araclar birikiyor, jenerik bir katalog
-        // degil.
         let modelRequest = 0;
         async function loadModelSuggestions() {
-            const brandInput = document.getElementById('attr_brand');
-            const box = draftFields.querySelector('.model-suggestions');
+            const box = stepHost.querySelector('.model-suggestions');
             if (!box) return;
 
-            const brand = brandInput ? brandInput.value.trim() : '';
-            if (!brand) {
-                box.hidden = true;
-                box.innerHTML = '';
-                return;
-            }
+            const brand = getValue('brand');
+            if (!brand) { box.hidden = true; box.innerHTML = ''; return; }
 
             const ticket = ++modelRequest;
             try {
@@ -1104,23 +1226,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const data = await res.json();
-                // Hizli hizli marka degistiren biri, gec gelen eski cevabin
-                // listeyi ezmesini gormemeli.
                 if (ticket !== modelRequest) return;
 
                 const models = (data && Array.isArray(data.models)) ? data.models : [];
-                if (models.length === 0) {
-                    box.hidden = true;
-                    box.innerHTML = '';
-                    return;
-                }
+                if (models.length === 0) { box.hidden = true; box.innerHTML = ''; return; }
 
-                const current = (document.getElementById('attr_model') || {}).value || '';
+                const current = getValue('model');
                 box.innerHTML = models.map(function (model) {
                     const on = String(model) === String(current);
-                    return '<button type="button" class="btn btn-sm rounded-pill model-chip ' +
+                    return '<button type="button" class="btn rounded-pill model-chip ' +
                         (on ? 'btn-primary' : 'btn-outline-secondary') + '" data-value="' + escapeAttr(model) + '">' +
-                        model + '</button>';
+                        escapeHtml(model) + '</button>';
                 }).join('');
                 box.hidden = false;
             } catch (err) {
@@ -1131,6 +1247,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         categorySelect.addEventListener('change', renderDraftInputs);
         renderDraftInputs();
+
 
         // --- Vitrin onizlemesi ---------------------------------------------------
         //
