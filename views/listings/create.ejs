@@ -209,6 +209,11 @@
                                     aciklama taslagi ureteci ikisi de [data-draft] okuyor. %>
                                 <div id="draftValues" hidden></div>
 
+                                <%# Genis ekranda kompakt izgara, dar ekranda adim adim.
+                                    Ikisi de ayni FIELDS tanimindan besleniyor ve ayni gizli
+                                    alanlara yaziyor; ayrisan tek sey cizim. %>
+                                <div class="row g-2 mb-2 d-none" id="draftGrid"></div>
+
                                 <div class="d-flex flex-wrap gap-2" id="draftAnswered"></div>
                                 <div class="border rounded-4 bg-white p-3 mb-2" id="draftSteps"></div>
 
@@ -1000,11 +1005,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (stepIndex >= stepFields.length) {
                 stepHost.innerHTML = '';
-                stepHost.hidden = true;
+                stepHost.classList.add('d-none');
                 return;
             }
 
-            stepHost.hidden = false;
+            stepHost.classList.remove('d-none');
             const field = stepFields[stepIndex];
             const value = getValue(field.name);
             const options = choicesFor(field);
@@ -1038,7 +1043,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (field.modelChoices) {
-                html += '<div class="d-flex flex-wrap gap-2 mt-2 model-suggestions" hidden></div>';
+                // d-none ile gizleniyor, hidden ozniteligiyle degil: d-flex
+                // display'i !important yaziyor ve hidden'i eziyor.
+                html += '<div class="d-flex flex-wrap gap-2 mt-2 model-suggestions d-none"></div>';
             }
 
             html += '<div class="d-flex gap-2 mt-3">' +
@@ -1083,6 +1090,61 @@ document.addEventListener('DOMContentLoaded', function() {
             }).join('');
         };
 
+        // Genis ekranda adim adim ilerlemek yavaslatiyor: yer var, klavye var,
+        // fare var. Orada butun alanlar kompakt bir izgarada duruyor ve kapali
+        // listeler acilir kutu olarak basiliyor - kirk alti markayi etiket
+        // olarak yan yana dizmek tam da sikayet edilen goruntuydu ve o goruntu
+        // masaustunde ortaya cikmisti.
+        //
+        // Izgaradaki kontroller name tasimiyor: deger yine gizli alanlarda
+        // duruyor, bunlar yalnizca onu yazan arayuz. Boylece iki gorunum
+        // arasinda gecis yapinca girilenler yerinde kaliyor.
+        const gridHost = document.getElementById('draftGrid');
+        const wideScreen = window.matchMedia('(min-width: 992px)');
+
+        const renderGrid = function (fields) {
+            gridHost.innerHTML = fields.map(function (field) {
+                const value = getValue(field.name);
+                const options = choicesFor(field);
+                const id = 'grid_' + field.name;
+
+                let control;
+                if (options) {
+                    control = '<select class="form-select form-select-sm bg-white grid-control" id="' + id +
+                        '" data-field="' + field.name + '">' +
+                        '<option value="">Seçiniz</option>' +
+                        options.map(function (option) {
+                            const on = String(option) === String(value) ? ' selected' : '';
+                            return '<option value="' + escapeAttr(option) + '"' + on + '>' + escapeHtml(option) + '</option>';
+                        }).join('') +
+                        // Listede olmayan bir deger daha once girilmisse acilir
+                        // kutuda da gorunmeli, yoksa kaydedilmis ilan bosalirdi.
+                        (value && options.indexOf(value) === -1
+                            ? '<option value="' + escapeAttr(value) + '" selected>' + escapeHtml(value) + '</option>'
+                            : '') +
+                        '</select>';
+                } else {
+                    control = '<input type="text" class="form-control form-control-sm bg-white grid-control" id="' + id +
+                        '" data-field="' + field.name + '" placeholder="' + escapeAttr(field.placeholder || '') +
+                        '" value="' + escapeAttr(value) + '">';
+                }
+
+                return '<div class="col-6 col-md-3">' +
+                    '<label class="form-label small fw-semibold text-muted mb-1" for="' + id + '">' +
+                    escapeHtml(field.label) + '</label>' + control + '</div>';
+            }).join('');
+        };
+
+        gridHost.addEventListener('change', function (event) {
+            const control = event.target.closest('.grid-control');
+            if (control) setValue(control.getAttribute('data-field'), control.value.trim());
+        });
+
+        gridHost.addEventListener('input', function (event) {
+            const control = event.target.closest('input.grid-control');
+            if (control) setValue(control.getAttribute('data-field'), control.value.trim());
+        });
+
         const renderDraftInputs = function () {
             const root = currentRoot();
             const fields = FIELDS[root] || [];
@@ -1091,14 +1153,31 @@ document.addEventListener('DOMContentLoaded', function() {
             stepFields = fields.filter(function (f) { return f.step; });
             detailFields = fields.filter(function (f) { return !f.step; });
 
-            // Kaldigi yerden devam: daha once doldurulmus alanlar tekrar
-            // sorulmuyor.
-            stepIndex = 0;
-            while (stepIndex < stepFields.length && getValue(stepFields[stepIndex].name)) stepIndex++;
+            // Gizlemek icin d-none sinifi kullaniliyor, hidden ozniteligi degil.
+            // Bootstrap'in .row ve .d-flex siniflari display'i !important ile
+            // yaziyor ve hidden ozniteligini eziyor: oge gizli isaretleniyor ama
+            // ekranda durmaya devam ediyordu.
+            const wide = wideScreen.matches;
+            gridHost.classList.toggle('d-none', !wide);
+            doneHost.classList.toggle('d-none', wide);
+            stepHost.classList.toggle('d-none', wide);
+            detailToggle.classList.toggle('d-none', wide || detailFields.length === 0);
+            if (wide) {
+                const wrap = document.getElementById('draftDetailsWrap');
+                if (wrap) wrap.classList.remove('show');
+            }
 
-            renderStep();
-            renderDetails();
-            detailToggle.hidden = detailFields.length === 0;
+            if (wide) {
+                renderGrid(fields);
+            } else {
+                // Kaldigi yerden devam: daha once doldurulmus alanlar tekrar
+                // sorulmuyor.
+                stepIndex = 0;
+                while (stepIndex < stepFields.length && getValue(stepFields[stepIndex].name)) stepIndex++;
+
+                renderStep();
+                renderDetails();
+            }
 
             const feats = FEATURES[root] || [];
             draftFeatures.innerHTML = '';
@@ -1218,7 +1297,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!box) return;
 
             const brand = getValue('brand');
-            if (!brand) { box.hidden = true; box.innerHTML = ''; return; }
+            if (!brand) { box.classList.add('d-none'); box.innerHTML = ''; return; }
 
             const ticket = ++modelRequest;
             try {
@@ -1229,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (ticket !== modelRequest) return;
 
                 const models = (data && Array.isArray(data.models)) ? data.models : [];
-                if (models.length === 0) { box.hidden = true; box.innerHTML = ''; return; }
+                if (models.length === 0) { box.classList.add('d-none'); box.innerHTML = ''; return; }
 
                 const current = getValue('model');
                 box.innerHTML = models.map(function (model) {
@@ -1238,14 +1317,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         (on ? 'btn-primary' : 'btn-outline-secondary') + '" data-value="' + escapeAttr(model) + '">' +
                         escapeHtml(model) + '</button>';
                 }).join('');
-                box.hidden = false;
+                box.classList.remove('d-none');
             } catch (err) {
-                box.hidden = true;
+                box.classList.add('d-none');
                 box.innerHTML = '';
             }
         }
 
         categorySelect.addEventListener('change', renderDraftInputs);
+
+        // Pencere kucultulup buyutuldugunde gorunum degisiyor. Degerler gizli
+        // alanlarda durdugu icin gecis sirasinda hicbir sey kaybolmuyor.
+        if (typeof wideScreen.addEventListener === 'function') {
+            wideScreen.addEventListener('change', renderDraftInputs);
+        }
+
         renderDraftInputs();
 
 
