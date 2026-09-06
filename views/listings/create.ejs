@@ -374,6 +374,26 @@
                     </div>
                 </div>
 
+                <%# Vitrin onizlemesi. Yayinlamadan hemen once, cunku "bu ilani
+                    yayinlayayim mi" sorusunun cevabi tam olarak bu kart. %>
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                            <i class="fa-regular fa-eye text-primary"></i>
+                            <h2 class="fs-6 fw-bold mb-0"><%= t('listing.preview_title') %></h2>
+                            <span class="text-muted small ms-auto"><%= t('listing.preview_hint') %></span>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-9 col-sm-6 col-md-4">
+                                <%# pe-none: karttaki baglantilar ve favori dugmesi henuz
+                                    var olmayan bir ilana gidiyor; onizleme bakilacak bir
+                                    sey, tiklanacak degil. %>
+                                <div id="listingPreview" class="pe-none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <%# Reversed on phones so the primary action sits at the bottom,
                     under the thumb, and spans the full width. %>
                 <div class="d-flex flex-column-reverse flex-sm-row gap-3 justify-content-sm-end mb-5">
@@ -1111,6 +1131,96 @@ document.addEventListener('DOMContentLoaded', function() {
 
         categorySelect.addEventListener('change', renderDraftInputs);
         renderDraftInputs();
+
+        // --- Vitrin onizlemesi ---------------------------------------------------
+        //
+        // Kart sunucuda, sitenin gercek partial'i ile uretiliyor. Ayni karti bir
+        // de burada JavaScript ile cizmek daha hizli olurdu ama iki kopya
+        // kacinilmaz olarak ayrisir: kart bir gun degisir, onizleme eski halini
+        // gostermeye devam eder ve satici yayinladiginda baska bir sey gorur.
+        (function () {
+            const box = document.getElementById('listingPreview');
+            const form = document.getElementById('createListingForm');
+            if (!box || !form) return;
+
+            const fileInput = document.getElementById('fileInput');
+            let timer = null;
+            let ticket = 0;
+            let objectUrl = null;
+
+            const val = function (name) {
+                const el = form.querySelector('[name="' + name + '"]');
+                return el ? el.value : '';
+            };
+
+            const checked = function (name) {
+                const el = form.querySelector('[name="' + name + '"]');
+                return Boolean(el && el.checked);
+            };
+
+            const collect = function () {
+                return {
+                    title: val('title'),
+                    price: val('price'),
+                    currency: val('currency'),
+                    city: val('city'),
+                    district: val('district'),
+                    category_id: categorySelect.value,
+                    listing_type: val('listing_type'),
+                    is_urgent: checked('badge_urgent'),
+                    is_opportunity: checked('badge_opportunity'),
+                    is_negotiable: checked('badge_negotiable'),
+                    is_swap: checked('badge_swap'),
+                    image_count: fileInput && fileInput.files ? fileInput.files.length : 0
+                };
+            };
+
+            // Secilen fotograf henuz sunucuda yok; karttaki gorsel tarayicidaki
+            // dosyadan gosteriliyor. Onceki adres serbest birakiliyor, yoksa her
+            // tus vurusunda bir tane daha sizar.
+            const applyLocalPhoto = function () {
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) return;
+                const img = box.querySelector('img');
+                if (!img) return;
+
+                if (objectUrl) URL.revokeObjectURL(objectUrl);
+                objectUrl = URL.createObjectURL(fileInput.files[0]);
+                img.src = objectUrl;
+                img.removeAttribute('onerror');
+            };
+
+            const refresh = async function () {
+                const mine = ++ticket;
+                try {
+                    const res = await fetch('/api/listing-preview', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(collect())
+                    });
+                    const data = await res.json();
+                    // Hizli yazan birinde gec gelen eski cevap yenisini ezmemeli.
+                    if (mine !== ticket || !data || !data.success) return;
+
+                    box.innerHTML = data.html;
+                    applyLocalPhoto();
+                } catch (err) {
+                    // Onizleme bir kolaylik: alinamazsa form calismaya devam etsin.
+                }
+            };
+
+            const schedule = function () {
+                clearTimeout(timer);
+                timer = setTimeout(refresh, 400);
+            };
+
+            form.addEventListener('input', schedule);
+            form.addEventListener('change', schedule);
+            refresh();
+        })();
 
 
         draftBtn.addEventListener('click', async function () {

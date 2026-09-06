@@ -6,6 +6,7 @@ const listingController = require('../controllers/listingController');
 const searchController = require('../controllers/searchController');
 const { isAuthenticated } = require('../middlewares/auth');
 const listingDraft = require('../utils/listingDraft');
+const listingPreview = require('../utils/listingPreview');
 
 const MAX_LIMIT = 100;
 
@@ -54,6 +55,51 @@ router.get('/listings/:id', async (req, res) => {
 // Bir markanin altinda daha once kullanilmis modeller. Ilan verme formu
 // marka secilir secilmez bunu cagiriyor ve gelen degerleri dokunulacak
 // secenekler olarak basiyor.
+// Ilan kartinin canli onizlemesi.
+//
+// Kart, sitenin gercek partial'i render edilerek uretiliyor. Ayni karti bir de
+// istemci tarafinda JavaScript ile cizmek daha hizli olurdu ama iki kopya
+// kacinilmaz olarak ayrisir: bir gun kart degisir, onizleme eski halini
+// gostermeye devam eder ve satici yayinladiginda baska bir sey gorur.
+// Onizlemenin tek isi dogru olmak.
+router.post('/listing-preview', isAuthenticated, async (req, res) => {
+    try {
+        const body = req.body || {};
+
+        // Kategori adi ve slug'i karttaki rozet mantigini besliyor; kategori
+        // secilmemisse kart yine de bir sey gostermeli.
+        let category = null;
+        if (body.category_id) {
+            category = await Category.getBySlug(parseInt(body.category_id, 10));
+        }
+        const rootSlug = category ? await Category.getRootSlug(category.id) : null;
+
+        const listing = listingPreview.buildPreviewListing(body, {
+            category,
+            rootSlug,
+            lang: res.locals.lang || 'tr',
+            currency: res.locals.currency || 'GBP',
+            untitled: res.locals.t('listing.preview_untitled')
+        });
+
+        res.render('partials/listingCard', {
+            layout: false,
+            listing,
+            userFavoriteIds: []
+        }, (err, html) => {
+            if (err) {
+                console.error('Listing preview render error:', err);
+                return res.json({ success: false });
+            }
+            res.json({ success: true, html });
+        });
+    } catch (error) {
+        console.error('Listing preview error:', error);
+        // Onizleme bir kolaylik; alinamazsa form calismaya devam etmeli.
+        res.json({ success: false });
+    }
+});
+
 router.get('/vehicle-models', async (req, res) => {
     try {
         const brand = String(req.query.brand || '').trim();
