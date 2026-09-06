@@ -12,6 +12,7 @@ const { discardProcessedImages, removeImagesByUrl } = require('../middlewares/up
 const Setting = require('../models/Setting');
 const PriceAlert = require('../models/PriceAlert');
 const listingPolicy = require('../config/listingPolicy');
+const vehicleBrands = require('../config/vehicleBrands');
 const listingBadges = require('../config/listingBadges');
 const smartSearch = require('../utils/smartSearch');
 const cities = require('../config/cities');
@@ -390,6 +391,9 @@ const showCreate = async (req, res, next) => {
             categoryTree,
             draftFeatureMap,
             draftFeatureLabels,
+            // Marka listesi alt kategoriye gore degisiyor: motosiklet markalari
+            // otomobilinkiyle ayni degil.
+            vehicleBrandsBySub: vehicleBrands.BY_SUBCATEGORY,
             formData,
             userPhone: (user && user.phone) || '',
             hidePhone: user ? Number(user.show_phone) === 0 : false,
@@ -518,6 +522,15 @@ const create = async (req, res, next) => {
                 attributes[canonicalKey] = String(v).trim();
             }
         });
+
+        // Marka ve model havuzu ancak temiz tutulursa ise yariyor. "320i",
+        // "320  i" ve " 320i " ayni model; ayri satirlar olarak birikirlerse
+        // oneri listesi ayni seyin bes yazimiyla dolar. Marka ayrica listedeki
+        // yazimina cekiliyor: "bmw" -> "BMW".
+        if (attributes.model) attributes.model = vehicleBrands.normalize(attributes.model);
+        if (attributes.brand) {
+            attributes.brand = vehicleBrands.canonicalBrand(category.slug, attributes.brand);
+        }
 
         const rawFeatures = req.body.features || (req.body.attributes && req.body.attributes.features);
         if (rawFeatures) {

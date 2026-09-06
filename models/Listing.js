@@ -224,6 +224,38 @@ class Listing {
     return true;
   }
 
+  // Bir markanin altinda daha once gercekten kullanilmis modeller.
+  //
+  // Model listesi elle yazilmiyor; ilan verenlerin yazdiklarindan birikiyor.
+  // Elle derlenmis bir liste iki sekilde yaniliyor: adada hic bulunmayan
+  // modellerle doluyor ve burada gercekten satilan bir modeli eksik birakiyor.
+  // Bu havuz ise Kibris'taki filoya gore kendini yaziyor.
+  //
+  // En az iki ayri ilanda gecmis olma sarti, yazim hatalarinin oneriye
+  // donusmesini engelliyor: bir kisinin bir kez yanlis yazdigi sey listeye
+  // girmiyor, iki kisinin ayni sekilde yazdigi sey giriyor.
+  static async modelsForBrand(brand, { minUses = 2, limit = 40 } = {}) {
+    const clean = String(brand || '').trim();
+    if (!clean) return [];
+
+    const db = getDb();
+    return db.prepare(`
+      SELECT MAX(m.attribute_value) AS model, COUNT(DISTINCT m.listing_id) AS uses
+      FROM listing_attributes m
+      JOIN listing_attributes b
+        ON b.listing_id = m.listing_id AND b.attribute_key = 'brand'
+      JOIN listings l ON l.id = m.listing_id
+      WHERE m.attribute_key = 'model'
+        AND TRIM(m.attribute_value) <> ''
+        AND LOWER(TRIM(b.attribute_value)) = LOWER(?)
+        AND l.status = 'active'
+      GROUP BY LOWER(TRIM(m.attribute_value))
+      HAVING uses >= ?
+      ORDER BY uses DESC, model ASC
+      LIMIT ?
+    `).all([clean, minUses, limit]);
+  }
+
   static async findDetailBySlug(slug) {
     const db = getDb();
     const row = db.prepare(`

@@ -51,6 +51,24 @@ router.get('/listings/:id', async (req, res) => {
     }
 });
 
+// Bir markanin altinda daha once kullanilmis modeller. Ilan verme formu
+// marka secilir secilmez bunu cagiriyor ve gelen degerleri dokunulacak
+// secenekler olarak basiyor.
+router.get('/vehicle-models', async (req, res) => {
+    try {
+        const brand = String(req.query.brand || '').trim();
+        if (!brand) return res.json({ success: true, models: [] });
+
+        const rows = await Listing.modelsForBrand(brand);
+        res.json({ success: true, models: rows.map((r) => r.model) });
+    } catch (error) {
+        console.error('Vehicle models API error:', error);
+        // Oneri listesi bir kolaylik; alinamazsa form serbest metinle
+        // calismaya devam etmeli, hata sayfasi acilmamali.
+        res.json({ success: true, models: [] });
+    }
+});
+
 router.get('/categories', async (req, res) => {
     try {
         const categories = await Category.getTree();

@@ -800,33 +800,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const descriptionInput = document.getElementById('descriptionInput');
 
     if (draftBox && categorySelect && descriptionInput) {
+        // Alanların üç türü var: serbest metin, kapalı liste (choices) ve
+        // markaya bağlı olarak sunucudan gelen liste (dynamic).
+        //
+        // Kapalı listeler artık açılır kutu değil, dokunulacak etiketler.
+        // Telefonda açılır kutu üç hareket istiyor - aç, kaydır, seç; etiket bir
+        // dokunuş. Satıcının bir ilanda on kez tekrarladığı şey tam olarak bu.
         const FIELDS = {
             emlak: [
-                { name: 'rooms', label: '<%= t("draft.field_rooms") %>', placeholder: 'Örn: 3+1' },
+                // Oda sayısı ve kat, emlak ilanında en çok yazılan iki şey.
+                // Yazılacak yerde seçilecek şeye dönüştüler.
+                { name: 'rooms', label: '<%= t("draft.field_rooms") %>', choices: ['1+0', '1+1', '2+1', '3+1', '4+1', '5+1', '6+1 ve üzeri'], placeholder: 'Örn: 3+1' },
                 { name: 'size', label: '<%= t("draft.field_size") %> (m²)', placeholder: 'Örn: 120' },
-                { name: 'floor', label: '<%= t("draft.field_floor") %>', placeholder: 'Örn: 2' },
+                { name: 'floor', label: '<%= t("draft.field_floor") %>', choices: ['Bodrum', 'Zemin', 'Bahçe Katı', '1', '2', '3', '4', '5', '6-10', '10 üzeri'], placeholder: 'Örn: 2' },
                 { name: 'build_year', draftKey: 'buildYear', label: '<%= t("draft.field_build_year") %>', placeholder: 'Örn: 2018' }
             ],
             vasita: [
-                { name: 'brand', label: '<%= t("draft.field_brand") %>', placeholder: 'Örn: BMW' },
-                { name: 'model', label: '<%= t("draft.field_model") %>', placeholder: 'Örn: 320i' },
+                { name: 'brand', label: '<%= t("draft.field_brand") %>', brandChoices: true, placeholder: 'Örn: BMW' },
+                { name: 'model', label: '<%= t("draft.field_model") %>', modelChoices: true, placeholder: 'Örn: 320i' },
                 { name: 'year', label: '<%= t("draft.field_year") %>', placeholder: 'Örn: 2020' },
                 { name: 'km', label: '<%= t("draft.field_km") %>', placeholder: 'Örn: 85000' },
-                { name: 'fuel', label: '<%= t("draft.field_fuel") %>', options: ['', 'Benzin', 'Dizel', 'Hibrit', 'Elektrik', 'LPG'] },
-                { name: 'gear', label: '<%= t("draft.field_gear") %>', options: ['', 'Otomatik', 'Manuel', 'Yarı Otomatik'] },
-                { name: 'body_type', label: '<%= t("draft.field_body_type") %>', options: ['', 'Sedan', 'Hatchback', 'SUV', 'Coupe', 'Cabrio', 'Station Wagon', 'Pick-up', 'Minivan'] },
+                { name: 'fuel', label: '<%= t("draft.field_fuel") %>', choices: ['Benzin', 'Dizel', 'Hibrit', 'Elektrik', 'LPG'] },
+                { name: 'gear', label: '<%= t("draft.field_gear") %>', choices: ['Otomatik', 'Manuel', 'Yarı Otomatik'] },
+                { name: 'body_type', label: '<%= t("draft.field_body_type") %>', choices: ['Sedan', 'Hatchback', 'SUV', 'Coupe', 'Cabrio', 'Station Wagon', 'Pick-up', 'Minivan'] },
                 { name: 'engine_power', label: '<%= t("draft.field_engine_power") %>', placeholder: 'Örn: 150 HP' },
                 { name: 'engine_size', label: '<%= t("draft.field_engine_size") %>', placeholder: 'Örn: 1600 cc' },
-                { name: 'drivetrain', label: '<%= t("draft.field_drivetrain") %>', options: ['', 'Önden Çekiş', 'Arkadan İtiş', '4x4 / AWD (Dört Çeker)'] },
+                { name: 'drivetrain', label: '<%= t("draft.field_drivetrain") %>', choices: ['Önden Çekiş', 'Arkadan İtiş', '4x4 / AWD (Dört Çeker)'] },
                 { name: 'color', label: '<%= t("draft.field_color") %>', placeholder: 'Örn: Beyaz' },
-                { name: 'vehicle_status', label: '<%= t("draft.field_vehicle_status") %>', options: ['', 'İkinci El', 'Sıfır (0 KM)', 'Hasarsız / Boyasız', 'Boyalı / Değişenli', 'Ağır Hasar Kayıtlı'] },
-                { name: 'swap', label: '<%= t("draft.field_swap") %>', options: ['', 'Hayır (Takas Yok)', 'Evet (Takasa Uygun)', 'Sadece Araçla Takas', 'Düşük Model Araçla Takas'] }
+                { name: 'vehicle_status', label: '<%= t("draft.field_vehicle_status") %>', choices: ['İkinci El', 'Sıfır (0 KM)', 'Hasarsız / Boyasız', 'Boyalı / Değişenli', 'Ağır Hasar Kayıtlı'] },
+                { name: 'swap', label: '<%= t("draft.field_swap") %>', choices: ['Hayır (Takas Yok)', 'Evet (Takasa Uygun)', 'Sadece Araçla Takas', 'Düşük Model Araçla Takas'] }
             ],
             'ikinci-el': [
-                { name: 'condition', label: '<%= t("draft.field_condition") %>', options: ['', 'Sıfır / Kapalı Kutu', 'Çok Az Kullanılmış (Yeni Gibi)', 'İkinci El (Sorunsuz)', 'Kozmetik Kusurlu'] },
-                { name: 'swap', label: '<%= t("draft.field_swap") %>', options: ['', 'Hayır (Takas Yok)', 'Evet (Takasa Uygun)'] }
+                { name: 'condition', label: '<%= t("draft.field_condition") %>', choices: ['Sıfır / Kapalı Kutu', 'Çok Az Kullanılmış (Yeni Gibi)', 'İkinci El (Sorunsuz)', 'Kozmetik Kusurlu'] },
+                { name: 'swap', label: '<%= t("draft.field_swap") %>', choices: ['Hayır (Takas Yok)', 'Evet (Takasa Uygun)'] }
             ]
         };
+
+        const BRANDS_BY_SUB = <%- JSON.stringify(typeof vehicleBrandsBySub !== 'undefined' ? vehicleBrandsBySub : {}) %>;
 
         const FEATURES = <%- JSON.stringify(draftFeatureMap) %>;
         const FEATURE_LABELS = <%- JSON.stringify(draftFeatureLabels) %>;
@@ -838,6 +848,66 @@ document.addEventListener('DOMContentLoaded', function() {
             return option ? option.getAttribute('data-root') : null;
         };
 
+        const escapeAttr = function (value) {
+            return String(value === undefined || value === null ? '' : value).replace(/"/g, '&quot;');
+        };
+
+        const currentSub = function () {
+            const option = categorySelect.options[categorySelect.selectedIndex];
+            return option ? option.getAttribute('data-slug') : null;
+        };
+
+        // Etiket grubu: gizli bir alan degeri tutuyor, etiketler onu yaziyor.
+        // Gizli alan `data-draft` tasidigi icin aciklama taslagi ureteci de
+        // eskisi gibi okuyabiliyor - o tarafta hicbir sey degismedi.
+        const choiceGroupHtml = function (field, values, existingVal, opts) {
+            const settings = opts || {};
+            const inList = values.some(function (v) { return String(v) === String(existingVal); });
+            const freeVal = existingVal && !inList ? existingVal : '';
+
+            let html = '<input type="hidden" name="' + field.name + '" id="attr_' + field.name +
+                '" data-draft="' + (field.draftKey || field.name) + '" value="' + escapeAttr(existingVal) + '">';
+
+            // Kirk alti marka telefonda bir duvar. Once sik gorulenler, gerisi
+            // bir dokunusla. Secili deger kirpilan kisimdaysa liste zaten acik
+            // basiliyor - yoksa satici kendi sectigi markayi goremezdi.
+            const collapseAfter = settings.collapseAfter || 0;
+            const hiddenIndex = values.indexOf(existingVal);
+            const startExpanded = !collapseAfter || (hiddenIndex >= collapseAfter);
+
+            html += '<div class="d-flex flex-wrap gap-1 choice-chips" data-field="' + field.name + '">';
+            values.forEach(function (value, index) {
+                const active = String(value) === String(existingVal);
+                const collapsed = collapseAfter && index >= collapseAfter && !startExpanded;
+                html += '<button type="button" class="btn btn-sm rounded-pill choice-chip' +
+                    (collapsed ? ' choice-more d-none' : '') + ' ' +
+                    (active ? 'btn-primary' : 'btn-outline-secondary') + '" data-value="' + escapeAttr(value) + '">' +
+                    value + '</button>';
+            });
+
+            if (collapseAfter && !startExpanded && values.length > collapseAfter) {
+                html += '<button type="button" class="btn btn-sm rounded-pill btn-light border choice-expand">' +
+                    '+' + (values.length - collapseAfter) + ' daha</button>';
+            }
+
+            // Liste kapali degil. Kibris'ta tek bir Morgan varsa o da ilan
+            // verilebilmeli; "Baska" onu yazmanin yolu.
+            html += '<button type="button" class="btn btn-sm rounded-pill choice-other ' +
+                (freeVal ? 'btn-primary' : 'btn-outline-secondary') + '">' +
+                (settings.otherLabel || 'Başka…') + '</button>';
+            html += '</div>';
+
+            html += '<input type="text" class="form-control form-control-sm bg-white mt-1 choice-free' +
+                (freeVal ? '' : ' d-none') + '" placeholder="' + escapeAttr(field.placeholder || '') +
+                '" value="' + escapeAttr(freeVal) + '">';
+
+            if (settings.hint) {
+                html += '<div class="form-text small mt-1">' + settings.hint + '</div>';
+            }
+
+            return html;
+        };
+
         const renderDraftInputs = function () {
             const root = currentRoot();
             draftFields.innerHTML = '';
@@ -845,29 +915,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const fields = FIELDS[root] || [];
             fields.forEach(function (field) {
+                const isChoice = Boolean(field.choices || field.brandChoices || field.modelChoices);
                 const col = document.createElement('div');
-                col.className = (field.options ? 'col-12 col-sm-6 col-md-3' : 'col-6 col-md-3');
+                col.className = isChoice ? 'col-12' : 'col-6 col-md-3';
                 const draftKey = field.draftKey || field.name;
                 const existingVal = savedAttributes[field.name] || savedAttributes[draftKey] || '';
 
                 let inputHtml = '';
-                if (field.options) {
-                    inputHtml = '<select class="form-select form-select-sm bg-white" name="' + field.name +
-                        '" id="attr_' + field.name + '" data-draft="' + draftKey + '">';
-                    field.options.forEach(function (opt) {
-                        const optVal = opt;
-                        const optLabel = opt === '' ? 'Seçiniz' : opt;
-                        const isSel = String(existingVal) === String(optVal) ? 'selected' : '';
-                        inputHtml += '<option value="' + optVal + '" ' + isSel + '>' + optLabel + '</option>';
+                if (field.brandChoices) {
+                    const sub = currentSub();
+                    const brands = (BRANDS_BY_SUB[sub] || BRANDS_BY_SUB.otomobil || { popular: [], all: [] });
+                    inputHtml = choiceGroupHtml(field, brands.all, existingVal, {
+                        otherLabel: 'Listede yok…',
+                        collapseAfter: (brands.popular || []).length
                     });
-                    inputHtml += '</select>';
+                } else if (field.modelChoices) {
+                    // Model listesi markaya bagli ve sunucudan geliyor; marka
+                    // secilene kadar ortada gosterilecek bir sey yok.
+                    inputHtml = '<input type="text" class="form-control form-control-sm bg-white" name="' + field.name +
+                        '" id="attr_' + field.name + '" data-draft="' + draftKey +
+                        '" placeholder="' + escapeAttr(field.placeholder || '') + '" value="' + escapeAttr(existingVal) + '">' +
+                        '<div class="d-flex flex-wrap gap-1 mt-1 model-suggestions" hidden></div>';
+                } else if (field.choices) {
+                    inputHtml = choiceGroupHtml(field, field.choices, existingVal);
                 } else {
                     inputHtml = '<input type="text" class="form-control form-control-sm bg-white" name="' + field.name +
                         '" id="attr_' + field.name + '" data-draft="' + draftKey +
-                        '" placeholder="' + (field.placeholder || '') + '" value="' + (existingVal ? String(existingVal).replace(/"/g, '&quot;') : '') + '">';
+                        '" placeholder="' + escapeAttr(field.placeholder || '') + '" value="' + escapeAttr(existingVal) + '">';
                 }
 
-                col.innerHTML = '<label class="form-label small fw-semibold text-muted mb-1" for="attr_' + field.name + '">' + field.label + '</label>' + inputHtml;
+                col.innerHTML = '<label class="form-label small fw-semibold text-muted mb-1"' +
+                    (isChoice ? '' : ' for="attr_' + field.name + '"') + '>' + field.label + '</label>' + inputHtml;
                 draftFields.appendChild(col);
             });
 
@@ -891,10 +969,149 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             draftBox.hidden = !root || (fields.length === 0 && feats.length === 0);
+
+            if (FIELDS[root] && FIELDS[root].some(function (f) { return f.modelChoices; })) {
+                loadModelSuggestions();
+            }
         };
+
+        // --- Etiketlere dokunma -------------------------------------------------
+        const setChoiceValue = function (group, value, fromFree) {
+            const hidden = group.parentNode.querySelector('input[type="hidden"]');
+            const free = group.parentNode.querySelector('.choice-free');
+            if (!hidden) return;
+
+            hidden.value = value;
+            // Taslak ureteci ve form saklama degisikligi duysun.
+            hidden.dispatchEvent(new Event('input', { bubbles: true }));
+            hidden.dispatchEvent(new Event('change', { bubbles: true }));
+
+            group.querySelectorAll('.choice-chip').forEach(function (chip) {
+                const on = !fromFree && chip.getAttribute('data-value') === value;
+                chip.classList.toggle('btn-primary', on);
+                chip.classList.toggle('btn-outline-secondary', !on);
+            });
+
+            const other = group.querySelector('.choice-other');
+            if (other) {
+                other.classList.toggle('btn-primary', Boolean(fromFree));
+                other.classList.toggle('btn-outline-secondary', !fromFree);
+            }
+
+            if (!fromFree && free) {
+                free.value = '';
+                free.classList.add('d-none');
+            }
+
+            if (hidden.getAttribute('name') === 'brand') loadModelSuggestions();
+        };
+
+        draftFields.addEventListener('click', function (event) {
+            const chip = event.target.closest('.choice-chip');
+            if (chip) {
+                const group = chip.closest('.choice-chips');
+                const already = chip.classList.contains('btn-primary');
+                // Ikinci dokunus secimi kaldiriyor: yanlis dokunan biri sayfayi
+                // yenilemek zorunda kalmamali.
+                setChoiceValue(group, already ? '' : chip.getAttribute('data-value'), false);
+                return;
+            }
+
+            const expand = event.target.closest('.choice-expand');
+            if (expand) {
+                const group = expand.closest('.choice-chips');
+                group.querySelectorAll('.choice-more').forEach(function (chip) { chip.classList.remove('d-none'); });
+                expand.remove();
+                return;
+            }
+
+            const other = event.target.closest('.choice-other');
+            if (other) {
+                const group = other.closest('.choice-chips');
+                const free = group.parentNode.querySelector('.choice-free');
+                if (!free) return;
+                free.classList.remove('d-none');
+                free.focus();
+                setChoiceValue(group, free.value.trim(), true);
+                return;
+            }
+
+            const suggestion = event.target.closest('.model-chip');
+            if (suggestion) {
+                const input = document.getElementById('attr_model');
+                if (!input) return;
+                const already = suggestion.classList.contains('btn-primary');
+                input.value = already ? '' : suggestion.getAttribute('data-value');
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                suggestion.parentNode.querySelectorAll('.model-chip').forEach(function (c) {
+                    const on = c === suggestion && !already;
+                    c.classList.toggle('btn-primary', on);
+                    c.classList.toggle('btn-outline-secondary', !on);
+                });
+            }
+        });
+
+        draftFields.addEventListener('input', function (event) {
+            const free = event.target.closest('.choice-free');
+            if (!free) return;
+            const group = free.parentNode.querySelector('.choice-chips');
+            setChoiceValue(group, free.value.trim(), true);
+        });
+
+        // --- Markaya gore model onerileri ---------------------------------------
+        //
+        // Liste elle yazilmiyor; daha once ilan verilmis modellerden birikiyor.
+        // Ilk gunlerde bos gelecek ve form bugunku gibi serbest metin olarak
+        // calisacak - bu bir eksiklik degil, listenin dogru bicimde dolmasinin
+        // yolu: adada gercekten satilan araclar birikiyor, jenerik bir katalog
+        // degil.
+        let modelRequest = 0;
+        async function loadModelSuggestions() {
+            const brandInput = document.getElementById('attr_brand');
+            const box = draftFields.querySelector('.model-suggestions');
+            if (!box) return;
+
+            const brand = brandInput ? brandInput.value.trim() : '';
+            if (!brand) {
+                box.hidden = true;
+                box.innerHTML = '';
+                return;
+            }
+
+            const ticket = ++modelRequest;
+            try {
+                const res = await fetch('/api/vehicle-models?brand=' + encodeURIComponent(brand), {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json();
+                // Hizli hizli marka degistiren biri, gec gelen eski cevabin
+                // listeyi ezmesini gormemeli.
+                if (ticket !== modelRequest) return;
+
+                const models = (data && Array.isArray(data.models)) ? data.models : [];
+                if (models.length === 0) {
+                    box.hidden = true;
+                    box.innerHTML = '';
+                    return;
+                }
+
+                const current = (document.getElementById('attr_model') || {}).value || '';
+                box.innerHTML = models.map(function (model) {
+                    const on = String(model) === String(current);
+                    return '<button type="button" class="btn btn-sm rounded-pill model-chip ' +
+                        (on ? 'btn-primary' : 'btn-outline-secondary') + '" data-value="' + escapeAttr(model) + '">' +
+                        model + '</button>';
+                }).join('');
+                box.hidden = false;
+            } catch (err) {
+                box.hidden = true;
+                box.innerHTML = '';
+            }
+        }
 
         categorySelect.addEventListener('change', renderDraftInputs);
         renderDraftInputs();
+
 
         draftBtn.addEventListener('click', async function () {
             const root = currentRoot();
