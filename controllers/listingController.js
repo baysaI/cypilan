@@ -13,6 +13,7 @@ const Setting = require('../models/Setting');
 const PriceAlert = require('../models/PriceAlert');
 const listingPolicy = require('../config/listingPolicy');
 const vehicleBrands = require('../config/vehicleBrands');
+const listingMap = require('../utils/listingMap');
 const listingBadges = require('../config/listingBadges');
 const smartSearch = require('../utils/smartSearch');
 const cities = require('../config/cities');
@@ -341,6 +342,26 @@ const show = async (req, res, next) => {
         });
     } catch (error) {
         console.error('Listing Show Error:', error);
+        next(error);
+    }
+};
+
+const map = async (req, res, next) => {
+    try {
+        const rows = await Listing.mapListings({ rootSlug: 'emlak' });
+        const points = listingMap.buildMapPoints(rows, { currency: res.locals.currency || 'GBP' });
+
+        res.locals.meta = Object.assign({}, res.locals.meta, {
+            title: res.locals.t('map.page_title'),
+            description: res.locals.t('map.page_description')
+        });
+
+        res.render('listings/map', {
+            points,
+            title: res.locals.t('map.page_title')
+        });
+    } catch (error) {
+        console.error('Listing Map Error:', error);
         next(error);
     }
 };
@@ -1026,6 +1047,7 @@ const boost = async (req, res) => {
 
 module.exports = {
     index,
+    map,
     show,
     showCreate,
     create,

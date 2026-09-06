@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const homeController = require('../controllers/homeController');
 const searchController = require('../controllers/searchController');
+const listingController = require('../controllers/listingController');
 const { isAuthenticated } = require('../middlewares/auth');
 
 const authRoutes = require('./auth');
@@ -20,6 +21,7 @@ const supportRoutes = require('./support');
 const seoController = require('../controllers/seoController');
 const guideController = require('../controllers/guideController');
 
+router.get('/harita', listingController.map);
 router.get('/sitemap.xml', seoController.sitemap);
 router.get('/robots.txt', seoController.robots);
 

@@ -1,0 +1,117 @@
+<div class="container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+            <h1 class="h4 fw-bold mb-1"><%= t('map.page_title') %></h1>
+            <p class="text-muted small mb-0">
+                <%= t('map.listing_count', { count: points.total }) %>
+            </p>
+        </div>
+        <a href="/listings?category=emlak" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+            <i class="fa-solid fa-list me-1"></i><%= t('map.as_list') %>
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div id="listingMap" style="height: 70vh; min-height: 420px; background: #e9ecef;"></div>
+    </div>
+
+    <%# Işaretlerin ne anlama geldiği yazıyor. Şehir işareti "bu ilanlar bu
+        şehirde" demek, "bu binada" değil; harita bunu kendisi söylemezse
+        ziyaretçi iğneyi adres sanır. %>
+    <p class="text-muted small mt-3 mb-0">
+        <i class="fa-solid fa-circle-info me-1"></i><%= t('map.accuracy_note') %>
+    </p>
+</div>
+
+<script>
+(function () {
+    const host = document.getElementById('listingMap');
+    if (!host || typeof L === 'undefined') return;
+
+    const DATA = <%- JSON.stringify(points) %>;
+
+    // Kıbrıs'ın tamamı görünecek şekilde açılıyor; ziyaretçinin ilk gördüğü şey
+    // ada olmalı, rastgele bir mahalle değil.
+    const map = L.map(host, { scrollWheelZoom: false }).setView([35.15, 33.40], 9);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    // Fare tekerleği sayfayı kaydırırken haritaya takılmasın; tıklayınca
+    // yakınlaştırma açılıyor.
+    map.on('click', function () { map.scrollWheelZoom.enable(); });
+
+    const money = function (value) {
+        if (value === null || value === undefined) return '';
+        return new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: DATA.currency,
+            maximumFractionDigits: 0
+        }).format(value);
+    };
+
+    const escapeHtml = function (text) {
+        const div = document.createElement('div');
+        div.textContent = String(text === undefined || text === null ? '' : text);
+        return div.innerHTML;
+    };
+
+    const pin = function (label, sub, variant) {
+        return L.divIcon({
+            className: '',
+            html: '<div class="d-inline-flex align-items-center gap-1 shadow-sm rounded-pill px-2 py-1 border ' +
+                (variant === 'city' ? 'bg-primary text-white border-primary' : 'bg-white text-dark') +
+                '" style="white-space: nowrap; font-size: 0.78rem; font-weight: 600;">' +
+                '<i class="fa-solid fa-house"></i><span>' + label + '</span>' +
+                (sub ? '<span class="opacity-75 fw-normal">' + sub + '</span>' : '') +
+                '</div>',
+            iconSize: null,
+            iconAnchor: [0, 0]
+        });
+    };
+
+    const bounds = [];
+
+    // Şehir işaretleri: koordinatı olmayan ilanlar burada toplanıyor.
+    DATA.cities.forEach(function (point) {
+        const price = point.medianPrice !== null ? money(point.medianPrice) : '';
+        const marker = L.marker([point.lat, point.lng], {
+            icon: pin(String(point.total), price, 'city')
+        }).addTo(map);
+
+        marker.bindPopup(
+            '<div class="fw-bold mb-1">' + escapeHtml(point.city) + '</div>' +
+            '<div class="small text-muted mb-2">' + point.total + ' ilan' +
+            (price ? ' &middot; ortanca ' + price : '') + '</div>' +
+            '<a class="btn btn-sm btn-primary rounded-pill px-3" href="/listings?category=emlak&city=' +
+            encodeURIComponent(point.city) + '">İlanları gör</a>'
+        );
+
+        bounds.push([point.lat, point.lng]);
+    });
+
+    // Koordinatı olan ilanlar tek tek, kendi yerlerinde.
+    DATA.exact.forEach(function (listing) {
+        const marker = L.marker([listing.lat, listing.lng], {
+            icon: pin(listing.price !== null ? money(listing.price) : '—', '', 'exact')
+        }).addTo(map);
+
+        marker.bindPopup(
+            (listing.image ? '<img src="' + escapeHtml(listing.image) + '" alt="" style="width:100%;height:90px;object-fit:cover;border-radius:8px;margin-bottom:6px;">' : '') +
+            '<div class="fw-bold mb-1">' + escapeHtml(listing.title) + '</div>' +
+            '<div class="small text-muted mb-2">' + escapeHtml(listing.city) +
+            (listing.district ? ', ' + escapeHtml(listing.district) : '') + '</div>' +
+            '<a class="btn btn-sm btn-primary rounded-pill px-3" href="/listings/' +
+            encodeURIComponent(listing.slug || listing.id) + '">İlanı aç</a>'
+        );
+
+        bounds.push([listing.lat, listing.lng]);
+    });
+
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+    }
+})();
+</script>

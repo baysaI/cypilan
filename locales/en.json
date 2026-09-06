@@ -827,8 +827,13 @@
     "title": "We Will Be Right Back"
   },
   "map": {
+    "accuracy_note": "A city marker groups the listings in that city; it is not the address of any one of them. Listings whose location was picked on a map appear individually.",
     "approximate": "Approximate City Center",
+    "as_list": "List view",
+    "listing_count": "{count} property listings on the map",
     "modal_title": "Ad Location & Map",
+    "page_description": "See property listings across Cyprus on a map.",
+    "page_title": "Property Map",
     "view_on_map": "See on Map"
   },
   "messages": {

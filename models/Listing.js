@@ -234,6 +234,34 @@ class Listing {
   // En az iki ayri ilanda gecmis olma sarti, yazim hatalarinin oneriye
   // donusmesini engelliyor: bir kisinin bir kez yanlis yazdigi sey listeye
   // girmiyor, iki kisinin ayni sekilde yazdigi sey giriyor.
+  // Haritada gosterilecek emlak ilanlari.
+  //
+  // Koordinati olanlar tek tek, olmayanlar sehrine gore toplaniyor - ayrimi
+  // cagiran taraf yapiyor, sorgu ikisini de getiriyor. Bugun ilanlarin
+  // tamaminin koordinati bos: form haritadan konum sormuyor. Bu yuzden harita
+  // sehir isaretleriyle basliyor ve koordinat biriktikce kendiliginden tek tek
+  // eve donusuyor.
+  //
+  // Kok kategoriye gore suzuluyor: emlak haritasinda araba gorunmemeli.
+  static async mapListings({ rootSlug = 'emlak', limit = 2000 } = {}) {
+    const db = getDb();
+    return db.prepare(`
+      SELECT l.id, l.slug, l.title, l.price, l.currency,
+             l.location_city AS city, l.location_district AS district,
+             l.location_lat AS lat, l.location_lng AS lng,
+             c.slug AS category_slug,
+             (SELECT image_url FROM listing_images WHERE listing_id = l.id
+              ORDER BY is_primary DESC, sort_order ASC LIMIT 1) AS image
+      FROM listings l
+      LEFT JOIN categories c ON l.category_id = c.id
+      LEFT JOIN categories p ON c.parent_id = p.id
+      WHERE l.status = 'active'
+        AND COALESCE(p.slug, c.slug) = ?
+      ORDER BY l.id DESC
+      LIMIT ?
+    `).all([rootSlug, Math.min(Math.max(parseInt(limit, 10) || 2000, 1), 5000)]);
+  }
+
   static async modelsForBrand(brand, { minUses = 2, limit = 40 } = {}) {
     const clean = String(brand || '').trim();
     if (!clean) return [];

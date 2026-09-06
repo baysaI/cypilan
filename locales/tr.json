@@ -827,8 +827,13 @@
     "title": "Kısa Bir Ara Veriyoruz"
   },
   "map": {
+    "accuracy_note": "Şehir işaretleri o şehirdeki ilanları toplar; ilanın tam adresini göstermez. Konumunu haritadan seçen ilanlar tek tek görünür.",
     "approximate": "Yaklaşık Şehir Merkezi",
+    "as_list": "Liste görünümü",
+    "listing_count": "Haritada {count} emlak ilanı",
     "modal_title": "İlan Konumu & Harita",
+    "page_description": "Kıbrıs genelindeki emlak ilanlarını harita üzerinde görün.",
+    "page_title": "Emlak Haritası",
     "view_on_map": "Haritada Gör"
   },
   "messages": {
