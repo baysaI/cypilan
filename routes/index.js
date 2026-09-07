@@ -21,7 +21,10 @@ const supportRoutes = require('./support');
 const seoController = require('../controllers/seoController');
 const guideController = require('../controllers/guideController');
 
-router.get('/harita', listingController.map);
+// Harita bir sure /harita adresinde durdu. Paylasilmis ya da yer imine
+// eklenmis baglantilar kirilmasin diye eski adres yenisine yonlendiriliyor;
+// 301 ile, cunku tasima kalici.
+router.get('/harita', (req, res) => res.redirect(301, '/listings/harita'));
 router.get('/sitemap.xml', seoController.sitemap);
 router.get('/robots.txt', seoController.robots);
 

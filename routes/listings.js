@@ -83,6 +83,10 @@ router.post(
 
 router.get('/compare', listingController.compare);
 
+// '/:slug'tan once duruyor: asagidaki slug yolu bu adresi "harita" adli bir
+// ilan sanip yakalardi.
+router.get('/harita', listingController.map);
+
 router.get('/:slug', listingController.show);
 
 router.get('/:slug/edit', isAuthenticated, fetchListingForOwnership, isOwner, listingController.showEdit);
