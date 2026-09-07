@@ -765,7 +765,7 @@
     "listing_purpose": "İlan Amacı / Türü",
     "location": "Konum",
     "login_to_see_phone": "Numarayı görmek için giriş yapın",
-    "max_images": "En fazla 10 fotoğraf yükleyebilirsiniz",
+    "max_images": "En fazla 20 fotoğraf yükleyebilirsiniz",
     "max_price": "Max Fiyat",
     "min_price": "Min Fiyat",
     "my_listings_empty": "Henüz ilan vermediniz.",
@@ -818,7 +818,13 @@
     "type_wanted": "Arıyorum",
     "unlimited_mode_desc": "Şu an tüm kategorilerde dilediğiniz kadar ücretsiz ilan verebilirsiniz.",
     "unlimited_mode_title": "Sınırsız İlan Modu Aktif",
-    "views": "Görüntülenme"
+    "views": "Görüntülenme",
+    "cover_photo": "Kapak",
+    "move_earlier": "Öne al",
+    "move_later": "Geriye al",
+    "images_order_help": "İlk fotoğraf ilanın kapağı olur. Sırayı oklarla değiştirebilir, bilgisayarda sürükleyerek taşıyabilirsiniz.",
+    "unsupported_format": "Desteklenmeyen dosya biçimi. Yalnızca JPG, PNG ve WEBP kabul ediliyor:",
+    "file_too_large": "Dosya 15 MB sınırını aşıyor:"
   },
   "maintenance": {
     "admin_banner": "Bakım modu açık — siteyi yalnızca yöneticiler görebiliyor.",

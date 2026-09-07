@@ -409,7 +409,14 @@
                             <input type="file" name="images" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="position-absolute" style="opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden; z-index: -1;">
                         </label>
 
-                        <div class="row g-3 mt-3" id="imagePreviewContainer"></div>
+                        <%# Sira bir suslemeden ibaret degil: ilk fotograf ilanin
+                            kapagi oluyor, listelerde ve aramada gorunen tek gorsel o.
+                            Satici bunu bilmezse yanlis fotografi one koyar. %>
+                        <p class="text-muted small mb-0 mt-3 d-none" id="imageOrderHelp">
+                            <i class="fa-solid fa-circle-info me-1"></i><%= t('listing.images_order_help') %>
+                        </p>
+
+                        <div class="row g-3 mt-2" id="imagePreviewContainer"></div>
                     </div>
                 </div>
 
@@ -450,6 +457,8 @@
     .pointer-events-none { pointer-events: none !important; }
 </style>
 
+<script src="/js/imagePicker.js?v=<%= assetVersion %>"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const dropArea = document.getElementById('dropArea');
@@ -457,7 +466,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewContainer = document.getElementById('imagePreviewContainer');
     const titleInput = document.getElementById('titleInput');
     const titleCount = document.getElementById('titleCount');
-    const form = document.getElementById('createListingForm');
 
     if (titleInput && titleCount) {
         titleCount.textContent = `${titleInput.value.length}/70`;
@@ -468,125 +476,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!dropArea || !fileInput || !previewContainer) return;
 
-    let selectedFiles = [];
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        window.addEventListener(eventName, function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }, false);
-    });
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, function() {
-            dropArea.classList.add('border-accent', 'bg-primary-light');
-        }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, function() {
-            dropArea.classList.remove('border-accent', 'bg-primary-light');
-        }, false);
-    });
-
-    dropArea.addEventListener('drop', function(e) {
-        if (e.dataTransfer && e.dataTransfer.files) {
-            handleNewFiles(e.dataTransfer.files);
-        }
-    }, false);
-
-    dropArea.addEventListener('click', function() {
-        fileInput.value = '';
-    });
-
-    fileInput.addEventListener('change', function() {
-        if (this.files && this.files.length > 0) {
-            handleNewFiles(this.files);
+    // Fotograf secimi, siralamasi ve onizlemesi public/js/imagePicker.js'te.
+    // Duzenleme formu da ayni bileseni kullaniyor: iki kopya kacinilmaz olarak
+    // ayrisirdi, nitekim siralama eksigi de iki yerde birden duruyordu.
+    setupImagePicker({
+        dropArea: dropArea,
+        fileInput: fileInput,
+        previewContainer: previewContainer,
+        hint: document.getElementById('imageOrderHelp'),
+        labels: {
+            cover: <%- JSON.stringify(t('listing.cover_photo')) %>,
+            moveEarlier: <%- JSON.stringify(t('listing.move_earlier')) %>,
+            moveLater: <%- JSON.stringify(t('listing.move_later')) %>,
+            remove: <%- JSON.stringify(t('common.delete')) %>,
+            tooMany: <%- JSON.stringify(t('listing.max_images')) %>,
+            badType: <%- JSON.stringify(t('listing.unsupported_format')) %>,
+            tooBig: <%- JSON.stringify(t('listing.file_too_large')) %>
         }
     });
-
-    function handleNewFiles(files) {
-        const fileList = Array.from(files);
-        const MAX_BYTES = 15 * 1024 * 1024;
-
-        for (let i = 0; i < fileList.length; i++) {
-            if (selectedFiles.length >= 20) {
-                alert('<%= t("listing.max_images") %>');
-                break;
-            }
-            const file = fileList[i];
-            const isImage = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp)$/i.test(file.name);
-            
-            if (!isImage) {
-                alert('Desteklenmeyen dosya formatı: ' + file.name + '. Sadece JPG, PNG ve WEBP kabul edilir.');
-                continue;
-            }
-
-            if (file.size > MAX_BYTES) {
-                alert('Dosya boyutu 15 MB sınırını aşıyor: ' + file.name);
-                continue;
-            }
-
-            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-                selectedFiles.push(file);
-            }
-        }
-        syncInputAndRender();
-    }
-
-    function syncInputAndRender() {
-        try {
-            if (window.DataTransfer) {
-                const dt = new DataTransfer();
-                selectedFiles.forEach(file => dt.items.add(file));
-                fileInput.files = dt.files;
-            }
-        } catch (err) {
-            console.warn('DataTransfer sync notice:', err);
-        }
-
-        renderPreviews();
-    }
-
-    function renderPreviews() {
-        previewContainer.innerHTML = '';
-        selectedFiles.forEach((file, index) => {
-            const objectUrl = URL.createObjectURL(file);
-            const col = document.createElement('div');
-            col.className = 'col-6 col-sm-4 col-md-3 position-relative';
-            col.innerHTML = `
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative" style="padding-top: 75%;">
-                    <img src="${objectUrl}" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="Preview">
-                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle d-flex align-items-center justify-content-center p-0 remove-btn shadow-sm" style="width: 28px; height: 28px; z-index: 10;" title="Sil">
-                        <i class="fa-solid fa-xmark fs-6"></i>
-                    </button>
-                </div>
-            `;
-            previewContainer.appendChild(col);
-
-            col.querySelector('.remove-btn').addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                URL.revokeObjectURL(objectUrl);
-                selectedFiles.splice(index, 1);
-                syncInputAndRender();
-            });
-        });
-    }
-
-    if (form) {
-        form.addEventListener('submit', function() {
-            try {
-                if (window.DataTransfer && selectedFiles.length > 0) {
-                    const dt = new DataTransfer();
-                    selectedFiles.forEach(file => dt.items.add(file));
-                    fileInput.files = dt.files;
-                }
-            } catch (err) {
-                console.warn('Submit sync notice:', err);
-            }
-        });
-    }
 
     // Offers from registered agents and dealers only make sense for property and
     // vehicles, so the checkbox appears once such a category is chosen and is

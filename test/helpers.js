@@ -92,6 +92,8 @@ const baseLocals = (overrides = {}) => Object.assign({
   listingBadges,
   userBadges,
   csrfToken: 'test-token',
+  // server.js her yanıta koyuyor; varlık adreslerindeki ?v= bundan geliyor.
+  assetVersion: 'test',
   t: (key, params) => translate(key, 'tr', params)
 }, overrides);
 

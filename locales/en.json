@@ -765,7 +765,7 @@
     "listing_purpose": "Ad Purpose / Type",
     "location": "Location",
     "login_to_see_phone": "Log in to see phone number",
-    "max_images": "You can upload up to 10 photos",
+    "max_images": "You can upload up to 20 photos",
     "max_price": "Max Price",
     "min_price": "Min Price",
     "my_listings_empty": "You haven't posted any listings yet.",
@@ -818,7 +818,13 @@
     "type_wanted": "Wanted",
     "unlimited_mode_desc": "You can post unlimited free listings across all categories.",
     "unlimited_mode_title": "Unlimited Listings Mode Active",
-    "views": "Views"
+    "views": "Views",
+    "cover_photo": "Cover",
+    "move_earlier": "Move earlier",
+    "move_later": "Move later",
+    "images_order_help": "The first photo becomes the listing cover. Reorder with the arrows, or drag them on a computer.",
+    "unsupported_format": "Unsupported file format. Only JPG, PNG and WEBP are accepted:",
+    "file_too_large": "File exceeds the 15 MB limit:"
   },
   "maintenance": {
     "admin_banner": "Maintenance mode is on — only administrators can see the site.",

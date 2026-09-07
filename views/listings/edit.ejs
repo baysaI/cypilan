@@ -382,7 +382,13 @@
                             <input type="file" name="images" id="fileInput" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="position-absolute" style="opacity: 0; width: 0.1px; height: 0.1px; overflow: hidden; z-index: -1;">
                         </label>
 
-                        <div class="row g-3 mt-3" id="imagePreviewContainer"></div>
+                        <%# Sira bir suslemeden ibaret degil: ilk fotograf ilanin
+                            kapagi oluyor, listelerde ve aramada gorunen tek gorsel o. %>
+                        <p class="text-muted small mb-0 mt-3 d-none" id="imageOrderHelp">
+                            <i class="fa-solid fa-circle-info me-1"></i><%= t('listing.images_order_help') %>
+                        </p>
+
+                        <div class="row g-3 mt-2" id="imagePreviewContainer"></div>
                     </div>
                 </div>
 
@@ -431,101 +437,31 @@
     .pointer-events-none { pointer-events: none !important; }
 </style>
 
+<script src="/js/imagePicker.js?v=<%= assetVersion %>"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('fileInput');
     const previewContainer = document.getElementById('imagePreviewContainer');
     const dropArea = document.getElementById('dropArea');
-    const form = document.getElementById('editListingForm');
 
     if (!fileInput || !previewContainer || !dropArea) return;
 
-    let selectedFiles = [];
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function (eventName) {
-        window.addEventListener(eventName, function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }, false);
-    });
-
-    dropArea.addEventListener('drop', function (e) {
-        if (e.dataTransfer && e.dataTransfer.files) handleNewFiles(e.dataTransfer.files);
-    }, false);
-
-    dropArea.addEventListener('click', function() {
-        fileInput.value = '';
-    });
-
-    fileInput.addEventListener('change', function () {
-        if (this.files && this.files.length > 0) handleNewFiles(this.files);
-    });
-
-    function handleNewFiles(files) {
-        const MAX_BYTES = 15 * 1024 * 1024;
-        Array.from(files).forEach(function (file) {
-            if (selectedFiles.length >= 20) return;
-            const isImage = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp)$/i.test(file.name);
-            if (!isImage) {
-                alert('Desteklenmeyen dosya formatı: ' + file.name);
-                return;
-            }
-            if (file.size > MAX_BYTES) {
-                alert('Dosya boyutu 15 MB sınırını aşıyor: ' + file.name);
-                return;
-            }
-            if (selectedFiles.some(function (f) { return f.name === file.name && f.size === file.size; })) return;
-            selectedFiles.push(file);
-        });
-        syncInputAndRender();
-    }
-
-    function syncInputAndRender() {
-        try {
-            if (window.DataTransfer) {
-                const dt = new DataTransfer();
-                selectedFiles.forEach(function (file) { dt.items.add(file); });
-                fileInput.files = dt.files;
-            }
-        } catch (err) {
-            console.warn('DataTransfer sync notice:', err);
+    // Yeni ilan formuyla ayni bilesen; bkz. public/js/imagePicker.js.
+    setupImagePicker({
+        dropArea: dropArea,
+        fileInput: fileInput,
+        previewContainer: previewContainer,
+        hint: document.getElementById('imageOrderHelp'),
+        labels: {
+            cover: <%- JSON.stringify(t('listing.cover_photo')) %>,
+            moveEarlier: <%- JSON.stringify(t('listing.move_earlier')) %>,
+            moveLater: <%- JSON.stringify(t('listing.move_later')) %>,
+            remove: <%- JSON.stringify(t('common.delete')) %>,
+            tooMany: <%- JSON.stringify(t('listing.max_images')) %>,
+            badType: <%- JSON.stringify(t('listing.unsupported_format')) %>,
+            tooBig: <%- JSON.stringify(t('listing.file_too_large')) %>
         }
-        renderPreviews();
-    }
-
-    function renderPreviews() {
-        previewContainer.innerHTML = '';
-        selectedFiles.forEach(function (file, index) {
-            const objectUrl = URL.createObjectURL(file);
-            const col = document.createElement('div');
-            col.className = 'col-6 col-sm-4 col-md-3';
-            col.innerHTML = '<div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative" style="padding-top: 75%;">'
-                + '<img src="' + objectUrl + '" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="">'
-                + '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle d-flex align-items-center justify-content-center p-0 remove-btn" style="width: 28px; height: 28px; z-index: 10;">'
-                + '<i class="fa-solid fa-xmark fs-6"></i></button></div>';
-            previewContainer.appendChild(col);
-
-            col.querySelector('.remove-btn').addEventListener('click', function (e) {
-                e.preventDefault();
-                URL.revokeObjectURL(objectUrl);
-                selectedFiles.splice(index, 1);
-                syncInputAndRender();
-            });
-        });
-    }
-
-    if (form) {
-        form.addEventListener('submit', function() {
-            try {
-                if (window.DataTransfer && selectedFiles.length > 0) {
-                    const dt = new DataTransfer();
-                    selectedFiles.forEach(file => dt.items.add(file));
-                    fileInput.files = dt.files;
-                }
-            } catch (err) {
-                console.warn('Submit sync notice:', err);
-            }
-        });
-    }
+    });
 });
 </script>
