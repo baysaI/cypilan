@@ -1,4 +1,14 @@
 <div class="container py-4">
+    <%# Kirinti yolu: harita emlagin altinda duruyor, ziyaretci nereden
+        geldigini ve nereye donecegini gormeli. %>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="/listings" class="text-decoration-none"><%= t('listing.all_categories') %></a></li>
+            <li class="breadcrumb-item"><a href="/listings?category=emlak" class="text-decoration-none"><%= t('categories.real_estate') %></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><%= t('map.page_title') %></li>
+        </ol>
+    </nav>
+
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <div>
             <h1 class="h4 fw-bold mb-1"><%= t('map.page_title') %></h1>
