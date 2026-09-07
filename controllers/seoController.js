@@ -43,10 +43,17 @@ const seoController = {
             let urlsXml = '';
 
             // 1. Static Pages
+            //
+            // Bu sayfalarin ne zaman degistigini tutmuyoruz. Onceden hepsine
+            // bugunun tarihi yaziliyordu: cerez politikasi aylardir ayni
+            // dururken site haritasi her gun "bugun degisti" diyordu. Google
+            // tutarli bicimde yanlis bir lastmod gorurse o alani tumden yok
+            // sayiyor - yani yalan sadece bu sayfalari degil, dogru tarihi olan
+            // ilan sayfalarini da degersizlestiriyordu. Bilmedigimiz bir tarihi
+            // uydurmak yerine alani hic yazmiyoruz.
             for (const page of staticPages) {
                 urlsXml += '  <url>\n';
                 urlsXml += '    <loc>' + baseUrl + page.url + '</loc>\n';
-                urlsXml += '    <lastmod>' + today + '</lastmod>\n';
                 urlsXml += '    <changefreq>' + page.changefreq + '</changefreq>\n';
                 urlsXml += '    <priority>' + page.priority + '</priority>\n';
                 for (const lang of LANGUAGES) {
@@ -61,11 +68,37 @@ const seoController = {
             const mainCategories = db.prepare('SELECT * FROM categories WHERE parent_id IS NULL ORDER BY sort_order ASC').all();
             const subCategories = db.prepare('SELECT * FROM categories WHERE parent_id IS NOT NULL ORDER BY sort_order ASC').all();
 
+            // Kategori ve sehir sayfalarinin gercek son degisim tarihi, o
+            // kapsamdaki en yeni ilanin tarihi. Zaten veritabaninda duruyordu;
+            // eksik olan tek sey sormaktir. Kapsaminda hic ilan olmayan bir
+            // sayfaya tarih yazilmiyor.
+            const listingDates = db.prepare(`
+                SELECT category_id, MAX(COALESCE(updated_at, created_at)) AS last_change
+                FROM listings WHERE status = 'active' GROUP BY category_id
+            `).all();
+            const dateByCategory = new Map(listingDates.map((r) => [r.category_id, r.last_change]));
+
+            const cityDates = db.prepare(`
+                SELECT location_city, MAX(COALESCE(updated_at, created_at)) AS last_change
+                FROM listings WHERE status = 'active' AND location_city IS NOT NULL
+                GROUP BY location_city
+            `).all();
+            const dateByCity = new Map(cityDates.map((r) => [r.location_city, r.last_change]));
+
+            // Ust kategori sayfasi alt kategorilerin ilanlarini da listeliyor,
+            // dolayisiyla tarihi de agacin tamaminin en yenisi.
+            const newest = (...values) => {
+                const found = values.filter(Boolean).sort();
+                return found.length > 0 ? found[found.length - 1].split(' ')[0] : null;
+            };
+            const lastmodTag = (value) => (value ? '    <lastmod>' + value + '</lastmod>\n' : '');
+
             for (const cat of mainCategories) {
+                const subs = subCategories.filter(s => s.parent_id === cat.id);
                 const catUrl = '/listings?category=' + encodeURIComponent(cat.slug);
                 urlsXml += '  <url>\n';
                 urlsXml += '    <loc>' + baseUrl + catUrl + '</loc>\n';
-                urlsXml += '    <lastmod>' + today + '</lastmod>\n';
+                urlsXml += lastmodTag(newest(dateByCategory.get(cat.id), ...subs.map((s) => dateByCategory.get(s.id))));
                 urlsXml += '    <changefreq>daily</changefreq>\n';
                 urlsXml += '    <priority>0.85</priority>\n';
                 for (const lang of LANGUAGES) {
@@ -73,12 +106,17 @@ const seoController = {
                 }
                 urlsXml += '  </url>\n';
 
-                const subs = subCategories.filter(s => s.parent_id === cat.id);
+                // Alt kategori adresi '?category=<alt-slug>'. Onceden
+                // '?category=<ust>&sub=<alt>' yaziliyordu ama uygulamada 'sub'
+                // diye bir parametre yok: o adres ust kategorinin sayfasini
+                // aynen basiyordu. Yani site haritasi Google'a 32 tane kopya
+                // sayfa gonderiyordu. Alt kategorinin kendi slug'i dogru
+                // sayfayi getiriyor.
                 for (const sub of subs) {
-                    const subUrl = '/listings?category=' + encodeURIComponent(cat.slug) + '&amp;sub=' + encodeURIComponent(sub.slug);
+                    const subUrl = '/listings?category=' + encodeURIComponent(sub.slug);
                     urlsXml += '  <url>\n';
                     urlsXml += '    <loc>' + baseUrl + subUrl + '</loc>\n';
-                    urlsXml += '    <lastmod>' + today + '</lastmod>\n';
+                    urlsXml += lastmodTag(newest(dateByCategory.get(sub.id)));
                     urlsXml += '    <changefreq>daily</changefreq>\n';
                     urlsXml += '    <priority>0.80</priority>\n';
                     urlsXml += '  </url>\n';
@@ -91,7 +129,7 @@ const seoController = {
                 const cityUrl = '/listings?city=' + encodeURIComponent(city.name);
                 urlsXml += '  <url>\n';
                 urlsXml += '    <loc>' + baseUrl + cityUrl + '</loc>\n';
-                urlsXml += '    <lastmod>' + today + '</lastmod>\n';
+                urlsXml += lastmodTag(newest(dateByCity.get(city.name)));
                 urlsXml += '    <changefreq>daily</changefreq>\n';
                 urlsXml += '    <priority>0.75</priority>\n';
                 urlsXml += '  </url>\n';

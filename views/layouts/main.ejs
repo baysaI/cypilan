@@ -45,8 +45,12 @@
 
     <link rel="canonical" href="<%= canonicalUrl %>">
 
+    <%# Kategori ve sehir sayfalarinin canonical'i kendi sorgu dizesini tasiyor
+        ('/listings?category=emlak'), o yuzden dil baglantisi hep '?' ile
+        eklenemez - ikinci bir '?' adresi bozardi. %>
+    <% const langJoin = canonicalUrl.includes('?') ? '&' : '?'; %>
     <% ['tr', 'en', 'el', 'ru', 'fa'].forEach(function (code) { %>
-        <link rel="alternate" hreflang="<%= code %>" href="<%= canonicalUrl %>?lang=<%= code %>" />
+        <link rel="alternate" hreflang="<%= code %>" href="<%= canonicalUrl %><%= langJoin %>lang=<%= code %>" />
     <% }); %>
     <link rel="alternate" hreflang="x-default" href="<%= canonicalUrl %>" />
 

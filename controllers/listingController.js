@@ -118,6 +118,28 @@ const index = async (req, res, next) => {
             res.locals.meta.description = 'Kuzey Kıbrıs\'ın en büyük ilan platformu CYPILAN.COM ile binlerce satılık ve kiralık ilana hemen ulaşın, ücretsiz ilan verin.';
         }
 
+        // Bu sayfa kendi adresini gostermeli. Varsayilan canonical sorgu dizesini
+        // atiyor (middlewares/seo.js), yani '/listings?category=emlak' Google'a
+        // "beni degil /listings'i dizine ekle" diyordu - site haritasinda
+        // yayinladigimiz kategori ve sehir adreslerinin tamami boyleydi, hepsi
+        // ayni sayfaya isaret ediyordu. Basligi ve aciklamasi ayri olan bir
+        // sayfanin canonical'i de kendisi olmali.
+        //
+        // Yalnizca sayfayi tanimlayan iki parametre tasiniyor. page, sort, fiyat
+        // filtreleri, lang ve takip parametreleri disarida kaliyor ki butun o
+        // varyantlar temiz adrese katlanmaya devam etsin. Kodlama site
+        // haritasindakiyle ayni olmali - 'Larnaka Kırsal' iki yerde farkli
+        // kodlanirsa Google iki ayri adres gorur.
+        const canonicalParts = [];
+        if (filters.category) canonicalParts.push('category=' + encodeURIComponent(filters.category));
+        if (filters.city) canonicalParts.push('city=' + encodeURIComponent(filters.city));
+        if (canonicalParts.length > 0) {
+            // Varsayilan deger zaten '<site>/listings'; tabani yeniden kurmak
+            // yerine onun uzerine ekleniyor.
+            res.locals.meta.canonical = res.locals.meta.canonical + '?' + canonicalParts.join('&');
+            res.locals.meta.url = res.locals.meta.canonical;
+        }
+
         let userFavoriteIds = [];
         if (req.session && req.session.userId) {
             userFavoriteIds = await Listing.getUserFavoriteIds(req.session.userId);
