@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const t = require('./helpers');
 
 const Listing = require(t.rootDir + '/models/Listing');
@@ -121,6 +124,39 @@ t.run('Emlak haritası', async (db) => {
   t.assertEqual(cities.getCoordinates('Girne', 35.34, 33.32).zoom, 14,
     'İlan noktası mahalle düzeyinde açılıyor');
   t.assertEqual(cities.getCoordinates('Girne').zoom, 13, 'Şehir merkezi kendi yakınlaştırmasıyla');
+
+  // --- Balonun okunabilirligi
+  //
+  // Leaflet balonu kendi beyaz zeminini ve kendi #333 yazisini getiriyor, ama
+  // icine Bootstrap siniflari koyuyoruz. Koyu temada .text-muted acik griye
+  // donuyor ve o beyaz zeminde neredeyse kayboluyordu (1.6:1). Dugme daha
+  // kotuydu: Leaflet'in '.leaflet-container a' kurali '.btn'den daha ozgul,
+  // yani mavi zeminin uzerine Leaflet mavisi yaziyordu - iki temada da
+  // gorunmez. Bunlar tarayicida olculdu; asagidakiler o olcumun kaynagini
+  // sabitliyor, cunku kurallar silinirse hata sessizce geri gelir.
+  const css = fs.readFileSync(path.join(t.rootDir, 'public', 'css', 'style.css'), 'utf8')
+    .replace(/\s+/g, ' ');
+
+  t.assert(css.includes('.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--bs-body-bg); color: var(--bs-body-color); }'),
+    'Balon zemini ve yazısı temadan geliyor, Leaflet\'in sabit beyazından değil');
+  t.assert(css.includes('.leaflet-popup-content a.btn { color: var(--bs-btn-color); }'),
+    'Balondaki düğme kendi yazı rengini geri alıyor');
+  t.assert(css.includes('.leaflet-container a.leaflet-popup-close-button { color: var(--bs-secondary-color); }'),
+    'Kapatma çarpısı da temayı izliyor');
+
+  // Balonun icindeki her baglanti dugme; Leaflet'in link rengini geri alan
+  // kural yalnizca '.btn'i hedefliyor. Sinifsiz bir baglanti eklenirse kural
+  // onu kapsamaz ve yine Leaflet mavisinde kalir.
+  const mapView = fs.readFileSync(path.join(t.rootDir, 'views', 'listings', 'map.ejs'), 'utf8');
+  const popups = mapView.match(/bindPopup\(([\s\S]*?)\);/g) || [];
+  t.assert(popups.length === 2, 'Şehir ve ilan balonlarının ikisi de okunabiliyor');
+  t.assert(popups.every((p) => (p.match(/<a /g) || []).length === (p.match(/<a class="btn/g) || []).length),
+    'Balondaki bağlantıların hepsi düğme sınıfını taşıyor');
+
+  // Doseme kareleri gelene kadar gorunen zemin de sabit acik griydi; koyu
+  // temada parlak bir levha birakiyordu.
+  t.assert(!mapView.includes('#e9ecef'), 'Harita zemininde sabit açık gri kalmadı');
+  t.assert(/id="listingMap"[^>]*var\(--bs-secondary-bg\)/.test(mapView), 'Harita zemini temadan geliyor');
 
   // --- Diller
   const diller = ['tr', 'en', 'el', 'ru', 'fa'].every((lang) =>

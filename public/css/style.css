@@ -1315,6 +1315,34 @@ h5, .h5 { font-size: clamp(1.0625rem, 1.02rem + 0.2vw, 1.25rem); }
     box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
 }
 
+/* Leaflet balonu kendi beyaz zeminini ve kendi #333 yazisini getiriyor. Icine
+   koydugumuz Bootstrap siniflari ise sitenin temasini izliyor: koyu temada
+   .text-muted acik griye donuyor ve o beyaz zeminde okunmuyor. Cozum balonu
+   temanin disinda birakmamak. */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+
+/* Leaflet'in '.leaflet-container a' kurali kendi mavisini basiyor ve ozgullugu
+   '.btn'inkinden yuksek: balondaki dugmenin yazisi mavi zemin uzerinde mavi
+   kaliyor, yani hic gorunmuyordu. Iki temada da boyleydi. */
+.leaflet-popup-content a.btn {
+    color: var(--bs-btn-color);
+}
+
+.leaflet-popup-content a.btn:hover,
+.leaflet-popup-content a.btn:focus {
+    color: var(--bs-btn-hover-color);
+}
+
+/* Kapatma carpisi da Leaflet'in sabit grisiydi; balon koyulastiginda zemine
+   fazla yaklasiyor. */
+.leaflet-container a.leaflet-popup-close-button {
+    color: var(--bs-secondary-color);
+}
+
 /* -------------------------------------------------------------
    Listing Type Filter Pills & Interactive Category List
 ------------------------------------------------------------- */
