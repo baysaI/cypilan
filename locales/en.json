@@ -775,6 +775,8 @@
     "no_listings_desc": "No listings match your selected criteria or no listings have been added yet.",
     "no_phone_provided": "Seller has not provided a phone number.",
     "open_photo": "View photo larger",
+    "pick_area": "Approximate area on the map",
+    "pick_area_note": "Tap the map to mark the area the listing is in. The location is stored approximately and shown as an area — your exact address is never saved.",
     "popular": "Most Popular",
     "post_ad": "Post Listing",
     "posted_at": "Posted Date",
@@ -829,6 +831,7 @@
   "map": {
     "accuracy_note": "A city marker groups the listings in that city; it is not the address of any one of them. Listings whose location was picked on a map appear individually.",
     "approximate": "Approximate City Center",
+    "approximate_area": "Approximate area",
     "as_list": "List view",
     "listing_count": "{count} property listings on the map",
     "modal_title": "Ad Location & Map",

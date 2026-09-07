@@ -775,6 +775,8 @@
     "no_listings_desc": "Seçtiğiniz kriterlere uygun ilan bulunamadı veya henüz veritabanına ilan eklenmedi.",
     "no_phone_provided": "Satıcı telefon numarası paylaşmamış.",
     "open_photo": "Fotoğrafı büyüt",
+    "pick_area": "Haritada yaklaşık bölge",
+    "pick_area_note": "Haritaya dokunarak ilanın bulunduğu bölgeyi işaretleyin. Konum yaklaşık olarak saklanır ve haritada bir bölge olarak gösterilir — tam adresiniz kaydedilmez.",
     "popular": "En Popüler",
     "post_ad": "İlan Yayınla",
     "posted_at": "Yayın Tarihi",
@@ -829,6 +831,7 @@
   "map": {
     "accuracy_note": "Şehir işaretleri o şehirdeki ilanları toplar; ilanın tam adresini göstermez. Konumunu haritadan seçen ilanlar tek tek görünür.",
     "approximate": "Yaklaşık Şehir Merkezi",
+    "approximate_area": "Yaklaşık bölge",
     "as_list": "Liste görünümü",
     "listing_count": "Haritada {count} emlak ilanı",
     "modal_title": "İlan Konumu & Harita",

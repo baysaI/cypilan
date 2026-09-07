@@ -261,6 +261,27 @@
                                 <label class="form-label fw-bold small text-muted"><%= t('listing.district') %></label>
                                 <input type="text" name="district" class="form-control bg-light border-0 shadow-none focus-ring-primary" placeholder="<%= t('listing.district') %>" value="<%= typeof formData !== 'undefined' && formData.district ? formData.district : '' %>">
                             </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold small text-muted">
+                                    <%= t('listing.pick_area') %>
+                                    <span class="fw-normal text-muted">(<%= t('common.optional') || 'isteğe bağlı' %>)</span>
+                                </label>
+
+                                <%# Iğne kaydedilirken ızgaraya oturtuluyor; sunucuda
+                                    kabalaştırılıyor, burada da öyle anlatılıyor. Formun
+                                    söylediğiyle veritabanına yazılanın aynı olması gerekiyor. %>
+                                <div class="rounded-4 overflow-hidden border">
+                                    <div id="areaPicker" style="height: 260px; background: #e9ecef;"></div>
+                                </div>
+                                <input type="hidden" name="location_lat" id="locationLat"
+                                       value="<%= typeof formData !== 'undefined' && formData.location_lat ? formData.location_lat : '' %>">
+                                <input type="hidden" name="location_lng" id="locationLng"
+                                       value="<%= typeof formData !== 'undefined' && formData.location_lng ? formData.location_lng : '' %>">
+                                <div class="form-text small mt-1">
+                                    <i class="fa-solid fa-circle-info me-1"></i><%= t('listing.pick_area_note') %>
+                                </div>
+                            </div>
                             <div class="col-12">
                                 <label class="form-label fw-bold small text-muted">İletişim Telefonu <span class="text-danger">*</span></label>
                                 <input type="tel" name="phone" class="form-control bg-light border-0 shadow-none focus-ring-primary" placeholder="0533 123 4567" value="<%= (typeof formData !== 'undefined' && typeof formData.phone !== 'undefined') ? formData.phone : (typeof userPhone !== 'undefined' ? userPhone : '') %>" required>
@@ -1323,6 +1344,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 box.innerHTML = '';
             }
         }
+
+        // --- Yaklasik konum secici -----------------------------------------------
+        //
+        // Amac istatistik: haritada "su bolgede su fiyatlar var" diyebilmek. Bu
+        // yuzden igne kaydedilirken sunucuda bir izgaraya oturtuluyor ve tam
+        // adres hicbir zaman saklanmiyor. Daire de bunu gosteriyor: satici
+        // noktayi degil, bir bolgeyi isaretliyor.
+        (function () {
+            const host = document.getElementById('areaPicker');
+            const latInput = document.getElementById('locationLat');
+            const lngInput = document.getElementById('locationLng');
+            if (!host || !latInput || !lngInput || typeof L === 'undefined') return;
+
+            const CITY_POINTS = <%- JSON.stringify(cities.CITIES.map(function (c) { return { name: c.name, lat: c.lat, lng: c.lng, zoom: c.zoom || 13 }; })) %>;
+            const RADIUS = 500;
+
+            const start = (latInput.value && lngInput.value)
+                ? [Number(latInput.value), Number(lngInput.value)]
+                : [35.15, 33.40];
+
+            const map = L.map(host, { scrollWheelZoom: false }).setView(start, latInput.value ? 13 : 9);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18, attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            map.on('click', function () { map.scrollWheelZoom.enable(); });
+
+            let circle = null;
+            const place = function (lat, lng) {
+                latInput.value = lat.toFixed(5);
+                lngInput.value = lng.toFixed(5);
+                if (circle) map.removeLayer(circle);
+                circle = L.circle([lat, lng], {
+                    radius: RADIUS, color: '#0d6efd', weight: 2, fillOpacity: 0.15
+                }).addTo(map);
+            };
+
+            if (latInput.value && lngInput.value) place(Number(latInput.value), Number(lngInput.value));
+
+            map.on('click', function (event) { place(event.latlng.lat, event.latlng.lng); });
+
+            // Sehir secildiginde harita oraya gidiyor: ada olcegindeki bir
+            // haritada dogru mahalleyi bulmak zor.
+            const citySelect = document.querySelector('select[name="city"]');
+            if (citySelect) {
+                citySelect.addEventListener('change', function () {
+                    const found = CITY_POINTS.find(function (c) { return c.name === citySelect.value; });
+                    if (found) map.setView([found.lat, found.lng], found.zoom);
+                });
+            }
+        })();
 
         categorySelect.addEventListener('change', renderDraftInputs);
 

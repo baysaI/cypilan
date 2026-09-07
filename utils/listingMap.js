@@ -93,4 +93,31 @@ const buildMapPoints = (rows = [], { currency = 'GBP' } = {}) => {
   return { exact, cities: cityPoints, currency: target, total: rows.length };
 };
 
-module.exports = { buildMapPoints, median };
+// Satıcının bıraktığı iğne olduğu gibi saklanmıyor, bir ızgaraya oturtuluyor.
+//
+// Amaç istatistik: "Çatalköy tarafında şu fiyatlar var" demek. Evin kapısını
+// göstermek değil, ve bir kez saklandıktan sonra o kapı numarası artık
+// veritabanında duruyor demektir - sızması, dışa aktarılması, yanlışlıkla API
+// ile yayınlanması mümkün hale geliyor. Saklanmayan veri sızmıyor.
+//
+// 0.005 derece Kıbrıs enleminde kabaca 500 metre: mahalleyi söyler, binayı
+// söylemez.
+const GRID = 0.005;
+
+const coarsen = (lat, lng) => {
+  const latitude = Number(lat);
+  const longitude = Number(lng);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  if (latitude === 0 && longitude === 0) return null;
+
+  // Kıbrıs'ın çok dışındaki bir nokta ya yanlışlık ya da kasıt; haritada
+  // Akdeniz'in ortasında bir ev göstermektense hiç göstermemek doğru.
+  if (latitude < 34.4 || latitude > 35.8 || longitude < 32.2 || longitude > 34.7) return null;
+
+  return {
+    lat: Math.round(latitude / GRID) * GRID,
+    lng: Math.round(longitude / GRID) * GRID
+  };
+};
+
+module.exports = { buildMapPoints, median, coarsen, GRID };

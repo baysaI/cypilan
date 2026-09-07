@@ -1,7 +1,8 @@
 const t = require('./helpers');
 
 const Listing = require(t.rootDir + '/models/Listing');
-const { buildMapPoints, median } = require(t.rootDir + '/utils/listingMap');
+const { buildMapPoints, median, coarsen, GRID } = require(t.rootDir + '/utils/listingMap');
+const cities = require(t.rootDir + '/config/cities');
 
 t.run('Emlak haritası', async (db) => {
   const seller = t.makeUser(db, 'satici@test.local', 'Satıcı');
@@ -87,6 +88,39 @@ t.run('Emlak haritası', async (db) => {
   });
   t.assert(bosHtml.includes('listingMap'), 'İlan yokken de harita basılıyor');
   t.assert(!bosHtml.includes('NaN'), 'Boş veride NaN yok');
+
+  // --- Konum kasten kabalastiriliyor
+  //
+  // Amac istatistik: "su bolgede su fiyatlar var" demek. Evin kapisini
+  // saklamak degil - saklandigi anda o kapi numarasi disa aktarilabilir,
+  // sizabilir hale geliyor. Saklanmayan veri sizmiyor.
+  const nokta = coarsen(35.34123, 33.31876);
+  t.assert(nokta !== null, 'Geçerli nokta kabul ediliyor');
+  t.assertEqual(Math.round(nokta.lat * 1000) / 1000, 35.34, 'Enlem ızgaraya oturuyor');
+  t.assertEqual(Math.round(nokta.lng * 1000) / 1000, 33.32, 'Boylam ızgaraya oturuyor');
+
+  const kapi1 = coarsen(35.3412, 33.3187);
+  const kapi2 = coarsen(35.3419, 33.3191);
+  t.assert(kapi1.lat === kapi2.lat && kapi1.lng === kapi2.lng,
+    'Aynı mahalledeki iki adres aynı noktaya düşüyor');
+  t.assert(coarsen(35.3412, 33.3400).lng !== kapi1.lng,
+    'Uzaktaki nokta ayrı kalıyor (harita bir şey söyleyebilsin)');
+
+  const metre = GRID * 111000;
+  t.assert(metre > 400 && metre < 700, 'Izgara aralığı yaklaşık 500 metre');
+
+  t.assertEqual(coarsen(null, null), null, 'Boş nokta reddediliyor');
+  t.assertEqual(coarsen('abc', 'def'), null, 'Sayı olmayan reddediliyor');
+  t.assertEqual(coarsen(0, 0), null, 'Sıfır sıfır gerçek konum sayılmıyor');
+  t.assertEqual(coarsen(48.85, 2.35), null, 'Kıbrıs dışındaki nokta reddediliyor');
+  t.assert(coarsen(34.75, 32.42) !== null, 'Adanın batı ucu kabul ediliyor');
+  t.assert(coarsen(35.40, 34.55) !== null, 'Karpaz kabul ediliyor');
+
+  // Kapiya kadar yakinlastirmak, olmayan bir hassasiyeti varmis gibi
+  // gostermek olurdu.
+  t.assertEqual(cities.getCoordinates('Girne', 35.34, 33.32).zoom, 14,
+    'İlan noktası mahalle düzeyinde açılıyor');
+  t.assertEqual(cities.getCoordinates('Girne').zoom, 13, 'Şehir merkezi kendi yakınlaştırmasıyla');
 
   // --- Diller
   const diller = ['tr', 'en', 'el', 'ru', 'fa'].every((lang) =>

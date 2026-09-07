@@ -573,6 +573,12 @@ const create = async (req, res, next) => {
             listing_type: collectsBids ? 'bid_request' : (['sale', 'rent', 'wanted', 'job', 'service'].includes(selectedType) ? selectedType : 'sale'),
             city,
             district,
+            // Satıcının haritada bıraktığı iğne ızgaraya oturtularak saklanıyor;
+            // tam adres hiçbir zaman veritabanına girmiyor.
+            ...(function () {
+                const point = listingMap.coarsen(req.body.location_lat, req.body.location_lng);
+                return point ? { location_lat: point.lat, location_lng: point.lng } : {};
+            })(),
             status,
             is_featured: 1,
             expires_at: listingPolicy.expiresAt(),

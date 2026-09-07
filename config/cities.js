@@ -30,7 +30,11 @@ const grouped = () => [
 
 const getCoordinates = (cityName, customLat = null, customLng = null) => {
   if (customLat && customLng && Number.isFinite(Number(customLat)) && Number.isFinite(Number(customLng))) {
-    return { lat: Number(customLat), lng: Number(customLng), zoom: 15, isExact: true };
+    // 15 degil 14: sitede saklanan hicbir koordinat tam adres degil, hepsi
+    // kasten kabalastirilmis bir mahalle noktasi (utils/listingMap.coarsen).
+    // Kapiya kadar yakinlastirmak, olmayan bir hassasiyeti varmis gibi
+    // gostermek olurdu.
+    return { lat: Number(customLat), lng: Number(customLng), zoom: 14, isExact: true };
   }
   const found = CITIES.find((c) => c.name.toLowerCase() === String(cityName || '').toLowerCase());
   if (found) {
