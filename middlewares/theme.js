@@ -14,8 +14,13 @@ const themeMiddleware = (req, res, next) => {
         theme = DEFAULT_THEME;
     }
 
-    if (cookies.theme !== theme) {
-        res.cookie('theme', theme, { maxAge: COOKIE_MAX_AGE, httpOnly: false, sameSite: 'lax' });
+    // Yalnizca acik bir secimde yaziliyor. Tema degistirici zaten cerezi
+    // tarayicida kendisi kuruyor; sunucunun ayrica her istekte varsayilani
+    // cerezlemesi, secim yapmamis ziyaretciye bir yillik bir cerez birakmaktan
+    // baska bir sey yapmiyordu.
+    const chosen = req.query.theme;
+    if (chosen && THEMES.includes(chosen) && cookies.theme !== chosen) {
+        res.cookie('theme', chosen, { maxAge: COOKIE_MAX_AGE, httpOnly: false, sameSite: 'lax' });
     }
 
     res.locals.theme = theme;

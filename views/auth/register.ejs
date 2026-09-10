@@ -114,6 +114,16 @@ const fData = (typeof formData !== 'undefined' && formData) ? formData : {};
                             </div>
                         </div>
 
+                        <%# Yas onayi ayri bir kutu: kullanim kosullariyla birlikte tek
+                            kutuda sorulsaydi, kabul edilen iki ayri sey tek kayda
+                            duserdi ve hangisinin onaylandigi belli olmazdi. %>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input shadow-none cursor-pointer" id="ageConfirm" name="ageConfirm" required>
+                            <label class="form-check-label small text-muted" for="ageConfirm">
+                                <%= t('auth.age_confirm', { age: minimumAge }) %>
+                            </label>
+                        </div>
+
                         <div class="mb-4 form-check">
                             <input type="checkbox" class="form-check-input shadow-none cursor-pointer" id="terms" name="terms" required>
                             <label class="form-check-label small text-muted" for="terms">

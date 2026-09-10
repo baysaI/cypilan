@@ -30,6 +30,25 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Kimin neyi ne zaman kabul ettigi.
+--
+-- Kayit formundaki onay kutusu yalnizca tarayicida duruyordu: sunucu 'terms'
+-- alanina hic bakmiyordu, dolayisiyla forma ugramadan atilan bir istek onaysiz
+-- hesap acabiliyor ve kabul edildigine dair hicbir kayit kalmiyordu. Bir
+-- uyusmazlikta ispat gerekiyor.
+--
+-- Surum alani metnin hangi halinin kabul edildigini tutuyor: kullanim
+-- kosullari degistiginde eski onay yeni metni kapsamis gibi gorunmemeli.
+CREATE TABLE IF NOT EXISTS user_consents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL,
+  version TEXT NOT NULL,
+  accepted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_consents_user ON user_consents(user_id);
+
 -- Categories (self-referencing for subcategories)
 CREATE TABLE IF NOT EXISTS categories (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

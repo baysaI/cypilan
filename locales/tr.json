@@ -100,7 +100,8 @@
     "verify_pending_instructions": "E-posta kutunuzdaki doğrulama bağlantısına tıkladıktan sonra aşağıdaki 'E-postamı Doğruladım, Sayfayı Yenile' butonuna basabilirsiniz.",
     "verify_pending_refresh_btn": "E-postamı Doğruladım, Sayfayı Yenile",
     "verify_pending_spam_notice": "E-postayı gelen kutunuzda göremiyorsanız lütfen Spam (Gereksiz) klasörünüzü de kontrol edin.",
-    "verify_pending_title": "E-posta Adresinizi Kontrol Edin"
+    "verify_pending_title": "E-posta Adresinizi Kontrol Edin",
+    "age_confirm": "{age} yaşından büyüğüm."
   },
   "badges": {
     "verified_seller": "Onaylı Satıcı",
@@ -640,7 +641,9 @@
     "warning_issued": "Uyarı gönderildi.",
     "warning_issued_suspended": "Uyarı gönderildi ve sınıra ulaşıldığı için hesap askıya alındı.",
     "warning_revoked": "Uyarı kaldırıldı.",
-    "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir."
+    "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.",
+    "terms_required": "Devam etmek için kullanım koşullarını ve gizlilik politikasını kabul etmeniz gerekiyor.",
+    "age_required": "Kayıt olabilmek için yaş onayını işaretlemeniz gerekiyor."
   },
   "footer": {
     "about": "Hakkımızda",
@@ -1295,7 +1298,10 @@
     "update_password": "Şifreyi Güncelle",
     "upload_avatar": "Fotoğraf Yükle",
     "verify_password_help": "Güvenlik için şifrenizi doğrulamanız gerekir.",
-    "view_profile": "Profilimi Gör"
+    "view_profile": "Profilimi Gör",
+    "export_title": "Verilerimi indir",
+    "export_desc": "Hesabınızda tuttuğumuz her şeyi tek bir dosya olarak indirin: profiliniz, ilanlarınız, mesajlarınız, favorileriniz ve onay kayıtlarınız.",
+    "export_btn": "JSON olarak indir"
   },
   "report_modal": {
     "desc_label": "Açıklama (opsiyonel)",
@@ -1454,5 +1460,11 @@
     "remaining_body": "{remaining} uyarı daha alırsan hesabın otomatik olarak askıya alınır.",
     "suspended_body": "Uyarı sınırına ulaştığın için hesabın askıya alındı. İtiraz için destek ekibiyle iletişime geç.",
     "title": "Hesabında {count}/{threshold} uyarı var"
+  },
+  "consent": {
+    "title": "Çerezler",
+    "body": "Sitenin çalışması için gereken çerezleri kullanıyoruz. Ziyaret istatistiği tutmak için ayrıca izninizi istiyoruz; reddederseniz site aynı şekilde çalışır.",
+    "accept": "Kabul et",
+    "essential_only": "Yalnızca zorunlu"
   }
 }

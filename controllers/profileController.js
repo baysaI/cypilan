@@ -1,5 +1,7 @@
+const { getDb } = require('../config/database');
 const User = require('../models/User');
 const UserBadge = require('../models/UserBadge');
+const UserConsent = require('../models/UserConsent');
 const Listing = require('../models/Listing');
 const listingPolicy = require('../config/listingPolicy');
 const Review = require('../models/Review');
@@ -386,6 +388,80 @@ const deleteAccount = async (req, res) => {
     }
 };
 
+// Kullanicinin kendi verisini makine okunur bicimde indirmesi.
+//
+// Silme ve duzeltme zaten vardi, tasinabilirlik yoktu. Veri gorulmedigi surece
+// "hangi verimi tutuyorsunuz" sorusunun cevabi gizlilik metnindeki genel
+// cumleler oluyor; burada cevap dosyanin kendisi.
+//
+// Yalnizca istegi yapanin kendi verisi. Mesajlasmalarda karsi tarafin
+// e-postasi ya da telefonu degil, yalnizca profilinde zaten herkese acik olan
+// gorunen adi tasiniyor.
+const exportData = async (req, res, next) => {
+    try {
+        const userId = req.session.userId;
+        const db = getDb();
+
+        const account = db.prepare(`
+            SELECT id, email, full_name, phone, role, bio, company_name,
+                   language_pref, currency_pref, is_verified, show_phone, show_surname,
+                   corporate_status, corporate_tax_no, corporate_type, created_at
+            FROM users WHERE id = ?
+        `).get([userId]);
+
+        if (!account) return next();
+
+        const listings = db.prepare(`
+            SELECT l.id, l.title, l.slug, l.description, l.price, l.currency, l.status,
+                   l.location_city, l.location_district, l.views_count, l.created_at,
+                   c.slug AS category
+            FROM listings l LEFT JOIN categories c ON l.category_id = c.id
+            WHERE l.user_id = ? ORDER BY l.created_at ASC
+        `).all([userId]);
+
+        listings.forEach((listing) => {
+            listing.images = db.prepare(
+                'SELECT image_url FROM listing_images WHERE listing_id = ? ORDER BY sort_order'
+            ).all([listing.id]).map((row) => row.image_url);
+        });
+
+        const messages = db.prepare(`
+            SELECT m.id, m.listing_id, m.content, m.created_at,
+                   CASE WHEN m.sender_id = ? THEN 'giden' ELSE 'gelen' END AS direction,
+                   other.id AS counterpart_id, other.full_name AS counterpart_name
+            FROM messages m
+            JOIN users other ON other.id = CASE WHEN m.sender_id = ? THEN m.receiver_id ELSE m.sender_id END
+            WHERE m.sender_id = ? OR m.receiver_id = ?
+            ORDER BY m.created_at ASC
+        `).all([userId, userId, userId, userId]);
+
+        const favorites = db.prepare(`
+            SELECT l.slug, l.title, f.created_at
+            FROM favorites f JOIN listings l ON l.id = f.listing_id
+            WHERE f.user_id = ? ORDER BY f.created_at ASC
+        `).all([userId]);
+
+        const consents = await UserConsent.forUser(userId);
+
+        const payload = {
+            aciklama: 'CYPILAN.COM hesabinizda tutulan kisisel verilerin tamami.',
+            olusturulma: new Date().toISOString(),
+            hesap: account,
+            ilanlar: listings,
+            mesajlar: messages,
+            favoriler: favorites,
+            onaylar: consents
+        };
+
+        const stamp = new Date().toISOString().slice(0, 10);
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="cypilan-verilerim-${stamp}.json"`);
+        return res.send(JSON.stringify(payload, null, 2));
+    } catch (error) {
+        return next(error);
+    }
+};
+
 module.exports = {
     index,
     show,
@@ -396,5 +472,6 @@ module.exports = {
     myListings,
     myFavorites,
     myPriceAlerts,
+    exportData,
     deleteAccount
 };

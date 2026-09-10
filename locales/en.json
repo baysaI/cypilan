@@ -100,7 +100,8 @@
     "verify_pending_instructions": "After clicking the verification link in your e-mail box, you can press the 'I Verified My E-mail, Refresh Page' button below.",
     "verify_pending_refresh_btn": "I Verified My Email, Refresh the Page",
     "verify_pending_spam_notice": "If you do not see the email in your inbox, please also check your Spam folder.",
-    "verify_pending_title": "Check Your Email Address"
+    "verify_pending_title": "Check Your Email Address",
+    "age_confirm": "I am over {age} years old."
   },
   "badges": {
     "verified_seller": "Verified Seller",
@@ -640,7 +641,9 @@
     "warning_issued": "The warning has been sent.",
     "warning_issued_suspended": "The warning was sent and the account was suspended on reaching the limit.",
     "warning_revoked": "The warning has been lifted.",
-    "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit."
+    "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit.",
+    "terms_required": "You need to accept the terms of use and the privacy policy to continue.",
+    "age_required": "You need to confirm your age to register."
   },
   "footer": {
     "about": "About Us",
@@ -1295,7 +1298,10 @@
     "update_password": "Update Password",
     "upload_avatar": "Upload Photo",
     "verify_password_help": "For security, you must verify your password.",
-    "view_profile": "See My Profile"
+    "view_profile": "See My Profile",
+    "export_title": "Download my data",
+    "export_desc": "Download everything we hold on your account as a single file: your profile, listings, messages, favourites and consent records.",
+    "export_btn": "Download as JSON"
   },
   "report_modal": {
     "desc_label": "Description (optional)",
@@ -1454,5 +1460,11 @@
     "remaining_body": "{remaining} more warnings and your account will be suspended automatically.",
     "suspended_body": "Your account has been suspended because you reached the warning limit. Contact support to appeal.",
     "title": "Your account has {count}/{threshold} warnings"
+  },
+  "consent": {
+    "title": "Cookies",
+    "body": "We use the cookies the site needs to work. For visit statistics we ask separately; if you decline, the site works exactly the same.",
+    "accept": "Accept",
+    "essential_only": "Essential only"
   }
 }

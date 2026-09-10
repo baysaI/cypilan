@@ -227,6 +227,20 @@
                 </div>
             </div>
 
+            <%# Verilerini indirme. Silmenin yaninda degil ustunde duruyor:
+                indirmek geri alinabilir bir istek, silmek degil - ve tehlikeli
+                bolgenin icine konursa oradan uzak duran kullanici bunu da hic
+                gormez. %>
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-4">
+                    <h2 class="fs-6 fw-bold mb-2"><%= t('profile_edit.export_title') %></h2>
+                    <p class="text-muted small mb-3"><%= t('profile_edit.export_desc') %></p>
+                    <a href="/profile/verilerim" class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-medium">
+                        <i class="fa-solid fa-download me-1"></i><%= t('profile_edit.export_btn') %>
+                    </a>
+                </div>
+            </div>
+
             <!-- Danger Zone: Account Deletion -->
             <div class="card border-danger border-opacity-25 shadow-sm mt-4 mb-5">
                 <div class="card-header bg-danger bg-opacity-10 py-3 text-danger d-flex align-items-center gap-2">

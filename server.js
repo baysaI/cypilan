@@ -44,8 +44,11 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com", "fonts.googleapis.com"],
-      fontSrc: ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com", "cdn.jsdelivr.net"],
+      // Yazi tipi artik kendi sunucumuzdan geliyor, Google adresleri listeden
+      // cikti: politikada duran her ad, oraya istek gidebilecegi anlamina
+      // geliyor.
+      styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
+      fontSrc: ["'self'", "cdnjs.cloudflare.com", "cdn.jsdelivr.net"],
       imgSrc: ["'self'", "data:", "blob:", "http:", "https:"],
       connectSrc: ["'self'"],
 
@@ -206,11 +209,14 @@ app.set('layout extractStyles', true);
 // After i18n so that a rejected request can report the failure in the
 // visitor's own language.
 const analyticsMiddleware = require('./middlewares/analytics');
+const consentMiddleware = require('./middlewares/consent');
 app.use(i18nMiddleware);
 app.use(themeMiddleware);
 app.use(csrfProtection);
 app.use(seoMiddleware);
 app.use(setUserLocal);
+// Analitikten once: onay okunmadan sayfa gorutulemesi yazilamaz.
+app.use(consentMiddleware);
 app.use(analyticsMiddleware);
 
 const helpers = require('./utils/helpers');
@@ -228,6 +234,9 @@ app.use((req, res, next) => {
   res.locals.cities = cities;
   res.locals.listingBadges = listingBadges;
   res.locals.userBadges = userBadges;
+  // Kayit formu ve kullanim kosullari ayni sayiyi soylemeli; sayi tek yerde
+  // duruyor ve sablon onu her zaman buluyor.
+  res.locals.minimumAge = require('./config/consent').MINIMUM_AGE;
 
   // Gelistirme notu varsayilan olarak acik: ayar hic yazilmamissa site
   // gelistirme asamasindadir. Kapatmak bir karar, acik olmak varsayilan.
@@ -240,6 +249,9 @@ app.use((req, res, next) => {
     res.locals.devNoticeEnabled = false;
   }
   res.locals.currentPath = req.path;
+  // Sorgu dizesiyle birlikte: cerez onayindan sonra ziyaretciyi filtreli
+  // listenin basina degil, bulundugu yere geri gondermek icin gerekiyor.
+  res.locals.currentUrl = req.originalUrl;
   res.locals.assetVersion = ASSET_VERSION;
   // Absolute URLs in the page (canonical, og:image, structured data) follow the
   // configured site address in production. In development they follow the host
@@ -386,6 +398,22 @@ async function startServer() {
 
     await sweepExpiredListings();
     setInterval(sweepExpiredListings, 24 * 60 * 60 * 1000).unref();
+
+    // Saklama suresi dolmus ziyaret kayitlari. Ilan suresi taramasiyla ayni
+    // ritimde: gunde bir, acilista bir kez.
+    const Analytics = require('./models/Analytics');
+    const appConfig = require('./config/app');
+    const sweepOldPageViews = async () => {
+      try {
+        const removed = await Analytics.purgeExpired(appConfig.analytics.retentionDays);
+        if (removed > 0) console.log(`🧹 ${removed} eski ziyaret kaydı silindi.`);
+      } catch (error) {
+        console.error('Analytics retention sweep failed:', error);
+      }
+    };
+
+    await sweepOldPageViews();
+    setInterval(sweepOldPageViews, 24 * 60 * 60 * 1000).unref();
 
     const server = app.listen(PORT, () => {
       console.log('');

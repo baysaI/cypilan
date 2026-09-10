@@ -94,6 +94,7 @@ const baseLocals = (overrides = {}) => Object.assign({
   csrfToken: 'test-token',
   // server.js her yanıta koyuyor; varlık adreslerindeki ?v= bundan geliyor.
   assetVersion: 'test',
+  minimumAge: require(path.join(rootDir, 'config', 'consent')).MINIMUM_AGE,
   t: (key, params) => translate(key, 'tr', params)
 }, overrides);
 

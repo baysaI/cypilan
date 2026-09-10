@@ -72,9 +72,11 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <%# Yazi tipi kendi sunucumuzdan. Onceden Google'dan yukleniyordu ve her
+        sayfa acilisi her ziyaretcinin IP adresini Google'a gonderiyordu -
+        ziyaretcinin haberi olmadan ve secme sansi olmadan. Dosyalar
+        public/fonts/ altinda; scripts/fetch-fonts.js ile yenileniyor. %>
+    <link rel="stylesheet" href="/fonts/inter.css?v=<%= assetVersion %>">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -257,6 +259,10 @@
     <%# One copy for the whole site: the footer link and the account menu item both
         open this modal, so the form cannot drift into two versions. %>
     <%- include('../partials/feedbackModal') %>
+
+    <%# Karar verilene kadar her sayfada; kendisi karar verilmisse hic
+        basilmiyor. %>
+    <%- include('../partials/cookieBanner') %>
 
     <%# Yonetici siteyi gezerken de canli destek talebini duymali; panelde
         olmadigi surece hicbir sey dinlemiyordu. %>

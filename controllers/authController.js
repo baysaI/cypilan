@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const UserConsent = require('../models/UserConsent');
+const consentConfig = require('../config/consent');
 const mailer = require('../config/mailer');
 const { isValidEmail, isValidPassword, isValidPhone } = require('../utils/validators');
 
@@ -169,6 +171,20 @@ const register = async (req, res) => {
             return saveFormAndRedirect('flash.fill_required_fields');
         }
 
+        // Onay kutulari yalnizca tarayicida 'required' idi; sunucu bu alanlara
+        // hic bakmiyordu. Forma ugramadan atilan bir istek onaysiz hesap
+        // acabiliyordu ve kabul edildigine dair hicbir kayit kalmiyordu.
+        const acceptedTerms = req.body.terms === 'on' || req.body.terms === 'true';
+        const confirmedAge = req.body.ageConfirm === 'on' || req.body.ageConfirm === 'true';
+
+        if (!acceptedTerms) {
+            return saveFormAndRedirect('flash.terms_required');
+        }
+
+        if (!confirmedAge) {
+            return saveFormAndRedirect('flash.age_required');
+        }
+
         if (isCorporate && !companyName) {
             return saveFormAndRedirect('flash.company_name_required');
         }
@@ -211,6 +227,10 @@ const register = async (req, res) => {
             corporate_type: isCorporate ? validCorporateType : null,
             corporate_applied_at: isCorporate ? new Date().toISOString() : null
         });
+
+        // Hesap acildiktan hemen sonra: kimin, hangi metni, hangi surumuyle ve
+        // ne zaman kabul ettigi kayda geciyor.
+        await UserConsent.record(userId, ['terms', 'privacy', 'age'], consentConfig.POLICY_VERSION);
 
         const user = await User.findById(userId);
 

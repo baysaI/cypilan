@@ -28,6 +28,25 @@ router.get('/harita', (req, res) => res.redirect(301, '/listings/harita'));
 router.get('/sitemap.xml', seoController.sitemap);
 router.get('/robots.txt', seoController.robots);
 
+// Cerez tercihi. Bilerek normal bir form gonderimi: betigi kapali bir
+// tarayicida da secim yapilabilmeli.
+const consentConfig = require('../config/consent');
+router.post('/cerez-tercihi', (req, res) => {
+    const value = consentConfig.serialize(req.body.level);
+
+    if (value) {
+        res.cookie(consentConfig.COOKIE_NAME, value, consentConfig.cookieOptions);
+    }
+
+    // Ziyaretci geldigi yere donuyor. Yalnizca kendi sitemizdeki bir yol kabul
+    // ediliyor: '//baska-site' ile baslayan bir deger tarayicida mutlak adres
+    // sayilir ve form alanina yazilan her sey bize acik yonlendirme kurdururdu.
+    const target = String(req.body.returnTo || '/');
+    const safe = target.startsWith('/') && !target.startsWith('//') ? target : '/';
+
+    res.redirect(303, safe);
+});
+
 router.get('/rehber', guideController.index);
 router.get('/rehber/:slug', guideController.show);
 
@@ -62,6 +81,8 @@ router.delete('/profile', isAuthenticated, profileController.deleteAccount);
 router.get('/profile/listings', isAuthenticated, profileController.myListings);
 router.get('/profile/favorites', isAuthenticated, profileController.myFavorites);
 router.get('/profile/alarmlar', isAuthenticated, profileController.myPriceAlerts);
+// Kendi verisini indirme. robots.txt zaten /profile/ altini disariya kapatiyor.
+router.get('/profile/verilerim', isAuthenticated, profileController.exportData);
 router.get('/profile/messages', isAuthenticated, (req, res) => res.redirect('/messages'));
 router.get('/profile/notifications', isAuthenticated, (req, res) => res.redirect('/notifications'));
 

@@ -158,6 +158,23 @@ class Analytics {
       LIMIT ?
     `).all([limit]);
   }
+
+  // Saklama suresi dolmus sayfa goruntulemelerini siler.
+  //
+  // Onceden hicbir sey silinmiyordu. Panelde en uzun pencere bir yil, yani
+  // bundan eski kayitlar hicbir sey gostermiyor ama duruyordu - ve her biri bir
+  // oturum kimligi ile bir IP ozeti tasiyor.
+  static async purgeExpired(retentionDays) {
+    const db = getDb();
+    const days = Number(retentionDays);
+    if (!Number.isFinite(days) || days < 1) return 0;
+
+    const result = db.prepare(
+      "DELETE FROM page_views WHERE created_at < datetime('now', '-' || ? || ' days')"
+    ).run([Math.floor(days)]);
+
+    return Number(result.changes || 0);
+  }
 }
 
 module.exports = Analytics;

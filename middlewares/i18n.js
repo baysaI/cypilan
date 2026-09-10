@@ -31,8 +31,14 @@ const i18nMiddleware = (req, res, next) => {
         }
     }
 
-    if (cookies.lang !== lang) {
-        res.cookie('lang', lang, { maxAge: 31536000000, httpOnly: false });
+    // Cerez yalnizca acik bir secimde yaziliyor - para biriminde oldugu gibi.
+    // Onceden hicbir sey secmemis ziyaretciye de ilk istekte bir yillik cerez
+    // birakiliyordu; o cerez bir tercihi degil, yalnizca tarayicinin dil
+    // basligindan cikarilan tahmini temsil ediyordu. Tahmin her istekte
+    // yeniden yapilabilir, saklanmasi gerekmiyor.
+    const chosenLang = req.query.lang;
+    if (chosenLang && supportedLanguages.includes(chosenLang) && cookies.lang !== chosenLang) {
+        res.cookie('lang', chosenLang, { maxAge: 31536000000, httpOnly: false, sameSite: 'lax' });
     }
 
     // Para birimi cerezi, ziyaretci hicbir sey secmese bile ilk istekte
