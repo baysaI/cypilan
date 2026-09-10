@@ -100,11 +100,17 @@ t.run('Gizlilik: onay, saklama süresi ve veri taşınabilirliği', async (db) =
   t.assert(banner.includes('value="essential"') && banner.includes('value="all"'), 'İki seçenek de sunuluyor');
   t.assert(banner.includes('/listings?category=emlak'), 'Sorgu dizesi geri dönüş için taşınıyor');
 
-  // Reddetmek kabul etmek kadar kolay olmali: ayni boyda, ayni bicimde iki
-  // dugme. Ret kucuk bir baglanti olsaydi onay gercek bir secim sayilmazdi.
+  // Reddetmek kabul etmek kadar kolay olmali: ayni bicim, ayni yukseklik, ayni
+  // dolgu. Ret kucuk bir baglanti olsaydi onay gercek bir secim sayilmazdi.
+  // Genislikler etiket uzunluguna gore farkli - olculdu, 147px ve 92px - ama
+  // aranan sey esit piksel degil esit muamele.
   const buttons = banner.match(/<button[^>]*class="([^"]*)"/g) || [];
   t.assertEqual(buttons.length, 2, 'İki düğme var');
-  t.assert(buttons.every((b) => b.includes('rounded-pill px-3 flex-fill')), 'İki düğme de aynı boyda');
+  t.assert(buttons.every((b) => b.includes('rounded-pill px-3 flex-fill')), 'İki düğme de aynı biçimde');
+
+  // Kurabiye simgesi tanima isareti: onsuz kart sitedeki diger duyuru
+  // seritlerinden ayirt edilemiyor ve okunmadan uyari metni saniliyor.
+  t.assert(banner.includes('fa-cookie-bite'), 'Çerez simgesi var');
 
   const settled = await t.render('partials/cookieBanner.ejs', {
     consent: consentConfig.parse('v1:essential'), currentUrl: '/'
