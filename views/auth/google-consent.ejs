@@ -1,0 +1,35 @@
+<%# Google ile ilk kez gelenler icin tek adim. Hesap bu form gonderilene kadar
+    acilmiyor; kutular kayit formundakilerle ayni parcadan geliyor. %>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle mb-3" style="width: 56px; height: 56px;" aria-hidden="true">
+                            <i class="fa-brands fa-google fs-4"></i>
+                        </div>
+                        <h1 class="h4 fw-bold mb-2"><%= t('auth.google_consent_title') %></h1>
+                        <p class="text-muted small mb-0"><%= t('auth.google_consent_intro', { email: pending.email }) %></p>
+                    </div>
+
+                    <form method="POST" action="/auth/google/onay">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                        <%- include('../partials/consentChecks') %>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                                <%= t('auth.google_consent_submit') %>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-light border-0 py-3 text-center">
+                    <a href="/auth/login" class="small text-muted text-decoration-none"><%= t('common.cancel') %></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

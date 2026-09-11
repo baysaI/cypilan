@@ -105,6 +105,13 @@ router.post('/resend-verification', resendVerificationLimiter, authController.re
 router.get('/google/callback', (req, res, next) => {
   // The same address has to be presented again when the code is exchanged.
   passport.authenticate('google', { callbackURL: googleCallbackUrl(req) }, async (err, user, info) => {
+    // Bu e-postayla hesap yok: hesap acilmadan once yas ve kullanim
+    // kosullari onayina gidiliyor. Profil kisa bir sure oturumda bekliyor.
+    if (!err && !user && info && info.pendingGoogle) {
+      req.session.pendingGoogleSignup = Object.assign({}, info.pendingGoogle, { at: Date.now() });
+      return req.session.save(() => res.redirect(303, '/auth/google/onay'));
+    }
+
     if (err || !user) {
       console.error('Google OAuth callback error:', err || info);
       req.flash('error', (info && info.message) || 'flash.google_login_failed');
@@ -145,5 +152,10 @@ router.get('/google/callback', (req, res, next) => {
     });
   })(req, res, next);
 });
+
+// Google ile ilk kez gelenlerin onay adimi. Kayit formuyla ayni kutular, ayni
+// sunucu kontrolu, ayni onay kaydi; hesap acildigi icin kayitla ayni sinir.
+router.get('/google/onay', authController.showGoogleConsent);
+router.post('/google/onay', registerLimiter, authController.completeGoogleSignup);
 
 module.exports = router;

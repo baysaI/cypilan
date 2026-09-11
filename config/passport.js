@@ -1,7 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const googleSignup = require('../utils/googleSignup');
 
 const clientID = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -16,34 +16,21 @@ if (clientID && clientSecret) {
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const primaryEmail = profile.emails && profile.emails[0] ? profile.emails[0] : null;
-        if (!primaryEmail || !primaryEmail.value) {
-          return done(null, false, { message: 'flash.google_email_missing' });
+        const result = await googleSignup.resolve(profile);
+
+        if (result.error) {
+          return done(null, false, { message: result.error });
         }
 
-        // Without this an unverified Google address could be used to take over an
-        // existing password account that happens to share the same e-mail.
-        if (primaryEmail.verified === false) {
-          return done(null, false, { message: 'flash.google_email_unverified' });
+        // Hesap burada acilmiyor. Yeni gelen, once yas ve kullanim kosullari
+        // onay sayfasina gidiyor; hesap o sayfa gonderilince aciliyor
+        // (authController.completeGoogleSignup). Vazgecen olursa ortada
+        // onaysiz bir hesap kalmiyor.
+        if (result.pending) {
+          return done(null, false, { pendingGoogle: result.pending });
         }
 
-        const email = String(primaryEmail.value).trim().toLowerCase();
-
-        let user = await User.findByEmail(email);
-        if (!user) {
-          const randomPassword = Math.random().toString(36).slice(-10);
-          const password_hash = await bcrypt.hash(randomPassword, 10);
-          const userId = await User.create({
-            email,
-            password_hash,
-            full_name: profile.displayName || 'Google User',
-            phone: '',
-            role: 'user',
-            has_password: 0
-          });
-          user = await User.findById(userId);
-        }
-        return done(null, user);
+        return done(null, result.user);
       } catch (err) {
         console.error('Google Auth Strategy Error:', err);
         return done(err, null);

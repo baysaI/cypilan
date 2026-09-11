@@ -101,7 +101,11 @@
     "verify_pending_refresh_btn": "I Verified My Email, Refresh the Page",
     "verify_pending_spam_notice": "If you do not see the email in your inbox, please also check your Spam folder.",
     "verify_pending_title": "Check Your Email Address",
-    "age_confirm": "I am over {age} years old."
+    "age_confirm": "I am over {age} years old.",
+    "google_consent_title": "One last step",
+    "google_consent_intro": "You are signing in with {email} for the first time. Before we open your account, please confirm the following.",
+    "google_consent_submit": "Create my account",
+    "accept_terms": "I have read and accept the {terms} and the {privacy}."
   },
   "badges": {
     "verified_seller": "Verified Seller",
@@ -644,7 +648,8 @@
     "warning_revoked": "The warning has been lifted.",
     "weak_password": "Your password must be at least 8 characters and include one capital letter and one digit.",
     "terms_required": "You need to accept the terms of use and the privacy policy to continue.",
-    "age_required": "You need to confirm your age to register."
+    "age_required": "You need to confirm your age to register.",
+    "google_signup_expired": "The Google sign-up step expired. Please try again with Google."
   },
   "footer": {
     "about": "About Us",

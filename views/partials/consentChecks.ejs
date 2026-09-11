@@ -1,0 +1,24 @@
+<%# Kayit formu ve Google onay adimi ayni iki kutuyu buradan basiyor: iki
+    ekran hicbir zaman farkli bir sey soylememeli.
+
+    Yas ayri bir kutu - kullanim kosullariyla tek kutuda sorulsaydi, kabul
+    edilen iki ayri sey tek kayda duserdi ve hangisinin onaylandigi belli
+    olmazdi. Kosul cumlesi onceden sablona Turkce sabit yazilmisti
+    ("...'ni okudum, kabul ediyorum."); diger dillerdeki kullanici da onu
+    Turkce goruyordu. Artik tamami dil dosyasindan geliyor. %>
+<% const linkClass = 'text-primary fw-semibold text-decoration-underline'; %>
+<% const termsLink = '<a href="/kullanim-kosullari" target="_blank" rel="noopener" class="' + linkClass + '" onclick="event.stopPropagation();">' + t('footer.terms') + '</a>'; %>
+<% const privacyLink = '<a href="/gizlilik-politikasi" target="_blank" rel="noopener" class="' + linkClass + '" onclick="event.stopPropagation();">' + t('footer.privacy') + '</a>'; %>
+<div class="mb-3 form-check">
+    <input type="checkbox" class="form-check-input shadow-none cursor-pointer" id="ageConfirm" name="ageConfirm" required>
+    <label class="form-check-label small text-muted" for="ageConfirm">
+        <%= t('auth.age_confirm', { age: minimumAge }) %>
+    </label>
+</div>
+
+<div class="mb-4 form-check">
+    <input type="checkbox" class="form-check-input shadow-none cursor-pointer" id="terms" name="terms" required>
+    <label class="form-check-label small text-muted" for="terms">
+        <%- t('auth.accept_terms', { terms: termsLink, privacy: privacyLink }) %>
+    </label>
+</div>

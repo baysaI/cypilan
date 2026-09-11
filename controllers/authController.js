@@ -471,11 +471,93 @@ const logout = (req, res) => {
     });
 };
 
+// --- Google ile ilk kayit ----------------------------------------------------
+//
+// Kayit formu yas ve kullanim kosullari onayi istiyor; Google yolu ikisini de
+// atliyor ve hesabi aninda aciyordu. Artik Google'dan donen yeni kisinin
+// profili kisa bir sure oturumda bekliyor ve hesap yalnizca bu adimda, kutular
+// isaretlenince aciliyor. Kontrol, onay kaydi ve oturum baslatma kayit
+// formuyla birebir ayni.
+const googleSignup = require('../utils/googleSignup');
+
+const pendingExpired = (req, res) => {
+    if (req.session) delete req.session.pendingGoogleSignup;
+    req.flash('error', 'flash.google_signup_expired');
+    return res.redirect('/auth/login');
+};
+
+const showGoogleConsent = (req, res) => {
+    const pending = googleSignup.readPending(req.session);
+    if (!pending) return pendingExpired(req, res);
+
+    const title = res.locals.t('auth.google_consent_title');
+    res.locals.meta.title = title;
+    res.render('auth/google-consent', { title, pending });
+};
+
+const completeGoogleSignup = async (req, res) => {
+    const pending = googleSignup.readPending(req.session);
+    if (!pending) return pendingExpired(req, res);
+
+    const acceptedTerms = req.body.terms === 'on' || req.body.terms === 'true';
+    const confirmedAge = req.body.ageConfirm === 'on' || req.body.ageConfirm === 'true';
+
+    if (!acceptedTerms) {
+        req.flash('error', 'flash.terms_required');
+        return res.redirect(303, '/auth/google/onay');
+    }
+    if (!confirmedAge) {
+        req.flash('error', 'flash.age_required');
+        return res.redirect(303, '/auth/google/onay');
+    }
+
+    try {
+        const Setting = require('../models/Setting');
+        if (Setting.getBool(Setting.KEYS.MAINTENANCE_ENABLED, false)) {
+            delete req.session.pendingGoogleSignup;
+            req.flash('error', 'flash.maintenance_no_user_login');
+            return res.redirect('/auth/login');
+        }
+
+        // Arada ayni e-postayla hesap acilmis olabilir; o durumda ikinci bir
+        // hesap acilmiyor, mevcut hesaba giris yapiliyor - Google dogrulamasi
+        // o adresin sahibi oldugunu zaten gosterdi.
+        let user = await User.findByEmail(pending.email);
+        if (!user) {
+            const password_hash = await bcrypt.hash(crypto.randomBytes(24).toString('hex'), BCRYPT_ROUNDS);
+            const userId = await User.create({
+                email: pending.email,
+                password_hash,
+                full_name: pending.name,
+                phone: '',
+                role: 'user',
+                has_password: 0
+            });
+            await UserConsent.record(userId, ['terms', 'privacy', 'age'], consentConfig.POLICY_VERSION);
+            user = await User.findById(userId);
+        }
+
+        if (!user.is_verified) {
+            await User.verifyEmail(user.id);
+            user.is_verified = 1;
+        }
+
+        delete req.session.pendingGoogleSignup;
+        return startAuthenticatedSession(req, user, '/', 'flash.google_login_success', res);
+    } catch (error) {
+        console.error('Google signup completion error:', error);
+        req.flash('error', 'flash.google_login_failed');
+        return res.redirect('/auth/login');
+    }
+};
+
 module.exports = {
     showLogin,
     login,
     showRegister,
     register,
+    showGoogleConsent,
+    completeGoogleSignup,
     showForgotPassword,
     forgotPassword,
     showResetPassword,

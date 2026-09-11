@@ -101,7 +101,11 @@
     "verify_pending_refresh_btn": "E-postamı Doğruladım, Sayfayı Yenile",
     "verify_pending_spam_notice": "E-postayı gelen kutunuzda göremiyorsanız lütfen Spam (Gereksiz) klasörünüzü de kontrol edin.",
     "verify_pending_title": "E-posta Adresinizi Kontrol Edin",
-    "age_confirm": "{age} yaşından büyüğüm."
+    "age_confirm": "{age} yaşından büyüğüm.",
+    "google_consent_title": "Son bir adım",
+    "google_consent_intro": "{email} adresiyle ilk kez giriş yapıyorsunuz. Hesabınızı açmadan önce aşağıdakileri onaylamanız gerekiyor.",
+    "google_consent_submit": "Hesabımı aç",
+    "accept_terms": "{terms} ve {privacy} metinlerini okudum, kabul ediyorum."
   },
   "badges": {
     "verified_seller": "Onaylı Satıcı",
@@ -644,7 +648,8 @@
     "warning_revoked": "Uyarı kaldırıldı.",
     "weak_password": "Şifre en az 8 karakter olmalı, 1 büyük harf ve 1 rakam içermelidir.",
     "terms_required": "Devam etmek için kullanım koşullarını ve gizlilik politikasını kabul etmeniz gerekiyor.",
-    "age_required": "Kayıt olabilmek için yaş onayını işaretlemeniz gerekiyor."
+    "age_required": "Kayıt olabilmek için yaş onayını işaretlemeniz gerekiyor.",
+    "google_signup_expired": "Google ile kayıt adımının süresi doldu. Lütfen Google ile yeniden deneyin."
   },
   "footer": {
     "about": "Hakkımızda",

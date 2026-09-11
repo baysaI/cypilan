@@ -307,4 +307,95 @@ t.run('Gizlilik: onay, saklama süresi ve veri taşınabilirliği', async (db) =
   const styled = [...styleBlock.matchAll(/^\s*([a-z_]+):\s*\[/gm)].map((m) => m[1]);
   const unstyled = Feedback.TYPES.filter((type) => !styled.includes(type));
   t.assertEqual(unstyled.length, 0, 'Yönetici ekranı her geri bildirim türünü tanıyor' + (unstyled.length ? ' (eksik: ' + unstyled.join(', ') + ')' : ''));
+
+  // Kendi kapsaminda: yukaridaki disa aktarma testinin res adiyla cakismasin.
+  {
+  // --- Google ile kayit da yas ve kosul onayindan geciyor
+  //
+  // Kayit formu iki onayi da istiyordu; Google yolu ikisini de atliyor ve
+  // hesabi aninda aciyordu, onay kaydi da olusmuyordu. Artik Google'dan donen
+  // yeni kisinin hesabi yalnizca onay adiminda, kutular isaretlenince aciliyor.
+  const googleSignup = require(t.rootDir + '/utils/googleSignup');
+  const authController = require(t.rootDir + '/controllers/authController');
+  const User = require(t.rootDir + '/models/User');
+
+  const existingId = t.makeUser(db, 'var@test.local', 'Var Olan');
+  const known = await googleSignup.resolve({ emails: [{ value: 'VAR@test.local', verified: true }], displayName: 'Var' });
+  t.assert(known.user && known.user.id === existingId, 'Kayıtlı e-posta Google ile doğrudan giriş yapıyor');
+
+  const fresh = await googleSignup.resolve({ emails: [{ value: 'yeni@test.local', verified: true }], displayName: 'Yeni Kişi' });
+  t.assert(fresh.pending && fresh.pending.email === 'yeni@test.local', 'Yeni e-posta onay adımına gidiyor');
+  t.assert(!(await User.findByEmail('yeni@test.local')), 'Google dönüşünde hesap henüz açılmıyor');
+
+  t.assertEqual((await googleSignup.resolve({ emails: [{ value: 'x@test.local', verified: false }] })).error,
+    'flash.google_email_unverified', 'Doğrulanmamış Google adresi reddediliyor');
+  t.assertEqual((await googleSignup.resolve({ emails: [] })).error, 'flash.google_email_missing', 'E-postasız profil reddediliyor');
+
+  const stale = { pendingGoogleSignup: { email: 'yeni@test.local', name: 'Yeni', at: Date.now() - googleSignup.PENDING_TTL_MS - 1 } };
+  t.assertEqual(googleSignup.readPending(stale), null, 'Süresi geçmiş bekleyen kayıt kullanılmıyor');
+
+  const googleReq = (body, at = Date.now()) => {
+    const flashes = [];
+    return {
+      body,
+      flashes,
+      flash: (type, message) => flashes.push(type + ':' + message),
+      session: {
+        pendingGoogleSignup: { email: 'yeni@test.local', name: 'Yeni Kişi', at },
+        regenerate(callback) { callback(); },
+        save(callback) { if (callback) callback(); }
+      }
+    };
+  };
+  const googleRes = () => {
+    const res = { locals: { t: (key) => key, meta: {} }, target: null };
+    res.redirect = (a, b) => { res.target = b || a; };
+    return res;
+  };
+
+  let req = googleReq({});
+  let res = googleRes();
+  await authController.completeGoogleSignup(req, res);
+  t.assert(req.flashes.includes('error:flash.terms_required') && res.target === '/auth/google/onay',
+    'Kutular işaretlenmeden hesap açılmıyor');
+
+  req = googleReq({ terms: 'on' });
+  res = googleRes();
+  await authController.completeGoogleSignup(req, res);
+  t.assert(req.flashes.includes('error:flash.age_required'), 'Yaş onayı olmadan hesap açılmıyor');
+  t.assert(!(await User.findByEmail('yeni@test.local')), 'Eksik onayda hesap hâlâ yok');
+
+  req = googleReq({ terms: 'on', ageConfirm: 'on' }, Date.now() - googleSignup.PENDING_TTL_MS - 1);
+  res = googleRes();
+  await authController.completeGoogleSignup(req, res);
+  t.assert(req.flashes.includes('error:flash.google_signup_expired') && res.target === '/auth/login',
+    'Süresi geçmiş adımda hesap açılmıyor');
+
+  req = googleReq({ terms: 'on', ageConfirm: 'on' });
+  res = googleRes();
+  await authController.completeGoogleSignup(req, res);
+  const created = await User.findByEmail('yeni@test.local');
+  t.assert(Boolean(created), 'İki onayla hesap açılıyor');
+  t.assertEqual(created.full_name, 'Yeni Kişi', 'Google\'daki ad hesaba geçiyor');
+  const googleConsents = await UserConsent.forUser(created.id);
+  t.assertEqual(googleConsents.map((c) => c.kind).sort().join(','), 'age,privacy,terms', 'Google ile açılan hesabın üç onayı kayıtta');
+  t.assert(googleConsents.every((c) => c.version === consentConfig.POLICY_VERSION), 'Onaylar güncel metin sürümüyle kayıtlı');
+  t.assertEqual(req.session.pendingGoogleSignup, undefined, 'Bekleyen kayıt temizlendi');
+  t.assertEqual(res.target, '/', 'Oturum açılıp ana sayfaya gidiliyor');
+
+  // --- Iki ekran ayni kutulari basiyor
+  const registerSrc = fs.readFileSync(path.join(t.rootDir, 'views', 'auth', 'register.ejs'), 'utf8');
+  t.assert(registerSrc.includes("include('../partials/consentChecks')"), 'Kayıt formu ortak onay parçasını kullanıyor');
+  t.assert(!registerSrc.includes('okudum, kabul ediyorum'), 'Kayıt formunda sabit Türkçe onay cümlesi kalmadı');
+
+  for (const lang of ['tr', 'en', 'el', 'ru', 'fa']) {
+    const tl = (key, params) => t.translate(key, lang, params);
+    const page = await t.render('auth/google-consent.ejs', { t: tl, lang, pending: { email: 'a<b@test.local' } });
+    t.assert(page.includes('name="terms"') && page.includes('name="ageConfirm"'), lang + ': Google onay sayfasında iki kutu');
+    t.assert(page.includes('action="/auth/google/onay"'), lang + ': form onay adresine gidiyor');
+    t.assert(page.includes('a&lt;b@test.local') && !page.includes('a<b@test.local'), lang + ': e-posta kaçırılarak basılıyor');
+    t.assert(page.includes('href="/kullanim-kosullari"') && page.includes('href="/gizlilik-politikasi"'), lang + ': iki metnin bağlantısı var');
+    t.assert(!/\{(terms|privacy|email|age)\}/.test(page) && !page.includes('auth.accept_terms'), lang + ': yer tutucu ya da ham anahtar kalmadı');
+  }
+  }
 });
