@@ -433,7 +433,8 @@
     "type_bug": "Hata",
     "type_label": "Konu",
     "type_other": "Diğer",
-    "type_suggestion": "Öneri"
+    "type_suggestion": "Öneri",
+    "type_privacy": "Kişisel veri talebi"
   },
   "flash": {
     "account_deleted_success": "Hesabınız ve tüm verileriniz başarıyla silindi. Sizi tekrar aramızda görmeyi umarız.",
@@ -663,7 +664,8 @@
     "soon": "Çok Yakında",
     "support": "Destek",
     "terms": "Kullanım Koşulları",
-    "cookie_settings": "Çerez tercihleri"
+    "cookie_settings": "Çerez tercihleri",
+    "contact_form": "Bize site üzerinden yazın"
   },
   "home": {
     "active_listings": "Aktif İlan",
@@ -982,7 +984,7 @@
       "a2": "İlan vermek çok kolaydır! Ücretsiz bir hesap oluşturduktan veya giriş yaptıktan sonra sağ üst köşede yer alan \"İlan Ver\" butonuna tıklayarak kategorinizi seçebilir, ilan başlığı, fotoğraflar ve fiyat bilgisi ekleyerek dakikalar içinde ilanınızı yayına alabilirsiniz.",
       "a3": "Güvenliğiniz için ödemelerinizi ürünü görüp test ettikten sonra yüz yüze yapmanızı tavsiye ederiz. Tanımadığınız kişilere kesinlikle önden kapora veya havale göndermeyiniz. Daha detaylı bilgi için Güvenlik İpuçları sayfamızı inceleyebilirsiniz.",
       "a4": "Emlak ofisleri, oto galeriler ve ticari işletmeler için özel olarak sunulan Kurumsal Üyelik paketlerimizle sınırsız ilan verme, firma logosu ile kurumsal mağaza sayfası açma ve öncelikli destek hattından yararlanma gibi avantajlara sahip olursunuz.",
-      "a5": "Sorularınız, önerileriniz veya şikayetleriniz için info@cypilan.com adresinden veya +90 555 000 00 00 destek hattımızdan bize haftanın 7 günü ulaşabilirsiniz.",
+      "a5": "Sorularınız, önerileriniz veya şikâyetleriniz için sayfanın altındaki \"Bize site üzerinden yazın\" bağlantısını kullanabilirsiniz. Giriş yapmanız gerekmez ve her mesaj okunur; size geri dönebilmemiz için e-posta adresinizi eklemeyi unutmayın.",
       "a6": "Bir üyeyi yalnızca <strong>onunla daha önce mesajlaştıysan</strong> puanlayabilirsin; bu kural sahte yorumları önlemek için var. Her üyeye bir puan verebilirsin, dilediğin zaman güncelleyebilir veya silebilirsin. Puanlar 1 ile 5 yıldız arasındadır ve satıcı profilinde ortalama olarak görünür.",
       "a7": "Hayır. Bazı özellikler geliştirme aşamasında ve tanıtımlarda \"Çok Yakında\" olarak belirtiliyor. Hangi özelliğin şu an aktif, hangisinin yolda olduğunu <a href=\"/yakinda\">Çok Yakında sayfasından</a> güncel olarak görebilirsin.",
       "q1": "CYPILAN.COM'da ilan vermek ücretsiz mi?",
@@ -1092,7 +1094,7 @@
       "updated": "Son güncelleme: 11 Eylül 2026",
       "intro": "Bu metin, CYPILAN.COM'u kullanırken hangi kişisel verilerinizin toplandığını, ne için kullanıldığını, kimlere ulaştığını, ne kadar saklandığını ve bu veriler üzerindeki haklarınızı anlatır. Her madde sitenin gerçekte ne yaptığına göre yazılmıştır.",
       "controller_title": "Veri sorumlusu",
-      "controller_body": "<p>Bu platform CYPILAN.COM adıyla Lefkoşa, Kuzey Kıbrıs'tan işletilmektedir. Kişisel verilerinizle ilgili her soru ve talep için <a href=\"mailto:info@cypilan.com\">info@cypilan.com</a> adresine yazabilirsiniz.</p>",
+      "controller_body": "<p>Bu platform CYPILAN.COM adıyla Lefkoşa, Kuzey Kıbrıs'tan işletilmektedir. Kişisel verilerinizle ilgili her soru ve talep için sayfanın altındaki \"Bize site üzerinden yazın\" bağlantısını kullanın ve konu olarak \"Kişisel veri talebi\"ni seçin. Size geri dönebilmemiz için formdaki e-posta alanını doldurun.</p>",
       "data_title": "Hangi verileri topluyoruz",
       "data_body": "<p><b>Hesap açtığınızda:</b> e-posta adresiniz, ad soyadınız, şifreniz ve isterseniz telefon numaranız. Şifreniz geri döndürülemez biçimde şifrelenerek saklanır; düz metin hâlini biz de göremeyiz. Kurumsal hesaplarda ayrıca firma adı, firma türü ve vergi numarası.</p><p><b>Profilinizde:</b> profil fotoğrafı, tanıtım yazısı, dil ve para birimi tercihiniz, telefonunuzun ve soyadınızın görünürlük tercihi, son giriş zamanınız.</p><p><b>İlan verdiğinizde:</b> başlık, açıklama, fiyat, fotoğraflar, kategori, şehir ve semt. Haritadan bir bölge seçerseniz konum yaklaşık olarak saklanır: koordinat, kaydedilmeden önce yaklaşık beş yüz metrelik bir ızgaraya oturtulur. Tam adres hiçbir zaman kaydedilmez.</p><p><b>Siteyi kullanırken:</b> diğer kullanıcılarla yazışmalarınız, favorileriniz, fiyat alarmlarınız, teklifleriniz ve bildirimleriniz.</p><p><b>Ziyaret istatistiği:</b> yalnızca çerez onayı verirseniz, hangi sayfaların görüntülendiği ve oturum kimliği kaydedilir. IP adresiniz ham hâlde saklanmaz; gizli bir anahtarla geri döndürülemez bir özete çevrilir. Onay vermezseniz bu kayıt hiç oluşturulmaz.</p><p><b>Google ile giriş yaparsanız:</b> Google'ın bize ilettiği e-posta adresiniz ve adınız. Google şifreniz bize geçmez.</p>",
       "purposes_title": "Verilerinizi neden işliyoruz",
@@ -1105,7 +1107,7 @@
       "retention_body": "<ul><li><b>Hesap bilgileriniz:</b> Hesabınız açık kaldığı sürece.</li><li><b>İlanlarınız:</b> Yayın süresi dolduğunda ilan siteden kalkar; kaydı hesabınızda kalır ve dilediğiniz zaman silebilirsiniz.</li><li><b>Yazışmalarınız:</b> Hesabınız açık kaldığı sürece. Hesabınızı silerseniz yazışmalarınız da silinir.</li><li><b>Ziyaret istatistiği:</b> On üç aydan eski kayıtlar her gün otomatik olarak silinir. Hesabınızı silerseniz bu kayıtların hesabınızla bağlantısı kesilir.</li><li><b>Onay kayıtları:</b> Hangi metni ne zaman kabul ettiğinize dair kayıt, hesabınız açık kaldığı sürece tutulur.</li></ul>",
       "messages_title": "Yazışmalar ve dolandırıcılık önlemleri",
       "rights_title": "Haklarınız",
-      "rights_body": "<p>Kişisel verilerinizle ilgili olarak şunları yapabilirsiniz:</p><ul><li><b>Verilerinize erişmek ve kopyasını almak.</b> Profil ayarlarınızdaki \"Verilerimi indir\" düğmesi hesabınızdaki her şeyi tek bir dosya olarak indirir: profiliniz, ilanlarınız, yazışmalarınız, favorileriniz ve onay kayıtlarınız.</li><li><b>Düzeltmek.</b> Profil bilgilerinizi ve ilanlarınızı istediğiniz zaman değiştirebilirsiniz.</li><li><b>Silmek.</b> Profil ayarlarından hesabınızı silebilirsiniz; ilanlarınız, yazışmalarınız ve yüklediğiniz fotoğraflar da silinir.</li><li><b>Onayınızı geri almak.</b> Çerez tercihinizi sayfanın altındaki \"Çerez tercihleri\" bağlantısından istediğiniz zaman değiştirebilirsiniz; ziyaret istatistiği o andan itibaren durur.</li><li><b>İtiraz etmek ve şikâyette bulunmak.</b> Talebinizi <a href=\"mailto:info@cypilan.com\">info@cypilan.com</a> adresine iletebilir, ayrıca KKTC Kişisel Verileri Koruma Kurulu'na (<a href=\"https://kvkk.gov.ct.tr/\" rel=\"noopener\" target=\"_blank\">kvkk.gov.ct.tr</a>) başvurabilirsiniz.</li></ul><p>Bize ilettiğiniz talepleri en geç 30 gün içinde yanıtlarız.</p>",
+      "rights_body": "<p>Kişisel verilerinizle ilgili olarak şunları yapabilirsiniz:</p><ul><li><b>Verilerinize erişmek ve kopyasını almak.</b> Profil ayarlarınızdaki \"Verilerimi indir\" düğmesi hesabınızdaki her şeyi tek bir dosya olarak indirir: profiliniz, ilanlarınız, yazışmalarınız, favorileriniz ve onay kayıtlarınız.</li><li><b>Düzeltmek.</b> Profil bilgilerinizi ve ilanlarınızı istediğiniz zaman değiştirebilirsiniz.</li><li><b>Silmek.</b> Profil ayarlarından hesabınızı silebilirsiniz; ilanlarınız, yazışmalarınız ve yüklediğiniz fotoğraflar da silinir.</li><li><b>Onayınızı geri almak.</b> Çerez tercihinizi sayfanın altındaki \"Çerez tercihleri\" bağlantısından istediğiniz zaman değiştirebilirsiniz; ziyaret istatistiği o andan itibaren durur.</li><li><b>İtiraz etmek ve şikâyette bulunmak.</b> Talebinizi sayfanın altındaki \"Bize site üzerinden yazın\" formundan, konu olarak \"Kişisel veri talebi\"ni seçerek iletebilir, ayrıca KKTC Kişisel Verileri Koruma Kurulu'na (<a href=\"https://kvkk.gov.ct.tr/\" rel=\"noopener\" target=\"_blank\">kvkk.gov.ct.tr</a>) başvurabilirsiniz.</li></ul><p>Bize ilettiğiniz talepleri en geç 30 gün içinde yanıtlarız.</p>",
       "security_title": "Güvenlik",
       "security_body": "<p>Şifreniz geri döndürülemez biçimde şifrelenerek saklanır. Site bağlantısı baştan sona şifrelidir. Yönetim paneline erişim yetkiyle sınırlıdır ve giriş yaptığınızda oturumunuz yenilenir. Bununla birlikte hiçbir sistem mutlak güvenlik vaat edemez; hesabınızı korumak için güçlü ve size özel bir şifre kullanmanızı öneririz.</p>",
       "children_title": "Çocuklar",

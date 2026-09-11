@@ -32,14 +32,11 @@ const seoMiddleware = (req, res, next) => {
                     "url": `${baseUrl}/img/logo.svg`,
                     "caption": "CYPILAN.COM - Kıbrıs İlan Sitesi"
                 },
-                "description": "Kuzey Kıbrıs Türk Cumhuriyeti (KKTC) dijital pazaryeri ve ücretsiz seri ilan platformu.",
-                "contactPoint": {
-                    "@type": "ContactPoint",
-                    "email": "info@cypilan.com",
-                    "contactType": "customer support",
-                    "areaServed": "CY",
-                    "availableLanguage": ["Turkish", "English", "Greek", "Russian", "Persian"]
-                }
+                // Burada info@cypilan.com'u gosteren bir ContactPoint vardi; o
+                // kutu yok. Arama motoruna var olmayan bir iletisim adresi
+                // bildirmektense hic bildirmemek dogru - iletisim site
+                // uzerinden, geri bildirim formuyla yapiliyor.
+                "description": "Kuzey Kıbrıs Türk Cumhuriyeti (KKTC) dijital pazaryeri ve ücretsiz seri ilan platformu."
             },
             {
                 "@type": "WebSite",

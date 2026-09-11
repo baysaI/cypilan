@@ -1,6 +1,9 @@
 const { getDb } = require('../config/database');
 
-const TYPES = ['bug', 'suggestion', 'other'];
+// 'privacy': kisisel veri talepleri. Gizlilik politikasi bu talepler icin bu
+// formu gosteriyor ve "en gec 30 gun icinde yanitlariz" diyor; o sozun
+// tutulabilmesi icin talebin panelde digerlerinden ayirt edilebilmesi gerekiyor.
+const TYPES = ['bug', 'suggestion', 'privacy', 'other'];
 const STATUSES = ['new', 'read', 'resolved'];
 
 const MESSAGE_MIN_LENGTH = 5;

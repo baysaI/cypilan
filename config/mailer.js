@@ -49,7 +49,9 @@ async function sendMail({ to, subject, html, text }) {
 
   const mailOptions = {
     from: DEFAULT_FROM,
-    replyTo: 'info@cypilan.com',
+    // Yanit adresi info@cypilan.com'du ve o kutu yok: e-postaya yanit veren
+    // kullanicinin mesaji hicbir yere gitmiyordu. Ayri bir yanit adresi
+    // olmadiginda yanitlar gonderen adrese gider.
     to,
     subject,
     text: text || html.replace(/<[^>]*>?/gm, '').trim(),

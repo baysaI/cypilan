@@ -4,6 +4,7 @@ const path = require('path');
 const t = require('./helpers');
 const consentConfig = require(t.rootDir + '/config/consent');
 const consentMiddleware = require(t.rootDir + '/middlewares/consent');
+const seoMiddleware = require(t.rootDir + '/middlewares/seo');
 const analyticsMiddleware = require(t.rootDir + '/middlewares/analytics');
 const i18nMiddleware = require(t.rootDir + '/middlewares/i18n');
 const themeMiddleware = require(t.rootDir + '/middlewares/theme');
@@ -260,4 +261,50 @@ t.run('Gizlilik: onay, saklama süresi ve veri taşınabilirliği', async (db) =
 
   const footerSrc = fs.readFileSync(path.join(t.rootDir, 'views', 'partials', 'footer.ejs'), 'utf8');
   t.assert(footerSrc.includes('href="?cerez=ayarla"'), 'Footer\'da çerez tercihleri bağlantısı');
+
+  // --- Var olmayan iletisim kanallari gosterilmemeli
+  //
+  // Her sayfanin altinda bir e-posta (info@cypilan.com) ve tiklanabilir bir
+  // telefon (+90 555 000 00 00) duruyordu. Kutu hic yoktu, numara yer
+  // tutucuydu ve gercek birine gidebilirdi; gizlilik politikasi da veri
+  // taleplerini o kutuya yonlendiriyordu. Calisan kanal geri bildirim formu.
+  //
+  // Kontrol, basilabilecek kisim uzerinde: sablon yorumlari (<%# %>) hicbir
+  // zaman basilmiyor ve eski degerleri aciklamak icin anabiliyor.
+  const renderable = footerSrc.replace(/<%#[\s\S]*?%>/g, '');
+  t.assert(!renderable.includes('info@cypilan'), 'Footer var olmayan e-postayı göstermiyor');
+  t.assert(!/555\s?000|tel:\+90555/.test(renderable), 'Footer sahte telefonu göstermiyor');
+  t.assert(renderable.includes('data-bs-target="#feedbackModal"'), 'Footer iletişim için formu açıyor');
+
+  for (const lang of ['tr', 'en', 'el', 'ru', 'fa']) {
+    const texts = ['pages.faq.a5', 'pages.privacy.controller_body', 'pages.privacy.rights_body']
+      .map((key) => t.translate(key, lang)).join(' ');
+    t.assert(!texts.includes('info@cypilan') && !/555\s?000/.test(texts),
+      lang + ': SSS ve gizlilik metni var olmayan kanala yönlendirmiyor');
+    t.assert(texts.includes(t.translate('footer.contact_form', lang)),
+      lang + ': metin, footer\'daki bağlantının gerçek adını kullanıyor');
+  }
+
+  // Arama motoruna da var olmayan bir adres bildirilmemeli.
+  const seoRes = { locals: {} };
+  seoMiddleware({ originalUrl: '/' }, seoRes, () => {});
+  t.assert(!JSON.stringify(seoRes.locals.schemaOrg).includes('info@cypilan'), 'Yapısal veri var olmayan e-postayı bildirmiyor');
+
+  // --- Veri talepleri formda ayri bir tur
+  //
+  // Politika "30 gun icinde yanitlariz" diyor; talebin panelde digerlerinden
+  // ayirt edilebilmesi o sozun tutulabilmesinin sarti.
+  const Feedback = require(t.rootDir + '/models/Feedback');
+  t.assert(Feedback.TYPES.includes('privacy'), 'Geri bildirim türlerinde kişisel veri talebi var');
+
+  const modal = await t.render('partials/feedbackModal.ejs', {});
+  t.assert(modal.includes('value="privacy"'), 'Formda kişisel veri talebi seçeneği var');
+
+  // Yonetici ekrani turleri sabit bir haritadan etiketliyor: modele eklenen
+  // bir tur haritada yoksa panel o turdeki ilk kayitta cokerdi.
+  const adminFeedback = fs.readFileSync(path.join(t.rootDir, 'views', 'admin', 'feedback.ejs'), 'utf8');
+  const styleBlock = (adminFeedback.match(/const TYPE_STYLES = \{([\s\S]*?)\};/) || [])[1] || '';
+  const styled = [...styleBlock.matchAll(/^\s*([a-z_]+):\s*\[/gm)].map((m) => m[1]);
+  const unstyled = Feedback.TYPES.filter((type) => !styled.includes(type));
+  t.assertEqual(unstyled.length, 0, 'Yönetici ekranı her geri bildirim türünü tanıyor' + (unstyled.length ? ' (eksik: ' + unstyled.join(', ') + ')' : ''));
 });

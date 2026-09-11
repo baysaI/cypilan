@@ -7,6 +7,9 @@ const c = (typeof counts !== 'undefined' && counts) ? counts : { total: 0, new: 
 const TYPE_STYLES = {
     bug: ['danger', 'fa-bug', 'Hata'],
     suggestion: ['warning', 'fa-lightbulb', 'Öneri'],
+    // Gizlilik politikasi veri taleplerini bu forma yonlendiriyor ve 30 gun
+    // icinde yanit sozu veriyor; panelde ayri gorunmeleri o yuzden.
+    privacy: ['primary', 'fa-user-shield', 'Kişisel veri talebi'],
     other: ['secondary', 'fa-comment-dots', 'Diğer']
 };
 const STATUS_STYLES = {

@@ -433,7 +433,8 @@
     "type_bug": "Bug",
     "type_label": "Topic",
     "type_other": "Other",
-    "type_suggestion": "Suggestion"
+    "type_suggestion": "Suggestion",
+    "type_privacy": "Personal data request"
   },
   "flash": {
     "account_deleted_success": "Your account and all your data have been successfully deleted. We hope to see you again with us.",
@@ -663,7 +664,8 @@
     "soon": "Coming Soon",
     "support": "Support",
     "terms": "Terms of Service",
-    "cookie_settings": "Cookie settings"
+    "cookie_settings": "Cookie settings",
+    "contact_form": "Write to us through the site"
   },
   "home": {
     "active_listings": "Active Ads",
@@ -982,7 +984,7 @@
       "a2": "Posting an ad is very easy! After creating a free account or logging in, you can choose your category by clicking the \"Post an Ad\" button in the upper right corner, add the ad title, photos and price information and publish your ad within minutes.",
       "a3": "For your safety, we recommend that you make your payments face to face after seeing and testing the product. Never send an advance deposit or money order to people you do not know. For more detailed information, you can review our Security Tips page.",
       "a4": "With our Corporate Membership packages offered specifically for real estate offices, car dealerships and commercial businesses, you will have advantages such as posting unlimited advertisements, opening a corporate store page with the company logo and benefiting from the priority support line.",
-      "a5": "For your questions, suggestions or complaints, you can reach us 7 days a week at info@cypilan.com or our support line +90 555 000 00 00.",
+      "a5": "For questions, suggestions or complaints, use the \"Write to us through the site\" link at the bottom of the page. You do not need to sign in and every message is read; add your email address so we can get back to you.",
       "a6": "You can only rate a member <strong>you have previously messaged</strong>; this rule exists to prevent fake reviews. You can leave one rating per member and update or delete it at any time. Ratings run from 1 to 5 stars and appear as an average on the seller profile.",
       "a7": "No. Some features are still in development and are labelled \"Coming Soon\" in our promotions. You can see which features are live and which are on the way on the <a href=\"/yakinda\">Coming Soon page</a>.",
       "q1": "Is it free to post an ad on CYPILAN.COM?",
@@ -1092,7 +1094,7 @@
       "updated": "Last updated: 11 September 2026",
       "intro": "This page explains which personal data CYPILAN.COM collects when you use it, what it is used for, who it reaches, how long it is kept and the rights you have over it. Every section describes what the site actually does.",
       "controller_title": "Who is responsible for your data",
-      "controller_body": "<p>This platform is operated as CYPILAN.COM from Nicosia, Northern Cyprus. For any question or request about your personal data, write to <a href=\"mailto:info@cypilan.com\">info@cypilan.com</a>.</p>",
+      "controller_body": "<p>This platform is operated as CYPILAN.COM from Nicosia, Northern Cyprus. For any question or request about your personal data, use the \"Write to us through the site\" link at the bottom of the page and choose \"Personal data request\" as the topic. Fill in the email field on the form so we can get back to you.</p>",
       "data_title": "What data we collect",
       "data_body": "<p><b>When you open an account:</b> your email address, your full name, your password and, if you choose, your phone number. Your password is stored in an irreversibly encrypted form; not even we can read it. Business accounts also provide a company name, business type and tax number.</p><p><b>On your profile:</b> profile photo, bio, language and currency preference, whether your phone number and surname are shown, and the time you last signed in.</p><p><b>When you post a listing:</b> title, description, price, photos, category, city and district. If you pick an area on the map, the location is stored approximately: before it is saved, the point is snapped to a grid of roughly five hundred metres. An exact address is never recorded.</p><p><b>While using the site:</b> your conversations with other users, favourites, price alerts, offers and notifications.</p><p><b>Visit statistics:</b> only if you accept cookies, the pages viewed and a session identifier are recorded. Your IP address is not stored as is; it is turned into an irreversible digest with a secret key. If you do not consent, no such record is created.</p><p><b>If you sign in with Google:</b> the email address and name Google passes to us. Your Google password never reaches us.</p>",
       "purposes_title": "Why we process your data",
@@ -1105,7 +1107,7 @@
       "retention_body": "<ul><li><b>Your account details:</b> for as long as your account stays open.</li><li><b>Your listings:</b> when a listing expires it is removed from the site; its record stays in your account and you can delete it at any time.</li><li><b>Your conversations:</b> for as long as your account stays open. If you delete your account, your conversations are deleted too.</li><li><b>Visit statistics:</b> records older than thirteen months are deleted automatically every day. If you delete your account, these records are no longer linked to it.</li><li><b>Consent records:</b> the record of which text you accepted and when is kept for as long as your account stays open.</li></ul>",
       "messages_title": "Messages and fraud prevention",
       "rights_title": "Your rights",
-      "rights_body": "<p>With regard to your personal data, you can:</p><ul><li><b>Access it and get a copy.</b> The \"Download my data\" button in your profile settings downloads everything in your account as a single file: your profile, listings, conversations, favourites and consent records.</li><li><b>Correct it.</b> You can change your profile details and listings at any time.</li><li><b>Delete it.</b> You can delete your account from your profile settings; your listings, conversations and uploaded photos are deleted with it.</li><li><b>Withdraw your consent.</b> You can change your cookie choice at any time from the \"Cookie settings\" link at the bottom of the page; visit statistics stop from that moment.</li><li><b>Object and complain.</b> You can send your request to <a href=\"mailto:info@cypilan.com\">info@cypilan.com</a>, and you can also apply to the Personal Data Protection Board (<a href=\"https://kvkk.gov.ct.tr/\" rel=\"noopener\" target=\"_blank\">kvkk.gov.ct.tr</a>).</li></ul><p>We respond to requests within 30 days at the latest.</p>",
+      "rights_body": "<p>With regard to your personal data, you can:</p><ul><li><b>Access it and get a copy.</b> The \"Download my data\" button in your profile settings downloads everything in your account as a single file: your profile, listings, conversations, favourites and consent records.</li><li><b>Correct it.</b> You can change your profile details and listings at any time.</li><li><b>Delete it.</b> You can delete your account from your profile settings; your listings, conversations and uploaded photos are deleted with it.</li><li><b>Withdraw your consent.</b> You can change your cookie choice at any time from the \"Cookie settings\" link at the bottom of the page; visit statistics stop from that moment.</li><li><b>Object and complain.</b> You can send your request through the \"Write to us through the site\" form at the bottom of the page, choosing \"Personal data request\" as the topic, and you can also apply to the Personal Data Protection Board (<a href=\"https://kvkk.gov.ct.tr/\" rel=\"noopener\" target=\"_blank\">kvkk.gov.ct.tr</a>).</li></ul><p>We respond to requests within 30 days at the latest.</p>",
       "security_title": "Security",
       "security_body": "<p>Your password is stored in an irreversibly encrypted form. The connection to the site is encrypted end to end. Access to the admin panel is restricted to authorised staff, and your session is renewed when you sign in. Even so, no system can promise absolute security; we recommend a strong password that you use only here.</p>",
       "children_title": "Children",

@@ -69,13 +69,17 @@
                         <i class="fa-solid fa-location-dot mt-1 me-2 text-accent"></i>
                         <span><%= t('footer.address_text') %></span>
                     </li>
-                    <li class="mb-3 d-flex align-items-center text-white-50">
-                        <i class="fa-solid fa-phone me-2 text-accent"></i>
-                        <a href="tel:+905550000000" class="text-white-50 text-decoration-none hover-text-white">+90 555 000 00 00</a>
-                    </li>
-                    <li class="mb-3 d-flex align-items-center text-white-50">
-                        <i class="fa-solid fa-envelope me-2 text-accent"></i>
-                        <a href="mailto:info@cypilan.com" class="text-white-50 text-decoration-none hover-text-white">info@cypilan.com</a>
+                    <%# Burada bir telefon (+90 555 000 00 00) ve bir e-posta
+                        (info@cypilan.com) duruyordu. Numara yer tutucuydu, tiklanabilir
+                        bir tel: baglantisiydi ve gercek birine gidebilirdi; e-posta
+                        kutusu hic yoktu. Sitede calisan iletisim yolu geri bildirim
+                        formu: giris gerektirmiyor ve yoneticiler panelde goruyor. %>
+                    <li class="mb-3 d-flex align-items-start text-white-50">
+                        <i class="fa-solid fa-comment-dots mt-1 me-2 text-accent"></i>
+                        <button type="button" class="btn btn-link p-0 text-white-50 text-decoration-none hover-text-white border-0 align-baseline small text-start"
+                                data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                            <%= t('footer.contact_form') %>
+                        </button>
                     </li>
                 </ul>
             </div>
