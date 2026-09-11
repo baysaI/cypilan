@@ -203,4 +203,61 @@ t.run('Gizlilik: onay, saklama süresi ve veri taşınabilirliği', async (db) =
   const csp = serverSrc.slice(serverSrc.indexOf('contentSecurityPolicy'), serverSrc.indexOf('upgradeInsecureRequests'));
   t.assert(!csp.includes('fonts.googleapis.com') && !csp.includes('fonts.gstatic.com'),
     'Güvenlik politikasında Google Fonts adresleri kalmadı');
+
+  // --- Yasal metinler kodla ayni seyi soylemeli
+  //
+  // Gizlilik ve cerez politikalari sitenin gercekte yaptigina gore yazildi.
+  // Kod degisip metin degismezse metin yalan soylemeye baslar - ve bunu kimse
+  // fark etmez, cunku sayfa hala duzgun gorunur. Asagidakiler metnin
+  // dayandigi olgulari kodun kendisine bagliyor.
+
+  // Sitenin yazdigi her cerez, cerez tablosunda olmali. Liste kaynaktan
+  // cikariliyor: yeni bir res.cookie eklenip tabloya eklenmezse test duser.
+  const cookieSources = ['middlewares/i18n.js', 'middlewares/theme.js', 'routes/index.js']
+    .map((f) => fs.readFileSync(path.join(t.rootDir, f), 'utf8')).join('\n');
+  const writtenCookies = new Set([...cookieSources.matchAll(/res\.cookie\('([a-z_]+)'/g)].map((m) => m[1]));
+  writtenCookies.add(consentConfig.COOKIE_NAME);
+  const sessionName = (serverSrc.match(/name:\s*'([^']+)'/) || [])[1];
+  t.assert(Boolean(sessionName), 'Oturum çerezinin adı kaynaktan okunabiliyor');
+  writtenCookies.add(sessionName);
+
+  // Sureler de: tablo "7 gun", "6 ay", "13 ay" diyor.
+  t.assert(serverSrc.includes('maxAge: 7 * 24 * 60 * 60 * 1000'), 'Oturum çerezi 7 gün — tablo ile aynı');
+  t.assertEqual(Math.round(consentConfig.MAX_AGE_MS / (30 * 24 * 60 * 60 * 1000)), 6, 'Onay çerezi 6 ay — tablo ile aynı');
+  t.assertEqual(Math.round(appConfig.analytics.retentionDays / 30.4), 13, 'Ziyaret kayıtları 13 ay — metin ile aynı');
+
+  for (const lang of ['tr', 'en', 'el', 'ru', 'fa']) {
+    const tl = (key, params) => t.translate(key, lang, params);
+
+    const privacyHtml = await t.render('pages/privacy.ejs', { t: tl, lang });
+    t.assertEqual((privacyHtml.match(/<h2 /g) || []).length, 11, lang + ': gizlilik politikası 11 bölüm');
+    t.assert(!/pages\.(privacy|cookie|terms)\.[a-z]/.test(privacyHtml), lang + ': gizlilikte ham anahtar yok');
+    t.assert(!privacyHtml.includes('{age}') && privacyHtml.includes(String(consentConfig.MINIMUM_AGE)),
+      lang + ': yaş sınırı metne işlendi');
+    t.assert(!privacyHtml.includes('&lt;p&gt;') && !privacyHtml.includes('&lt;li&gt;'), lang + ': bölüm HTML\'i metin olarak kaçmadı');
+
+    const cookieHtml = await t.render('pages/cookie-policy.ejs', { t: tl, lang });
+    const missingRows = [...writtenCookies].filter((name) => !cookieHtml.includes('<code>' + name + '</code>'));
+    t.assertEqual(missingRows.length, 0, lang + ': sitenin yazdığı her çerez tabloda' + (missingRows.length ? ' (eksik: ' + missingRows.join(', ') + ')' : ''));
+    t.assert(cookieHtml.includes('href="?cerez=ayarla"'), lang + ': çerez sayfası tercihi değiştirme yolunu gösteriyor');
+
+    const termsHtml = await t.render('pages/terms.ejs', { t: tl, lang });
+    t.assert(!termsHtml.includes('{age}') && termsHtml.includes(String(consentConfig.MINIMUM_AGE)),
+      lang + ': kullanım koşullarında yaş maddesi');
+  }
+
+  // Onay geri alinabilir olmali: banner karar verilmis olsa bile yeniden
+  // acilabiliyor ve secimden sonra ziyaretci ayni sayfaya parametresiz donuyor.
+  const reqReopen = { query: { cerez: 'ayarla' }, originalUrl: '/listings?category=emlak&cerez=ayarla', cookies: { [consentConfig.COOKIE_NAME]: 'v1:essential' } };
+  const resReopen = fakeRes();
+  consentMiddleware(reqReopen, resReopen, () => {});
+  t.assertEqual(resReopen.locals.consentBannerOpen, true, 'Karar verilmiş olsa da banner yeniden açılabiliyor');
+  t.assertEqual(resReopen.locals.consentReturnTo, '/listings?category=emlak', 'Geri dönüş adresi parametresiz');
+
+  const resPlain = fakeRes();
+  consentMiddleware({ query: {}, originalUrl: '/', cookies: { [consentConfig.COOKIE_NAME]: 'v1:all' } }, resPlain, () => {});
+  t.assertEqual(resPlain.locals.consentBannerOpen, false, 'Karar verilmişse banner kendiliğinden açılmıyor');
+
+  const footerSrc = fs.readFileSync(path.join(t.rootDir, 'views', 'partials', 'footer.ejs'), 'utf8');
+  t.assert(footerSrc.includes('href="?cerez=ayarla"'), 'Footer\'da çerez tercihleri bağlantısı');
 });

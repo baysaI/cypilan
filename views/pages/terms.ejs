@@ -19,6 +19,11 @@
 
             <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.terms.section3_title') %></h5>
             <p><%= t('pages.terms.section3_body') %></p>
+
+            <%# Kayit formundaki yas onayinin dayanagi. Sayi config/consent.js'teki
+                tek degerden geliyor; form ile bu madde ayni sayiyi soyluyor. %>
+            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.terms.section4_title') %></h5>
+            <p><%= t('pages.terms.section4_body', { age: minimumAge }) %></p>
         </div>
     </div>
 </div>

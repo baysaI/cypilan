@@ -662,7 +662,8 @@
     "safety_tips": "Safety Tips",
     "soon": "Coming Soon",
     "support": "Support",
-    "terms": "Terms of Service"
+    "terms": "Terms of Service",
+    "cookie_settings": "Cookie settings"
   },
   "home": {
     "active_listings": "Active Ads",
@@ -929,14 +930,36 @@
       "subtitle": "Put your brand in front of Cyprus's fastest-growing digital marketplace."
     },
     "cookie": {
-      "intro": "As CYPILAN.COM, we use cookies to provide a better user experience to our visitors and to increase platform performance.",
-      "section1_body": "Cookies are small text files that are stored on your device or network server through your browser when you visit a website.",
-      "section1_title": "1. What is a Cookie?",
-      "section2_essential": "Mandatory Cookies: Required for basic site functions such as login, language preference and currency selection.",
-      "section2_performance": "Performance and Analytics Cookies: Help us understand site usage statistics and improve its performance.",
-      "section2_title": "2. Types of Cookies Used",
-      "section3_body": "If you wish, you can change your cookie preferences or block cookies completely in your browser settings. However, if mandatory cookies are blocked, some features of the site may not function fully.",
-      "section3_title": "3. Cookie Management"
+      "intro": "This page explains which cookies CYPILAN.COM stores on your device, what they are for and how you can change your choice.",
+      "what_title": "What a cookie is",
+      "what_body": "<p>Cookies are small text files your browser stores on your device when you visit a site. They let the site remember you — for example that you are signed in, or which language you chose.</p>",
+      "list_title": "The cookies we use",
+      "list_intro": "Below is every cookie the site sets. We do not use advertising or tracking cookies.",
+      "col_name": "Cookie",
+      "col_purpose": "What it does",
+      "col_duration": "Duration",
+      "col_consent": "Consent",
+      "row_session_purpose": "Keeps you signed in and protects your forms against forged requests",
+      "row_session_duration": "7 days",
+      "row_session_consent": "Essential",
+      "row_consent_purpose": "Remembers your cookie choice so you are not asked on every visit",
+      "row_consent_duration": "6 months",
+      "row_consent_consent": "Essential",
+      "row_lang_purpose": "Remembers the language you chose",
+      "row_lang_duration": "1 year",
+      "row_lang_consent": "Set only if you choose a language",
+      "row_theme_purpose": "Remembers your light/dark theme choice",
+      "row_theme_duration": "1 year",
+      "row_theme_consent": "Set only if you switch theme",
+      "row_currency_purpose": "Remembers the currency you chose",
+      "row_currency_duration": "1 year",
+      "row_currency_consent": "Set only if you choose a currency",
+      "analytics_title": "Visit statistics",
+      "analytics_body": "<p>To understand how the site is used, we count which pages are viewed. This count runs only if you allow it. Your IP address is not stored as is; it is turned into an irreversible digest with a secret key. Records older than thirteen months are deleted automatically.</p><p>We use no ad networks, tracking pixels or third-party analytics tools. The count happens on our own server and is not sent anywhere.</p>",
+      "choice_title": "Changing your choice",
+      "choice_body": "<p>You are asked when you first visit the site, and both options are equally easy to pick. You can change your decision at any time with the button below or the \"Cookie settings\" link at the bottom of the page. You can also delete or block all cookies in your browser settings; if you block essential cookies you will not be able to sign in.</p>",
+      "external_title": "External content on pages",
+      "external_body": "<p>Some pages load map tiles and visual components from external servers. During these requests your IP address reaches the server in question, and those servers may have their own cookie practices. Fonts and site styles are served from our own server.</p>"
     },
     "corporate": {
       "active_status_desc": "Your account is active as a corporate member.",
@@ -1066,17 +1089,30 @@
       "unlimited_free": "Completely Free (Unlimited Listings)"
     },
     "privacy": {
-      "intro": "As CYPILAN.COM, we attach great importance to the security and privacy of your personal data. This Privacy Policy explains how your personal data is collected, used and protected when you visit our website and use our services.",
-      "section1_body": "When you register or post an ad, your name, e-mail address, phone number, location information and device login records are collected for service delivery purposes.",
-      "section1_title": "1. Data Collected",
-      "section2_body": "Your personal data is processed for the purpose of publishing advertisements on our platform, ensuring user security, communicating and fulfilling legal obligations.",
-      "section2_title": "2. Purpose of Use of Data",
-      "section3_body": "Your data is not sold or shared with third party individuals or institutions for advertising/marketing purposes. It can only be shared with competent authorities in case of official requests by legal authorities.",
-      "section3_title": "3. Data Security and Sharing",
-      "section4_body": "Messages members send each other through the site are stored on our systems so that conversations can continue and so that both parties can be protected if a dispute arises. Where a report is filed, where fraud is suspected, or where we are legally required to do so, these messages may be reviewed by authorised staff. Any such review is limited to those purposes and to what is necessary; your messages are not used for advertising and are not shared with third parties.",
-      "section4_title": "4. Messaging and Safety",
-      "section5_body": "If you have questions about our privacy policy, you can contact us at info@cypilan.com.",
-      "section5_title": "5. Communication"
+      "updated": "Last updated: 11 September 2026",
+      "intro": "This page explains which personal data CYPILAN.COM collects when you use it, what it is used for, who it reaches, how long it is kept and the rights you have over it. Every section describes what the site actually does.",
+      "controller_title": "Who is responsible for your data",
+      "controller_body": "<p>This platform is operated as CYPILAN.COM from Nicosia, Northern Cyprus. For any question or request about your personal data, write to <a href=\"mailto:info@cypilan.com\">info@cypilan.com</a>.</p>",
+      "data_title": "What data we collect",
+      "data_body": "<p><b>When you open an account:</b> your email address, your full name, your password and, if you choose, your phone number. Your password is stored in an irreversibly encrypted form; not even we can read it. Business accounts also provide a company name, business type and tax number.</p><p><b>On your profile:</b> profile photo, bio, language and currency preference, whether your phone number and surname are shown, and the time you last signed in.</p><p><b>When you post a listing:</b> title, description, price, photos, category, city and district. If you pick an area on the map, the location is stored approximately: before it is saved, the point is snapped to a grid of roughly five hundred metres. An exact address is never recorded.</p><p><b>While using the site:</b> your conversations with other users, favourites, price alerts, offers and notifications.</p><p><b>Visit statistics:</b> only if you accept cookies, the pages viewed and a session identifier are recorded. Your IP address is not stored as is; it is turned into an irreversible digest with a secret key. If you do not consent, no such record is created.</p><p><b>If you sign in with Google:</b> the email address and name Google passes to us. Your Google password never reaches us.</p>",
+      "purposes_title": "Why we process your data",
+      "purposes_body": "<ul><li>To open your account, let you sign in and keep your session secure</li><li>To publish your listings, make them searchable and take them down when they expire</li><li>To let buyers and sellers contact each other</li><li>To prevent fraud, look into complaints and assess rule violations</li><li>To send you notifications and emails about your account</li><li>If you consent, to measure how the site is used</li><li>To meet our legal obligations and respond to lawful requests from the authorities</li></ul>",
+      "sharing_title": "Who your data reaches",
+      "sharing_body": "<p>We do not sell, rent or pass your data to third parties for advertising or marketing. Your data reaches others only in the following cases, and only as far as described:</p><ul><li><b>Other users:</b> everything you publish in a listing — title, description, photos, city, your name and, if you choose, your phone number — is public. You decide on your profile whether your surname and phone number are shown.</li><li><b>Infrastructure:</b> the site runs on a hosting service and sits behind Cloudflare. These services technically see the traffic, and therefore your IP address.</li><li><b>Email:</b> verification and notification emails are delivered through an email sending service.</li><li><b>External content on pages:</b> some pages load visual and software components from external servers, and map tiles come from OpenStreetMap. During these requests your IP address reaches the server in question.</li><li><b>Authorities:</b> in response to a lawful official request, limited to its scope.</li></ul>",
+      "transfer_title": "Transfers outside Northern Cyprus",
+      "transfer_body": "<p>Some of the infrastructure services listed above are located outside Northern Cyprus. Your data may therefore be transferred off the island through these services while it is processed. Such transfers happen only to the extent needed to provide the service.</p>",
+      "retention_title": "How long we keep it",
+      "retention_body": "<ul><li><b>Your account details:</b> for as long as your account stays open.</li><li><b>Your listings:</b> when a listing expires it is removed from the site; its record stays in your account and you can delete it at any time.</li><li><b>Your conversations:</b> for as long as your account stays open. If you delete your account, your conversations are deleted too.</li><li><b>Visit statistics:</b> records older than thirteen months are deleted automatically every day. If you delete your account, these records are no longer linked to it.</li><li><b>Consent records:</b> the record of which text you accepted and when is kept for as long as your account stays open.</li></ul>",
+      "messages_title": "Messages and fraud prevention",
+      "rights_title": "Your rights",
+      "rights_body": "<p>With regard to your personal data, you can:</p><ul><li><b>Access it and get a copy.</b> The \"Download my data\" button in your profile settings downloads everything in your account as a single file: your profile, listings, conversations, favourites and consent records.</li><li><b>Correct it.</b> You can change your profile details and listings at any time.</li><li><b>Delete it.</b> You can delete your account from your profile settings; your listings, conversations and uploaded photos are deleted with it.</li><li><b>Withdraw your consent.</b> You can change your cookie choice at any time from the \"Cookie settings\" link at the bottom of the page; visit statistics stop from that moment.</li><li><b>Object and complain.</b> You can send your request to <a href=\"mailto:info@cypilan.com\">info@cypilan.com</a>, and you can also apply to the Personal Data Protection Board (<a href=\"https://kvkk.gov.ct.tr/\" rel=\"noopener\" target=\"_blank\">kvkk.gov.ct.tr</a>).</li></ul><p>We respond to requests within 30 days at the latest.</p>",
+      "security_title": "Security",
+      "security_body": "<p>Your password is stored in an irreversibly encrypted form. The connection to the site is encrypted end to end. Access to the admin panel is restricted to authorised staff, and your session is renewed when you sign in. Even so, no system can promise absolute security; we recommend a strong password that you use only here.</p>",
+      "children_title": "Children",
+      "children_body": "<p>The platform is not open to anyone under {age}. You are asked to confirm your age when you open an account. An account found to belong to someone under the age limit is closed and its data deleted.</p>",
+      "changes_title": "Changes to this text",
+      "changes_body": "<p>We may update this policy from time to time. When there is a material change we will let you know and, where needed, ask for your consent again. This text takes effect on 11 September 2026.</p>",
+      "messages_body": "<p>Messages members send each other through the site are stored on our systems so that conversations can continue and so that both parties can be protected if a dispute arises. Where a report is filed, where fraud is suspected, or where we are legally required to do so, these messages may be reviewed by authorised staff. Any such review is limited to those purposes and to what is necessary; your messages are not used for advertising and are not shared with third parties.</p>"
     },
     "safety": {
       "badge": "Safe Shopping",
@@ -1210,7 +1246,9 @@
       "section2_body": "Users cannot post false, deceptive, copyright-infringing or illegal advertisements. Postings that do not comply with the rules may be removed without prior notice.",
       "section2_title": "2. User Obligations",
       "section3_body": "CYPILAN.COM is not a direct party in the buying-selling, payment and shipping processes between users and cannot be held responsible for any disputes that may arise.",
-      "section3_title": "3. Limitation of Liability"
+      "section3_title": "3. Limitation of Liability",
+      "section4_title": "4. Age Limit and Account Responsibility",
+      "section4_body": "You must be at least {age} years old to use the platform, and you confirm this when you open an account. You are responsible for what is done with your account and for keeping it secure. Do not share your password with anyone."
     },
     "trust": {
       "intro": "Safety is not just a list of warnings — it is a choice about how the platform works.",
@@ -1465,6 +1503,7 @@
     "title": "Cookies",
     "body": "We use the cookies the site needs to work. For visit statistics we ask separately; if you decline, the site works exactly the same.",
     "accept": "Accept",
-    "essential_only": "Essential only"
+    "essential_only": "Essential only",
+    "current": "Your current choice: {choice}"
   }
 }

@@ -662,7 +662,8 @@
     "safety_tips": "Güvenlik İpuçları",
     "soon": "Çok Yakında",
     "support": "Destek",
-    "terms": "Kullanım Koşulları"
+    "terms": "Kullanım Koşulları",
+    "cookie_settings": "Çerez tercihleri"
   },
   "home": {
     "active_listings": "Aktif İlan",
@@ -929,14 +930,36 @@
       "subtitle": "Kıbrıs'ın her gün büyüyen dijital pazar yerinde markanızı öne çıkarın."
     },
     "cookie": {
-      "intro": "CYPILAN.COM olarak, ziyaretçilerimize daha iyi bir kullanıcı deneyimi sunabilmek ve platform performansını artırabilmek amacıyla çerezler (cookies) kullanmaktayız.",
-      "section1_body": "Çerezler, bir web sitesini ziyaret ettiğinizde tarayıcınız aracılığıyla cihazınıza veya ağ sunucusuna depolanan küçük metin dosyalarıdır.",
-      "section1_title": "1. Çerez (Cookie) Nedir?",
-      "section2_essential": "Zorunlu Çerezler: Oturum açma, dil tercihi ve para birimi seçimi gibi temel site işlevleri için gereklidir.",
-      "section2_performance": "Performans ve Analiz Çerezleri: Sitenin kullanım istatistiklerini anlamamıza ve performansını iyileştirmemize yardımcı olur.",
-      "section2_title": "2. Kullanılan Çerez Türleri",
-      "section3_body": "Dilerseniz tarayıcı ayarlarınızdan çerez tercihlerinizi değiştirebilir veya çerezleri tamamen engelleyebilirsiniz. Ancak zorunlu çerezlerin engellenmesi durumunda sitenin bazı özellikleri tam çalışmayabilir.",
-      "section3_title": "3. Çerez Yönetimi"
+      "intro": "Bu sayfa, CYPILAN.COM'un cihazınıza hangi çerezleri kaydettiğini, ne için kullandığını ve tercihinizi nasıl değiştirebileceğinizi anlatır.",
+      "what_title": "Çerez nedir",
+      "what_body": "<p>Çerezler, bir siteyi ziyaret ettiğinizde tarayıcınızın cihazınıza kaydettiği küçük metin dosyalarıdır. Sitenin sizi hatırlamasını sağlarlar — örneğin giriş yaptığınızı ya da hangi dili seçtiğinizi.</p>",
+      "list_title": "Kullandığımız çerezler",
+      "list_intro": "Sitenin yazdığı çerezlerin tamamı aşağıdadır. Reklam veya izleme çerezi kullanmıyoruz.",
+      "col_name": "Çerez",
+      "col_purpose": "Ne işe yarar",
+      "col_duration": "Süre",
+      "col_consent": "Onay",
+      "row_session_purpose": "Oturumunuzu açık tutar ve formlarınızı sahte isteklere karşı korur",
+      "row_session_duration": "7 gün",
+      "row_session_consent": "Zorunlu",
+      "row_consent_purpose": "Çerez tercihinizi hatırlar, böylece her ziyarette yeniden sorulmaz",
+      "row_consent_duration": "6 ay",
+      "row_consent_consent": "Zorunlu",
+      "row_lang_purpose": "Seçtiğiniz dili hatırlar",
+      "row_lang_duration": "1 yıl",
+      "row_lang_consent": "Yalnızca dil seçerseniz yazılır",
+      "row_theme_purpose": "Açık/koyu tema tercihinizi hatırlar",
+      "row_theme_duration": "1 yıl",
+      "row_theme_consent": "Yalnızca tema değiştirirseniz yazılır",
+      "row_currency_purpose": "Seçtiğiniz para birimini hatırlar",
+      "row_currency_duration": "1 yıl",
+      "row_currency_consent": "Yalnızca para birimi seçerseniz yazılır",
+      "analytics_title": "Ziyaret istatistiği",
+      "analytics_body": "<p>Sitenin nasıl kullanıldığını anlamak için hangi sayfaların görüntülendiğini sayıyoruz. Bu sayım yalnızca izin verirseniz çalışır. IP adresiniz ham hâlde saklanmaz; gizli bir anahtarla geri döndürülemez bir özete çevrilir. On üç aydan eski kayıtlar otomatik olarak silinir.</p><p>Reklam ağı, izleme pikseli veya üçüncü taraf analiz aracı kullanmıyoruz. Sayım kendi sunucumuzda yapılır ve dışarı gönderilmez.</p>",
+      "choice_title": "Tercihinizi değiştirme",
+      "choice_body": "<p>Siteye ilk girdiğinizde size sorulur ve iki seçenek aynı kolaylıkta sunulur. Kararınızı istediğiniz zaman aşağıdaki düğmeden ya da sayfanın altındaki \"Çerez tercihleri\" bağlantısından değiştirebilirsiniz. Tarayıcı ayarlarınızdan tüm çerezleri silebilir veya engelleyebilirsiniz; zorunlu çerezleri engellerseniz giriş yapamazsınız.</p>",
+      "external_title": "Sayfalardaki dış içerikler",
+      "external_body": "<p>Bazı sayfalar harita döşemelerini ve görsel bileşenleri dış sunuculardan yükler. Bu istekler sırasında IP adresiniz ilgili sunucuya ulaşır ve bu sunucuların kendi çerez uygulamaları olabilir. Yazı tiplerini ve site stillerini kendi sunucumuzdan sunuyoruz.</p>"
     },
     "corporate": {
       "active_status_desc": "Hesabınız kurumsal üye olarak aktiftir.",
@@ -1066,17 +1089,30 @@
       "unlimited_free": "Tamamen Ücretsiz (Sınırsız İlan)"
     },
     "privacy": {
-      "intro": "CYPILAN.COM olarak kişisel verilerinizin güvenliği ve gizliliği konusuna büyük önem vermekteyiz. Bu Gizlilik Politikası, web sitemizi ziyaret ettiğinizde ve hizmetlerimizden yararlandığınızda kişisel verilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.",
-      "section1_body": "Kayıt olduğunuzda veya ilan verdiğinizde adınız, e-posta adresiniz, telefon numaranız, konum bilgileriniz ve cihaz giriş kayıtlarınız hizmet sunumu amacıyla toplanmaktadır.",
-      "section1_title": "1. Toplanan Veriler",
-      "section2_body": "Kişisel verileriniz platformumuzda ilanların yayınlanması, kullanıcı güvenliğinin sağlanması, iletişim kurulabilmesi ve yasal yükümlülüklerin yerine getirilmesi amacıyla işlenmektedir.",
-      "section2_title": "2. Verilerin Kullanım Amacı",
-      "section3_body": "Verileriniz 3. taraf şahıs veya kurumlarla reklam/pazarlama amacıyla satılmaz veya paylaşılmaz. Yalnızca yasal mercilerin resmi talepleri durumunda yetkili makamlarla paylaşılabilir.",
-      "section3_title": "3. Veri Güvenliği ve Paylaşım",
-      "section4_body": "Üyelerin site üzerinden birbirine gönderdiği mesajlar, iletişimin sürdürülebilmesi ve olası uyuşmazlıklarda tarafların korunabilmesi için sistemimizde saklanır. Bir şikayet bildirildiğinde, dolandırıcılık şüphesi doğduğunda veya yasal bir talep söz konusu olduğunda bu yazışmalar yetkili ekibimizce incelenebilir. İnceleme yalnızca bu amaçlarla ve gereken ölçüde yapılır; mesajlarınız reklam amacıyla kullanılmaz ve üçüncü kişilerle paylaşılmaz.",
-      "section4_title": "4. Mesajlaşma ve Güvenlik",
-      "section5_body": "Gizlilik politikamız ile ilgili sorularınız için info@cypilan.com adresi üzerinden bizimle iletişime geçebilirsiniz.",
-      "section5_title": "5. İletişim"
+      "updated": "Son güncelleme: 11 Eylül 2026",
+      "intro": "Bu metin, CYPILAN.COM'u kullanırken hangi kişisel verilerinizin toplandığını, ne için kullanıldığını, kimlere ulaştığını, ne kadar saklandığını ve bu veriler üzerindeki haklarınızı anlatır. Her madde sitenin gerçekte ne yaptığına göre yazılmıştır.",
+      "controller_title": "Veri sorumlusu",
+      "controller_body": "<p>Bu platform CYPILAN.COM adıyla Lefkoşa, Kuzey Kıbrıs'tan işletilmektedir. Kişisel verilerinizle ilgili her soru ve talep için <a href=\"mailto:info@cypilan.com\">info@cypilan.com</a> adresine yazabilirsiniz.</p>",
+      "data_title": "Hangi verileri topluyoruz",
+      "data_body": "<p><b>Hesap açtığınızda:</b> e-posta adresiniz, ad soyadınız, şifreniz ve isterseniz telefon numaranız. Şifreniz geri döndürülemez biçimde şifrelenerek saklanır; düz metin hâlini biz de göremeyiz. Kurumsal hesaplarda ayrıca firma adı, firma türü ve vergi numarası.</p><p><b>Profilinizde:</b> profil fotoğrafı, tanıtım yazısı, dil ve para birimi tercihiniz, telefonunuzun ve soyadınızın görünürlük tercihi, son giriş zamanınız.</p><p><b>İlan verdiğinizde:</b> başlık, açıklama, fiyat, fotoğraflar, kategori, şehir ve semt. Haritadan bir bölge seçerseniz konum yaklaşık olarak saklanır: koordinat, kaydedilmeden önce yaklaşık beş yüz metrelik bir ızgaraya oturtulur. Tam adres hiçbir zaman kaydedilmez.</p><p><b>Siteyi kullanırken:</b> diğer kullanıcılarla yazışmalarınız, favorileriniz, fiyat alarmlarınız, teklifleriniz ve bildirimleriniz.</p><p><b>Ziyaret istatistiği:</b> yalnızca çerez onayı verirseniz, hangi sayfaların görüntülendiği ve oturum kimliği kaydedilir. IP adresiniz ham hâlde saklanmaz; gizli bir anahtarla geri döndürülemez bir özete çevrilir. Onay vermezseniz bu kayıt hiç oluşturulmaz.</p><p><b>Google ile giriş yaparsanız:</b> Google'ın bize ilettiği e-posta adresiniz ve adınız. Google şifreniz bize geçmez.</p>",
+      "purposes_title": "Verilerinizi neden işliyoruz",
+      "purposes_body": "<ul><li>Hesabınızı açmak, giriş yapmanızı sağlamak ve oturumunuzu güvende tutmak</li><li>İlanlarınızı yayımlamak, aranabilir kılmak ve süresi dolduğunda yayından kaldırmak</li><li>Alıcı ile satıcının iletişim kurabilmesini sağlamak</li><li>Dolandırıcılığı önlemek, şikâyetleri incelemek ve kural ihlallerini değerlendirmek</li><li>Hesabınızla ilgili bildirim ve e-posta göndermek</li><li>Onay vermeniz hâlinde, sitenin nasıl kullanıldığını ölçmek</li><li>Yasal yükümlülüklerimizi yerine getirmek ve yetkili makamların usulüne uygun taleplerini karşılamak</li></ul>",
+      "sharing_title": "Verileriniz kimlere ulaşır",
+      "sharing_body": "<p>Verilerinizi reklam veya pazarlama amacıyla satmıyor, kiralamıyor ve üçüncü kişilere aktarmıyoruz. Verileriniz yalnızca şu durumlarda ve şu kadarıyla başkalarına ulaşır:</p><ul><li><b>Diğer kullanıcılar:</b> İlanınızda yayımladığınız her şey — başlık, açıklama, fotoğraflar, şehir, adınız ve tercih ettiyseniz telefon numaranız — herkese açıktır. Soyadınızın ve telefonunuzun görünüp görünmeyeceğini profilinizden siz belirlersiniz.</li><li><b>Altyapı:</b> Site bir sunucu barındırma hizmeti üzerinde çalışır ve önünde Cloudflare bulunur. Bu hizmetler teknik olarak trafiği, dolayısıyla IP adresinizi görür.</li><li><b>E-posta:</b> Doğrulama ve bildirim e-postaları bir e-posta gönderim hizmeti üzerinden iletilir.</li><li><b>Sayfalardaki dış içerikler:</b> Bazı sayfalar görsel ve yazılım bileşenlerini dış sunuculardan yükler; harita döşemeleri OpenStreetMap'ten gelir. Bu istekler sırasında IP adresiniz ilgili sunucuya ulaşır.</li><li><b>Yetkili makamlar:</b> Usulüne uygun resmî bir talep hâlinde, talebin kapsamıyla sınırlı olarak.</li></ul>",
+      "transfer_title": "Yurt dışına aktarım",
+      "transfer_body": "<p>Yukarıda sayılan altyapı hizmetlerinin bir kısmı Kuzey Kıbrıs dışında bulunmaktadır. Bu nedenle verileriniz, işlenirken bu hizmetler aracılığıyla ada dışına aktarılabilir. Aktarım yalnızca hizmetin sunulması için gereken ölçüde yapılır.</p>",
+      "retention_title": "Ne kadar süre saklıyoruz",
+      "retention_body": "<ul><li><b>Hesap bilgileriniz:</b> Hesabınız açık kaldığı sürece.</li><li><b>İlanlarınız:</b> Yayın süresi dolduğunda ilan siteden kalkar; kaydı hesabınızda kalır ve dilediğiniz zaman silebilirsiniz.</li><li><b>Yazışmalarınız:</b> Hesabınız açık kaldığı sürece. Hesabınızı silerseniz yazışmalarınız da silinir.</li><li><b>Ziyaret istatistiği:</b> On üç aydan eski kayıtlar her gün otomatik olarak silinir. Hesabınızı silerseniz bu kayıtların hesabınızla bağlantısı kesilir.</li><li><b>Onay kayıtları:</b> Hangi metni ne zaman kabul ettiğinize dair kayıt, hesabınız açık kaldığı sürece tutulur.</li></ul>",
+      "messages_title": "Yazışmalar ve dolandırıcılık önlemleri",
+      "rights_title": "Haklarınız",
+      "rights_body": "<p>Kişisel verilerinizle ilgili olarak şunları yapabilirsiniz:</p><ul><li><b>Verilerinize erişmek ve kopyasını almak.</b> Profil ayarlarınızdaki \"Verilerimi indir\" düğmesi hesabınızdaki her şeyi tek bir dosya olarak indirir: profiliniz, ilanlarınız, yazışmalarınız, favorileriniz ve onay kayıtlarınız.</li><li><b>Düzeltmek.</b> Profil bilgilerinizi ve ilanlarınızı istediğiniz zaman değiştirebilirsiniz.</li><li><b>Silmek.</b> Profil ayarlarından hesabınızı silebilirsiniz; ilanlarınız, yazışmalarınız ve yüklediğiniz fotoğraflar da silinir.</li><li><b>Onayınızı geri almak.</b> Çerez tercihinizi sayfanın altındaki \"Çerez tercihleri\" bağlantısından istediğiniz zaman değiştirebilirsiniz; ziyaret istatistiği o andan itibaren durur.</li><li><b>İtiraz etmek ve şikâyette bulunmak.</b> Talebinizi <a href=\"mailto:info@cypilan.com\">info@cypilan.com</a> adresine iletebilir, ayrıca KKTC Kişisel Verileri Koruma Kurulu'na (<a href=\"https://kvkk.gov.ct.tr/\" rel=\"noopener\" target=\"_blank\">kvkk.gov.ct.tr</a>) başvurabilirsiniz.</li></ul><p>Bize ilettiğiniz talepleri en geç 30 gün içinde yanıtlarız.</p>",
+      "security_title": "Güvenlik",
+      "security_body": "<p>Şifreniz geri döndürülemez biçimde şifrelenerek saklanır. Site bağlantısı baştan sona şifrelidir. Yönetim paneline erişim yetkiyle sınırlıdır ve giriş yaptığınızda oturumunuz yenilenir. Bununla birlikte hiçbir sistem mutlak güvenlik vaat edemez; hesabınızı korumak için güçlü ve size özel bir şifre kullanmanızı öneririz.</p>",
+      "children_title": "Çocuklar",
+      "children_body": "<p>Platform {age} yaşından küçüklerin kullanımına açık değildir. Hesap açarken yaşınızı beyan etmeniz istenir. Yaş sınırının altındaki bir kişiye ait olduğu tespit edilen hesap kapatılır ve verileri silinir.</p>",
+      "changes_title": "Bu metinde değişiklik",
+      "changes_body": "<p>Bu politikayı zaman zaman güncelleyebiliriz. Esaslı bir değişiklik olduğunda sizi bilgilendirir ve gerekiyorsa onayınızı yeniden isteriz. Bu metnin yürürlük tarihi 11 Eylül 2026'dır.</p>",
+      "messages_body": "<p>Üyelerin site üzerinden birbirine gönderdiği mesajlar, iletişimin sürdürülebilmesi ve olası uyuşmazlıklarda tarafların korunabilmesi için sistemimizde saklanır. Bir şikayet bildirildiğinde, dolandırıcılık şüphesi doğduğunda veya yasal bir talep söz konusu olduğunda bu yazışmalar yetkili ekibimizce incelenebilir. İnceleme yalnızca bu amaçlarla ve gereken ölçüde yapılır; mesajlarınız reklam amacıyla kullanılmaz ve üçüncü kişilerle paylaşılmaz.</p>"
     },
     "safety": {
       "badge": "Güvenli Alışveriş",
@@ -1210,7 +1246,9 @@
       "section2_body": "Kullanıcılar gerçeğe aykırı, aldatıcı, telif hakkı ihlali içeren veya yasalara aykırı ilan yayınlayamazlar. Kurallara uymayan ilanlar önceden haber verilmeksizin kaldırılabilir.",
       "section2_title": "2. Kullanıcı Yükümlülükleri",
       "section3_body": "CYPILAN.COM, kullanıcılar arasında gerçekleşen alım-satım, ödeme ve kargo süreçlerinde doğrudan taraf değildir ve doğabilecek uyuşmazlıklardan sorumlu tutulamaz.",
-      "section3_title": "3. Sorumluluk Sınırlaması"
+      "section3_title": "3. Sorumluluk Sınırlaması",
+      "section4_title": "4. Yaş Sınırı ve Hesap Sorumluluğu",
+      "section4_body": "Platformu kullanabilmek için {age} yaşını doldurmuş olmanız gerekir; hesap açarken bunu beyan edersiniz. Hesabınızla yapılan işlemlerden ve hesabınızın güvenliğinden siz sorumlusunuz. Şifrenizi kimseyle paylaşmayın."
     },
     "trust": {
       "intro": "Güvenlik yalnızca bir uyarı listesi değil; platformun nasıl çalıştığıyla ilgili bir tercih.",
@@ -1465,6 +1503,7 @@
     "title": "Çerezler",
     "body": "Sitenin çalışması için gereken çerezleri kullanıyoruz. Ziyaret istatistiği tutmak için ayrıca izninizi istiyoruz; reddederseniz site aynı şekilde çalışır.",
     "accept": "Kabul et",
-    "essential_only": "Yalnızca zorunlu"
+    "essential_only": "Yalnızca zorunlu",
+    "current": "Şu anki tercihiniz: {choice}"
   }
 }

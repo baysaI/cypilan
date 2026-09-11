@@ -7,7 +7,9 @@
 
     Betik gerektirmiyor - normal bir form gönderimi. Sayfa yeniden yükleniyor,
     o kadar. %>
-<% if (!consent.decided) { %>
+<% const bannerOpen = typeof consentBannerOpen !== 'undefined' ? consentBannerOpen : !consent.decided; %>
+<% const returnTo = typeof consentReturnTo !== 'undefined' ? consentReturnTo : currentUrl; %>
+<% if (bannerOpen) { %>
     <div class="position-fixed bottom-0 start-0 end-0 p-2 p-sm-3" style="z-index: 1080;">
         <div class="container">
             <div class="card border-0 shadow-lg rounded-4 mx-auto" style="max-width: 720px;">
@@ -28,12 +30,19 @@
                                     <%= t('consent.body') %>
                                     <a href="/cerez-politikasi" class="text-decoration-underline"><%= t('footer.cookie_policy') %></a>
                                 </p>
+                                <%# Tercih yeniden acildiysa, degistirmeden once neyin secili
+                                    oldugunu bilmek gerekiyor. %>
+                                <% if (consent.decided) { %>
+                                    <p class="small fw-semibold mb-0 mt-1">
+                                        <%= t('consent.current', { choice: t(consent.analytics ? 'consent.accept' : 'consent.essential_only') }) %>
+                                    </p>
+                                <% } %>
                             </div>
                         </div>
 
                         <form method="POST" action="/cerez-tercihi" class="d-flex gap-2 flex-shrink-0">
                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="returnTo" value="<%= currentUrl %>">
+                            <input type="hidden" name="returnTo" value="<%= returnTo %>">
                             <button type="submit" name="level" value="essential"
                                     class="btn btn-outline-primary rounded-pill px-3 flex-fill text-nowrap">
                                 <%= t('consent.essential_only') %>

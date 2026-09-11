@@ -1,3 +1,8 @@
+<%# Bolumler sirali bir listeden basiliyor: onceden bes bolume sabitlenmis
+    bir sablondu ve metne bir bolum eklemek sablonu da degistirmeyi
+    gerektiriyordu. Bolum metinleri HTML iceriyor (liste, kalin etiket,
+    baglanti); kaynaklari depodaki dil dosyalari, kullanici girdisi degil. %>
+<% const sections = ['controller', 'data', 'purposes', 'sharing', 'transfer', 'retention', 'messages', 'rights', 'security', 'children', 'changes']; %>
 <div class="container py-4 py-md-5">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0 small">
@@ -7,24 +12,16 @@
     </nav>
 
     <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
-        <h1 class="fs-3 fw-bold mb-4 border-bottom pb-3"><%= t('footer.privacy') %></h1>
-        <div class="lh-lg text-muted">
+        <h1 class="fs-3 fw-bold mb-2"><%= t('footer.privacy') %></h1>
+        <p class="small text-muted mb-4 border-bottom pb-3"><%= t('pages.privacy.updated') %></p>
+
+        <div class="lh-lg text-muted policy-text">
             <p><%= t('pages.privacy.intro') %></p>
 
-            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.privacy.section1_title') %></h5>
-            <p><%= t('pages.privacy.section1_body') %></p>
-
-            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.privacy.section2_title') %></h5>
-            <p><%= t('pages.privacy.section2_body') %></p>
-
-            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.privacy.section3_title') %></h5>
-            <p><%= t('pages.privacy.section3_body') %></p>
-
-            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.privacy.section4_title') %></h5>
-            <p><%= t('pages.privacy.section4_body') %></p>
-
-            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.privacy.section5_title') %></h5>
-            <p><%- t('pages.privacy.section5_body') %></p>
+            <% sections.forEach(function (id, index) { %>
+                <h2 class="fs-5 fw-bold text-dark mt-4 mb-2"><%= index + 1 %>. <%= t('pages.privacy.' + id + '_title') %></h2>
+                <%- t('pages.privacy.' + id + '_body', { age: minimumAge }) %>
+            <% }); %>
         </div>
     </div>
 </div>

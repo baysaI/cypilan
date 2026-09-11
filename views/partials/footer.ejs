@@ -95,6 +95,9 @@
                         <li class="list-inline-item"><a href="/kullanim-kosullari" class="text-white-50 text-decoration-none hover-text-white"><%= t('footer.terms') %></a></li>
                         <li class="list-inline-item text-white-50 mx-2">|</li>
                         <li class="list-inline-item"><a href="/cerez-politikasi" class="text-white-50 text-decoration-none hover-text-white"><%= t('footer.cookie_policy') %></a></li>
+                        <%# Onay geri alinabilir olmali. Banner bir kez kapaninca bir daha
+                            gorunmuyordu; bu baglanti onu bulundugu sayfada yeniden aciyor. %>
+                        <li class="list-inline-item"><a href="?cerez=ayarla" class="text-white-50 text-decoration-none hover-text-white"><%= t('footer.cookie_settings') %></a></li>
                     </ul>
                 </div>
             </div>

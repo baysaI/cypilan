@@ -22,7 +22,9 @@ const LEVELS = ['all', 'essential'];
 // gizlilik politikasi esasli bicimde degistiginde bu tarih guncelleniyor;
 // boylece eski onaylar yeni metni kapsamis gibi gorunmuyor ve kimin hangi
 // metni kabul ettigi kayitta belli oluyor.
-const POLICY_VERSION = '2026-09-10';
+// 2026-09-11: gizlilik ve cerez politikalari yeniden yazildi, kullanim
+// kosullarina yas maddesi eklendi.
+const POLICY_VERSION = '2026-09-11';
 
 // Kayit formunda ayrica onaylanan asgari yas. Bir ilan platformu, bir cocugun
 // kendi telefon numarasini yayimlayabildigi yer.

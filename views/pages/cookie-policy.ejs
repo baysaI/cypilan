@@ -1,3 +1,7 @@
+<%# Tablo sitenin gercekte yazdigi cerezlerin listesi: adlar, sureler ve ne
+    zaman yazildiklari middlewares/ ve config/consent.js ile birebir. Yeni bir
+    cerez eklenirse buraya da eklenmeli - yoksa metin gercegi anlatmaz. %>
+<% const cookies = [['session', 'cypilan.sid'], ['consent', 'cyp_consent'], ['lang', 'lang'], ['theme', 'theme'], ['currency', 'currency_choice']]; %>
 <div class="container py-4 py-md-5">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0 small">
@@ -7,21 +11,53 @@
     </nav>
 
     <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
-        <h1 class="fs-3 fw-bold mb-4 border-bottom pb-3"><%= t('footer.cookie_policy') %></h1>
-        <div class="lh-lg text-muted">
+        <h1 class="fs-3 fw-bold mb-2"><%= t('footer.cookie_policy') %></h1>
+        <p class="small text-muted mb-4 border-bottom pb-3"><%= t('pages.privacy.updated') %></p>
+
+        <div class="lh-lg text-muted policy-text">
             <p><%= t('pages.cookie.intro') %></p>
 
-            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.cookie.section1_title') %></h5>
-            <p><%= t('pages.cookie.section1_body') %></p>
+            <h2 class="fs-5 fw-bold text-dark mt-4 mb-2">1. <%= t('pages.cookie.what_title') %></h2>
+            <%- t('pages.cookie.what_body') %>
 
-            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.cookie.section2_title') %></h5>
-            <ul class="mb-3">
-                <li><%= t('pages.cookie.section2_essential') %></li>
-                <li><%= t('pages.cookie.section2_performance') %></li>
-            </ul>
+            <h2 class="fs-5 fw-bold text-dark mt-4 mb-2">2. <%= t('pages.cookie.list_title') %></h2>
+            <p><%= t('pages.cookie.list_intro') %></p>
+            <div class="table-responsive mb-3">
+                <table class="table table-sm align-top small mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col"><%= t('pages.cookie.col_name') %></th>
+                            <th scope="col"><%= t('pages.cookie.col_purpose') %></th>
+                            <th scope="col" class="text-nowrap"><%= t('pages.cookie.col_duration') %></th>
+                            <th scope="col"><%= t('pages.cookie.col_consent') %></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% cookies.forEach(function (row) { %>
+                            <tr>
+                                <td><code><%= row[1] %></code></td>
+                                <td><%= t('pages.cookie.row_' + row[0] + '_purpose') %></td>
+                                <td class="text-nowrap"><%= t('pages.cookie.row_' + row[0] + '_duration') %></td>
+                                <td><%= t('pages.cookie.row_' + row[0] + '_consent') %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
 
-            <h5 class="fw-bold text-dark mt-4 mb-2"><%= t('pages.cookie.section3_title') %></h5>
-            <p><%= t('pages.cookie.section3_body') %></p>
+            <h2 class="fs-5 fw-bold text-dark mt-4 mb-2">3. <%= t('pages.cookie.analytics_title') %></h2>
+            <%- t('pages.cookie.analytics_body') %>
+
+            <h2 class="fs-5 fw-bold text-dark mt-4 mb-2">4. <%= t('pages.cookie.choice_title') %></h2>
+            <%- t('pages.cookie.choice_body') %>
+            <%# Tercihi degistirme yolu metnin hemen yaninda: "istediginiz zaman
+                degistirebilirsiniz" deyip yolu gostermemek sozu bos birakirdi. %>
+            <a href="?cerez=ayarla" class="btn btn-outline-primary btn-sm rounded-pill px-3 mb-2">
+                <i class="fa-solid fa-cookie-bite me-1"></i><%= t('footer.cookie_settings') %>
+            </a>
+
+            <h2 class="fs-5 fw-bold text-dark mt-4 mb-2">5. <%= t('pages.cookie.external_title') %></h2>
+            <%- t('pages.cookie.external_body') %>
         </div>
     </div>
 </div>
