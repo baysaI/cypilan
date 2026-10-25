@@ -36,3 +36,7 @@ npm-debug.log*
 # icinde gercek kullanici e-postalari ve sifre ozetleri olan veri dosyalari.
 /backups/
 database/pre-restore-backup-*/
+
+# Windows SQLite araci (restore betigi gerektiginde indirir)
+database/sqlite3.exe
+.claude/
